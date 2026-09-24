@@ -10,26 +10,29 @@ import type { EnrollmentApplication } from "@features/enrollment-applications/ty
 type MyEnrollmentApplicationTableContainerProps = PaginationParams & {
   dataPromise: Promise<PaginatedResponse<EnrollmentApplication>>;
   status?: EnrollmentApplicationStatus;
-  hasFilters?: boolean;
+  currentPersonId?: string;
+  showApplicant?: boolean;
 };
 
 export async function MyEnrollmentApplicationTableContainer({
   dataPromise,
   status,
-  hasFilters,
   page,
   size,
+  currentPersonId,
+  showApplicant,
 }: MyEnrollmentApplicationTableContainerProps): Promise<ReactElement> {
   const data = await dataPromise;
 
   return (
     <MyEnrollmentApplicationTablePresentation
       key={`${page}-${size}-${status ?? "all"}`}
+      currentPersonId={currentPersonId}
       data={data}
       page={page}
+      showApplicant={showApplicant}
       size={size}
       status={status}
-      hasFilters={hasFilters}
     />
   );
 }

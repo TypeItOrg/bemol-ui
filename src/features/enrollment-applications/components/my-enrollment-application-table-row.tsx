@@ -21,9 +21,25 @@ import { formatEnrollmentApplicationDate } from "@features/enrollment-applicatio
 
 type MyEnrollmentApplicationTableRowProps = {
   application: EnrollmentApplication;
+  currentPersonId?: string;
+  showApplicant?: boolean;
 };
 
-export function MyEnrollmentApplicationTableRow({ application }: MyEnrollmentApplicationTableRowProps): ReactElement {
+function getSubmitterNote(application: EnrollmentApplication, currentPersonId?: string): string | null {
+  const { submittedByPersonId, personId } = application;
+
+  if (!submittedByPersonId || submittedByPersonId === personId) {
+    return null;
+  }
+
+  return submittedByPersonId === currentPersonId ? "Presentada por vos" : "Presentada por otro tutor";
+}
+
+export function MyEnrollmentApplicationTableRow({
+  application,
+  currentPersonId,
+  showApplicant = false,
+}: MyEnrollmentApplicationTableRowProps): ReactElement {
   const router = useRouter();
 
   const [isCancelOpen, setIsCancelOpen] = useState(false);
@@ -75,20 +91,31 @@ export function MyEnrollmentApplicationTableRow({ application }: MyEnrollmentApp
                 </DropdownMenu>
               </div>
             </TableCell>
+            {showApplicant ? (
+              <TableCell>
+                <span className="block">
+                  {application.applicantFirstName} {application.applicantLastName}
+                </span>
+                <span className="text-muted-foreground block text-xs">{getSubmitterNote(application, currentPersonId)}</span>
+              </TableCell>
+            ) : null}
             <TableCell className="font-medium">
               <OptionalValue value={application.trainingPathName} fallback="Sin trayecto formativo" />
             </TableCell>
-            <TableCell>
-              <OptionalValue value={application.academicYear} fallback="Sin ciclo registrado" />
-            </TableCell>
+            <TableCell>{application.academicYear}</TableCell>
             <TableCell className="text-muted-foreground">{formatEnrollmentApplicationDate(application.createdAt)}</TableCell>
             <TableCell>
-              <EnrollmentApplicationStatusBadge
-                status={application.status}
-                rejectionReason={application.rejectionReason}
-                pendingCourses={application.pendingCourses}
-                detailHref={detailHref}
-              />
+              <EnrollmentApplicationStatusBadge status={application.status} />
+            </TableCell>
+            <TableCell>
+              {application.status === ENROLLMENT_APPLICATION_STATUS.REJECTED && application.rejectionReason ? (
+                <span className="text-destructive">{application.rejectionReason}</span>
+              ) : (
+                <OptionalValue
+                  value={null}
+                  fallback={application.status === ENROLLMENT_APPLICATION_STATUS.REJECTED ? "Sin motivo informado" : "No corresponde"}
+                />
+              )}
             </TableCell>
           </TableRow>
         </ContextMenuTrigger>
