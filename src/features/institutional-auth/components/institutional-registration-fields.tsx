@@ -17,7 +17,7 @@ import { Switch } from "@common/components/ui/switch";
 import { InstitutionalAuthInstitutionField } from "@features/institutional-auth/components/institutional-auth-institution-field";
 import { InstitutionalRegistrationSubmitButton } from "@features/institutional-auth/components/institutional-registration-submit-button";
 import type { InstitutionalRegistrationFieldsProps } from "@features/institutional-auth/types/institutional-registration-fields-props.types";
-import { formatBirthDateInput, getLatestAllowedBirthDate } from "@features/people/utils/person-birth-date.util";
+import { formatBirthDateInput, getLatestAdultBirthDate, getLatestAllowedBirthDate } from "@features/people/utils/person-birth-date.util";
 
 export function InstitutionalRegistrationFields({
   state,
@@ -89,7 +89,7 @@ export function InstitutionalRegistrationFields({
           <DatePicker
             aria-invalid={!!state.fieldErrors?.birthDate}
             id="register-birth-date"
-            maxDate={getLatestAllowedBirthDate()}
+            maxDate={isGuardian ? getLatestAdultBirthDate() : getLatestAllowedBirthDate()}
             onChange={setBirthDate}
             value={birthDate}
           />
@@ -111,7 +111,7 @@ export function InstitutionalRegistrationFields({
         <div className="grid gap-1">
           <FieldLabel htmlFor="register-is-guardian">Soy tutor o representante legal a cargo de menores</FieldLabel>
           <p className="text-muted-foreground text-sm" id="register-is-guardian-help">
-            Permite inscribir y gestionar las solicitudes de tus hijos o personas bajo tu tutela.
+            Permite inscribir y gestionar las solicitudes de tus hijos o personas bajo tu tutela. Tenés que ser mayor de 18 años.
           </p>
         </div>
         <FieldError errors={state.fieldErrors?.isGuardian ? [{ message: state.fieldErrors.isGuardian }] : undefined} />
