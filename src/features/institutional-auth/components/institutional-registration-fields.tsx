@@ -12,6 +12,7 @@ import { Field, FieldError, FieldGroup, FieldLabel } from "@common/components/ui
 import { Input } from "@common/components/ui/input";
 import { PasswordInput } from "@common/components/ui/password-input";
 import { NumericInput } from "@common/components/ui/restricted-input";
+import { Switch } from "@common/components/ui/switch";
 
 import { InstitutionalAuthInstitutionField } from "@features/institutional-auth/components/institutional-auth-institution-field";
 import { InstitutionalRegistrationSubmitButton } from "@features/institutional-auth/components/institutional-registration-submit-button";
@@ -25,6 +26,8 @@ export function InstitutionalRegistrationFields({
   isPending,
   birthDate,
   setBirthDate,
+  isGuardian,
+  onGuardianChange,
 }: InstitutionalRegistrationFieldsProps): ReactElement {
   return (
     <div className="mt-6 space-y-6">
@@ -100,6 +103,18 @@ export function InstitutionalRegistrationFields({
         </FieldLabel>
         <Input aria-invalid={!!state.fieldErrors?.email} autoComplete="email" id="register-email" name="email" type="email" />
         <FieldError errors={state.fieldErrors?.email ? [{ message: state.fieldErrors.email }] : undefined} />
+      </Field>
+
+      <Field data-invalid={!!state.fieldErrors?.isGuardian} orientation="horizontal">
+        <input name="isGuardian" type="hidden" value={String(isGuardian)} />
+        <Switch aria-describedby="register-is-guardian-help" checked={isGuardian} id="register-is-guardian" onCheckedChange={onGuardianChange} />
+        <div className="grid gap-1">
+          <FieldLabel htmlFor="register-is-guardian">Soy tutor o representante legal a cargo de menores</FieldLabel>
+          <p className="text-muted-foreground text-sm" id="register-is-guardian-help">
+            Permite inscribir y gestionar las solicitudes de tus hijos o personas bajo tu tutela.
+          </p>
+        </div>
+        <FieldError errors={state.fieldErrors?.isGuardian ? [{ message: state.fieldErrors.isGuardian }] : undefined} />
       </Field>
 
       <div className="grid gap-6 sm:grid-cols-2">

@@ -19,6 +19,8 @@ export function InstitutionalRegisterForm(): ReactElement {
 
   const [birthDate, setBirthDate] = useState<Date>();
 
+  const [isGuardian, setIsGuardian] = useState(false);
+
   return (
     <ActionForm action={formAction} className="flex flex-col justify-center p-5 sm:p-8">
       <InstitutionalAuthStepHeader
@@ -34,6 +36,8 @@ export function InstitutionalRegisterForm(): ReactElement {
         isPending={isPending}
         birthDate={birthDate}
         setBirthDate={setBirthDate}
+        isGuardian={isGuardian}
+        onGuardianChange={setIsGuardian}
       />
     </ActionForm>
   );
