@@ -8,9 +8,11 @@ export interface EnrollmentApplicationResponse {
   applicationId: string;
   institutionId: string;
   personId: string;
+  /** Person who submitted it: the tutor when the application was made on behalf of a dependent. */
+  submittedByPersonId?: string | null;
   trainingPathId?: string | null;
   studyPlanId?: string | null;
-  academicYearId: string | null;
+  academicYearId: string;
   enrollmentPeriodId: string;
   enrollmentPeriod?: EnrollmentPeriod;
   periodOpen?: boolean;
@@ -30,10 +32,9 @@ export interface EnrollmentApplicationResponse {
   studyPlanName?: string;
   studyPlanVersion?: number | null;
   trainingPathName?: string | null;
-  academicYear?: number | null;
+  academicYearName?: string;
   enrollmentPeriodName?: string;
   status: EnrollmentApplicationStatus;
-  pendingCourses?: boolean | null;
   isEditable: boolean;
   data: EnrollmentApplicationData;
   spaces?: EnrollmentApplicationSpaceResponse[];
