@@ -22,9 +22,11 @@ import {
 
 import type { NavigationItem } from "@common/utils/navigation.util";
 
+import { GUARDIAN_DEPENDENTS_PAGE_PATH } from "@features/guardian-dependents/constants/guardian-dependent.constants";
 import { INSTITUTIONAL_PERMISSION } from "@features/institutional-auth/types/institutional-permission.types";
 import type { InstitutionalUser } from "@features/institutional-auth/types/institutional-user.types";
 import {
+  canManageDependents,
   canStartEnrollmentApplication,
   canViewOwnEnrollmentApplications,
 } from "@features/institutional-auth/utils/institutional-applicant-role.util";
@@ -92,6 +94,7 @@ export function getInstitutionalNavigationSections(user: InstitutionalUser): Ins
 
   const enrollmentItems: NavigationItem[] = [
     ...(canReadEnrollmentPeriods ? [{ title: "Períodos de inscripción", url: "/enrollment-periods", icon: CalendarRangeIcon }] : []),
+    ...(canManageDependents(user) ? [{ title: "Mis personas a cargo", url: GUARDIAN_DEPENDENTS_PAGE_PATH, icon: UsersIcon }] : []),
     ...(canStartEnrollmentApplication(user) ? [{ title: "Nueva inscripción", url: "/enrollment", icon: FilePenLineIcon }] : []),
     ...(canViewOwnEnrollmentApplications(user)
       ? [
