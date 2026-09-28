@@ -26,6 +26,7 @@ import { GUARDIAN_DEPENDENTS_PAGE_PATH } from "@features/guardian-dependents/con
 import { INSTITUTIONAL_PERMISSION } from "@features/institutional-auth/types/institutional-permission.types";
 import type { InstitutionalUser } from "@features/institutional-auth/types/institutional-user.types";
 import {
+  canViewAcademicNavigation,
   canManageDependents,
   canStartEnrollmentApplication,
   canViewOwnEnrollmentApplications,
@@ -59,7 +60,7 @@ export function getInstitutionalNavigationSections(user: InstitutionalUser): Ins
     ...(canReadRoles ? [{ title: "Roles y permisos", url: "/roles", icon: UserLockIcon }] : []),
   ];
 
-  const academicItems: NavigationItem[] = [
+  const academicItems: NavigationItem[] = canViewAcademicNavigation(user) ? [
     ...(hasInstitutionalPermission(user, INSTITUTIONAL_PERMISSION.DOCUMENT_CATALOG_READ)
       ? [{ title: "Documentación", url: "/documentation", icon: FileTextIcon }]
       : []),
@@ -90,7 +91,7 @@ export function getInstitutionalNavigationSections(user: InstitutionalUser): Ins
     ...(user.roles.includes("Profesor") ? [{ title: "Mis clases", url: "/my-teaching", icon: GraduationCapIcon }] : []),
     ...(user.roles.includes("Profesor") ? [{ title: "Mis horarios", url: "/my-teaching/schedules", icon: CalendarRangeIcon }] : []),
     ...(hasInstitutionalPermission(user, INSTITUTIONAL_PERMISSION.SHIFT_READ) ? [{ title: "Turnos", url: "/shifts", icon: ClockIcon }] : []),
-  ];
+  ] : [];
 
   const enrollmentItems: NavigationItem[] = [
     ...(canReadEnrollmentPeriods ? [{ title: "Períodos de inscripción", url: "/enrollment-periods", icon: CalendarRangeIcon }] : []),
