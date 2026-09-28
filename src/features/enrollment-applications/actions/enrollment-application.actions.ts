@@ -12,13 +12,20 @@ import { mutateEnrollmentApplication } from "@features/enrollment-applications/s
 import type { ChangeEnrollmentCareerResult } from "@features/enrollment-applications/types/change-enrollment-career-result.types";
 import type { StartEnrollmentApplicationInput } from "@features/enrollment-applications/types/start-enrollment-application-input.types";
 import type { UpdateEnrollmentDraftInput } from "@features/enrollment-applications/types/update-enrollment-draft-input.types";
-import { canMutateEnrollmentApplication } from "@features/enrollment-applications/utils/can-mutate-enrollment-application.util";
+import {
+  canMutateEnrollmentApplication,
+  canStartEnrollmentApplication,
+} from "@features/enrollment-applications/utils/can-mutate-enrollment-application.util";
 
 export async function startOrGetEnrollmentApplicationAction(input: StartEnrollmentApplicationInput): Promise<ChangeEnrollmentCareerResult> {
   const parsed = startEnrollmentApplicationSchema.safeParse(input);
 
   if (!parsed.success) {
     return { error: INVALID_ACTION_ARGUMENTS };
+  }
+
+  if (!(await canStartEnrollmentApplication(parsed.data.applicantPersonId))) {
+    return { error: ENROLLMENT_MESSAGES.APPLICATION_INVALID };
   }
 
   return mutateEnrollmentApplication(ENROLLMENT_APPLICATIONS_API_PATH, "POST", ENROLLMENT_MESSAGES.START_FAILED, parsed.data);
