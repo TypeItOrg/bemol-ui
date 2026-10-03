@@ -22,12 +22,14 @@ import {
 
 import type { NavigationItem } from "@common/utils/navigation.util";
 
+import { GUARDIAN_LINKS_PAGE_PATH } from "@features/guardian-links/constants/guardian-link.constants";
 import { GUARDIAN_DEPENDENTS_PAGE_PATH } from "@features/guardian-dependents/constants/guardian-dependent.constants";
 import { INSTITUTIONAL_PERMISSION } from "@features/institutional-auth/types/institutional-permission.types";
 import type { InstitutionalUser } from "@features/institutional-auth/types/institutional-user.types";
 import {
   canViewAcademicNavigation,
   canManageDependents,
+  canReviewGuardianLinks,
   canStartEnrollmentApplication,
   canViewOwnEnrollmentApplications,
 } from "@features/institutional-auth/utils/institutional-applicant-role.util";
@@ -114,6 +116,7 @@ export function getInstitutionalNavigationSections(user: InstitutionalUser): Ins
           },
         ]
       : []),
+    ...(canReviewGuardianLinks(user) ? [{ title: "Solicitudes de vinculación", url: GUARDIAN_LINKS_PAGE_PATH, icon: UsersIcon }] : []),
   ];
 
   return [
