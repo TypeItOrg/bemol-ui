@@ -33,7 +33,7 @@ export function EnrollmentPeriodResultsTable({
   setDeletingPeriodId: Dispatch<SetStateAction<string | null>>;
 }): ReactElement {
   return (
-    <Table containerClassName="table-scrollbar h-full" className="min-w-225">
+    <Table containerClassName="h-full" className="min-w-225">
       <TableHeader className="bg-muted sticky top-0 z-10 [&_tr]:border-b">
         <TableRow className="hover:bg-muted/50 data-[state=selected]:bg-muted h-11 border-b transition-colors">
           <TableHead className="w-16 pl-4">

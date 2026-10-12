@@ -2,6 +2,8 @@
 
 import type { ComponentProps } from "react";
 
+import { ScrollArea as ScrollAreaPrimitive } from "radix-ui";
+
 import { cn } from "@common/utils/cn.util";
 
 type TableProps = ComponentProps<"table"> & {
@@ -10,9 +12,22 @@ type TableProps = ComponentProps<"table"> & {
 
 function Table({ className, containerClassName, ...props }: TableProps) {
   return (
-    <div data-slot="table-container" className={cn("relative w-full overflow-x-auto overflow-y-hidden", containerClassName)}>
-      <table data-slot="table" className={cn("w-full caption-bottom text-sm", className)} {...props} />
-    </div>
+    <ScrollAreaPrimitive.Root type="auto" data-slot="table-container" className={cn("relative w-full overflow-hidden", containerClassName)}>
+      <ScrollAreaPrimitive.Viewport
+        tabIndex={0}
+        className="focus-visible:outline-ring w-full focus-visible:outline-2 focus-visible:-outline-offset-2"
+      >
+        <table data-slot="table" className={cn("w-full caption-bottom text-sm", className)} {...props} />
+      </ScrollAreaPrimitive.Viewport>
+      <ScrollAreaPrimitive.Scrollbar
+        data-slot="table-scrollbar"
+        orientation="horizontal"
+        className="flex h-2.5 cursor-grab touch-none select-none active:cursor-grabbing"
+        style={{ position: "relative" }}
+      >
+        <ScrollAreaPrimitive.Thumb className="bg-primary relative h-full rounded-full" />
+      </ScrollAreaPrimitive.Scrollbar>
+    </ScrollAreaPrimitive.Root>
   );
 }
 
