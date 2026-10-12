@@ -11,7 +11,6 @@ export type CourseEnrollmentResultsTableProps = {
   canWithdraw: boolean;
   permissionScopes: Readonly<Record<string, PermissionAccess>> | undefined;
   canUpdateAcademicStatus: boolean;
-  canReadWaitlist: boolean;
   detailBasePath: string | undefined;
   setMutation: Dispatch<SetStateAction<{ enrollment: CourseEnrollment; mode: "withdraw" | "academic" } | undefined>>;
 };

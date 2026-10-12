@@ -30,7 +30,6 @@ type CourseEnrollmentTableProps = {
   emptyMessage: string;
   canWithdraw?: boolean;
   canUpdateAcademicStatus?: boolean;
-  canReadWaitlist?: boolean;
   detailBasePath?: string;
 };
 
@@ -44,7 +43,6 @@ export function CourseEnrollmentTable({
   emptyMessage,
   canWithdraw = false,
   canUpdateAcademicStatus = false,
-  canReadWaitlist = false,
   detailBasePath,
 }: CourseEnrollmentTableProps): ReactElement {
   const router = useRouter();
@@ -62,7 +60,7 @@ export function CourseEnrollmentTable({
 
   const EmptyIcon = hasFilters && !hasItemsOnOtherPages ? SearchIcon : ScrollTextIcon;
 
-  const showActionsColumn = Boolean(detailBasePath) || canReadWaitlist || canWithdraw || canUpdateAcademicStatus;
+  const showActionsColumn = Boolean(detailBasePath) || canWithdraw || canUpdateAcademicStatus;
 
   if (data.items.length === 0) {
     const emptyContent = getDataTableEmptyContent({
@@ -114,7 +112,6 @@ export function CourseEnrollmentTable({
           canWithdraw={canWithdraw}
           permissionScopes={permissionScopes}
           canUpdateAcademicStatus={canUpdateAcademicStatus}
-          canReadWaitlist={canReadWaitlist}
           detailBasePath={detailBasePath}
           setMutation={setMutation}
         />

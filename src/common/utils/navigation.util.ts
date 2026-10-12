@@ -9,5 +9,7 @@ export type NavigationItem = {
 };
 
 export function isNavigationItemActive(pathname: string, url: string, exact = false): boolean {
-  return exact ? pathname === url : pathname === url || pathname.startsWith(`${url}/`);
+  const activePathname = pathname.replace(/^(\/admin)?\/course-enrollments\/([^/]+)\/waitlist\/?$/, "$1/courses/$2/waitlist");
+
+  return exact ? activePathname === url : activePathname === url || activePathname.startsWith(`${url}/`);
 }

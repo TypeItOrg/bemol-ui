@@ -67,8 +67,6 @@ export default async function CourseEnrollmentsPage({
 
   const canUpdateAcademicStatus = hasInstitutionalPermission(user, INSTITUTIONAL_PERMISSION.COURSE_ENROLLMENT_ACADEMIC_STATUS_UPDATE);
 
-  const canReadWaitlist = hasInstitutionalPermission(user, INSTITUTIONAL_PERMISSION.COURSE_WAITLIST_READ);
-
   return (
     <PlatformPageShell title="Cursadas" breadcrumb={<InstitutionalBreadcrumb />} actions={<PlatformPageIcon icon={GraduationCapIcon} />}>
       {canCreate ? (
@@ -91,7 +89,6 @@ export default async function CourseEnrollmentsPage({
             emptyMessage="No hay cursadas para mostrar."
             canWithdraw={canWithdraw}
             canUpdateAcademicStatus={canUpdateAcademicStatus}
-            canReadWaitlist={canReadWaitlist}
             detailBasePath="/course-enrollments"
           />
         </Suspense>

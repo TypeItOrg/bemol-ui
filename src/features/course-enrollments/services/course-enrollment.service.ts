@@ -3,11 +3,15 @@ import "server-only";
 import type { PaginatedResponse } from "@common/types/paginated-response.types";
 import { parseHttpResponse, parseNullableHttpResponse } from "@common/utils/http-response-error.util";
 
+import type { AcademicScope } from "@features/academic/utils/academic-scope.util";
 import type { AcademicEnrollmentStatus } from "@features/course-enrollments/types/academic-enrollment-status.types";
 import type { CourseEnrollmentHistory } from "@features/course-enrollments/types/course-enrollment-history.types";
 import type { CourseEnrollmentStatus } from "@features/course-enrollments/types/course-enrollment-status.types";
 import type { CourseEnrollment } from "@features/course-enrollments/types/course-enrollment.types";
 import type { CourseWaitlistEntry } from "@features/course-enrollments/types/course-waitlist-entry.types";
+import type { CourseWaitlistFilters } from "@features/course-enrollments/types/course-waitlist-filters.types";
+import type { CourseWaitlistOptions } from "@features/course-enrollments/types/course-waitlist-options.types";
+import { createCourseWaitlistSearchParams } from "@features/course-enrollments/utils/course-waitlist-filters.util";
 import { institutionalApiFetch } from "@features/institutional-auth/services/institutional-api-fetch.service";
 import { platformApiFetch } from "@features/platform-auth/services/platform-api-fetch.service";
 
@@ -58,14 +62,26 @@ export async function fetchInstitutionalCourseEnrollments(
   return parseHttpResponse(response, "No se pudieron obtener las cursadas.");
 }
 
-export async function fetchCourseWaitlist(institutionId: string, courseId: string): Promise<CourseWaitlistEntry[] | null> {
-  const response = await institutionalApiFetch(`/api/v1/institutions/${institutionId}/courses/${courseId}/waitlist`);
+export async function fetchCourseWaitlist(
+  institutionId: string,
+  courseId: string,
+  filters: CourseWaitlistFilters = {},
+): Promise<CourseWaitlistEntry[] | null> {
+  const params = createCourseWaitlistSearchParams(filters);
+
+  const response = await institutionalApiFetch(`/api/v1/institutions/${institutionId}/courses/${courseId}/waitlist?${params}`);
 
   return parseNullableHttpResponse(response, "No se pudo obtener la lista de espera.");
 }
 
-export async function fetchPlatformCourseWaitlist(institutionId: string, courseId: string): Promise<CourseWaitlistEntry[] | null> {
-  const response = await platformApiFetch(`/api/v1/institutions/${institutionId}/courses/${courseId}/waitlist`);
+export async function fetchPlatformCourseWaitlist(
+  institutionId: string,
+  courseId: string,
+  filters: CourseWaitlistFilters = {},
+): Promise<CourseWaitlistEntry[] | null> {
+  const params = createCourseWaitlistSearchParams(filters);
+
+  const response = await platformApiFetch(`/api/v1/institutions/${institutionId}/courses/${courseId}/waitlist?${params}`);
 
   return parseNullableHttpResponse(response, "No se pudo obtener la lista de espera.");
 }
@@ -80,4 +96,16 @@ export async function fetchCourseEnrollmentHistory(institutionId: string, enroll
   const response = await institutionalApiFetch(`/api/v1/institutions/${institutionId}/course-enrollments/${enrollmentId}/history`);
 
   return parseHttpResponse(response, "No se pudo obtener el historial de la cursada.");
+}
+
+export async function fetchCourseWaitlistOptions(
+  scope: AcademicScope,
+  institutionId: string,
+  courseId: string,
+): Promise<CourseWaitlistOptions | null> {
+  const apiFetch = scope === "admin" ? platformApiFetch : institutionalApiFetch;
+
+  const response = await apiFetch(`/api/v1/institutions/${institutionId}/courses/${courseId}/waitlist/options`);
+
+  return parseNullableHttpResponse(response, "No se pudieron obtener las opciones de la lista de espera.");
 }

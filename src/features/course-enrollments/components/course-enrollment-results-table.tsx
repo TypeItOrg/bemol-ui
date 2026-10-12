@@ -2,8 +2,6 @@
 
 import type { ReactElement } from "react";
 
-import Link from "next/link";
-
 import { EllipsisVerticalIcon } from "lucide-react";
 
 import { ReturnToLink } from "@common/components/navigation/return-to-link";
@@ -28,12 +26,11 @@ export function CourseEnrollmentResultsTable({
   canWithdraw,
   permissionScopes,
   canUpdateAcademicStatus,
-  canReadWaitlist,
   detailBasePath,
   setMutation,
 }: CourseEnrollmentResultsTableProps): ReactElement {
   return (
-    <Table containerClassName="table-scrollbar" className="min-w-192">
+    <Table className="min-w-192">
       <CourseEnrollmentTableHeader showActionsColumn={showActionsColumn} />
       <TableBody>
         {data.items.map((enrollment) => {
@@ -48,15 +45,13 @@ export function CourseEnrollmentResultsTable({
             enrollment.status !== "WITHDRAWN" &&
             enrollment.status !== "ADMINISTRATIVELY_WITHDRAWN";
 
-          const canViewWaitlist = canReadWaitlist && scopeIncludesTrainingPath(permissionScopes, P.COURSE_WAITLIST_READ, enrollment.trainingPathId);
-
-          const hasActions = Boolean(detailBasePath) || canViewWaitlist || canWithdrawEnrollment || canUpdateResult;
+          const hasActions = Boolean(detailBasePath) || canWithdrawEnrollment || canUpdateResult;
 
           function renderActions(
             Item: typeof DropdownMenuItem | typeof ContextMenuItem,
             Separator: typeof DropdownMenuSeparator | typeof ContextMenuSeparator,
           ): ReactElement {
-            const hasActionBeforeWithdrawal = Boolean(detailBasePath) || canViewWaitlist || canUpdateResult;
+            const hasActionBeforeWithdrawal = Boolean(detailBasePath) || canUpdateResult;
 
             return (
               <>
@@ -65,13 +60,6 @@ export function CourseEnrollmentResultsTable({
                     <ReturnToLink href={`${detailBasePath}/${enrollment.id}`} className="px-2.5 py-1.5">
                       Ver detalle
                     </ReturnToLink>
-                  </Item>
-                ) : null}
-                {canViewWaitlist ? (
-                  <Item asChild>
-                    <Link href={`/course-enrollments/${enrollment.courseId}/waitlist`} className="px-2.5 py-1.5">
-                      Ver lista de espera
-                    </Link>
                   </Item>
                 ) : null}
                 {canUpdateResult ? (
