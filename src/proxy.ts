@@ -47,6 +47,11 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
       return NextResponse.json({ message }, { status, headers: { "Cache-Control": "no-store" } });
     }
 
+    // Let Next fall back to browser navigation instead of streaming a host-resolution error after an action redirect.
+    if (request.headers.get("rsc") === "1") {
+      return new NextResponse(null, { status, headers: { "Cache-Control": "no-store" } });
+    }
+
     const destination = new URL(INSTITUTIONAL_UNAVAILABLE_PATH, request.url);
 
     destination.searchParams.set("status", String(status));
