@@ -115,14 +115,14 @@ export function DocumentFilePreview({
                 className={
                   compact
                     ? "hover:bg-primary/5 absolute inset-0 h-full w-full rounded-md p-0 focus-visible:ring-inset"
-                    : "group absolute inset-0 h-full w-full flex-col justify-end rounded-lg p-3 hover:bg-transparent focus-visible:ring-inset"
+                    : "group absolute inset-0 h-full w-full flex-col items-end justify-end rounded-lg p-2 hover:bg-transparent focus-visible:ring-inset"
                 }
                 aria-label={`Ampliar vista previa de ${name}`}
+                title="Ampliar vista previa"
               >
                 {!compact ? (
-                  <span className="bg-background/95 text-foreground flex items-center gap-2 rounded-md border px-3 py-2 text-xs shadow-sm">
+                  <span className="bg-background/95 text-foreground flex size-9 items-center justify-center rounded-md border">
                     <ExpandIcon aria-hidden="true" />
-                    Ampliar vista previa
                   </span>
                 ) : null}
               </Button>

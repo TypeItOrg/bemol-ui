@@ -24,19 +24,26 @@ export function CourseEnrollmentScheduleFields({
   handleDayToggle,
   handleScheduleChange,
   handleSlotChange,
+  compact = false,
 }: CourseEnrollmentScheduleFieldsProps): ReactElement {
-  return (
-    <section aria-labelledby="manual-enrollment-schedule-title" className="bg-muted/25 min-w-0 rounded-xl border p-5 md:p-6">
-      <header className="-mx-5 border-b px-5 pb-5 md:-mx-6 md:px-6">
-        <SectionHeader
-          icon={CalendarClockIcon}
-          title="Días y horarios"
-          description={options.format === "INDIVIDUAL" ? "Seleccioná un período por cada día elegido." : "Seleccioná como mínimo un día de la clase."}
-          titleId="manual-enrollment-schedule-title"
-        />
-      </header>
+  const description = options.format === "INDIVIDUAL" ? "Seleccioná un período por cada día elegido." : "Seleccioná como mínimo un día de la clase.";
 
-      <div className="mt-5 grid min-w-0 gap-3">
+  return (
+    <section aria-labelledby="manual-enrollment-schedule-title" className={cn("min-w-0", !compact && "bg-muted/25 rounded-xl border p-5 md:p-6")}>
+      {compact ? (
+        <header className="space-y-1">
+          <h3 id="manual-enrollment-schedule-title" className="text-sm font-medium">
+            Días y horarios
+          </h3>
+          <p className="text-muted-foreground text-sm">{description}</p>
+        </header>
+      ) : (
+        <header className="-mx-5 border-b px-5 pb-5 md:-mx-6 md:px-6">
+          <SectionHeader icon={CalendarClockIcon} title="Días y horarios" description={description} titleId="manual-enrollment-schedule-title" />
+        </header>
+      )}
+
+      <div className={cn("grid min-w-0 gap-3", compact ? "mt-3" : "mt-5")}>
         {selectedClass?.days.map((day) => {
           const checked = checkedDays.includes(day.id);
 

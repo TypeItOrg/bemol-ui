@@ -2,10 +2,9 @@
 
 import { useActionState, type ReactElement } from "react";
 
-import { CircleAlertIcon, SendIcon } from "lucide-react";
+import { SendIcon } from "lucide-react";
 import type { z } from "zod";
 
-import { Alert, AlertDescription } from "@common/components/ui/alert";
 import {
   AlertDialog,
   AlertDialogContent,
@@ -16,17 +15,13 @@ import {
 } from "@common/components/ui/alert-dialog";
 import { Button } from "@common/components/ui/button";
 
-import { ENROLLMENT_MESSAGES } from "@features/enrollment-applications/constants/enrollment-messages.constants";
-
 type EnrollmentSubmitDialogProps = {
   onClose: () => void;
   onSubmit: () => Promise<{ error?: string; issues?: z.ZodIssue[] }>;
 };
 
 export function EnrollmentSubmitDialog({ onClose, onSubmit }: EnrollmentSubmitDialogProps): ReactElement {
-  const [state, action, pending] = useActionState(async () => onSubmit(), null);
-
-  const error = state?.error ?? (state?.issues?.length ? ENROLLMENT_MESSAGES.INCOMPLETE_FIELDS_SUMMARY(state.issues.length) : undefined);
+  const [, action, pending] = useActionState(async () => onSubmit(), null);
 
   return (
     <AlertDialog
@@ -48,13 +43,6 @@ export function EnrollmentSubmitDialog({ onClose, onSubmit }: EnrollmentSubmitDi
               Después de enviarla no podrás modificarla mientras la institución evalúa los datos presentados.
             </AlertDialogDescription>
           </AlertDialogHeader>
-
-          {error ? (
-            <Alert variant="destructive">
-              <CircleAlertIcon />
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          ) : null}
 
           <AlertDialogFooter>
             <Button type="button" variant="outline" size="lg" disabled={pending} onClick={onClose}>

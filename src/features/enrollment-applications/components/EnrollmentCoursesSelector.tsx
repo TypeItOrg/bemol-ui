@@ -2,8 +2,6 @@
 
 import type { ReactElement } from "react";
 
-import { ChevronDownIcon } from "lucide-react";
-
 import { Button } from "@common/components/ui/button";
 import { Checkbox } from "@common/components/ui/checkbox";
 import { cn } from "@common/utils/cn.util";
@@ -90,14 +88,7 @@ export function EnrollmentCoursesSelector({
             className="bg-background overflow-hidden rounded-xl border"
           >
             <header className="bg-muted/40 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 border-b px-4 py-1">
-              <details className="group/plan min-w-0">
-                <summary className="focus-visible:ring-ring flex min-h-11 cursor-pointer list-none items-center gap-2 rounded-sm outline-none focus-visible:ring-2 [&::-webkit-details-marker]:hidden">
-                  <h3 className="min-w-0 flex-1 truncate text-sm leading-6 font-semibold group-open/plan:break-words group-open/plan:whitespace-normal">
-                    {formatStudyPlanName(plan)}
-                  </h3>
-                  <ChevronDownIcon aria-hidden="true" className="text-muted-foreground size-4 shrink-0 group-open/plan:rotate-180" />
-                </summary>
-              </details>
+              <h3 className="flex min-h-11 min-w-0 items-center text-sm leading-6 font-semibold break-words">{formatStudyPlanName(plan)}</h3>
               <p className="text-muted-foreground text-xs leading-6">Ciclo {plan.academicYear}</p>
             </header>
             {[...levels.entries()].map(([levelName, levelGroups]) => (

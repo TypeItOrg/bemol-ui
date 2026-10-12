@@ -61,7 +61,6 @@ export async function submitEnrollmentWizard({
     return {};
   }
 
-  setValidationIssues([]);
   setInvalidInstrumentGroups([...pendingInstrumentGroups]);
 
   const parsed = enrollmentApplicationSubmissionSchema.safeParse(structuredData);
@@ -133,6 +132,23 @@ export async function submitEnrollmentWizard({
     }).then(unwrapEnrollmentResult);
 
     setApplication(savedApplication);
+
+    const missingDocuments = (savedApplication.documents ?? []).filter(
+      (requirement) => requirement.active !== false && requirement.level === "AT_SUBMISSION" && !requirement.currentAttachment,
+    );
+
+    if (missingDocuments.length > 0) {
+      const documentIssues: z.ZodIssue[] = missingDocuments.map((document) => ({
+        code: "custom",
+        message: document.name,
+        path: ["documents", document.id],
+      }));
+
+      setValidationIssues(documentIssues);
+      handleActiveTabChange("documents");
+
+      return { issues: documentIssues };
+    }
 
     setApplication(await submitEnrollmentApplicationAction(application.applicationId).then(unwrapEnrollmentResult));
     router.refresh();

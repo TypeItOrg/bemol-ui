@@ -8,6 +8,7 @@ import { SectionHeader } from "@common/components/section-header";
 import { Alert, AlertDescription } from "@common/components/ui/alert";
 import { Field, FieldDescription, FieldLabel } from "@common/components/ui/field";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@common/components/ui/select";
+import { cn } from "@common/utils/cn.util";
 
 import { CourseEnrollmentScheduleFields } from "@features/course-enrollments/components/course-enrollment-schedule-fields";
 import type { CourseEnrollmentAssignmentOptions } from "@features/course-enrollments/types/course-enrollment-assignment-options.types";
@@ -17,12 +18,14 @@ type CourseEnrollmentAssignmentFieldsProps = {
   options: CourseEnrollmentAssignmentOptions;
   disabled?: boolean;
   invalidDayIds?: readonly string[];
+  compact?: boolean;
 };
 
 export function CourseEnrollmentAssignmentFields({
   options,
   disabled = false,
   invalidDayIds = [],
+  compact = false,
 }: CourseEnrollmentAssignmentFieldsProps): ReactElement {
   const [courseClassId, setCourseClassId] = useState(options.classes[0]?.id ?? "");
 
@@ -92,17 +95,22 @@ export function CourseEnrollmentAssignmentFields({
         </Alert>
       ) : (
         <>
-          <section aria-labelledby="manual-enrollment-class-title" className="bg-muted/25 min-w-0 rounded-xl border p-5 md:p-6">
-            <header className="-mx-5 border-b px-5 pb-5 md:-mx-6 md:px-6">
-              <SectionHeader
-                icon={PresentationIcon}
-                title="Clase de cursada"
-                description="Elegí el grupo docente al que se incorporará el estudiante."
-                titleId="manual-enrollment-class-title"
-              />
-            </header>
+          <section
+            aria-labelledby={compact ? undefined : "manual-enrollment-class-title"}
+            className={cn("min-w-0", !compact && "bg-muted/25 rounded-xl border p-5 md:p-6")}
+          >
+            {!compact ? (
+              <header className="-mx-5 border-b px-5 pb-5 md:-mx-6 md:px-6">
+                <SectionHeader
+                  icon={PresentationIcon}
+                  title="Clase de cursada"
+                  description="Elegí el grupo docente al que se incorporará el estudiante."
+                  titleId="manual-enrollment-class-title"
+                />
+              </header>
+            ) : null}
 
-            <Field className="mt-5 min-w-0">
+            <Field className={cn("min-w-0", !compact && "mt-5")}>
               <FieldLabel htmlFor="courseClassId" required>
                 Clase
               </FieldLabel>
@@ -131,6 +139,7 @@ export function CourseEnrollmentAssignmentFields({
           </section>
 
           <CourseEnrollmentScheduleFields
+            compact={compact}
             options={options}
             selectedClass={selectedClass}
             checkedDays={checkedDays}

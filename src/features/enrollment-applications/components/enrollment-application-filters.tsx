@@ -25,6 +25,7 @@ type EnrollmentApplicationFiltersProps = {
   trainingPathId?: string;
   open?: boolean;
   pendingDocuments?: boolean;
+  pendingCourses?: boolean;
   canFilterDocuments?: boolean;
   trainingPaths?: readonly TrainingPath[];
 };
@@ -35,6 +36,7 @@ export function EnrollmentApplicationFilters({
   trainingPathId,
   open,
   pendingDocuments,
+  pendingCourses,
   canFilterDocuments = false,
   trainingPaths,
 }: EnrollmentApplicationFiltersProps): ReactElement {
@@ -46,7 +48,20 @@ export function EnrollmentApplicationFilters({
     value: status ?? ALL_STATUSES,
   };
 
-  const selectFilters: DataTableSelectFilter[] = [statusFilter];
+  const selectFilters: DataTableSelectFilter[] = [
+    statusFilter,
+    {
+      defaultValue: "all",
+      label: "Resolución de cursos",
+      name: "pendingCourses",
+      options: [
+        { label: "Todos los cursos", value: "all" },
+        { label: "Cursos pendientes", value: "true" },
+        { label: "Cursos resueltos", value: "false" },
+      ],
+      value: pendingCourses === undefined ? "all" : String(pendingCourses),
+    },
+  ];
 
   if (canFilterDocuments) {
     selectFilters.push({

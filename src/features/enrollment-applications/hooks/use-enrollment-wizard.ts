@@ -34,6 +34,8 @@ export function useEnrollmentWizard(props: EnrollmentWizardProps) {
 
   const [validationIssues, setValidationIssues] = useState<z.ZodIssue[]>([]);
 
+  const [submissionError, setSubmissionError] = useState<string>();
+
   const courses = useEnrollmentWizardCourses(props, setValidationIssues);
 
   const form = useEnrollmentWizardForm(initialApplication.data, initialShifts, readOnly, courses.selectedCourseIds);
@@ -83,8 +85,11 @@ export function useEnrollmentWizard(props: EnrollmentWizardProps) {
     setDocumentsBlocked(blockedDocumentsRef.current.size > 0);
   }
 
-  function submitApplication(): Promise<{ error?: string; issues?: z.ZodIssue[] }> {
-    return submitEnrollmentWizard({
+  async function submitApplication(): Promise<{ error?: string; issues?: z.ZodIssue[] }> {
+    setSubmissionError(undefined);
+    setValidationIssues([]);
+
+    const result = await submitEnrollmentWizard({
       blockedDocumentsRef,
       application,
       isCancelDialogOpen,
@@ -102,6 +107,17 @@ export function useEnrollmentWizard(props: EnrollmentWizardProps) {
       setApplication,
       router,
     });
+
+    if (result.error || result.issues?.length) {
+      setSubmissionError(result.error);
+      setIsSubmitDialogOpen(false);
+
+      if (result.error || result.issues?.some((issue) => issue.path[0] === "documents")) {
+        navigation.setPendingFocusFieldId("enrollment-validation-alert");
+      }
+    }
+
+    return result;
   }
 
   function getFieldError(path: (string | number)[]): string | undefined {
@@ -123,6 +139,7 @@ export function useEnrollmentWizard(props: EnrollmentWizardProps) {
     isCancelDialogOpen,
     isSubmitDialogOpen,
     validationIssues,
+    submissionError,
     router,
     setApplication,
     setIsCancelDialogOpen,

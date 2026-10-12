@@ -11,6 +11,7 @@ describe("parseEnrollmentApplicationPaginationParams", () => {
       trainingPathId: undefined,
       open: false,
       pendingDocuments: false,
+      pendingCourses: undefined,
     });
   });
 
@@ -31,6 +32,7 @@ describe("parseEnrollmentApplicationPaginationParams", () => {
       trainingPathId: "22222222-2222-4222-8222-222222222222",
       open: true,
       pendingDocuments: true,
+      pendingCourses: undefined,
     });
   });
 
@@ -44,6 +46,7 @@ describe("parseEnrollmentApplicationPaginationParams", () => {
       trainingPathId: undefined,
       open: false,
       pendingDocuments: false,
+      pendingCourses: undefined,
     });
   });
 });

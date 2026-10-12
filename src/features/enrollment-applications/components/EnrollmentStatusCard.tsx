@@ -9,6 +9,7 @@ import { Card, CardHeader } from "@common/components/ui/card";
 import { AcademicScope } from "@features/academic/utils/academic-scope.util";
 import { EnrollmentAdmissionHistory } from "@features/enrollment-applications/components/enrollment-admission-history";
 import { EnrollmentApplicationCoursesManagement } from "@features/enrollment-applications/components/enrollment-application-courses-management";
+import { EnrollmentApplicationStatusBadge } from "@features/enrollment-applications/components/enrollment-application-status-badge";
 import { SECTION_CARD_CLASS_NAME } from "@features/enrollment-applications/components/enrollment-detail-card";
 import { EnrollmentDocuments } from "@features/enrollment-applications/components/enrollment-documents";
 import { EnrollmentHealthSummary } from "@features/enrollment-applications/components/enrollment-health-summary";
@@ -18,7 +19,6 @@ import { EnrollmentResponsibleSummary } from "@features/enrollment-applications/
 import { EnrollmentSchoolingSummary } from "@features/enrollment-applications/components/enrollment-schooling-summary";
 import { EnrollmentSpacesSummary } from "@features/enrollment-applications/components/enrollment-spaces-summary";
 import { getStatusAlert } from "@features/enrollment-applications/components/enrollment-status-alert";
-import { getStatusBadge } from "@features/enrollment-applications/components/enrollment-status-badge";
 import type { EnrollmentApplicationResponse } from "@features/enrollment-applications/types/enrollment-application-response.types";
 import { ENROLLMENT_APPLICATION_STATUS } from "@features/enrollment-applications/types/enrollment-application-status.types";
 import { formatEnrollmentApplicationDateTime } from "@features/enrollment-applications/utils/enrollment-application-date.util";
@@ -75,8 +75,13 @@ export function EnrollmentStatusCard({
               <ClipboardCheckIcon className="size-5" aria-hidden="true" />
             </div>
             <h2 className="font-heading min-w-0 text-base leading-snug font-medium text-balance break-words">Estado de la solicitud</h2>
-            <div className="col-span-2 min-w-0 @xl/card-header:col-span-1 @xl/card-header:col-start-3 @xl/card-header:row-span-2 @xl/card-header:row-start-1 @xl/card-header:justify-self-end">
-              {getStatusBadge(application.status)}
+            <div className="col-span-2 flex min-w-0 flex-col items-start gap-1 @xl/card-header:col-span-1 @xl/card-header:col-start-3 @xl/card-header:row-span-2 @xl/card-header:row-start-1 @xl/card-header:justify-self-end">
+              <EnrollmentApplicationStatusBadge
+                status={application.status}
+                rejectionReason={application.rejectionReason}
+                pendingCourses={application.pendingCourses}
+                size="lg"
+              />
             </div>
             <p className="text-muted-foreground col-span-2 min-w-0 text-sm text-pretty @xl/card-header:col-span-1 @xl/card-header:col-start-2 @xl/card-header:row-start-2">
               Actualizada el{" "}
@@ -90,28 +95,18 @@ export function EnrollmentStatusCard({
 
       {showApplicantAlert ? getStatusAlert(application) : null}
 
-      {canManageApplicationCourses ? (
+      {application.courses?.length ? (
         <EnrollmentApplicationCoursesManagement
-          applicationId={application.applicationId}
-          institutionId={institutionId ?? application.institutionId}
-          scope={scope}
-          courses={application.courses ?? []}
-          canEnroll={canEnrollCourses}
-          canReject={canRejectCourses}
-          canReadWaitlist={canReadCourseWaitlist}
-        />
-      ) : null}
-
-      {application.courses && application.courses.length > 0 && !canManageApplicationCourses ? (
-        <EnrollmentApplicationCoursesManagement
+          key={canManageApplicationCourses ? "management" : "read-only"}
           applicationId={application.applicationId}
           institutionId={institutionId ?? application.institutionId}
           scope={scope}
           courses={application.courses}
-          canEnroll={false}
-          canReject={false}
+          canEnroll={canManageApplicationCourses && canEnrollCourses}
+          showAvailability={canEnrollCourses}
+          canReject={canManageApplicationCourses && canRejectCourses}
           canReadWaitlist={canReadCourseWaitlist}
-          readOnly
+          readOnly={!canManageApplicationCourses}
         />
       ) : null}
 

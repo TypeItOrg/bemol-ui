@@ -39,16 +39,22 @@ export default async function MyEnrollmentApplicationsPage({
 
   const resolvedSearchParams = await searchParams;
 
-  const { page, size, status } = parseEnrollmentApplicationPaginationParams(resolvedSearchParams);
+  const { page, size, status, pendingCourses } = parseEnrollmentApplicationPaginationParams(resolvedSearchParams);
 
-  const dataPromise = fetchMyEnrollmentApplications(user.institutionId, { page, size, status });
+  const dataPromise = fetchMyEnrollmentApplications(user.institutionId, { page, size, status, pendingCourses });
 
   return (
     <PlatformPageShell title="Mis inscripciones" breadcrumb={<InstitutionalBreadcrumb />} actions={<PlatformPageIcon icon={ClipboardListIcon} />}>
       <DataTableNavigationProvider>
-        <EnrollmentApplicationFilters status={status} size={size} />
+        <EnrollmentApplicationFilters status={status} pendingCourses={pendingCourses} size={size} />
         <Suspense fallback={<EnrollmentApplicationTableSkeleton />}>
-          <MyEnrollmentApplicationTableContainer page={page} size={size} status={status} dataPromise={dataPromise} />
+          <MyEnrollmentApplicationTableContainer
+            page={page}
+            size={size}
+            status={status}
+            hasFilters={Boolean(status || pendingCourses !== undefined)}
+            dataPromise={dataPromise}
+          />
         </Suspense>
       </DataTableNavigationProvider>
     </PlatformPageShell>

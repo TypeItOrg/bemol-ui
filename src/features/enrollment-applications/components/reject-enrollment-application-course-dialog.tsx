@@ -2,7 +2,7 @@
 
 import { useActionState, type ReactElement } from "react";
 
-import { CircleAlertIcon } from "lucide-react";
+import { CircleAlertIcon, CircleXIcon } from "lucide-react";
 
 import { ActionForm } from "@common/components/action-form";
 import { Alert, AlertDescription } from "@common/components/ui/alert";
@@ -20,7 +20,7 @@ import { Textarea } from "@common/components/ui/textarea";
 import { safelyRunAction } from "@common/utils/safe-action.util";
 
 import { AcademicScope } from "@features/academic/utils/academic-scope.util";
-import { formatStudyPlanName } from "@features/academic/utils/study-plan-label.util";
+import { formatStudyPlanNameWithPrefix } from "@features/academic/utils/study-plan-label.util";
 import { rejectApplicationCourseAction } from "@features/course-enrollments/actions/course-enrollment.actions";
 import { rejectPlatformApplicationCourseAction } from "@features/course-enrollments/actions/platform-course-enrollment.actions";
 import { COURSE_ENROLLMENT_MESSAGES } from "@features/course-enrollments/constants/course-enrollment.constants";
@@ -57,12 +57,16 @@ export function RejectEnrollmentApplicationCourseDialog({
 
   return (
     <AlertDialog open={open} onOpenChange={(nextOpen) => (!isPending ? onOpenChange(nextOpen) : undefined)}>
-      <AlertDialogContent>
+      <AlertDialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto">
         <ActionForm action={formAction} className="space-y-4">
           <AlertDialogHeader>
+            <div className="bg-destructive/10 text-destructive mb-1 flex size-12 items-center justify-center rounded-2xl">
+              <CircleXIcon className="size-6" aria-hidden="true" />
+            </div>
             <AlertDialogTitle>Rechazar solicitud de cursada</AlertDialogTitle>
             <AlertDialogDescription>
-              {course.academicSpaceName} · {course.academicYear ? `Ciclo ${course.academicYear} · ` : ""}Plan {formatStudyPlanName(course)}
+              {course.academicSpaceName} · {course.academicYear ? `Ciclo ${course.academicYear} · ` : ""}
+              {formatStudyPlanNameWithPrefix(course)}
             </AlertDialogDescription>
           </AlertDialogHeader>
           {state.error ? (
@@ -71,11 +75,11 @@ export function RejectEnrollmentApplicationCourseDialog({
               <AlertDescription>{state.error}</AlertDescription>
             </Alert>
           ) : null}
-          <Field>
+          <Field className="py-1">
             <FieldLabel htmlFor="reason" required>
-              Motivo
+              Motivo de rechazo
             </FieldLabel>
-            <Textarea id="reason" name="reason" maxLength={1000} required disabled={isPending} />
+            <Textarea id="reason" name="reason" rows={4} maxLength={1000} required disabled={isPending} />
           </Field>
           <AlertDialogFooter>
             <Button type="button" variant="outline" size="lg" disabled={isPending} onClick={() => onOpenChange(false)}>

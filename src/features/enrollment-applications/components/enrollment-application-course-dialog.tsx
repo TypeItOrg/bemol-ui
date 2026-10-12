@@ -2,7 +2,7 @@
 
 import { useActionState, useState, type ReactElement } from "react";
 
-import { CircleAlertIcon, LoaderCircleIcon } from "lucide-react";
+import { CircleAlertIcon } from "lucide-react";
 
 import {
   AlertDialog,
@@ -44,8 +44,6 @@ export function EnrollmentApplicationCourseDialog({
 
   const loadError = query.error ?? (query.options && !hasCapacity ? COURSE_ENROLLMENT_MESSAGES.COURSE_WITHOUT_CAPACITY : undefined);
 
-  const isLoadingOptions = query.loading;
-
   const [state, formAction, isPending] = useActionState<{ error?: string; invalidDayIds?: string[] }, FormData>(async (_previous, formData) => {
     if (!options) {
       return { error: loadError ?? COURSE_ENROLLMENT_MESSAGES.LOADING_ASSIGNMENTS };
@@ -72,22 +70,18 @@ export function EnrollmentApplicationCourseDialog({
     return result;
   }, {});
 
-  if (!options) {
+  if (!options && loadError) {
     return (
       <AlertDialog open={open} onOpenChange={onOpenChange}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            {loadError ? (
-              <CircleAlertIcon className="text-destructive size-6" aria-hidden="true" />
-            ) : (
-              <LoaderCircleIcon className="text-primary size-6 animate-spin motion-reduce:animate-none" aria-hidden="true" />
-            )}
-            <AlertDialogTitle>{loadError ? "No se puede iniciar la inscripción" : "Comprobando disponibilidad"}</AlertDialogTitle>
-            <AlertDialogDescription aria-live="polite">{loadError ?? COURSE_ENROLLMENT_MESSAGES.LOADING_ASSIGNMENTS}</AlertDialogDescription>
+            <CircleAlertIcon className="text-destructive size-6" aria-hidden="true" />
+            <AlertDialogTitle>No se puede iniciar la inscripción</AlertDialogTitle>
+            <AlertDialogDescription aria-live="polite">{loadError}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <Button type="button" size="lg" onClick={() => onOpenChange(false)}>
-              {loadError ? "Entendido" : "Cancelar"}
+              Entendido
             </Button>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -97,11 +91,11 @@ export function EnrollmentApplicationCourseDialog({
 
   return (
     <AlertDialog open={open} onOpenChange={(nextOpen) => (!isPending ? onOpenChange(nextOpen) : undefined)}>
-      <AlertDialogContent className="flex h-[min(42rem,calc(100dvh-2rem))] w-[calc(100%-2rem)] min-w-0 flex-col overflow-hidden p-0 sm:max-w-3xl">
+      <AlertDialogContent className="flex max-h-[calc(100dvh-2rem)] min-w-0 flex-col overflow-hidden sm:max-w-xl">
         <ApplicationCourseAssignmentForm
           formAction={formAction}
           course={course}
-          isLoadingOptions={isLoadingOptions}
+          isLoadingOptions={query.loading}
           state={state}
           options={options}
           optionsRevision={optionsRevision}

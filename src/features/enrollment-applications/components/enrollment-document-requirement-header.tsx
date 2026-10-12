@@ -3,6 +3,7 @@
 import type { ReactElement } from "react";
 
 import { Badge } from "@common/components/ui/badge";
+import { cn } from "@common/utils/cn.util";
 
 import { TrainingPathDocumentInstructions } from "@features/academic/components/training-path-document-instructions";
 import { DOCUMENT_LEVEL_LABELS, DOCUMENT_STATUS_LABELS } from "@features/enrollment-applications/constants/documentation.constants";
@@ -15,6 +16,8 @@ export function EnrollmentDocumentRequirementHeader({
   requirement: DocumentRequirement;
   administrativeView: boolean;
 }): ReactElement {
+  const badgeClassName = cn("h-8 px-3 py-1.5", administrativeView && "w-full @xl/documents:w-fit");
+
   return (
     <header className="flex min-w-0 flex-col gap-3 @3xl/documents:flex-row @3xl/documents:items-center @3xl/documents:justify-between @3xl/documents:gap-6">
       <div className="flex min-w-0 items-center gap-1.5 @3xl/documents:flex-1">
@@ -27,12 +30,12 @@ export function EnrollmentDocumentRequirementHeader({
         />
       </div>
       <div className="flex flex-wrap items-center gap-2 @3xl/documents:justify-end">
-        <Badge variant="secondary" size="lg" className={administrativeView ? "w-full @xl/documents:w-fit" : undefined}>
+        <Badge variant="secondary" size="lg" className={badgeClassName}>
           {requirement.origin === "ADDITIONAL" && requirement.level === "AT_SUBMISSION"
             ? "Obligatorio antes de aprobar"
             : DOCUMENT_LEVEL_LABELS[requirement.level]}
         </Badge>
-        <Badge size="lg" className={administrativeView ? "w-full @xl/documents:w-fit" : undefined} variant={getStatusVariant(requirement)}>
+        <Badge size="lg" className={badgeClassName} variant={getStatusVariant(requirement)}>
           {requirement.active === false ? "Requisito retirado" : DOCUMENT_STATUS_LABELS[requirement.status ?? "MISSING"]}
         </Badge>
       </div>

@@ -53,9 +53,9 @@ export default async function MyEnrollmentApplicationDetailPage({
 
   const detailLabel = isEditable ? "Continuar inscripción" : "Detalle de inscripción";
 
-  const detailContext = [application.trainingPathName, application.academicYearName].filter(Boolean).join(" ");
+  const detailContext = [application.trainingPathName, application.academicYear].filter(Boolean).join(" ");
 
-  const breadcrumbLabel = detailContext ? `${detailLabel} · ${detailContext}` : detailLabel;
+  const breadcrumbLabel = !isEditable && detailContext ? `${detailLabel} · ${detailContext}` : detailLabel;
 
   const PageIcon = isEditable ? FilePenLineIcon : ClipboardListIcon;
 

@@ -14,6 +14,7 @@ export type EnrollmentApplicationSearchParams = PaginationSearchParams & {
   trainingPathId?: string;
   open?: string;
   pendingDocuments?: string;
+  pendingCourses?: string;
 };
 
 export type EnrollmentApplicationPaginationParams = PaginationParams & {
@@ -21,6 +22,7 @@ export type EnrollmentApplicationPaginationParams = PaginationParams & {
   trainingPathId?: string;
   open?: boolean;
   pendingDocuments?: boolean;
+  pendingCourses?: boolean;
 };
 
 export function parseEnrollmentApplicationPaginationParams(searchParams: EnrollmentApplicationSearchParams): EnrollmentApplicationPaginationParams {
@@ -29,6 +31,8 @@ export function parseEnrollmentApplicationPaginationParams(searchParams: Enrollm
     defaultSize: DEFAULT_ENROLLMENT_APPLICATION_PAGE_SIZE,
   });
 
+  const pendingCourses = searchParams.pendingCourses;
+
   return {
     page,
     size,
@@ -36,5 +40,6 @@ export function parseEnrollmentApplicationPaginationParams(searchParams: Enrollm
     trainingPathId: searchParams.trainingPathId || undefined,
     open: searchParams.open === "true",
     pendingDocuments: searchParams.pendingDocuments === "true",
+    pendingCourses: pendingCourses === "true" || pendingCourses === "false" ? pendingCourses === "true" : undefined,
   };
 }

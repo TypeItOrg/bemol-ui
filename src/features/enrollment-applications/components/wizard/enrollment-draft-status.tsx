@@ -7,11 +7,15 @@ import { AlertCircleIcon, CheckCircle2Icon, FileClockIcon, Loader2Icon } from "l
 import { ENROLLMENT_MESSAGES } from "@features/enrollment-applications/constants/enrollment-messages.constants";
 
 export function EnrollmentDraftStatus({
+  trainingPathName,
+  academicYear,
   saving,
   saveError,
   pendingInstrumentGroups,
   documentsBlocked,
 }: {
+  trainingPathName?: string | null;
+  academicYear?: number | null;
   saving: boolean;
   saveError: string | undefined;
   pendingInstrumentGroups: string[];
@@ -58,9 +62,12 @@ export function EnrollmentDraftStatus({
         <div className="bg-primary/10 text-primary flex size-11 shrink-0 items-center justify-center rounded-xl">
           <FileClockIcon className="size-5" aria-hidden="true" />
         </div>
-        <div className="flex flex-col justify-center gap-1">
-          <p className="font-heading text-sm font-medium">Solicitud en borrador</p>
-          <div className="text-muted-foreground flex items-center gap-2 text-xs sm:text-sm" aria-live="polite" aria-atomic="true">
+        <div className="flex min-w-0 flex-1 flex-col justify-center gap-1">
+          <p className="font-heading text-sm font-medium break-words">
+            {trainingPathName || "Solicitud en borrador"}
+            {academicYear != null ? <span className="text-muted-foreground font-normal"> · Ciclo {academicYear}</span> : null}
+          </p>
+          <div className="text-muted-foreground flex flex-wrap items-center gap-x-2 gap-y-1 text-xs sm:text-sm" aria-live="polite" aria-atomic="true">
             {renderSaveStatus()}
           </div>
         </div>

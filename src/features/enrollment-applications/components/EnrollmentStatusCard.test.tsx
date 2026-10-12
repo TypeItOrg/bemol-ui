@@ -1,7 +1,9 @@
-import { render, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 
 import { EnrollmentStatusCard } from "@features/enrollment-applications/components/EnrollmentStatusCard";
 import type { EnrollmentApplicationResponse } from "@features/enrollment-applications/types/enrollment-application-response.types";
+
+import { renderWithQueryClient as render } from "@/../test/utils/render-with-query-client";
 
 jest.mock("next/navigation", () => ({
   useRouter: () => ({ refresh: jest.fn() }),

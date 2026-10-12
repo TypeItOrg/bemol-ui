@@ -29,7 +29,8 @@ export default async function PlatformEnrollmentApplicationsPage({
 }): Promise<ReactElement> {
   const resolvedSearchParams = await searchParams;
 
-  const { page, size, status, trainingPathId, open, pendingDocuments } = parseEnrollmentApplicationPaginationParams(resolvedSearchParams);
+  const { page, size, status, trainingPathId, open, pendingDocuments, pendingCourses } =
+    parseEnrollmentApplicationPaginationParams(resolvedSearchParams);
 
   const dataPromise = fetchPlatformEnrollmentApplications({
     page,
@@ -38,6 +39,7 @@ export default async function PlatformEnrollmentApplicationsPage({
     trainingPathId,
     open,
     pendingDocuments,
+    pendingCourses,
   });
 
   const { items: trainingPaths } = await fetchTrainingPaths(AcademicScope.ADMIN, undefined, {
@@ -54,6 +56,7 @@ export default async function PlatformEnrollmentApplicationsPage({
           trainingPathId={trainingPathId}
           open={open}
           pendingDocuments={pendingDocuments}
+          pendingCourses={pendingCourses}
           canFilterDocuments={true}
           trainingPaths={trainingPaths}
           size={size}
@@ -63,7 +66,7 @@ export default async function PlatformEnrollmentApplicationsPage({
             page={page}
             size={size}
             status={status}
-            hasFilters={Boolean(status || trainingPathId || open || pendingDocuments)}
+            hasFilters={Boolean(status || trainingPathId || open || pendingDocuments || pendingCourses !== undefined)}
             dataPromise={dataPromise}
             canApprove
             canReject

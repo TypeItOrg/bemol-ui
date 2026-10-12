@@ -2,12 +2,13 @@
 
 import type { ReactElement } from "react";
 
-import { CircleAlertIcon } from "lucide-react";
+import { CircleAlertIcon, UserPlusIcon } from "lucide-react";
 
 import { ActionForm } from "@common/components/action-form";
 import { Alert, AlertDescription } from "@common/components/ui/alert";
 import { AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@common/components/ui/alert-dialog";
 import { Button } from "@common/components/ui/button";
+import { Skeleton } from "@common/components/ui/skeleton";
 
 import { CourseEnrollmentAssignmentFields } from "@features/course-enrollments/components/course-enrollment-assignment-fields";
 import type { CourseEnrollmentAssignmentOptions } from "@features/course-enrollments/types/course-enrollment-assignment-options.types";
@@ -35,32 +36,40 @@ export function ApplicationCourseAssignmentForm({
   onOpenChange: (open: boolean) => void;
 }): ReactElement {
   return (
-    <ActionForm action={formAction} className="flex min-h-0 min-w-0 flex-1 flex-col">
-      <AlertDialogHeader className="shrink-0 items-start border-b p-5 text-left">
-        <AlertDialogTitle className="text-left">Inscribir solicitud de cursada</AlertDialogTitle>
-        <AlertDialogDescription className="text-left">
+    <ActionForm action={formAction} className="flex min-h-0 min-w-0 flex-1 flex-col gap-4">
+      <AlertDialogHeader className="shrink-0">
+        <div className="bg-primary/10 text-primary mb-1 flex size-12 items-center justify-center rounded-2xl">
+          <UserPlusIcon className="size-6" aria-hidden="true" />
+        </div>
+        <AlertDialogTitle>Inscribir solicitud de cursada</AlertDialogTitle>
+        <AlertDialogDescription>
           {course.academicSpaceName} · {course.academicYear ? `Ciclo ${course.academicYear} · ` : ""}
           {course.academicLevelName ?? "Sin nivel"}
         </AlertDialogDescription>
       </AlertDialogHeader>
 
-      <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-4 overflow-y-auto p-5" aria-busy={isLoadingOptions}>
+      <div className="-mx-5 flex min-h-0 min-w-0 flex-1 flex-col gap-4 overflow-y-auto px-5" aria-busy={isLoadingOptions}>
         {state.error ? (
           <Alert variant="destructive">
             <CircleAlertIcon />
             <AlertDescription>{state.error}</AlertDescription>
           </Alert>
         ) : null}
-        {options ? (
-          <CourseEnrollmentAssignmentFields
-            key={`${course.courseId}-${optionsRevision}`}
-            options={options}
-            disabled={isPending}
-            invalidDayIds={state.invalidDayIds}
-          />
-        ) : null}
+        <div className="h-56 shrink-0">
+          {options ? (
+            <CourseEnrollmentAssignmentFields
+              compact
+              key={`${course.courseId}-${optionsRevision}`}
+              options={options}
+              disabled={isPending}
+              invalidDayIds={state.invalidDayIds}
+            />
+          ) : (
+            <Skeleton role="status" aria-label="Cargando clases y horarios" className="h-full w-full rounded-xl" />
+          )}
+        </div>
       </div>
-      <AlertDialogFooter className="mx-0 mb-0 shrink-0 sm:flex-wrap">
+      <AlertDialogFooter className="shrink-0 sm:flex-wrap">
         <Button type="button" variant="outline" size="lg" disabled={isPending || isLoadingOptions} onClick={onRefreshOptions}>
           Actualizar horarios
         </Button>

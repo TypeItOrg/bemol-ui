@@ -15,12 +15,14 @@ export function useCourseEnrollmentOptions({
   scope = AcademicScope.INSTITUTIONAL,
   enabled = true,
   revision = 0,
+  refreshAvailability = false,
 }: {
   courseId: string;
   institutionId?: string;
   scope?: AcademicScope;
   enabled?: boolean;
   revision?: number;
+  refreshAvailability?: boolean;
 }) {
   const hasInstitution = scope !== AcademicScope.ADMIN || Boolean(institutionId);
 
@@ -41,6 +43,9 @@ export function useCourseEnrollmentOptions({
     retry: false,
     staleTime: 0,
     gcTime: 0,
+    refetchInterval: refreshAvailability ? 30_000 : false,
+    refetchOnWindowFocus: refreshAvailability,
+    refetchOnReconnect: true,
   });
 
   const error = hasInstitution ? getErrorMessage(query.error) : COURSE_ENROLLMENT_MESSAGES.ASSIGNMENTS_FAILED;
@@ -49,5 +54,7 @@ export function useCourseEnrollmentOptions({
     options: query.data,
     error,
     loading: enabled && Boolean(courseId) && query.isPending && !error,
+    refreshing: query.isFetching,
+    refetch: query.refetch,
   };
 }

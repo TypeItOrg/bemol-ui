@@ -2,6 +2,7 @@ import type { CourseEnrollmentAssignmentOptions } from "@features/course-enrollm
 import type { DaySelection } from "@features/course-enrollments/types/course-enrollment-day-selection.types";
 
 export type CourseEnrollmentScheduleFieldsProps = {
+  compact?: boolean;
   options: CourseEnrollmentAssignmentOptions;
   selectedClass:
     | {

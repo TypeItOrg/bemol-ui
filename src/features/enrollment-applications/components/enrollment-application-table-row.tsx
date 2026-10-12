@@ -87,23 +87,20 @@ export function EnrollmentApplicationTableRow({
         {application.applicantLastName}, {application.applicantFirstName}
       </TableCell>
       <TableCell>{application.applicantDocumentNumber}</TableCell>
-      <TableCell>
+      <TableCell className="max-w-64 whitespace-normal">
         <OptionalValue value={application.trainingPathName} fallback="Sin trayecto formativo" />
       </TableCell>
-      <TableCell>{application.academicYear}</TableCell>
+      <TableCell>
+        <OptionalValue value={application.academicYear} fallback="Sin ciclo registrado" />
+      </TableCell>
       <TableCell className="text-muted-foreground">{formatEnrollmentApplicationDate(application.createdAt)}</TableCell>
       <TableCell>
-        <EnrollmentApplicationStatusBadge status={application.status} />
-      </TableCell>
-      <TableCell className="max-w-72">
-        {application.status === ENROLLMENT_APPLICATION_STATUS.REJECTED && application.rejectionReason ? (
-          <span className="text-destructive">{application.rejectionReason}</span>
-        ) : (
-          <OptionalValue
-            value={null}
-            fallback={application.status === ENROLLMENT_APPLICATION_STATUS.REJECTED ? "Sin motivo informado" : "No corresponde"}
-          />
-        )}
+        <EnrollmentApplicationStatusBadge
+          status={application.status}
+          rejectionReason={application.rejectionReason}
+          pendingCourses={application.pendingCourses}
+          detailHref={detailHref}
+        />
       </TableCell>
     </TableRow>
   );

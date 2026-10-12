@@ -20,6 +20,7 @@ export type FetchEnrollmentApplicationsParams = {
   trainingPathId?: string;
   open?: boolean;
   pendingDocuments?: boolean;
+  pendingCourses?: boolean;
 };
 
 export async function fetchEnrollmentApplications(
@@ -93,6 +94,10 @@ function buildListSearchParams(params: FetchEnrollmentApplicationsParams): URLSe
 
   if (params.pendingDocuments) {
     searchParams.set("pendingDocuments", "true");
+  }
+
+  if (params.pendingCourses !== undefined) {
+    searchParams.set("pendingCourses", String(params.pendingCourses));
   }
 
   if (params.open) {

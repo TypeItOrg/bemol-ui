@@ -42,7 +42,8 @@ export default async function EnrollmentApplicationsPage({
 
   const resolvedSearchParams = await searchParams;
 
-  const { page, size, status, trainingPathId, open, pendingDocuments } = parseEnrollmentApplicationPaginationParams(resolvedSearchParams);
+  const { page, size, status, trainingPathId, open, pendingDocuments, pendingCourses } =
+    parseEnrollmentApplicationPaginationParams(resolvedSearchParams);
 
   const dataPromise = fetchEnrollmentApplications(user.institutionId, {
     page,
@@ -51,6 +52,7 @@ export default async function EnrollmentApplicationsPage({
     trainingPathId,
     open,
     pendingDocuments,
+    pendingCourses,
   });
 
   const { items: trainingPaths } = hasInstitutionalPermission(user, INSTITUTIONAL_PERMISSION.TRAINING_PATH_READ)
@@ -73,6 +75,7 @@ export default async function EnrollmentApplicationsPage({
           trainingPathId={trainingPathId}
           open={open}
           pendingDocuments={pendingDocuments}
+          pendingCourses={pendingCourses}
           canFilterDocuments={hasInstitutionalPermission(user, INSTITUTIONAL_PERMISSION.ENROLLMENT_ATTACHMENT_READ)}
           trainingPaths={trainingPaths}
           size={size}
@@ -82,7 +85,7 @@ export default async function EnrollmentApplicationsPage({
             page={page}
             size={size}
             status={status}
-            hasFilters={Boolean(status || trainingPathId || open || pendingDocuments)}
+            hasFilters={Boolean(status || trainingPathId || open || pendingDocuments || pendingCourses !== undefined)}
             dataPromise={dataPromise}
             canApprove={hasInstitutionalPermission(user, INSTITUTIONAL_PERMISSION.ENROLLMENT_APPLICATION_APPROVE)}
             canReject={hasInstitutionalPermission(user, INSTITUTIONAL_PERMISSION.ENROLLMENT_APPLICATION_REJECT)}

@@ -61,9 +61,9 @@ export function DocumentActivity({
 
     if (history.items.length > 0) {
       return (
-        <ol className="divide-y">
+        <ol className="space-y-4">
           {history.items.map((file) => (
-            <li key={file.id} className="space-y-3 py-5 first:pt-0">
+            <li key={file.id} className="space-y-2 rounded-xl border p-4">
               <div className="flex items-center gap-2">
                 <Badge variant={file.versionStatus === "CURRENT" ? "secondary" : "outline"}>{getDeliveryVersionLabel(file.versionStatus)}</Badge>
               </div>

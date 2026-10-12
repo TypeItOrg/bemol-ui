@@ -15,7 +15,6 @@ import { formatStudyPlanLabel } from "@features/academic/utils/study-plan-label.
 import { EnrollmentStatusCard } from "@features/enrollment-applications/components/EnrollmentStatusCard";
 import { PlatformEnrollmentApplicationResolvePanel } from "@features/enrollment-applications/components/platform-enrollment-application-resolve-panel";
 import { fetchPlatformEnrollmentApplicationById } from "@features/enrollment-applications/services/enrollment-application.service";
-import { formatEnrollmentApplicationBreadcrumbLabel } from "@features/enrollment-applications/utils/enrollment-application-breadcrumb.util";
 import { PlatformBreadcrumb } from "@features/platform-auth/components/platform-breadcrumb";
 import { PlatformPageIcon } from "@features/platform-auth/components/platform-page-icon";
 import { PlatformPageShell } from "@features/platform-auth/components/platform-page-shell";
@@ -54,7 +53,7 @@ export default async function PlatformEnrollmentApplicationDetailPage({
         <PlatformBreadcrumb
           hiddenSegments={[institutionId]}
           segmentLabels={{
-            [applicationId]: formatEnrollmentApplicationBreadcrumbLabel(application, applicantName),
+            [applicationId]: "Detalle",
           }}
         />
       }
