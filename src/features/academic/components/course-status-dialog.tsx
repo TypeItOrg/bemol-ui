@@ -1,9 +1,10 @@
 "use client";
 
-import { useActionState, useState, type ReactElement } from "react";
+import { useActionState, useRef, useState, type ReactElement } from "react";
 
-import { CircleAlertIcon } from "lucide-react";
+import { ChevronDownIcon, CircleAlertIcon } from "lucide-react";
 
+import { ReturnToLink } from "@common/components/navigation/return-to-link";
 import { Alert, AlertDescription } from "@common/components/ui/alert";
 import {
   AlertDialog,
@@ -15,6 +16,7 @@ import {
   AlertDialogTitle,
 } from "@common/components/ui/alert-dialog";
 import { Button } from "@common/components/ui/button";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@common/components/ui/dropdown-menu";
 import { cn } from "@common/utils/cn.util";
 
 import { updateAcademicStatusAction } from "@features/academic/actions/update-academic-status.action";
@@ -27,6 +29,7 @@ import type { AcademicScope } from "@features/academic/utils/academic-scope.util
 type CourseStatusDialogProps = {
   id: string;
   institutionId: string;
+  onCloseAutoFocus?: (event: Event) => void;
   onOpenChange: (open: boolean) => void;
   open: boolean;
   resourceLabel: string;
@@ -40,6 +43,7 @@ const INITIAL_STATE: AcademicActionState = {};
 export function CourseStatusDialog({
   id,
   institutionId,
+  onCloseAutoFocus,
   onOpenChange,
   open,
   resourceLabel,
@@ -66,7 +70,7 @@ export function CourseStatusDialog({
 
   return (
     <AlertDialog open={open} onOpenChange={handleOpenChange}>
-      <AlertDialogContent>
+      <AlertDialogContent onCloseAutoFocus={onCloseAutoFocus}>
         <form action={formAction}>
           <AlertDialogHeader>
             <div className={cn(config.iconClassName, "mb-1 flex size-12 items-center justify-center rounded-2xl")}>
@@ -99,7 +103,9 @@ export function CourseStatusDialog({
   );
 }
 
-export function CourseDetailStatusActions({
+export function CourseDetailActions({
+  canChangeStatus,
+  canEdit,
   courseStatus,
   id,
   institutionId,
@@ -107,6 +113,8 @@ export function CourseDetailStatusActions({
   returnTo,
   scope,
 }: {
+  canChangeStatus: boolean;
+  canEdit: boolean;
   courseStatus: CourseStatus;
   id: string;
   institutionId: string;
@@ -114,11 +122,13 @@ export function CourseDetailStatusActions({
   returnTo: string;
   scope: AcademicScope;
 }): ReactElement | null {
+  const actionsTriggerRef = useRef<HTMLButtonElement>(null);
+
   const [toggleOpen, setToggleOpen] = useState(false);
 
   const [finalizeOpen, setFinalizeOpen] = useState(false);
 
-  if (courseStatus === "CLOSED") {
+  if (courseStatus === "CLOSED" || (!canEdit && !canChangeStatus)) {
     return null;
   }
 
@@ -126,15 +136,47 @@ export function CourseDetailStatusActions({
 
   const toggleConfig = COURSE_STATUS_DIALOG_CONFIG[toggleTarget];
 
+  function restoreActionsFocus(event: Event): void {
+    event.preventDefault();
+    actionsTriggerRef.current?.focus();
+  }
+
   return (
-    <div className="flex flex-wrap items-center gap-2">
-      <Button type="button" size="lg" variant={toggleConfig.variant} onClick={() => setToggleOpen(true)}>
-        {toggleTarget === "ACTIVE" ? "Activar" : "Desactivar"}
-      </Button>
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button ref={actionsTriggerRef} type="button" size="lg" variant="outline">
+            Acciones
+            <ChevronDownIcon aria-hidden="true" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-44 p-1.5">
+          {canEdit ? (
+            <DropdownMenuItem asChild>
+              <ReturnToLink href={`${returnTo}/edit`} className="px-2.5 py-1.5">
+                Editar
+              </ReturnToLink>
+            </DropdownMenuItem>
+          ) : null}
+          {canChangeStatus ? (
+            <>
+              {canEdit && toggleTarget !== "ACTIVE" ? <DropdownMenuSeparator /> : null}
+              <DropdownMenuItem variant={toggleConfig.variant} className="px-2.5 py-1.5" onSelect={() => setToggleOpen(true)}>
+                {toggleTarget === "ACTIVE" ? "Activar" : "Desactivar"}
+              </DropdownMenuItem>
+              {toggleTarget === "ACTIVE" ? <DropdownMenuSeparator /> : null}
+              <DropdownMenuItem variant="destructive" className="px-2.5 py-1.5" onSelect={() => setFinalizeOpen(true)}>
+                Finalizar
+              </DropdownMenuItem>
+            </>
+          ) : null}
+        </DropdownMenuContent>
+      </DropdownMenu>
       {toggleOpen ? (
         <CourseStatusDialog
           id={id}
           institutionId={institutionId}
+          onCloseAutoFocus={restoreActionsFocus}
           onOpenChange={setToggleOpen}
           open={toggleOpen}
           resourceLabel={resourceLabel}
@@ -143,13 +185,11 @@ export function CourseDetailStatusActions({
           targetStatus={toggleTarget}
         />
       ) : null}
-      <Button type="button" size="lg" variant="destructive" onClick={() => setFinalizeOpen(true)}>
-        Finalizar
-      </Button>
       {finalizeOpen ? (
         <CourseStatusDialog
           id={id}
           institutionId={institutionId}
+          onCloseAutoFocus={restoreActionsFocus}
           onOpenChange={setFinalizeOpen}
           open={finalizeOpen}
           resourceLabel={resourceLabel}
@@ -158,6 +198,6 @@ export function CourseDetailStatusActions({
           targetStatus="CLOSED"
         />
       ) : null}
-    </div>
+    </>
   );
 }

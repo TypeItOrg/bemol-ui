@@ -102,6 +102,11 @@ export async function fetchCourses(
   institutionId: string | undefined,
   params: PageParams & {
     status?: CourseStatus;
+    academicLevelId?: string;
+    type?: AcademicSpaceType;
+    format?: AcademicSpaceFormat;
+    instrumentId?: string;
+    withoutInstrument?: boolean;
     academicSpaceId?: string;
     trainingPathId?: string;
     studyPlanId?: string;

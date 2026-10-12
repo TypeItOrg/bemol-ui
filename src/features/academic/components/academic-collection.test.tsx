@@ -9,6 +9,10 @@ import { AcademicScope } from "@features/academic/utils/academic-scope.util";
 
 import { renderWithQueryClient } from "@/../test/utils/render-with-query-client";
 
+jest.mock("@features/academic/services/course-filter-labels.service", () => ({
+  getCourseFilterLabels: jest.fn(async () => ({})),
+}));
+
 const mockPush = jest.fn();
 const mockReplace = jest.fn();
 let mockQuery = new URLSearchParams();

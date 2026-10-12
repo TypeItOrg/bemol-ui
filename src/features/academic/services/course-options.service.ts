@@ -2,9 +2,10 @@ import type { AsyncDropdownFetchPageInput } from "@common/types/async-dropdown-f
 import type { AsyncDropdownPage } from "@common/types/async-dropdown-page.types";
 import { parseHttpResponse } from "@common/utils/http-response-error.util";
 
+import type { AcademicLevel } from "@features/academic/types/academic-level.types";
 import type { AcademicScope } from "@features/academic/utils/academic-scope.util";
 
-type CourseOptionResource = "teachers" | "spaces";
+type CourseOptionResource = "teachers" | "spaces" | "levels";
 export type CourseTeacherOption = { id: string; fullName: string };
 export type CourseSpaceOption = {
   id: string;
@@ -15,7 +16,7 @@ export type CourseSpaceOption = {
   academicLevelName?: string | null;
   instrumental?: boolean;
 };
-type CourseOption = CourseTeacherOption | CourseSpaceOption;
+type CourseOption = CourseTeacherOption | CourseSpaceOption | AcademicLevel;
 
 async function fetchCourseOptionPage<TItem extends CourseOption>(
   resource: CourseOptionResource,
@@ -74,4 +75,13 @@ export function fetchCourseSpaceOptions(
   return fetchCourseOptionPage<CourseSpaceOption>("spaces", scope, institutionId, input, {
     studyPlanId,
   });
+}
+
+export function fetchCourseLevelOptions(
+  scope: AcademicScope,
+  institutionId: string,
+  studyPlanId: string,
+  input: AsyncDropdownFetchPageInput,
+): Promise<AsyncDropdownPage<AcademicLevel>> {
+  return fetchCourseOptionPage<AcademicLevel>("levels", scope, institutionId, input, { studyPlanId });
 }

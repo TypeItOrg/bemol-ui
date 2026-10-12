@@ -1,20 +1,14 @@
-import { formatStudyPlanName } from "@features/academic/utils/study-plan-label.util";
+import { formatStudyPlanNameWithPrefix } from "@features/academic/utils/study-plan-label.util";
 import { ENROLLMENT_PERIOD_MESSAGES } from "@features/enrollment-periods/constants/enrollment-period.messages";
 import type { EnrollmentPeriodOffering } from "@features/enrollment-periods/types/enrollment-period-offering.types";
 import type { EnrollmentPeriod } from "@features/enrollment-periods/types/enrollment-period.types";
-
-function getPlanLabel(offering: EnrollmentPeriodOffering) {
-  const name = formatStudyPlanName(offering);
-
-  return /^plan\b/i.test(name) ? name : `Plan ${name}`;
-}
 
 function getOfferingSummary(offerings: EnrollmentPeriodOffering[]) {
   const levels = offerings.flatMap((offering) => offering.academicLevels);
 
   const levelCount = new Set(levels.map((level) => level.id)).size;
 
-  const planLabel = offerings.length === 1 ? getPlanLabel(offerings[0]) : `${offerings.length} planes`;
+  const planLabel = offerings.length === 1 ? formatStudyPlanNameWithPrefix(offerings[0]) : `${offerings.length} planes`;
 
   let levelLabel: string | null = null;
 

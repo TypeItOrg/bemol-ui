@@ -28,7 +28,7 @@ export function getAcademicCollectionFilters({
 
   const useAdvancedFilters = isCourse || isAcademicYear || isStudyPlan || isAcademicSpace;
 
-  const advancedSelectFilterNames = new Set(isAcademicSpace ? ["type", "format", "deleted"] : ["deleted"]);
+  const advancedSelectFilterNames = new Set(isAcademicSpace || isCourse ? ["type", "format", "deleted"] : ["deleted"]);
 
   const primarySelectFilters = useAdvancedFilters ? filters.filter((filter) => !advancedSelectFilterNames.has(filter.name)) : filters;
 
@@ -41,6 +41,9 @@ export function getAcademicCollectionFilters({
       { active: params.academicSpaceId !== undefined, key: "academicSpaceId" },
       { active: params.institutionId !== undefined, key: "institutionId" },
       { active: params.studyPlanId !== undefined, key: "studyPlanId" },
+      { active: params.academicLevelId !== undefined, key: "academicLevelId" },
+      { active: params.instrumentId !== undefined, key: "instrumentId" },
+      ...(!isTrainingPathFixed ? [{ active: params.trainingPathId !== undefined, key: "trainingPathId" }] : []),
     ];
   } else if (isAcademicYear) {
     customAdvancedFilters = [{ active: params.institutionId !== undefined, key: "institutionId" }];
@@ -78,6 +81,7 @@ export function getAcademicCollectionFilters({
     (!isTrainingPathFixed && params.trainingPathId !== undefined) ||
     params.academicSpaceId !== undefined ||
     params.studyPlanId !== undefined ||
+    (isCourse && (params.academicLevelId !== undefined || params.instrumentId !== undefined)) ||
     params.year !== undefined ||
     filters.some((filter) => filter.name !== "deleted" && filter.value !== filter.defaultValue) ||
     yearFilters.some((filter) => filter.value !== filter.defaultValue) ||

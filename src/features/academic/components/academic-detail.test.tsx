@@ -182,7 +182,7 @@ describe("AcademicDetail", () => {
     expect(validity).toHaveTextContent(expected);
   });
 
-  it("renders course summary and classes section with styled icon, teachers, days, period, cupo, and schedules", () => {
+  it("renders course summary and classes section with styled icon, teachers, days, capacity and schedules", () => {
     render(<AcademicDetail item={COURSE} resource={AcademicResource.COURSE} basePath="" canEdit />);
 
     const info = screen.getByRole("region", { name: "Información del curso" });
@@ -197,7 +197,9 @@ describe("AcademicDetail", () => {
     expect(within(classesRegion).getByText("Clase 1")).toBeInTheDocument();
     expect(within(classesRegion).getByText("Ana Garcia")).toBeInTheDocument();
     expect(within(classesRegion).getByText("Lunes")).toBeInTheDocument();
-    expect(within(classesRegion).getByText("60 min")).toBeInTheDocument();
+    expect(within(classesRegion).getByText("Total:")).toBeInTheDocument();
+    expect(within(classesRegion).getByText("Restantes:")).toBeInTheDocument();
+    expect(within(classesRegion).getByText("No disponible")).toBeInTheDocument();
     expect(within(classesRegion).getByText("4")).toBeInTheDocument();
     expect(within(classesRegion).getByText("08:00 a 12:00")).toBeInTheDocument();
   });

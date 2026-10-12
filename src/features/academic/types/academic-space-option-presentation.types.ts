@@ -1,6 +1,6 @@
 export type AcademicSpaceOptionPresentation = {
   name?: string;
-  type?: string;
-  format?: string;
+  type?: string | null;
+  format?: string | null;
   academicLevelName?: string | null;
 };

@@ -19,6 +19,8 @@ export function InstitutionFilterControl({ filter, size }: { filter: { selectedL
     navigate(
       {
         academicSpaceId: undefined,
+        academicLevelId: undefined,
+        instrumentId: undefined,
         institutionId: value,
         page: "0",
         size: String(size),

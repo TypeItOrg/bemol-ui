@@ -14,6 +14,16 @@ function getStudyPlanNames(plan: StudyPlanLabel) {
 
   const path = plan.trainingPathName?.trim() ?? "";
 
+  if (path && name.endsWith(path)) {
+    const prefix = name.slice(0, -path.length);
+
+    const shortName = /[\s–—·:-]$/.test(prefix) ? prefix.replace(/[\s–—·:-]+$/, "") : "";
+
+    if (shortName) {
+      return { name: `${path} · ${shortName}`, path, shortName };
+    }
+  }
+
   const suffix = path && name.startsWith(path) ? name.slice(path.length) : "";
 
   const shortName = /^\s*[-–—·:]\s*/.test(suffix) ? suffix.replace(/^\s*[-–—·:]\s*/, "").trim() : name;
@@ -30,6 +40,12 @@ function appendVersion(name: string, plan: StudyPlanLabel): string {
 // Use when the training path is already visible beside the plan.
 export function formatStudyPlanName(plan: StudyPlanLabel): string {
   return appendVersion(getStudyPlanNames(plan).shortName, plan);
+}
+
+export function formatStudyPlanNameWithPrefix(plan: StudyPlanLabel): string {
+  const name = formatStudyPlanName(plan);
+
+  return /^plan\b/i.test(name) ? name : `Plan ${name}`;
 }
 
 // Use for standalone labels and selectors, preserving the training path once.

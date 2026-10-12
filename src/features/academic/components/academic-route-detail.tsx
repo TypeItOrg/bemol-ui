@@ -22,6 +22,7 @@ import { ACADEMIC_RESOURCE_ICONS } from "@features/academic/config/academic-reso
 import { ACADEMIC_ROUTE_SEGMENT } from "@features/academic/constants/academic-route.constants";
 import { fetchAcademicDetailDocumentRequirements } from "@features/academic/services/academic-detail-documents.service";
 import { fetchAcademicSpaceUsage, fetchStudyPlanCurriculum } from "@features/academic/services/academic.service";
+import { fetchCourseAvailability } from "@features/academic/services/course-availability.service";
 import { AcademicResource } from "@features/academic/types/academic-resource.types";
 import { type RouteDetailInput } from "@features/academic/types/academic-route-detail-input.types";
 import type { StudyPlan } from "@features/academic/types/study-plan.types";
@@ -98,6 +99,7 @@ export async function renderPrimaryDetail(input: RouteDetailInput): Promise<Reac
   const statusAction = getAcademicDetailStatusAction({
     input,
     config,
+    canEdit,
     item,
     detailPath,
     deactivationBlocked: academicSpaceUsage?.summary.deactivationBlocked === true,
@@ -168,6 +170,11 @@ export async function renderPrimaryDetail(input: RouteDetailInput): Promise<Reac
     notFound();
   }
 
+  const courseAvailability =
+    input.resource === AcademicResource.COURSE
+      ? await fetchCourseAvailability(input.scope, input.institutionId, input.id).catch(() => undefined)
+      : undefined;
+
   return (
     <AcademicShell
       title={config.getTitle(item)}
@@ -180,6 +187,7 @@ export async function renderPrimaryDetail(input: RouteDetailInput): Promise<Reac
         basePath={input.basePath}
         canEdit={canEdit}
         academicSpaceUsage={academicSpaceUsage}
+        courseAvailability={courseAvailability}
         item={item}
         resource={input.resource}
         statusAction={statusAction}

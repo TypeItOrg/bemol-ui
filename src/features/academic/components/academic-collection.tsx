@@ -7,6 +7,7 @@ import { Sheet } from "@common/components/ui/sheet";
 import { AcademicCollectionFilters } from "@features/academic/components/academic-collection-filters";
 import { AcademicTablePresentation } from "@features/academic/components/academic-table-presentation";
 import { ACADEMIC_COLLECTION_CONFIG } from "@features/academic/config/academic-collection.config";
+import { getCourseFilterLabels } from "@features/academic/services/course-filter-labels.service";
 import { type AcademicCollectionProps } from "@features/academic/types/academic-collection-view-props.types";
 import { AcademicResource } from "@features/academic/types/academic-resource.types";
 import { getAcademicCollectionFilters } from "@features/academic/utils/academic-collection-filter-state.util";
@@ -58,6 +59,16 @@ export async function AcademicCollectionView({
   const selectedStudyPlan = data.items.find((item) => "studyPlanId" in item && item.studyPlanId === params.studyPlanId);
 
   const selectedAcademicSpace = data.items.find((item) => "academicSpaceId" in item && item.academicSpaceId === params.academicSpaceId);
+
+  const courseFilterLabels =
+    resource === AcademicResource.COURSE && effectiveInstitutionId
+      ? await getCourseFilterLabels(
+          scope,
+          effectiveInstitutionId,
+          params,
+          data.items.filter((item) => "academicSpaceName" in item),
+        )
+      : undefined;
 
   const user = scope === "institutional" ? await requireInstitutionalUser() : null;
 
@@ -121,6 +132,7 @@ export async function AcademicCollectionView({
           </PlatformCollectionActions>
           <AcademicCollectionFilters
             {...filterState}
+            courseFilterLabels={courseFilterLabels}
             scope={scope}
             effectiveInstitutionId={effectiveInstitutionId}
             selectedAcademicSpace={selectedAcademicSpace}

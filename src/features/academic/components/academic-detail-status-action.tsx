@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 
 import { ActiveAcademicStatusButton } from "@features/academic/components/active-academic-status-dialog";
-import { CourseDetailStatusActions } from "@features/academic/components/course-status-dialog";
+import { CourseDetailActions } from "@features/academic/components/course-status-dialog";
 import type { AcademicCollectionConfig } from "@features/academic/types/academic-collection-config.types";
 import type { AcademicCollection } from "@features/academic/types/academic-collection.types";
 import { AcademicResource } from "@features/academic/types/academic-resource.types";
@@ -12,12 +12,14 @@ import { hasActiveAcademicStatus } from "@features/academic/utils/has-active-aca
 export function getAcademicDetailStatusAction({
   input,
   config,
+  canEdit,
   item,
   detailPath,
   deactivationBlocked,
 }: {
   input: RouteDetailInput;
   config: AcademicCollectionConfig;
+  canEdit: boolean;
   item: AcademicCollection;
   detailPath: string;
   deactivationBlocked: boolean;
@@ -35,9 +37,11 @@ export function getAcademicDetailStatusAction({
     const courseStatus = (course.status ??
       (course.active ? "ACTIVE" : "INACTIVE")) as import("@features/academic/types/course-status.types").CourseStatus;
 
-    if (config.canChangeStatus(input.access) && courseStatus !== "CLOSED") {
+    if ((canEdit || config.canChangeStatus(input.access)) && courseStatus !== "CLOSED") {
       statusAction = (
-        <CourseDetailStatusActions
+        <CourseDetailActions
+          canChangeStatus={config.canChangeStatus(input.access)}
+          canEdit={canEdit}
           courseStatus={courseStatus}
           id={item.id}
           institutionId={input.institutionId}

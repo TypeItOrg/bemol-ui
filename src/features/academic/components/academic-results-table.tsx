@@ -57,13 +57,18 @@ export function AcademicResultsTable({
     | AcademicResource.SHIFT;
 }): ReactElement {
   return (
-    <Table containerClassName="table-scrollbar" className={columns.detailLabels.length > 1 ? "min-w-220" : "min-w-180"}>
+    <Table className={columns.detailLabels.length > 1 ? "min-w-220" : "min-w-180"}>
       <TableHeader className="bg-muted sticky top-0 z-10 [&_tr]:border-b">
         <TableRow>
           <TableHead className="w-16 pl-4">
             <span className="sr-only">Acciones</span>
           </TableHead>
-          {global ? <TableHead>Institución</TableHead> : null}
+          {global &&
+            (columns.institutionSortField ? (
+              <DataTableSortableHead field={columns.institutionSortField} label="Institución" sort={sort} onSortChange={updateSort} />
+            ) : (
+              <TableHead>Institución</TableHead>
+            ))}
           {[columns.primaryLabel, ...columns.detailLabels].map((label, index) => {
             const field = columns.sortableFields?.[index];
 
@@ -81,7 +86,11 @@ export function AcademicResultsTable({
 
             return <TableHead key={`${label}-${index}`}>{label}</TableHead>;
           })}
-          <TableHead>Estado</TableHead>
+          {columns.statusSortField ? (
+            <DataTableSortableHead field={columns.statusSortField} label="Estado" sort={sort} onSortChange={updateSort} />
+          ) : (
+            <TableHead>Estado</TableHead>
+          )}
         </TableRow>
       </TableHeader>
       <TableBody>

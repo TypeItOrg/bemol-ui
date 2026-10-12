@@ -21,6 +21,7 @@ import type { AcademicSpaceUsage as AcademicSpaceUsageData } from "@features/aca
 import type { Course } from "@features/academic/types/course.types";
 import type { StudyPlan } from "@features/academic/types/study-plan.types";
 import { getAcademicDetailInfo } from "@features/academic/utils/academic-detail-fields.util";
+import type { CourseEnrollmentAssignmentOptions } from "@features/course-enrollments/types/course-enrollment-assignment-options.types";
 
 export { StudyPlanSpaceDetail };
 
@@ -29,6 +30,7 @@ type AcademicDetailProps = {
   resource: AcademicCollectionResource;
   basePath: string;
   canEdit: boolean;
+  courseAvailability?: CourseEnrollmentAssignmentOptions;
   academicSpaceUsage?: AcademicSpaceUsageData | null;
   statusAction?: ReactNode;
   versionAction?: ReactNode;
@@ -41,6 +43,7 @@ export function AcademicDetail({
   basePath,
   canEdit,
   academicSpaceUsage,
+  courseAvailability,
   statusAction,
   versionAction,
   returnTo,
@@ -49,22 +52,26 @@ export function AcademicDetail({
 
   const detailPath = `${basePath}/${resource}/${item.id}`;
 
+  const actionButtons = (
+    <div className="flex flex-wrap items-center gap-2">
+      {canEdit ? (
+        <Button asChild size="lg">
+          <ReturnToLink href={`${detailPath}/edit`}>Editar</ReturnToLink>
+        </Button>
+      ) : null}
+      {versionAction}
+      {statusAction}
+    </div>
+  );
+
+  const detailActions = resource === AcademicResource.COURSE && statusAction ? statusAction : actionButtons;
+
   const headerActions = (
     <div className="flex flex-wrap items-center justify-between gap-3">
       <Button asChild size="lg" variant="outline">
         <Link href={destination}>Volver</Link>
       </Button>
-      {canEdit || statusAction || versionAction ? (
-        <div className="flex flex-wrap items-center gap-2">
-          {canEdit ? (
-            <Button asChild size="lg">
-              <ReturnToLink href={`${detailPath}/edit`}>Editar</ReturnToLink>
-            </Button>
-          ) : null}
-          {versionAction}
-          {statusAction}
-        </div>
-      ) : null}
+      {canEdit || statusAction || versionAction ? detailActions : null}
     </div>
   );
 
@@ -81,7 +88,7 @@ export function AcademicDetail({
     return (
       <div className="flex flex-col gap-4">
         {headerActions}
-        <CourseSummary course={item as Course} />
+        <CourseSummary course={item as Course} availability={courseAvailability} />
       </div>
     );
   }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, type ReactElement } from "react";
+import { useCallback, useId, useMemo, type ReactElement } from "react";
 
 import { RouteIcon } from "lucide-react";
 
@@ -19,10 +19,20 @@ export const TRAINING_PATH_FILTER_PAGE_SIZE = 20;
 export function TrainingPathFilterControl({ filter, size }: TrainingPathFilterControlProps): ReactElement {
   const { navigate } = useDataTableNavigation();
 
+  const labelId = useId();
+
   const queryKey = useMemo(() => [...TRAINING_PATH_FILTER_QUERY_KEY, filter.scope, filter.institutionId], [filter.institutionId, filter.scope]);
 
   function updateTrainingPath(value: string | undefined): void {
-    navigate({ page: "0", size: String(size), trainingPathId: value }, { replace: true });
+    navigate(
+      {
+        page: "0",
+        size: String(size),
+        trainingPathId: value,
+        ...(filter.resetCourseFilters ? { studyPlanId: undefined, academicLevelId: undefined } : {}),
+      },
+      { replace: true },
+    );
   }
 
   const fetchPage = useCallback(
@@ -35,8 +45,11 @@ export function TrainingPathFilterControl({ filter, size }: TrainingPathFilterCo
 
   return (
     <div className="flex min-w-0 flex-col gap-1.5">
-      <span className="text-foreground text-sm font-medium">Trayecto formativo</span>
+      <label htmlFor={labelId} className="text-foreground text-sm font-medium">
+        Trayecto formativo
+      </label>
       <AsyncDropdown<TrainingPath>
+        id={labelId}
         className="min-w-0"
         clearLabel="Limpiar trayecto formativo"
         clearable
@@ -47,7 +60,7 @@ export function TrainingPathFilterControl({ filter, size }: TrainingPathFilterCo
         emptyTitle="No hay trayectos formativos"
         errorMessage="No se pudieron cargar los trayectos formativos."
         fetchPage={fetchPage}
-        getItemLabel={(item) => (item.active ? item.name : `${item.name} · Inactivo`)}
+        getItemLabel={(item) => (item.active === false ? `${item.name} · Inactivo` : item.name)}
         getItemValue={(item) => item.id}
         pageSize={TRAINING_PATH_FILTER_PAGE_SIZE}
         onValueChange={updateTrainingPath}
@@ -67,6 +80,7 @@ export type TrainingPathFilterControlProps = {
 };
 
 export type TrainingPathFilter = {
+  resetCourseFilters?: boolean;
   institutionId: string;
   scope: AcademicScope;
   selectedLabel: string | undefined;

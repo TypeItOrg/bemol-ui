@@ -2,7 +2,7 @@
 
 import type { ReactElement } from "react";
 
-import { LibraryBigIcon, RouteIcon } from "lucide-react";
+import { LayersIcon, LibraryBigIcon, Music2Icon, RouteIcon } from "lucide-react";
 
 import {
   type DataTableDateFilter,
@@ -19,6 +19,8 @@ import { type TrainingPathFilter, TrainingPathFilterControl } from "@features/ac
 
 type AcademicTableFiltersProps = {
   academicSpaceFilter?: CourseDropdownFilter;
+  academicLevelFilter?: CourseDropdownFilter;
+  instrumentFilter?: CourseDropdownFilter;
   activeAdvancedCount?: number;
   advancedDateFilters?: readonly DataTableDateFilter[];
   advancedResetKeys?: readonly string[];
@@ -40,6 +42,8 @@ type AcademicTableFiltersProps = {
 
 export function AcademicTableFilters({
   academicSpaceFilter,
+  academicLevelFilter,
+  instrumentFilter,
   activeAdvancedCount = 0,
   advancedDateFilters = [],
   advancedResetKeys,
@@ -95,8 +99,31 @@ export function AcademicTableFilters({
         useAdvancedLayout ? (
           <>
             {institutionNode}
+            {trainingPathFilter?.resetCourseFilters ? <TrainingPathFilterControl filter={trainingPathFilter} size={size} /> : null}
             {studyPlanNode}
+            {academicLevelFilter ? (
+              <CourseDropdownFilterControl
+                emptyIcon={LayersIcon}
+                filter={academicLevelFilter}
+                label="Nivel"
+                navigateKey="academicLevelId"
+                resource="levels"
+                searchPlaceholder="Buscar nivel…"
+                size={size}
+              />
+            ) : null}
             {academicSpaceNode}
+            {instrumentFilter ? (
+              <CourseDropdownFilterControl
+                emptyIcon={Music2Icon}
+                filter={instrumentFilter}
+                label="Instrumento"
+                navigateKey="instrumentId"
+                resource="instruments"
+                searchPlaceholder="Buscar instrumento…"
+                size={size}
+              />
+            ) : null}
           </>
         ) : undefined
       }
@@ -112,7 +139,7 @@ export function AcademicTableFilters({
       yearFilters={yearFilters}
     >
       {useAdvancedLayout ? null : institutionNode}
-      {trainingPathFilter ? <TrainingPathFilterControl filter={trainingPathFilter} size={size} /> : null}
+      {trainingPathFilter && !trainingPathFilter.resetCourseFilters ? <TrainingPathFilterControl filter={trainingPathFilter} size={size} /> : null}
       {useAdvancedLayout ? null : studyPlanNode}
       {useAdvancedLayout ? null : academicSpaceNode}
       {cycleFilter ? <CycleFilterControl filter={cycleFilter} size={size} /> : null}

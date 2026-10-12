@@ -7,6 +7,7 @@ import type { DataTableYearFilter } from "@common/types/data-table-year-filter.t
 import { AcademicTableFilters } from "@features/academic/components/academic-table-filters";
 import type { AcademicCollectionConfig } from "@features/academic/types/academic-collection-config.types";
 import type { AcademicCollection } from "@features/academic/types/academic-collection.types";
+import type { CourseFilterLabels } from "@features/academic/types/course-filter-labels.types";
 import { academicSpaceFormatLabels, academicSpaceTypeLabels } from "@features/academic/utils/academic-labels.util";
 import type { AcademicPaginationParams } from "@features/academic/utils/academic-pagination.util";
 import { formatStudyPlanLabel } from "@features/academic/utils/study-plan-label.util";
@@ -16,6 +17,7 @@ export function AcademicCollectionFilters({
   isCourse,
   effectiveInstitutionId,
   selectedAcademicSpace,
+  courseFilterLabels,
   params,
   activeAdvancedCount,
   advancedDateFilters,
@@ -39,6 +41,7 @@ export function AcademicCollectionFilters({
   isCourse: boolean;
   effectiveInstitutionId: string | undefined;
   selectedAcademicSpace: AcademicCollection | undefined;
+  courseFilterLabels?: CourseFilterLabels;
   params: AcademicPaginationParams;
   activeAdvancedCount: number;
   advancedDateFilters: readonly DataTableDateFilter[];
@@ -65,11 +68,33 @@ export function AcademicCollectionFilters({
           ? {
               institutionId: effectiveInstitutionId,
               selectedLabel:
-                selectedAcademicSpace && "academicSpaceName" in selectedAcademicSpace
+                courseFilterLabels?.academicSpace ??
+                (selectedAcademicSpace && "academicSpaceName" in selectedAcademicSpace
                   ? `${selectedAcademicSpace.academicSpaceName} · ${academicSpaceTypeLabels[selectedAcademicSpace.academicSpaceType]} · ${academicSpaceFormatLabels[selectedAcademicSpace.academicSpaceFormat]}`
-                  : undefined,
+                  : undefined),
               scope,
               value: params.academicSpaceId,
+            }
+          : undefined
+      }
+      academicLevelFilter={
+        isCourse && effectiveInstitutionId
+          ? {
+              institutionId: effectiveInstitutionId,
+              scope,
+              studyPlanId: params.studyPlanId,
+              value: params.academicLevelId,
+              selectedLabel: courseFilterLabels?.academicLevel,
+            }
+          : undefined
+      }
+      instrumentFilter={
+        isCourse && effectiveInstitutionId
+          ? {
+              institutionId: effectiveInstitutionId,
+              scope,
+              value: params.instrumentId,
+              selectedLabel: courseFilterLabels?.instrument,
             }
           : undefined
       }
@@ -106,17 +131,23 @@ export function AcademicCollectionFilters({
         isCourse && effectiveInstitutionId
           ? {
               institutionId: effectiveInstitutionId,
-              selectedLabel: selectedStudyPlan && "studyPlanName" in selectedStudyPlan ? formatStudyPlanLabel(selectedStudyPlan) : undefined,
+              selectedLabel:
+                courseFilterLabels?.studyPlan ??
+                (selectedStudyPlan && "studyPlanName" in selectedStudyPlan ? formatStudyPlanLabel(selectedStudyPlan) : undefined),
+              trainingPathId: params.trainingPathId,
               scope,
               value: params.studyPlanId,
             }
           : undefined
       }
       trainingPathFilter={
-        isStudyPlan && !isTrainingPathFixed && effectiveInstitutionId
+        (isStudyPlan || isCourse) && !isTrainingPathFixed && effectiveInstitutionId
           ? {
               institutionId: effectiveInstitutionId,
-              selectedLabel: selectedTrainingPath && "trainingPathName" in selectedTrainingPath ? selectedTrainingPath.trainingPathName : undefined,
+              selectedLabel:
+                courseFilterLabels?.trainingPath ??
+                (selectedTrainingPath && "trainingPathName" in selectedTrainingPath ? selectedTrainingPath.trainingPathName : undefined),
+              resetCourseFilters: isCourse,
               scope,
               value: params.trainingPathId,
             }

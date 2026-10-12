@@ -22,7 +22,9 @@ export const courseCollectionConfig: AcademicCollectionConfig = {
   columns: {
     primaryLabel: "Espacio académico",
     detailLabels: ["Trayecto formativo", "Plan de estudio", "Ciclo lectivo", "Nivel", "Tipo", "Formato", "Instrumento"],
-    sortableFields: COURSE_SORT_FIELDS,
+    sortableFields: COURSE_SORT_FIELDS.slice(0, 8),
+    statusSortField: "status",
+    institutionSortField: "institution.name",
   },
   searchPlaceholder: "Buscar por espacio o institución...",
   canRead: (access) => access.courseRead,
@@ -42,6 +44,10 @@ export const courseCollectionConfig: AcademicCollectionConfig = {
     active,
     courseStatus,
     academicSpaceId,
+    academicLevelId,
+    type,
+    format,
+    instrumentId,
     trainingPathId,
     studyPlanId,
     year,
@@ -55,6 +61,11 @@ export const courseCollectionConfig: AcademicCollectionConfig = {
       search,
       status: status as CourseStatus | undefined,
       academicSpaceId,
+      academicLevelId,
+      type,
+      format,
+      instrumentId: instrumentId === "none" ? undefined : instrumentId,
+      withoutInstrument: instrumentId === "none" ? true : undefined,
       trainingPathId,
       studyPlanId,
       year,
@@ -65,7 +76,7 @@ export const courseCollectionConfig: AcademicCollectionConfig = {
   },
   fetchDetail: fetchCourse,
   getTitle: (item) => (item as Extract<AcademicCollection, { classes: unknown }>).academicSpaceName,
-  filters: ({ active, courseStatus, deleted }) => {
+  filters: ({ active, courseStatus, deleted, type, format }) => {
     const status = courseStatus ?? getCourseStatusFromActive(active);
 
     return [
@@ -75,6 +86,20 @@ export const courseCollectionConfig: AcademicCollectionConfig = {
         name: "courseStatus",
         options: [{ value: "all", label: "Todos" }, ...toOptions(courseStatusLabels)],
         value: status ?? "all",
+      },
+      {
+        defaultValue: "all",
+        label: "Tipo",
+        name: "type",
+        options: [{ value: "all", label: "Todos los tipos" }, ...toOptions(academicSpaceTypeLabels)],
+        value: type ?? "all",
+      },
+      {
+        defaultValue: "all",
+        label: "Formato",
+        name: "format",
+        options: [{ value: "all", label: "Todos los formatos" }, ...toOptions(academicSpaceFormatLabels)],
+        value: format ?? "all",
       },
       deletionFilter(deleted),
     ];
