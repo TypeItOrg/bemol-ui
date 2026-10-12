@@ -117,7 +117,7 @@ function DocumentCatalogView({ scope, institutionId, canManage, breadcrumb, inst
     }
 
     return (
-      <Table containerClassName="table-scrollbar" className="min-w-180">
+      <Table className="min-w-180">
         <DocumentCatalogTableHeader scope={scope} />
         <TableBody>
           {query.isLoading ? (

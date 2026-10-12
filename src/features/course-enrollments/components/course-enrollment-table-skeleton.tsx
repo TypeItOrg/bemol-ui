@@ -7,7 +7,7 @@ export function CourseEnrollmentTableSkeleton(): ReactElement {
   return (
     <div className="flex h-full flex-col gap-4">
       <div className="h-full overflow-hidden rounded-lg border">
-        <Table containerClassName="table-scrollbar" className="min-w-192">
+        <Table className="min-w-192">
           <TableHeader className="bg-muted sticky top-0 z-10 [&_tr]:border-b">
             <TableRow className="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors">
               <TableHead>

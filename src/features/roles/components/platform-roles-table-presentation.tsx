@@ -53,7 +53,7 @@ export function PlatformRolesTablePresentation({
   return (
     <div className="flex h-full flex-col gap-4">
       <div className="relative h-full overflow-hidden rounded-lg border" aria-busy={isPending}>
-        <Table containerClassName="table-scrollbar" className="min-w-220">
+        <Table className="min-w-220">
           <TableHeader className="bg-muted sticky top-0 z-10 [&_tr]:border-b">
             <TableRow>
               <TableHead className="w-16 pl-4">

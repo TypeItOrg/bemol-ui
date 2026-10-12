@@ -29,7 +29,7 @@ export function CourseEnrollmentHistorySection({ history }: { history: CourseEnr
           <p className="text-muted-foreground text-sm">No hay movimientos históricos.</p>
         ) : (
           <div className="bg-background overflow-hidden rounded-lg border">
-            <Table containerClassName="table-scrollbar" className="min-w-180">
+            <Table className="min-w-180">
               <TableHeader className="bg-muted">
                 <TableRow className="h-11">
                   <TableHead>Fecha</TableHead>
