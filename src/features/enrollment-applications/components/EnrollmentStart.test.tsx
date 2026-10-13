@@ -71,7 +71,7 @@ describe("EnrollmentStart", () => {
 
     fireEvent.click(screen.getByRole("button", { name: /comenzar inscripción/i }));
 
-    await waitFor(() => expect(startAction).toHaveBeenCalledWith({ studyPlanId: "plan-1", academicYearId: "year-1", applicantPersonId: "dep-1" }));
+    await waitFor(() => expect(startAction).toHaveBeenCalledWith({ trainingPathId: "plan-1", applicantPersonId: "dep-1" }));
   });
 
   it("shows an unavailable message when there are no options", () => {

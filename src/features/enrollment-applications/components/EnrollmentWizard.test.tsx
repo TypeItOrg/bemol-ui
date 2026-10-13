@@ -181,7 +181,7 @@ describe("EnrollmentWizard", () => {
     await confirmSubmission();
 
     expect(await screen.findByText("Campos obligatorios incompletos")).toBeInTheDocument();
-    fireEvent.click(within(screen.getByRole("alertdialog")).getByRole("button", { name: "Volver" }));
+    expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
     expect(screen.getByRole("tab", { name: /datos personales/i })).toHaveAttribute("data-state", "active");
     expect(submitAction).not.toHaveBeenCalled();
 

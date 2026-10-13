@@ -101,6 +101,15 @@ export function getInstitutionalHomeTasks(user: Pick<InstitutionalUser, "permiss
 export function getInstitutionalEnrollmentHomeLinks(user: InstitutionalUser): InstitutionalHomeLink[] {
   const links: InstitutionalHomeLink[] = [];
 
+  if (canManageDependents(user)) {
+    links.push({
+      href: GUARDIAN_DEPENDENTS_PAGE_PATH,
+      title: "Mis personas a cargo",
+      description: "Registrá y gestioná a los menores a tu cargo para inscribirlos.",
+      icon: UsersIcon,
+    });
+  }
+
   if (hasInstitutionalPermission(user, INSTITUTIONAL_PERMISSION.COURSE_ENROLLMENT_READ)) {
     links.push({
       href: "/course-enrollments",
@@ -122,15 +131,6 @@ export function getInstitutionalEnrollmentHomeLinks(user: InstitutionalUser): In
       title: "Mis horarios",
       description: "Consultá la semana con los días y horarios de tus clases.",
       icon: CalendarRangeIcon,
-      });
-    }
-
-  if (canManageDependents(user)) {
-    links.push({
-      href: GUARDIAN_DEPENDENTS_PAGE_PATH,
-      title: "Mis personas a cargo",
-      description: "Registrá y gestioná a los menores a tu cargo para inscribirlos.",
-      icon: UsersIcon,
     });
   }
 

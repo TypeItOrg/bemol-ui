@@ -12,7 +12,7 @@ export interface EnrollmentApplicationResponse {
   submittedByPersonId?: string | null;
   trainingPathId?: string | null;
   studyPlanId?: string | null;
-  academicYearId: string;
+  academicYearId: string | null;
   enrollmentPeriodId: string;
   enrollmentPeriod?: EnrollmentPeriod;
   periodOpen?: boolean;
@@ -32,9 +32,10 @@ export interface EnrollmentApplicationResponse {
   studyPlanName?: string;
   studyPlanVersion?: number | null;
   trainingPathName?: string | null;
-  academicYearName?: string;
+  academicYear?: number | null;
   enrollmentPeriodName?: string;
   status: EnrollmentApplicationStatus;
+  pendingCourses?: boolean | null;
   isEditable: boolean;
   data: EnrollmentApplicationData;
   spaces?: EnrollmentApplicationSpaceResponse[];

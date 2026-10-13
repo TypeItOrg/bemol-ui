@@ -27,7 +27,9 @@ export function EnrollmentWizard(props: EnrollmentWizardProps): ReactElement {
 function EnrollmentWizardView(props: EnrollmentWizardProps): ReactElement {
   const model = useEnrollmentWizard(props);
 
-  const { application, validationIssues } = model;
+  const { application, validationIssues, submissionError } = model;
+
+  const hasMissingDocuments = validationIssues.some((issue) => issue.path[0] === "documents");
 
   if (application.status !== ENROLLMENT_APPLICATION_STATUS.DRAFT) {
     return <EnrollmentStatusCard application={application} />;
@@ -35,6 +37,14 @@ function EnrollmentWizardView(props: EnrollmentWizardProps): ReactElement {
 
   const showWithdrawnDocuments =
     !model.hasDocumentsStep && application.canReadAttachments && application.documents?.some((requirement) => requirement.active === false);
+
+  let validationTitle = ENROLLMENT_MESSAGES.INCOMPLETE_FIELDS_TITLE(validationIssues.length);
+
+  if (submissionError) {
+    validationTitle = ENROLLMENT_MESSAGES.SUBMISSION_ERROR_TITLE;
+  } else if (hasMissingDocuments) {
+    validationTitle = ENROLLMENT_MESSAGES.DOCUMENTS_REQUIRED_TITLE;
+  }
 
   return (
     <div className="flex flex-col gap-4">
@@ -62,17 +72,21 @@ function EnrollmentWizardView(props: EnrollmentWizardProps): ReactElement {
         </Alert>
       ) : null}
 
-      <EnrollmentDraftStatus {...model} />
-      {validationIssues.length > 0 ? (
-        <Alert variant="destructive">
+      <EnrollmentDraftStatus {...model} trainingPathName={application.trainingPathName} academicYear={application.academicYear} />
+      {submissionError || validationIssues.length > 0 ? (
+        <Alert variant="destructive" id="enrollment-validation-alert" tabIndex={-1}>
           <AlertCircleIcon />
-          <AlertTitle>{ENROLLMENT_MESSAGES.INCOMPLETE_FIELDS_TITLE(validationIssues.length)}</AlertTitle>
+          <AlertTitle>{validationTitle}</AlertTitle>
           <AlertDescription>
-            <ul className="mt-1 list-disc space-y-0.5 pl-4">
-              {validationIssues.map((issue, index) => (
-                <li key={index}>{issue.message}</li>
-              ))}
-            </ul>
+            {submissionError ? (
+              submissionError
+            ) : (
+              <ul className="mt-1 list-disc space-y-0.5 pl-4">
+                {validationIssues.map((issue, index) => (
+                  <li key={index}>{issue.message}</li>
+                ))}
+              </ul>
+            )}
           </AlertDescription>
         </Alert>
       ) : null}
