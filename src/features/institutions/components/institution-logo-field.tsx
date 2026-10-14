@@ -44,8 +44,6 @@ export function InstitutionLogoField({
 
   const [preview, setPreview] = useState<string>();
 
-  const [errorDismissed, setErrorDismissed] = useState(false);
-
   const [undoRequested, setUndoRequested] = useState(false);
 
   const currentUrl = getInstitutionLogoUrl(institutionId, logoUrl);
@@ -98,7 +96,6 @@ export function InstitutionLogoField({
     }
 
     setPreview(URL.createObjectURL(file));
-    setErrorDismissed(false);
     setUndoRequested(false);
     onChange({ intent: INSTITUTION_LOGO_INTENT.REPLACE, file });
   }
@@ -113,7 +110,6 @@ export function InstitutionLogoField({
 
   function undoChange(): void {
     setPreview(undefined);
-    setErrorDismissed(true);
     setUndoRequested(true);
     onError("");
     onChange({ intent: INSTITUTION_LOGO_INTENT.KEEP });
@@ -147,12 +143,12 @@ export function InstitutionLogoField({
           description="Arrastrá tu logo acá o hacé clic para seleccionar una imagen."
           buttonRef={selectRef}
           disabled={disabled}
-          error={selectedFile && !errorDismissed && !undoRequested ? error : undefined}
+          error={error}
           errorId={`${id}-error`}
           onSelectFiles={selectFiles}
         />
 
-        {selectedFile && !errorDismissed && !undoRequested ? <FieldError id={`${id}-error`}>{error}</FieldError> : null}
+        <FieldError id={`${id}-error`}>{error}</FieldError>
 
         {hasLogo ? (
           <FileUploadSelection
