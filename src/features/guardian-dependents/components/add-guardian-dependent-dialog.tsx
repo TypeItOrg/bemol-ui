@@ -1,8 +1,6 @@
 "use client";
 
-/* eslint-disable no-restricted-syntax */
-
-import { startTransition, useActionState, useState, type SyntheticEvent } from "react";
+import { startTransition, useActionState, useState, type SyntheticEvent, type ReactElement } from "react";
 
 import { AlertCircleIcon } from "lucide-react";
 
@@ -18,7 +16,6 @@ import { NumericInput } from "@common/components/ui/restricted-input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@common/components/ui/select";
 
 import { calculateAge } from "@features/enrollment-applications/schemas/enrollment-application.schema";
-import { createGuardianDependentAction } from "@features/guardian-dependents/actions/create-guardian-dependent.action";
 import {
   GUARDIAN_ATTACHMENT_ACCEPT,
   GUARDIAN_DEPENDENT_MESSAGES,
@@ -27,16 +24,17 @@ import {
 import type { GuardianDependentActionState } from "@features/guardian-dependents/types/guardian-dependent-action-state.types";
 import type { GuardianDependentFieldName } from "@features/guardian-dependents/types/guardian-dependent-field-name.types";
 import { GUARDIAN_RELATIONSHIP } from "@features/guardian-dependents/types/guardian-relationship.types";
+import { submitGuardianDependent } from "@features/guardian-dependents/utils/submit-guardian-dependent.util";
 import { formatBirthDateInput, getLatestAllowedBirthDate } from "@features/people/utils/person-birth-date.util";
 
 type AddGuardianDependentDialogProps = { institutionId: string; onClose: () => void; onSuccess: () => void };
 
 const RELATIONSHIP_OPTIONS = Object.values(GUARDIAN_RELATIONSHIP);
 
-export function AddGuardianDependentDialog({ institutionId, onClose, onSuccess }: AddGuardianDependentDialogProps): React.ReactElement {
+export function AddGuardianDependentDialog({ institutionId, onClose, onSuccess }: AddGuardianDependentDialogProps): ReactElement {
   const [state, action, isPending] = useActionState<GuardianDependentActionState, FormData>(async (previous, formData) => {
     try {
-      const result = await createGuardianDependentAction(institutionId, previous, formData);
+      const result = await submitGuardianDependent(institutionId, previous, formData);
 
       if (result.success) {
         onSuccess();
@@ -47,6 +45,8 @@ export function AddGuardianDependentDialog({ institutionId, onClose, onSuccess }
       return { error: GUARDIAN_DEPENDENT_MESSAGES.CREATE };
     }
   }, {});
+
+  const fieldsDisabled = isPending || Boolean(state.requestCreated);
 
   const [birthDate, setBirthDate] = useState<Date>();
 
@@ -59,7 +59,7 @@ export function AddGuardianDependentDialog({ institutionId, onClose, onSuccess }
   function handleSubmit(event: SyntheticEvent<HTMLFormElement>): void {
     event.preventDefault();
 
-    if (isPending) {
+    if (fieldsDisabled) {
       return;
     }
 
@@ -105,7 +105,7 @@ export function AddGuardianDependentDialog({ institutionId, onClose, onSuccess }
               <FieldLabel htmlFor="dependent-first-name" required>
                 Nombre
               </FieldLabel>
-              <Input aria-invalid={!!state.fieldErrors?.firstName} disabled={isPending} id="dependent-first-name" name="firstName" />
+              <Input aria-invalid={!!state.fieldErrors?.firstName} disabled={fieldsDisabled} id="dependent-first-name" name="firstName" />
               <FieldError errors={getErrors("firstName")} />
             </Field>
 
@@ -113,7 +113,7 @@ export function AddGuardianDependentDialog({ institutionId, onClose, onSuccess }
               <FieldLabel htmlFor="dependent-last-name" required>
                 Apellido
               </FieldLabel>
-              <Input aria-invalid={!!state.fieldErrors?.lastName} disabled={isPending} id="dependent-last-name" name="lastName" />
+              <Input aria-invalid={!!state.fieldErrors?.lastName} disabled={fieldsDisabled} id="dependent-last-name" name="lastName" />
               <FieldError errors={getErrors("lastName")} />
             </Field>
           </div>
@@ -125,7 +125,7 @@ export function AddGuardianDependentDialog({ institutionId, onClose, onSuccess }
               </FieldLabel>
               <NumericInput
                 aria-invalid={!!state.fieldErrors?.documentNumber}
-                disabled={isPending}
+                disabled={fieldsDisabled}
                 id="dependent-document-number"
                 maxLength={8}
                 name="documentNumber"
@@ -147,7 +147,7 @@ export function AddGuardianDependentDialog({ institutionId, onClose, onSuccess }
               <input name="birthDate" type="hidden" value={formatBirthDateInput(birthDate)} />
               <DatePicker
                 aria-invalid={!!state.fieldErrors?.birthDate}
-                disabled={isPending}
+                disabled={fieldsDisabled}
                 id="dependent-birth-date"
                 maxDate={getLatestAllowedBirthDate()}
                 onChange={setBirthDate}
@@ -163,7 +163,7 @@ export function AddGuardianDependentDialog({ institutionId, onClose, onSuccess }
                 Vínculo
               </FieldLabel>
               <input name="relationship" type="hidden" value={relationship} />
-              <Select disabled={isPending} onValueChange={setRelationship} value={relationship}>
+              <Select disabled={fieldsDisabled} onValueChange={setRelationship} value={relationship}>
                 <SelectTrigger aria-invalid={!!state.fieldErrors?.relationship} className="w-full" id="dependent-relationship">
                   <SelectValue placeholder="Seleccioná el vínculo" />
                 </SelectTrigger>
@@ -182,7 +182,7 @@ export function AddGuardianDependentDialog({ institutionId, onClose, onSuccess }
               <input name="isPrimaryContact" type="hidden" value={String(isPrimaryContact)} />
               <Checkbox
                 checked={isPrimaryContact}
-                disabled={isPending}
+                disabled={fieldsDisabled}
                 id="dependent-primary-contact"
                 onCheckedChange={(checked) => setIsPrimaryContact(checked === true)}
               />
@@ -196,7 +196,7 @@ export function AddGuardianDependentDialog({ institutionId, onClose, onSuccess }
             <Input
               accept={GUARDIAN_ATTACHMENT_ACCEPT}
               aria-invalid={!!state.fieldErrors?.documents}
-              disabled={isPending}
+              disabled={fieldsDisabled}
               id="dependent-documents"
               multiple
               name="documents"
@@ -208,9 +208,9 @@ export function AddGuardianDependentDialog({ institutionId, onClose, onSuccess }
 
           <DialogFooter>
             <Button disabled={isPending} onClick={onClose} type="button" variant="outline">
-              Cancelar
+              {state.requestCreated ? "Cerrar" : "Cancelar"}
             </Button>
-            <Button disabled={isPending} type="submit">
+            <Button disabled={fieldsDisabled} type="submit">
               {isPending ? "Enviando…" : "Solicitar"}
             </Button>
           </DialogFooter>

@@ -2,6 +2,7 @@ import { revalidatePath } from "next/cache";
 
 import { createGuardianDependentAction } from "@features/guardian-dependents/actions/create-guardian-dependent.action";
 import { GUARDIAN_DEPENDENT_MESSAGES, GUARDIAN_DEPENDENTS_PAGE_PATH } from "@features/guardian-dependents/constants/guardian-dependent.constants";
+import { submitGuardianDependent } from "@features/guardian-dependents/utils/submit-guardian-dependent.util";
 import { requireInstitutionalUser } from "@features/institutional-auth/services/get-institutional-user.service";
 import { institutionalApiFetch } from "@features/institutional-auth/services/institutional-api-fetch.service";
 import { INSTITUTIONAL_PERMISSION } from "@features/institutional-auth/types/institutional-permission.types";
@@ -64,11 +65,11 @@ describe("createGuardianDependentAction", () => {
   });
 
   it("links the dependent and refreshes the dependents page", async () => {
-    apiFetchMock.mockResolvedValue(Response.json({ dependentPersonId: "dependent-id" }, { status: 201 }));
+    apiFetchMock.mockResolvedValue(Response.json({ personGuardianId: LINK_ID }, { status: 201 }));
 
     const result = await createGuardianDependentAction(INSTITUTION_ID, {}, createForm());
 
-    expect(result).toEqual({ success: true });
+    expect(result).toEqual({ success: true, personGuardianId: LINK_ID });
     const [path, request] = apiFetchMock.mock.calls[0];
     expect(path).toBe(`/api/v1/institutions/${INSTITUTION_ID}/guardian/dependents`);
     expect(request?.method).toBe("POST");
@@ -88,9 +89,9 @@ describe("createGuardianDependentAction", () => {
       .mockResolvedValueOnce(Response.json({ personGuardianId: LINK_ID }, { status: 201 }))
       .mockResolvedValue(Response.json({ id: "attachment-id" }, { status: 201 }));
 
-    const result = await createGuardianDependentAction(INSTITUTION_ID, {}, createFormWithDocuments(pdf("a.pdf"), pdf("b.pdf")));
+    const result = await submitGuardianDependent(INSTITUTION_ID, {}, createFormWithDocuments(pdf("a.pdf"), pdf("b.pdf")));
 
-    expect(result).toEqual({ success: true });
+    expect(result).toEqual({ success: true, personGuardianId: LINK_ID });
     expect(apiFetchMock).toHaveBeenCalledTimes(3);
     const [path, request] = apiFetchMock.mock.calls[1];
     expect(path).toBe(`/api/v1/institutions/${INSTITUTION_ID}/guardian/dependents/${LINK_ID}/attachments`);
@@ -101,13 +102,9 @@ describe("createGuardianDependentAction", () => {
   it("ignores the empty file a browser sends when no document was chosen", async () => {
     apiFetchMock.mockResolvedValue(Response.json({ personGuardianId: LINK_ID }, { status: 201 }));
 
-    const result = await createGuardianDependentAction(
-      INSTITUTION_ID,
-      {},
-      createFormWithDocuments(new File([], "", { type: "application/octet-stream" })),
-    );
+    const result = await submitGuardianDependent(INSTITUTION_ID, {}, createFormWithDocuments(new File([], "", { type: "application/octet-stream" })));
 
-    expect(result).toEqual({ success: true });
+    expect(result).toEqual({ success: true, personGuardianId: LINK_ID });
     expect(apiFetchMock).toHaveBeenCalledTimes(1);
   });
 
@@ -124,7 +121,7 @@ describe("createGuardianDependentAction", () => {
       GUARDIAN_DEPENDENT_MESSAGES.ATTACHMENT_INVALID_TYPE,
     ],
   ])("rejects documents that are %s before creating the link", async (_label, documents, message) => {
-    const result = await createGuardianDependentAction(INSTITUTION_ID, {}, createFormWithDocuments(...documents));
+    const result = await submitGuardianDependent(INSTITUTION_ID, {}, createFormWithDocuments(...documents));
 
     expect(result.fieldErrors?.documents).toBe(message);
     expect(apiFetchMock).not.toHaveBeenCalled();
@@ -135,9 +132,9 @@ describe("createGuardianDependentAction", () => {
       .mockResolvedValueOnce(Response.json({ personGuardianId: LINK_ID }, { status: 201 }))
       .mockResolvedValueOnce(Response.json({ message: "boom" }, { status: 500 }));
 
-    const result = await createGuardianDependentAction(INSTITUTION_ID, {}, createFormWithDocuments(pdf()));
+    const result = await submitGuardianDependent(INSTITUTION_ID, {}, createFormWithDocuments(pdf()));
 
-    expect(result).toEqual({ error: GUARDIAN_DEPENDENT_MESSAGES.ATTACHMENTS_FAILED });
+    expect(result).toEqual({ error: GUARDIAN_DEPENDENT_MESSAGES.ATTACHMENTS_FAILED, requestCreated: true });
     expect(revalidatePath).toHaveBeenCalledWith(GUARDIAN_DEPENDENTS_PAGE_PATH);
   });
 

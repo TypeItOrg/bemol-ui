@@ -33,6 +33,7 @@ export const GUARDIAN_DEPENDENT_MESSAGES = {
   ATTACHMENTS_FAILED:
     "Tu solicitud se registró, pero no pudimos adjuntar la documentación. Cerrá esta ventana y contactá a la institución para completarla.",
   ATTACHMENT_TOO_MANY: "Podés adjuntar hasta 5 documentos.",
+  ATTACHMENT_REQUIRED: "Seleccioná un documento para adjuntar.",
   ATTACHMENT_TOO_LARGE: "Cada documento puede pesar hasta 10 MB.",
   ATTACHMENT_INVALID_TYPE: "Los documentos deben ser PDF, PNG o JPG.",
   FORBIDDEN: "No tenés permisos para gestionar personas a cargo.",

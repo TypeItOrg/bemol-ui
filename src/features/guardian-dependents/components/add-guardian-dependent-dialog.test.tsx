@@ -2,13 +2,18 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import { createGuardianDependentAction } from "@features/guardian-dependents/actions/create-guardian-dependent.action";
+import { uploadGuardianDependentDocumentAction } from "@features/guardian-dependents/actions/upload-guardian-dependent-document.action";
 import { AddGuardianDependentDialog } from "@features/guardian-dependents/components/add-guardian-dependent-dialog";
 
 jest.mock("@features/guardian-dependents/actions/create-guardian-dependent.action", () => ({
   createGuardianDependentAction: jest.fn(),
 }));
+jest.mock("@features/guardian-dependents/actions/upload-guardian-dependent-document.action", () => ({
+  uploadGuardianDependentDocumentAction: jest.fn(),
+}));
 
 const INSTITUTION_ID = "019f9c3a-f891-7bc5-a98d-e65332998127";
+const LINK_ID = "019f9c3a-f891-7bc5-a98d-e65332998128";
 const BIRTH_YEAR = new Date().getFullYear() - 8;
 
 async function fillForm(user: ReturnType<typeof userEvent.setup>): Promise<void> {
@@ -23,6 +28,11 @@ async function fillForm(user: ReturnType<typeof userEvent.setup>): Promise<void>
 describe("AddGuardianDependentDialog", () => {
   beforeEach(() => {
     jest.mocked(createGuardianDependentAction).mockReset().mockResolvedValue({});
+    jest.mocked(uploadGuardianDependentDocumentAction).mockReset().mockResolvedValue({ success: true });
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
   it("submits every field with an explicit primary contact boolean", async () => {
@@ -37,9 +47,7 @@ describe("AddGuardianDependentDialog", () => {
     const [institutionId, , formData] = jest.mocked(createGuardianDependentAction).mock.calls[0];
 
     expect(institutionId).toBe(INSTITUTION_ID);
-    // A browser always sends the file input, empty when nothing was chosen.
-    expect(formData.getAll("documents").every((document) => document instanceof File && document.size === 0)).toBe(true);
-    formData.delete("documents");
+    expect(formData.has("documents")).toBe(false);
     expect(Object.fromEntries(formData.entries())).toEqual({
       firstName: "Mateo",
       lastName: "Gonzalez",
@@ -50,20 +58,32 @@ describe("AddGuardianDependentDialog", () => {
     });
   });
 
-  it("sends the chosen supporting documents", async () => {
+  it("uploads allowed documents in separate requests", async () => {
     const user = userEvent.setup();
+    jest.mocked(createGuardianDependentAction).mockResolvedValueOnce({ success: true, personGuardianId: LINK_ID });
     render(<AddGuardianDependentDialog institutionId={INSTITUTION_ID} onClose={jest.fn()} onSuccess={jest.fn()} />);
 
     await fillForm(user);
     const input = screen.getByLabelText(/Documentación respaldatoria/) as HTMLInputElement;
-    await user.upload(input, new File(["%PDF-1.4"], "partida.pdf", { type: "application/pdf" }));
+    const files = ["partida.pdf", "constancia.pdf"].map((name) => new File([new Uint8Array(7 * 1024 * 1024)], name, { type: "application/pdf" }));
+    await user.upload(input, files);
     expect(input.files?.[0].name).toBe("partida.pdf");
+
+    const getAll = FormData.prototype.getAll;
+    // jsdom's form serializer misses user-event's FileList; bridge only that field in this test.
+    jest.spyOn(FormData.prototype, "getAll").mockImplementation(function (this: FormData, name: string) {
+      return name === "documents" ? Array.from(input.files ?? []) : getAll.call(this, name);
+    });
     await user.click(screen.getByRole("button", { name: "Solicitar" }));
 
-    await waitFor(() => expect(createGuardianDependentAction).toHaveBeenCalled());
-    const documents = jest.mocked(createGuardianDependentAction).mock.calls[0][2].getAll("documents");
-    expect(documents).toHaveLength(1);
-    // jsdom and Node's FormData do not share File, so the content is not checkable here.
+    await waitFor(() => expect(uploadGuardianDependentDocumentAction).toHaveBeenCalledTimes(2));
+    expect(jest.mocked(createGuardianDependentAction).mock.calls[0][2].has("documents")).toBe(false);
+    jest.mocked(uploadGuardianDependentDocumentAction).mock.calls.forEach(([institutionId, linkId, body], index) => {
+      expect(institutionId).toBe(INSTITUTION_ID);
+      expect(linkId).toBe(LINK_ID);
+      expect(body.getAll("file")).toHaveLength(1);
+      expect(body.get("file")).toMatchObject({ name: files[index].name, size: 7 * 1024 * 1024, type: "application/pdf" });
+    });
   });
 
   it("explains that the request stays pending until the institution validates it", () => {
