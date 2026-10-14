@@ -1,49 +1,31 @@
 "use client";
 
-/* eslint-disable no-nested-ternary, no-restricted-syntax */
-
-import * as React from "react";
-
-import { useRouter } from "next/navigation";
+import { createContext, useContext, useState, useTransition, type PropsWithChildren, type ReactElement } from "react";
 
 import type { GuardianDependent } from "@features/guardian-dependents/types/guardian-dependent.types";
 import { setGuardianWorkspaceAction } from "@features/guardian-workspace/actions/set-guardian-workspace.action";
 import type { GuardianWorkspaceContextValue } from "@features/guardian-workspace/types/guardian-workspace-context.types";
+import { resolveGuardianWorkspaceDependent } from "@features/guardian-workspace/utils/resolve-guardian-workspace-dependent.util";
 
-const GuardianWorkspaceContext = React.createContext<GuardianWorkspaceContextValue | null>(null);
+const GuardianWorkspaceContext = createContext<GuardianWorkspaceContextValue | null>(null);
 
-type GuardianWorkspaceProviderProps = React.PropsWithChildren<{
+type GuardianWorkspaceProviderProps = PropsWithChildren<{
   dependents: readonly GuardianDependent[];
   initialActiveDependentId?: string;
 }>;
 
-export function GuardianWorkspaceProvider({ children, dependents, initialActiveDependentId }: GuardianWorkspaceProviderProps): React.ReactElement {
-  const router = useRouter();
+export function GuardianWorkspaceProvider({ children, dependents, initialActiveDependentId }: GuardianWorkspaceProviderProps): ReactElement {
+  const [error, setError] = useState<string | null>(null);
 
-  const [activeDependentId, setActiveDependentId] = React.useState<string | null>(() =>
-    dependents.some((dependent) => dependent.dependentPersonId === initialActiveDependentId)
-      ? (initialActiveDependentId ?? null)
-      : dependents.length === 1
-        ? dependents[0].dependentPersonId
-        : null,
-  );
+  const [isPending, startTransition] = useTransition();
 
-  const [error, setError] = React.useState<string | null>(null);
-
-  const [isPending, startTransition] = React.useTransition();
-
-  const effectiveActiveDependentId = dependents.some((dependent) => dependent.dependentPersonId === activeDependentId)
-    ? activeDependentId
-    : dependents.some((dependent) => dependent.dependentPersonId === initialActiveDependentId)
-      ? (initialActiveDependentId ?? null)
-      : dependents.length === 1
-        ? dependents[0].dependentPersonId
-        : null;
-
-  const activeDependent = dependents.find((dependent) => dependent.dependentPersonId === effectiveActiveDependentId) ?? null;
+  const activeDependent = resolveGuardianWorkspaceDependent(dependents, initialActiveDependentId) ?? null;
 
   function selectDependent(dependentPersonId: string): void {
-    if (!dependents.some((dependent) => dependent.dependentPersonId === dependentPersonId) || dependentPersonId === effectiveActiveDependentId) {
+    if (
+      !dependents.some((dependent) => dependent.dependentPersonId === dependentPersonId) ||
+      dependentPersonId === activeDependent?.dependentPersonId
+    ) {
       return;
     }
 
@@ -56,9 +38,6 @@ export function GuardianWorkspaceProvider({ children, dependents, initialActiveD
 
         return;
       }
-
-      setActiveDependentId(dependentPersonId);
-      router.refresh();
     });
   }
 
@@ -66,7 +45,7 @@ export function GuardianWorkspaceProvider({ children, dependents, initialActiveD
 }
 
 export function useGuardianWorkspace(): GuardianWorkspaceContextValue {
-  const context = React.useContext(GuardianWorkspaceContext);
+  const context = useContext(GuardianWorkspaceContext);
 
   if (!context) {
     throw new Error("useGuardianWorkspace debe utilizarse dentro de GuardianWorkspaceProvider.");
