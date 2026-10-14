@@ -1,8 +1,8 @@
 "use client";
 
-/* eslint-disable max-lines, no-restricted-syntax */
+/* eslint-disable max-lines */
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, type ReactElement } from "react";
 
 import { useRouter } from "next/navigation";
 
@@ -48,7 +48,7 @@ function matchesSearch(dependent: GuardianDependent, search: string): boolean {
   return normalize(getGuardianDependentName(dependent)).includes(term) || dependent.documentNumber.includes(term);
 }
 
-export function GuardianDependentsList({ dependents, institutionId, initialSearch = "" }: GuardianDependentsListProps): React.ReactElement {
+export function GuardianDependentsList({ dependents, institutionId, initialSearch = "" }: GuardianDependentsListProps): ReactElement {
   const router = useRouter();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -142,7 +142,7 @@ export function GuardianDependentsList({ dependents, institutionId, initialSearc
   );
 }
 
-function SearchInput({ value, onChange }: { value: string; onChange: (value: string) => void }): React.ReactElement {
+function SearchInput({ value, onChange }: { value: string; onChange: (value: string) => void }): ReactElement {
   return (
     <InputGroup className="h-9 w-full sm:max-w-sm">
       <InputGroupAddon align="inline-start">
@@ -166,7 +166,7 @@ function SearchInput({ value, onChange }: { value: string; onChange: (value: str
   );
 }
 
-function AddButton({ onClick }: { onClick: () => void }): React.ReactElement {
+function AddButton({ onClick }: { onClick: () => void }): ReactElement {
   return (
     <Button onClick={onClick} type="button">
       <PlusIcon aria-hidden="true" />
@@ -185,7 +185,7 @@ function DependentRow({
   isSelectingWorkspace: boolean;
   onEnroll: () => void;
   onUnlink: () => void;
-}): React.ReactElement {
+}): ReactElement {
   const age = calculateAge(dependent.birthDate ?? undefined);
 
   const name = getGuardianDependentName(dependent);

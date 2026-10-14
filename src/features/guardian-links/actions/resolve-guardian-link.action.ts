@@ -10,7 +10,7 @@ import {
   GUARDIAN_LINKS_PAGE_PATH,
   getGuardianLinksApiPath,
 } from "@features/guardian-links/constants/guardian-link.constants";
-import type { GuardianLinkDecision } from "@features/guardian-links/types/guardian-link-request.types";
+import type { GuardianLinkDecision } from "@features/guardian-links/types/guardian-link-decision.types";
 import { requireInstitutionalUser } from "@features/institutional-auth/services/get-institutional-user.service";
 import { institutionalApiFetch } from "@features/institutional-auth/services/institutional-api-fetch.service";
 import { canReviewGuardianLinks } from "@features/institutional-auth/utils/institutional-applicant-role.util";

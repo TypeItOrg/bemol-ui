@@ -1,8 +1,6 @@
 "use client";
 
-/* eslint-disable no-restricted-syntax */
-
-import { startTransition, useActionState, type SyntheticEvent } from "react";
+import { startTransition, useActionState, type SyntheticEvent, type ReactElement } from "react";
 
 import { CircleAlertIcon, UserMinusIcon } from "lucide-react";
 
@@ -36,7 +34,7 @@ export function UnlinkGuardianDependentDialog({
   institutionId,
   onClose,
   onSuccess,
-}: UnlinkGuardianDependentDialogProps): React.ReactElement {
+}: UnlinkGuardianDependentDialogProps): ReactElement {
   const [state, action, isPending] = useActionState<GuardianDependentActionState, FormData>(async () => {
     try {
       const result = await unlinkGuardianDependentAction(institutionId, dependentPersonId);

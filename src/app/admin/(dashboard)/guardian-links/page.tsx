@@ -1,4 +1,4 @@
-/* eslint-disable no-restricted-syntax */
+import type { ReactElement } from "react";
 
 import type { Metadata } from "next";
 
@@ -13,7 +13,7 @@ import { PlatformPageShell } from "@features/platform-auth/components/platform-p
 
 export const metadata: Metadata = { title: "Solicitudes de vinculación" };
 
-export default async function PlatformGuardianLinksPage(): Promise<React.ReactElement> {
+export default async function PlatformGuardianLinksPage(): Promise<ReactElement> {
   const requests = await fetchAllPlatformGuardianLinkRequests();
 
   return (

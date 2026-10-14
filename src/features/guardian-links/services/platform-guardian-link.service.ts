@@ -4,7 +4,8 @@ import { parseHttpResponse } from "@common/utils/http-response-error.util";
 
 import type { GuardianLinkStatus } from "@features/guardian-dependents/types/guardian-link-status.types";
 import { getPlatformGuardianLinksApiPath } from "@features/guardian-links/constants/guardian-link.constants";
-import type { GuardianLinkAttachment, GuardianLinkRequest } from "@features/guardian-links/types/guardian-link-request.types";
+import type { GuardianLinkAttachment } from "@features/guardian-links/types/guardian-link-attachment.types";
+import type { GuardianLinkRequest } from "@features/guardian-links/types/guardian-link-request.types";
 import { platformApiFetch } from "@features/platform-auth/services/platform-api-fetch.service";
 
 export async function fetchPlatformGuardianLinkRequests(status: GuardianLinkStatus): Promise<GuardianLinkRequest[]> {

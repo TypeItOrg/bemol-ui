@@ -1,21 +1,7 @@
 import type { GuardianLinkStatus } from "@features/guardian-dependents/types/guardian-link-status.types";
 import type { GuardianRelationship } from "@features/guardian-dependents/types/guardian-relationship.types";
-
-export type GuardianLinkPerson = {
-  personId: string;
-  documentNumber: string;
-  firstName: string;
-  lastName: string;
-  birthDate: string | null;
-};
-
-export type GuardianLinkAttachment = {
-  id: string;
-  originalFileName: string;
-  contentType: string;
-  size: number;
-  createdAt: string;
-};
+import type { GuardianLinkAttachment } from "@features/guardian-links/types/guardian-link-attachment.types";
+import type { GuardianLinkPerson } from "@features/guardian-links/types/guardian-link-person.types";
 
 export type GuardianLinkRequest = {
   personGuardianId: string;
@@ -31,5 +17,3 @@ export type GuardianLinkRequest = {
   resolvedAt: string | null;
   attachments: GuardianLinkAttachment[];
 };
-
-export type GuardianLinkDecision = "approve" | "reject";

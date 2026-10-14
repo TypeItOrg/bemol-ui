@@ -1,4 +1,4 @@
-/* eslint-disable no-restricted-syntax */
+import type { ReactElement } from "react";
 
 import type { Metadata } from "next";
 
@@ -18,7 +18,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return getInstitutionalMetadata("Solicitudes de vinculación");
 }
 
-export default async function GuardianLinksPage(): Promise<React.ReactElement> {
+export default async function GuardianLinksPage(): Promise<ReactElement> {
   const user = await requireInstitutionalUser();
 
   if (!canReviewGuardianLinks(user)) {

@@ -1,4 +1,4 @@
-/* eslint-disable no-restricted-syntax */
+import type { ReactElement } from "react";
 
 import type { Metadata } from "next";
 
@@ -22,7 +22,7 @@ const MAX_SEARCH_LENGTH = 100;
 
 type MyDependentsPageProps = { searchParams: Promise<Record<string, string | string[] | undefined>> };
 
-export default async function MyDependentsPage({ searchParams }: MyDependentsPageProps): Promise<React.ReactElement> {
+export default async function MyDependentsPage({ searchParams }: MyDependentsPageProps): Promise<ReactElement> {
   const user = await requireInstitutionalUser();
 
   if (!canManageDependents(user)) {

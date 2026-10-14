@@ -1,8 +1,8 @@
 "use client";
 
-/* eslint-disable max-lines, no-nested-ternary, no-restricted-syntax */
+/* eslint-disable max-lines, no-nested-ternary */
 
-import { useMemo, useState, useTransition } from "react";
+import { useMemo, useState, useTransition, type ReactElement } from "react";
 
 import { CheckIcon, FileTextIcon, SearchIcon, UsersIcon, XIcon } from "lucide-react";
 
@@ -25,7 +25,9 @@ import {
   getGuardianLinkAttachmentContentPath,
   getPlatformGuardianLinkAttachmentContentPath,
 } from "@features/guardian-links/constants/guardian-link.constants";
-import type { GuardianLinkDecision, GuardianLinkPerson, GuardianLinkRequest } from "@features/guardian-links/types/guardian-link-request.types";
+import type { GuardianLinkDecision } from "@features/guardian-links/types/guardian-link-decision.types";
+import type { GuardianLinkPerson } from "@features/guardian-links/types/guardian-link-person.types";
+import type { GuardianLinkRequest } from "@features/guardian-links/types/guardian-link-request.types";
 
 type GuardianLinkRequestsProps = {
   requests: GuardianLinkRequest[];
@@ -50,7 +52,7 @@ export function GuardianLinkRequests({
   onResolve = resolveGuardianLinkAction,
   attachmentPathMode = "institutional",
   showInstitution = false,
-}: GuardianLinkRequestsProps): React.ReactElement {
+}: GuardianLinkRequestsProps): ReactElement {
   const [rows, setRows] = useState(requests);
 
   const [search, setSearch] = useState("");
@@ -143,7 +145,7 @@ function GuardianLinkFilters({
   onSearchChange: (value: string) => void;
   onDocumentNumberChange: (value: string) => void;
   onStatusChange: (value: string) => void;
-}): React.ReactElement {
+}): ReactElement {
   return (
     <div className="bg-muted/25 flex flex-row flex-wrap gap-3 rounded-lg border p-4 md:items-end">
       <label className="flex min-w-56 flex-1 flex-col gap-1.5 text-sm font-medium">
@@ -190,7 +192,7 @@ function RequestRow({
   onResolved: (requestId: string, status: GuardianLinkStatus) => void;
   attachmentPathMode: "institutional" | "platform";
   showInstitution: boolean;
-}): React.ReactElement {
+}): ReactElement {
   const [error, setError] = useState<string | null>(null);
 
   const [isPending, startTransition] = useTransition();
@@ -300,7 +302,7 @@ function RequestRow({
   );
 }
 
-function PersonCell({ person }: { person: GuardianLinkPerson }): React.ReactElement {
+function PersonCell({ person }: { person: GuardianLinkPerson }): ReactElement {
   return (
     <div>
       <div className="font-medium">{getGuardianDependentName(person)}</div>
@@ -309,7 +311,7 @@ function PersonCell({ person }: { person: GuardianLinkPerson }): React.ReactElem
   );
 }
 
-function EmptyRequests({ hasFilters }: { hasFilters: boolean }): React.ReactElement {
+function EmptyRequests({ hasFilters }: { hasFilters: boolean }): ReactElement {
   const Icon = hasFilters ? SearchIcon : UsersIcon;
 
   return (
