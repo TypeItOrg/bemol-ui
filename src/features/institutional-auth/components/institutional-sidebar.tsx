@@ -1,8 +1,6 @@
 "use client";
 
-/* eslint-disable no-restricted-syntax */
-
-import type { ComponentProps } from "react";
+import type { ComponentProps, ReactElement } from "react";
 
 import Link from "next/link";
 
@@ -34,7 +32,7 @@ type InstitutionalSidebarProps = ComponentProps<typeof Sidebar> & {
   navigationSections: readonly InstitutionalNavigationSection[];
 };
 
-export function InstitutionalSidebar({ user, navigationSections, className, ...props }: InstitutionalSidebarProps): React.ReactElement {
+export function InstitutionalSidebar({ user, navigationSections, className, ...props }: InstitutionalSidebarProps): ReactElement {
   const { resolvedTheme, setTheme } = useTheme();
 
   const navigation = useMobileSidebarNavigation();
@@ -91,7 +89,7 @@ export function InstitutionalSidebar({ user, navigationSections, className, ...p
                   </span>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <GuardianWorkspaceMenuItems />
+                <GuardianWorkspaceMenuItems onNavigate={navigation.handleNavigation} />
                 <DropdownMenuSeparator />
                 <DropdownMenuGroup>
                   <DropdownMenuItem asChild>
@@ -123,7 +121,7 @@ export function InstitutionalSidebar({ user, navigationSections, className, ...p
   );
 }
 
-function InstitutionalUserAvatar({ user }: { user: InstitutionalUser }): React.ReactElement {
+function InstitutionalUserAvatar({ user }: { user: InstitutionalUser }): ReactElement {
   return (
     <Avatar className="size-[34px] rounded-md group-data-[collapsible=icon]:size-8!">
       <AvatarFallback className="bg-primary text-primary-foreground rounded-md font-semibold">{getInitials(user.name, user.lastName)}</AvatarFallback>

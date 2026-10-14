@@ -1,6 +1,6 @@
 "use client";
 
-/* eslint-disable no-restricted-syntax */
+import type { ReactElement } from "react";
 
 import Link from "next/link";
 
@@ -18,7 +18,7 @@ import { GUARDIAN_DEPENDENTS_PAGE_PATH } from "@features/guardian-dependents/con
 import { getGuardianDependentName } from "@features/guardian-dependents/utils/guardian-dependent-display.util";
 import { useGuardianWorkspace } from "@features/guardian-workspace/components/guardian-workspace-provider";
 
-export function GuardianWorkspaceMenuItems(): React.ReactElement {
+export function GuardianWorkspaceMenuItems({ onNavigate }: { onNavigate: (url: string) => void }): ReactElement {
   const { dependents, activeDependent, error, isPending, selectDependent } = useGuardianWorkspace();
 
   if (dependents.length === 0) {
@@ -26,7 +26,7 @@ export function GuardianWorkspaceMenuItems(): React.ReactElement {
       <>
         <DropdownMenuLabel>Workspace</DropdownMenuLabel>
         <DropdownMenuItem asChild>
-          <Link href={GUARDIAN_DEPENDENTS_PAGE_PATH}>
+          <Link href={GUARDIAN_DEPENDENTS_PAGE_PATH} onClick={() => onNavigate(GUARDIAN_DEPENDENTS_PAGE_PATH)}>
             <UsersRoundIcon />
             Agregar persona a cargo
           </Link>
@@ -52,7 +52,7 @@ export function GuardianWorkspaceMenuItems(): React.ReactElement {
       {error ? <p className="text-destructive px-1.5 py-1 text-xs">{error}</p> : null}
       <DropdownMenuSeparator />
       <DropdownMenuItem asChild>
-        <Link href={GUARDIAN_DEPENDENTS_PAGE_PATH}>
+        <Link href={GUARDIAN_DEPENDENTS_PAGE_PATH} onClick={() => onNavigate(GUARDIAN_DEPENDENTS_PAGE_PATH)}>
           <UsersRoundIcon />
           Gestionar personas a cargo
         </Link>
