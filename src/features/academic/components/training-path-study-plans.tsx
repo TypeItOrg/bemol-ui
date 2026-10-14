@@ -1,15 +1,18 @@
+import type { ReactElement } from "react";
+
 import { BookMarkedIcon, PlusIcon } from "lucide-react";
 
 import { ReturnToLink } from "@common/components/navigation/return-to-link";
+import { SectionHeader } from "@common/components/section-header";
 import { Button } from "@common/components/ui/button";
+
 import { AcademicCollectionView } from "@features/academic/components/academic-collection";
 import type { AcademicTableColumns } from "@features/academic/config/academic-collection.config";
-import { AcademicResource } from "@features/academic/types/academic-resource.types";
 import type { AcademicAccess } from "@features/academic/types/academic-access.types";
+import { AcademicResource } from "@features/academic/types/academic-resource.types";
 import type { TrainingPath } from "@features/academic/types/training-path.types";
 import type { AcademicSearchParams } from "@features/academic/utils/academic-pagination.util";
 import type { AcademicScope } from "@features/academic/utils/academic-scope.util";
-import { SectionHeader } from "@common/components/section-header";
 
 type TrainingPathStudyPlansProps = {
   access: AcademicAccess;
@@ -33,12 +36,12 @@ export async function TrainingPathStudyPlans({
   scope,
   searchParams,
   trainingPath,
-}: TrainingPathStudyPlansProps): Promise<React.ReactElement> {
+}: TrainingPathStudyPlansProps): Promise<ReactElement> {
   const createHref = `${basePath}/${AcademicResource.STUDY_PLAN}/new?trainingPathId=${encodeURIComponent(trainingPath.id)}`;
 
   return (
     <section aria-labelledby="training-path-study-plans-title" className="bg-muted/25 flex flex-col gap-5 rounded-xl border p-5 md:p-6">
-      <header className="flex flex-col gap-3 border-b pb-5 sm:flex-row sm:items-center sm:justify-between">
+      <header className="-mx-5 flex flex-col gap-3 border-b px-5 pb-5 sm:flex-row sm:items-center sm:justify-between md:-mx-6 md:px-6">
         <SectionHeader
           icon={BookMarkedIcon}
           title="Planes de estudio"

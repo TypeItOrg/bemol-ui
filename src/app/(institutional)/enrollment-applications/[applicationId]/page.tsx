@@ -1,17 +1,20 @@
-import { formatStudyPlanLabel } from "@features/academic/utils/study-plan-label.util";
+import type { ReactElement } from "react";
+
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+
 import { ClipboardListIcon } from "lucide-react";
-import type { Metadata } from "next";
 
 import { Button } from "@common/components/ui/button";
 import type { QueryParamValue } from "@common/types/query-param.types";
 import { getSafeReturnTo } from "@common/utils/return-to.util";
+
 import { AcademicScope } from "@features/academic/utils/academic-scope.util";
+import { formatStudyPlanLabel } from "@features/academic/utils/study-plan-label.util";
 import { EnrollmentApplicationResolvePanel } from "@features/enrollment-applications/components/enrollment-application-resolve-panel";
 import { EnrollmentStatusCard } from "@features/enrollment-applications/components/EnrollmentStatusCard";
 import { fetchInstitutionalEnrollmentApplicationById } from "@features/enrollment-applications/services/enrollment-application.service";
-import { formatEnrollmentApplicationBreadcrumbLabel } from "@features/enrollment-applications/utils/enrollment-application-breadcrumb.util";
 import { InstitutionalAccessDenied } from "@features/institutional-auth/components/institutional-access-denied";
 import { InstitutionalBreadcrumb } from "@features/institutional-auth/components/institutional-breadcrumb";
 import { requireInstitutionalUser } from "@features/institutional-auth/services/get-institutional-user.service";
@@ -30,10 +33,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return getInstitutionalMetadata("Detalle de solicitud de inscripción");
 }
 
-export default async function EnrollmentApplicationDetailPage({
-  params,
-  searchParams,
-}: EnrollmentApplicationDetailPageProps): Promise<React.ReactElement> {
+export default async function EnrollmentApplicationDetailPage({ params, searchParams }: EnrollmentApplicationDetailPageProps): Promise<ReactElement> {
   const [{ applicationId }, { returnTo }, user] = await Promise.all([params, searchParams, requireInstitutionalUser()]);
 
   if (!hasInstitutionalPermission(user, INSTITUTIONAL_PERMISSION.ENROLLMENT_APPLICATION_READ)) {
@@ -41,6 +41,7 @@ export default async function EnrollmentApplicationDetailPage({
   }
 
   const destination = getSafeReturnTo(returnTo, "/enrollment-applications");
+
   const application = await fetchInstitutionalEnrollmentApplicationById(user.institutionId, applicationId);
 
   if (!application) {
@@ -48,8 +49,11 @@ export default async function EnrollmentApplicationDetailPage({
   }
 
   const personalData = application.data?.personalData;
+
   const personalDataName = `${personalData?.firstName || ""} ${personalData?.lastName || ""}`.trim();
+
   const applicantName = application.applicantName || personalDataName || "Solicitante";
+
   const reviewSummary = {
     institutionId: user.institutionId,
     applicationId,
@@ -63,7 +67,11 @@ export default async function EnrollmentApplicationDetailPage({
     <PlatformPageShell
       title={applicantName}
       breadcrumb={
-        <InstitutionalBreadcrumb segmentLabels={{ [applicationId]: formatEnrollmentApplicationBreadcrumbLabel(application, applicantName) }} />
+        <InstitutionalBreadcrumb
+          segmentLabels={{
+            [applicationId]: "Detalle",
+          }}
+        />
       }
       actions={<PlatformPageIcon icon={ClipboardListIcon} />}
     >
@@ -83,6 +91,8 @@ export default async function EnrollmentApplicationDetailPage({
       <EnrollmentStatusCard
         application={application}
         showApplicantAlert={false}
+        showRequirementChanges
+        administrativeView
         scope={AcademicScope.INSTITUTIONAL}
         canManageCourses={
           hasTrainingPathPermission(user, INSTITUTIONAL_PERMISSION.ENROLLMENT_APPLICATION_COURSE_READ, application.trainingPathId ?? "") ||

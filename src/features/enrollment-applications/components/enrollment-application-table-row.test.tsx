@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 
 import { EnrollmentApplicationTableRow } from "@features/enrollment-applications/components/enrollment-application-table-row";
 import type { EnrollmentApplication } from "@features/enrollment-applications/types/enrollment-application.types";
@@ -45,6 +45,8 @@ describe("EnrollmentApplicationTableRow", () => {
       </table>,
     );
 
+    expect(screen.queryByText("Documentación incompleta")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Rechazada: ver motivo de rechazo" }));
     expect(screen.getByText("Documentación incompleta")).toBeInTheDocument();
     expect(screen.queryByText("Aprobar inscripción")).not.toBeInTheDocument();
   });

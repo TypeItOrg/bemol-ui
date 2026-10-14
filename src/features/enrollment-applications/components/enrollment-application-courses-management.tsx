@@ -1,39 +1,24 @@
 "use client";
 
-import { formatStudyPlanName } from "@features/academic/utils/study-plan-label.util";
-import { ActionForm } from "@common/components/action-form";
-import { safelyRunAction } from "@common/utils/safe-action.util";
+import { useState, type ReactElement } from "react";
 
-import * as React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { CircleAlertIcon, LoaderCircleIcon } from "lucide-react";
 
-import { Alert, AlertDescription } from "@common/components/ui/alert";
+import { useQueryClient } from "@tanstack/react-query";
+import { BookOpenIcon, EllipsisIcon } from "lucide-react";
+
 import { Badge } from "@common/components/ui/badge";
 import { Button } from "@common/components/ui/button";
-import {
-  AlertDialog,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@common/components/ui/alert-dialog";
-import { Field, FieldLabel } from "@common/components/ui/field";
-import { Textarea } from "@common/components/ui/textarea";
-import { COURSE_ENROLLMENT_MESSAGES } from "@features/course-enrollments/constants/course-enrollment.constants";
+import { Card, CardContent } from "@common/components/ui/card";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@common/components/ui/dropdown-menu";
+
 import { AcademicScope } from "@features/academic/utils/academic-scope.util";
-import { CourseEnrollmentAssignmentFields } from "@features/course-enrollments/components/course-enrollment-assignment-fields";
-import { validateEnrollmentAssignment } from "@features/course-enrollments/utils/course-enrollment-assignment-validation.util";
-import { enrollApplicationCourseAction, rejectApplicationCourseAction } from "@features/course-enrollments/actions/course-enrollment.actions";
-import {
-  enrollPlatformApplicationCourseAction,
-  rejectPlatformApplicationCourseAction,
-} from "@features/course-enrollments/actions/platform-course-enrollment.actions";
-import { fetchCourseEnrollmentOptions } from "@features/course-enrollments/services/course-enrollment-client.service";
-import { fetchPlatformCourseEnrollmentOptions } from "@features/course-enrollments/services/platform-course-enrollment-client.service";
-import type { CourseEnrollmentAssignmentOptions } from "@features/course-enrollments/types/course-enrollment-assignment-options.types";
+import { formatStudyPlanNameWithPrefix } from "@features/academic/utils/study-plan-label.util";
+import { EnrollmentApplicationCourseDialog } from "@features/enrollment-applications/components/enrollment-application-course-dialog";
+import { EnrollmentCourseAvailability } from "@features/enrollment-applications/components/enrollment-course-availability";
+import { EnrollmentStepCardHeader } from "@features/enrollment-applications/components/enrollment-step-card-header";
+import { RejectEnrollmentApplicationCourseDialog } from "@features/enrollment-applications/components/reject-enrollment-application-course-dialog";
 import type { EnrollmentApplicationCourse } from "@features/enrollment-applications/types/enrollment-application-course.types";
 
 type EnrollmentApplicationCoursesManagementProps = {
@@ -45,6 +30,7 @@ type EnrollmentApplicationCoursesManagementProps = {
   canReject: boolean;
   canReadWaitlist: boolean;
   readOnly?: boolean;
+  showAvailability?: boolean;
 };
 
 const STATUS_LABELS: Record<EnrollmentApplicationCourse["status"], string> = {
@@ -64,10 +50,20 @@ export function EnrollmentApplicationCoursesManagement({
   canReject,
   canReadWaitlist,
   readOnly = false,
-}: EnrollmentApplicationCoursesManagementProps): React.ReactElement | null {
+  showAvailability = false,
+}: EnrollmentApplicationCoursesManagementProps): ReactElement | null {
   const router = useRouter();
-  const [courseToEnroll, setCourseToEnroll] = React.useState<EnrollmentApplicationCourse>();
-  const [courseToReject, setCourseToReject] = React.useState<EnrollmentApplicationCourse>();
+
+  const queryClient = useQueryClient();
+
+  const [courseToEnroll, setCourseToEnroll] = useState<EnrollmentApplicationCourse>();
+
+  const [courseToReject, setCourseToReject] = useState<EnrollmentApplicationCourse>();
+
+  function handleResolved(): void {
+    void queryClient.invalidateQueries({ queryKey: ["course-enrollment-options", scope, institutionId] });
+    router.refresh();
+  }
 
   if (courses.length === 0) {
     return null;
@@ -79,63 +75,84 @@ export function EnrollmentApplicationCoursesManagement({
       : `/course-enrollments/${courseId}/waitlist`;
 
   return (
-    <section className="bg-muted/25 rounded-xl border p-5 md:p-6" aria-labelledby="application-courses-title">
-      <header className="mb-5 flex flex-col gap-1 border-b pb-5">
-        <h2 id="application-courses-title" className="text-base font-semibold">
-          Solicitudes de cursada
-        </h2>
-        <p className="text-muted-foreground text-sm">
-          {readOnly
+    <Card className="bg-muted/25 sm:[--card-spacing:--spacing(6)]" role="region" aria-labelledby="application-courses-title">
+      <EnrollmentStepCardHeader
+        icon={BookOpenIcon}
+        title="Solicitudes de cursada"
+        titleId="application-courses-title"
+        description={
+          readOnly
             ? "Consultá el estado de cada curso solicitado y cualquier motivo informado por la institución."
-            : "Gestioná cada curso de forma independiente después de aprobar la documentación."}
-        </p>
-      </header>
+            : "Gestioná cada curso de forma independiente después de aprobar la documentación."
+        }
+      />
 
-      <div className="grid gap-3">
-        {courses.map((course) => (
-          <article key={course.applicationCourseId} className="bg-background rounded-xl border p-4">
-            <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
-              <div className="min-w-0">
-                <div className="flex flex-wrap items-center gap-2">
-                  <h3 className="font-semibold">{course.academicSpaceName}</h3>
-                  <Badge variant={course.status === "ENROLLED" ? "success" : course.status === "REJECTED" ? "destructive" : "outline"}>
-                    {STATUS_LABELS[course.status]}
-                  </Badge>
-                </div>
-                <p className="text-muted-foreground mt-1 text-sm">
-                  {course.academicYear ? `Ciclo ${course.academicYear} · ` : ""}Plan {formatStudyPlanName(course)} ·{" "}
-                  {course.academicLevelName ?? "Sin nivel"}
-                  {course.instrumentName ? ` · ${course.instrumentName}` : ""}
-                </p>
-                {course.waitlistNumber ? (
+      <CardContent className="grid gap-3">
+        {courses.map((course) => {
+          const isPending = course.status === "PENDING" || course.status === "WAITLISTED";
+
+          const canEnrollCourse = !readOnly && canEnroll && isPending;
+
+          const canRejectCourse = !readOnly && canReject && isPending;
+
+          return (
+            <article key={course.applicationCourseId} className="bg-background @container/application-course rounded-xl border p-4">
+              <div className="grid grid-cols-1 gap-3 @md/application-course:grid-cols-[minmax(0,1fr)_auto] @md/application-course:items-start">
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h3 className="min-w-0 font-semibold break-words">{course.academicSpaceName}</h3>
+                    <Badge variant={getCourseStatusVariant(course.status)}>{STATUS_LABELS[course.status]}</Badge>
+                  </div>
                   <p className="text-muted-foreground mt-1 text-sm">
-                    Número histórico de espera: <span className="font-medium">{course.waitlistNumber}</span>
+                    {course.academicYear ? `Ciclo ${course.academicYear} · ` : ""}
+                    {formatStudyPlanNameWithPrefix(course)} · {course.academicLevelName ?? "Sin nivel"}
+                    {course.instrumentName ? ` · ${course.instrumentName}` : ""}
                   </p>
-                ) : null}
-                {course.resolutionReasonText ? <p className="text-destructive mt-1 text-sm">{course.resolutionReasonText}</p> : null}
-              </div>
+                  {course.waitlistNumber ? (
+                    <p className="text-muted-foreground mt-1 text-sm">
+                      Número histórico de espera: <span className="font-medium">{course.waitlistNumber}</span>
+                    </p>
+                  ) : null}
+                  {course.resolutionReasonText ? <p className="text-destructive mt-1 text-sm">{course.resolutionReasonText}</p> : null}
+                </div>
 
-              <div className="flex flex-wrap gap-2">
-                {canReadWaitlist ? (
-                  <Button asChild variant="outline" size="sm">
-                    <Link href={waitlistHref(course.courseId)}>Ver espera</Link>
-                  </Button>
-                ) : null}
-                {!readOnly && canEnroll && (course.status === "PENDING" || course.status === "WAITLISTED") ? (
-                  <Button size="sm" onClick={() => setCourseToEnroll(course)}>
-                    Inscribir
-                  </Button>
-                ) : null}
-                {!readOnly && canReject && (course.status === "PENDING" || course.status === "WAITLISTED") ? (
-                  <Button variant="outline" size="sm" onClick={() => setCourseToReject(course)}>
-                    Rechazar
-                  </Button>
-                ) : null}
+                <div className="flex shrink-0 items-center justify-end gap-2 empty:hidden">
+                  {canEnrollCourse ? (
+                    <Button size="lg" className="flex-1 @md/application-course:flex-none" onClick={() => setCourseToEnroll(course)}>
+                      Inscribir
+                    </Button>
+                  ) : null}
+                  {canReadWaitlist || canRejectCourse ? (
+                    <DropdownMenu modal={false}>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon-lg" aria-label={`Más acciones para ${course.academicSpaceName}`}>
+                          <EllipsisIcon aria-hidden="true" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-max min-w-48 p-1.5">
+                        {canReadWaitlist ? (
+                          <DropdownMenuItem asChild>
+                            <Link href={waitlistHref(course.courseId)} className="px-2.5 py-1.5">
+                              Ver lista de espera
+                            </Link>
+                          </DropdownMenuItem>
+                        ) : null}
+                        {canReadWaitlist && canRejectCourse ? <DropdownMenuSeparator /> : null}
+                        {canRejectCourse ? (
+                          <DropdownMenuItem variant="destructive" className="px-2.5 py-1.5" onSelect={() => setCourseToReject(course)}>
+                            Rechazar solicitud de cursada
+                          </DropdownMenuItem>
+                        ) : null}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  ) : null}
+                </div>
               </div>
-            </div>
-          </article>
-        ))}
-      </div>
+              {showAvailability ? <EnrollmentCourseAvailability courseId={course.courseId} institutionId={institutionId} scope={scope} /> : null}
+            </article>
+          );
+        })}
+      </CardContent>
 
       {!readOnly && courseToEnroll ? (
         <EnrollmentApplicationCourseDialog
@@ -149,7 +166,7 @@ export function EnrollmentApplicationCoursesManagement({
               setCourseToEnroll(undefined);
             }
           }}
-          onResolved={() => router.refresh()}
+          onResolved={handleResolved}
         />
       ) : null}
       {!readOnly && courseToReject ? (
@@ -164,234 +181,22 @@ export function EnrollmentApplicationCoursesManagement({
               setCourseToReject(undefined);
             }
           }}
-          onResolved={() => router.refresh()}
+          onResolved={handleResolved}
         />
       ) : null}
-    </section>
+    </Card>
   );
 }
 
-type EnrollmentApplicationCourseDialogProps = {
-  applicationId: string;
-  institutionId?: string;
-  scope?: AcademicScope;
-  course: EnrollmentApplicationCourse;
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onResolved: () => void;
-};
-
-export function EnrollmentApplicationCourseDialog({
-  applicationId,
-  institutionId,
-  scope = AcademicScope.INSTITUTIONAL,
-  course,
-  open,
-  onOpenChange,
-  onResolved,
-}: EnrollmentApplicationCourseDialogProps): React.ReactElement {
-  const [options, setOptions] = React.useState<CourseEnrollmentAssignmentOptions>();
-  const [loadError, setLoadError] = React.useState<string>();
-  const [optionsRevision, setOptionsRevision] = React.useState(0);
-  const isLoadingOptions = !options && !loadError;
-  const [state, formAction, isPending] = React.useActionState<{ error?: string; invalidDayIds?: string[] }, FormData>(async (_previous, formData) => {
-    if (!options) {
-      return { error: loadError ?? COURSE_ENROLLMENT_MESSAGES.LOADING_ASSIGNMENTS };
-    }
-
-    const validation = validateEnrollmentAssignment(formData, options);
-
-    if (!validation.ok) {
-      return { error: validation.message, invalidDayIds: validation.invalidDayIds };
-    }
-
-    const result = await safelyRunAction(
-      scope === AcademicScope.ADMIN && institutionId
-        ? enrollPlatformApplicationCourseAction(institutionId, applicationId, course.applicationCourseId, course.version, formData)
-        : enrollApplicationCourseAction(applicationId, course.applicationCourseId, course.version, formData),
-      COURSE_ENROLLMENT_MESSAGES.MUTATION_UNAVAILABLE,
-    );
-
-    if (!result.error) {
-      onOpenChange(false);
-      onResolved();
-    }
-
-    return result;
-  }, {});
-
-  React.useEffect(() => {
-    let active = true;
-    const pending =
-      scope === AcademicScope.ADMIN && institutionId
-        ? fetchPlatformCourseEnrollmentOptions(institutionId, course.courseId)
-        : fetchCourseEnrollmentOptions(course.courseId);
-    pending
-      .then((value) => {
-        if (active) {
-          const hasCapacity = value.classes.some((courseClass) =>
-            courseClass.days.some(
-              (day) =>
-                day.availableCapacity !== 0 &&
-                day.schedules.some((schedule) => value.format === "GRUPAL" || schedule.individualSlots.some((slot) => slot.available)),
-            ),
-          );
-
-          if (hasCapacity) {
-            setOptions(value);
-          } else {
-            setLoadError(COURSE_ENROLLMENT_MESSAGES.COURSE_WITHOUT_CAPACITY);
-          }
-        }
-      })
-      .catch((error: unknown) => {
-        if (active) {
-          setLoadError(error instanceof Error ? error.message : "No se pudieron cargar los horarios.");
-        }
-      });
-
-    return () => {
-      active = false;
-    };
-  }, [course.courseId, institutionId, scope, optionsRevision]);
-
-  if (!options) {
-    return (
-      <AlertDialog open={open} onOpenChange={onOpenChange}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            {loadError ? (
-              <CircleAlertIcon className="text-destructive size-6" aria-hidden="true" />
-            ) : (
-              <LoaderCircleIcon className="text-primary size-6 animate-spin motion-reduce:animate-none" aria-hidden="true" />
-            )}
-            <AlertDialogTitle>{loadError ? "No se puede iniciar la inscripción" : "Comprobando disponibilidad"}</AlertDialogTitle>
-            <AlertDialogDescription aria-live="polite">{loadError ?? COURSE_ENROLLMENT_MESSAGES.LOADING_ASSIGNMENTS}</AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <Button type="button" size="lg" onClick={() => onOpenChange(false)}>
-              {loadError ? "Entendido" : "Cancelar"}
-            </Button>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    );
+function getCourseStatusVariant(status: EnrollmentApplicationCourse["status"]): "success" | "destructive" | "outline" {
+  switch (status) {
+    case "ENROLLED":
+      return "success";
+    case "REJECTED":
+      return "destructive";
+    default:
+      return "outline";
   }
-
-  return (
-    <AlertDialog open={open} onOpenChange={(nextOpen) => (!isPending ? onOpenChange(nextOpen) : undefined)}>
-      <AlertDialogContent className="flex h-[min(42rem,calc(100dvh-2rem))] w-[calc(100%-2rem)] min-w-0 flex-col overflow-hidden p-0 sm:max-w-3xl">
-        <ActionForm action={formAction} className="flex min-h-0 min-w-0 flex-1 flex-col">
-          <AlertDialogHeader className="shrink-0 items-start border-b p-5 text-left">
-            <AlertDialogTitle className="text-left">Inscribir solicitud de cursada</AlertDialogTitle>
-            <AlertDialogDescription className="text-left">
-              {course.academicSpaceName} · {course.academicYear ? `Ciclo ${course.academicYear} · ` : ""}
-              {course.academicLevelName ?? "Sin nivel"}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-
-          <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-4 overflow-y-auto p-5" aria-busy={isLoadingOptions}>
-            {state.error ? (
-              <Alert variant="destructive">
-                <CircleAlertIcon />
-                <AlertDescription>{state.error}</AlertDescription>
-              </Alert>
-            ) : null}
-            {options ? (
-              <CourseEnrollmentAssignmentFields
-                key={`${course.courseId}-${optionsRevision}`}
-                options={options}
-                disabled={isPending}
-                invalidDayIds={state.invalidDayIds}
-              />
-            ) : null}
-          </div>
-          <AlertDialogFooter className="mx-0 mb-0 shrink-0 sm:flex-wrap">
-            <Button
-              type="button"
-              variant="outline"
-              size="lg"
-              disabled={isPending || isLoadingOptions}
-              onClick={() => {
-                setOptions(undefined);
-                setLoadError(undefined);
-                setOptionsRevision((value) => value + 1);
-              }}
-            >
-              Actualizar horarios
-            </Button>
-            <Button type="button" variant="outline" size="lg" disabled={isPending} onClick={() => onOpenChange(false)}>
-              Cancelar
-            </Button>
-            <Button type="submit" size="lg" disabled={isPending || !options}>
-              {isPending ? "Inscribiendo…" : "Confirmar inscripción"}
-            </Button>
-          </AlertDialogFooter>
-        </ActionForm>
-      </AlertDialogContent>
-    </AlertDialog>
-  );
 }
 
-function RejectEnrollmentApplicationCourseDialog({
-  applicationId,
-  institutionId,
-  scope = AcademicScope.INSTITUTIONAL,
-  course,
-  open,
-  onOpenChange,
-  onResolved,
-}: EnrollmentApplicationCourseDialogProps): React.ReactElement {
-  const [state, formAction, isPending] = React.useActionState(async (_previous: { error?: string }, formData: FormData) => {
-    const reason = formData.get("reason");
-    const normalizedReason = typeof reason === "string" ? reason : "";
-    const result = await safelyRunAction(
-      scope === AcademicScope.ADMIN && institutionId
-        ? rejectPlatformApplicationCourseAction(institutionId, applicationId, course.applicationCourseId, course.version, normalizedReason)
-        : rejectApplicationCourseAction(applicationId, course.applicationCourseId, course.version, normalizedReason),
-      COURSE_ENROLLMENT_MESSAGES.MUTATION_UNAVAILABLE,
-    );
-
-    if (!result.error) {
-      onOpenChange(false);
-      onResolved();
-    }
-
-    return result;
-  }, {});
-
-  return (
-    <AlertDialog open={open} onOpenChange={(nextOpen) => (!isPending ? onOpenChange(nextOpen) : undefined)}>
-      <AlertDialogContent>
-        <ActionForm action={formAction} className="space-y-4">
-          <AlertDialogHeader>
-            <AlertDialogTitle>Rechazar solicitud de cursada</AlertDialogTitle>
-            <AlertDialogDescription>
-              {course.academicSpaceName} · {course.academicYear ? `Ciclo ${course.academicYear} · ` : ""}Plan {formatStudyPlanName(course)}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          {state.error ? (
-            <Alert variant="destructive">
-              <CircleAlertIcon />
-              <AlertDescription>{state.error}</AlertDescription>
-            </Alert>
-          ) : null}
-          <Field>
-            <FieldLabel htmlFor="reason" required>
-              Motivo
-            </FieldLabel>
-            <Textarea id="reason" name="reason" maxLength={1000} required disabled={isPending} />
-          </Field>
-          <AlertDialogFooter>
-            <Button type="button" variant="outline" size="lg" disabled={isPending} onClick={() => onOpenChange(false)}>
-              Cancelar
-            </Button>
-            <Button type="submit" size="lg" variant="destructive" disabled={isPending}>
-              {isPending ? "Rechazando…" : "Rechazar solicitud"}
-            </Button>
-          </AlertDialogFooter>
-        </ActionForm>
-      </AlertDialogContent>
-    </AlertDialog>
-  );
-}
+export { EnrollmentApplicationCourseDialog } from "@features/enrollment-applications/components/enrollment-application-course-dialog";

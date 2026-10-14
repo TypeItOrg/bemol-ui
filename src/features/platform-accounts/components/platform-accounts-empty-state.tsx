@@ -1,10 +1,15 @@
+import type { ReactElement } from "react";
+
 import Link from "next/link";
+
 import { FingerprintIcon, PlusIcon, SearchIcon } from "lucide-react";
 
+import { ReturnToLink } from "@common/components/navigation/return-to-link";
 import { Button } from "@common/components/ui/button";
 import { EmptyMedia } from "@common/components/ui/empty";
-import { ReturnToLink } from "@common/components/navigation/return-to-link";
+import { DATA_TABLE_EMPTY_MESSAGES } from "@common/constants/data-table-empty.constants";
 import type { PaginatedResponse } from "@common/types/paginated-response.types";
+
 import type { PlatformAccountAdmin } from "@features/platform-accounts/types/platform-account-admin.types";
 
 type PlatformAccountsEmptyStateProps = {
@@ -14,7 +19,7 @@ type PlatformAccountsEmptyStateProps = {
   size: number;
 };
 
-export function PlatformAccountsEmptyState({ data, search, enabled, size }: PlatformAccountsEmptyStateProps): React.ReactElement {
+export function PlatformAccountsEmptyState({ data, search, enabled, size }: PlatformAccountsEmptyStateProps): ReactElement {
   const hasFilters = search.trim() !== "" || enabled !== undefined;
 
   if (data.totalItems > 0) {
@@ -40,10 +45,8 @@ export function PlatformAccountsEmptyState({ data, search, enabled, size }: Plat
         <EmptyMedia className="mb-4" variant="icon">
           <SearchIcon className="size-5" />
         </EmptyMedia>
-        <h3 className="text-foreground text-base font-semibold">No se encontraron resultados</h3>
-        <p className="text-muted-foreground mt-1.5 max-w-sm text-sm">
-          No encontramos ningún administrador que coincida con los criterios de búsqueda seleccionados.
-        </p>
+        <h3 className="text-foreground text-base font-semibold">No se encontraron administradores</h3>
+        <p className="text-muted-foreground mt-1.5 max-w-sm text-sm">{DATA_TABLE_EMPTY_MESSAGES.FILTERED_DESCRIPTION}</p>
       </div>
     );
   }

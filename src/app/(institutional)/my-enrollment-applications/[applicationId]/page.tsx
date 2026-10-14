@@ -1,11 +1,15 @@
+import type { ReactElement } from "react";
+
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+
 import { ClipboardListIcon, FilePenLineIcon } from "lucide-react";
 
 import { Button } from "@common/components/ui/button";
 import type { QueryParamValue } from "@common/types/query-param.types";
 import { getSafeReturnTo } from "@common/utils/return-to.util";
+
 import { EnrollmentWizard } from "@features/enrollment-applications/components/EnrollmentWizard";
 import {
   fetchEnrollmentApplicationById,
@@ -34,9 +38,11 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function MyEnrollmentApplicationDetailPage({
   params,
   searchParams,
-}: MyEnrollmentApplicationDetailPageProps): Promise<React.ReactElement> {
+}: MyEnrollmentApplicationDetailPageProps): Promise<ReactElement> {
   const [{ applicationId }, { returnTo }] = await Promise.all([params, searchParams]);
+
   const destination = getSafeReturnTo(returnTo, "/my-enrollment-applications");
+
   const application = await fetchEnrollmentApplicationById(applicationId).catch(() => null);
 
   if (!application) {
@@ -44,10 +50,15 @@ export default async function MyEnrollmentApplicationDetailPage({
   }
 
   const isEditable = application.status === ENROLLMENT_APPLICATION_STATUS.DRAFT;
+
   const detailLabel = isEditable ? "Continuar inscripción" : "Detalle de inscripción";
-  const detailContext = [application.trainingPathName, application.academicYearName].filter(Boolean).join(" ");
-  const breadcrumbLabel = detailContext ? `${detailLabel} · ${detailContext}` : detailLabel;
+
+  const detailContext = [application.trainingPathName, application.academicYear].filter(Boolean).join(" ");
+
+  const breadcrumbLabel = !isEditable && detailContext ? `${detailLabel} · ${detailContext}` : detailLabel;
+
   const PageIcon = isEditable ? FilePenLineIcon : ClipboardListIcon;
+
   const [shifts, courses] = await Promise.all([
     isEditable ? fetchEnrollmentApplicationShifts(applicationId) : Promise.resolve([]),
     isEditable ? fetchEnrollmentApplicationCourses(applicationId) : Promise.resolve({ items: [], page: 0, size: 0, totalItems: 0, totalPages: 0 }),

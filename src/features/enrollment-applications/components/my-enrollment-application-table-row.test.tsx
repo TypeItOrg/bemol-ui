@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 
 import { MyEnrollmentApplicationTableRow } from "@features/enrollment-applications/components/my-enrollment-application-table-row";
 import type { EnrollmentApplication } from "@features/enrollment-applications/types/enrollment-application.types";
@@ -43,11 +43,13 @@ describe("MyEnrollmentApplicationTableRow", () => {
       </table>,
     );
 
+    expect(screen.queryByText("Documentación incompleta")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Rechazada: ver motivo de rechazo" }));
     expect(screen.getByText("Documentación incompleta")).toBeInTheDocument();
     expect(screen.getByText("Rechazada")).toBeInTheDocument();
   });
 
-  it("shows a placeholder when the application was approved", () => {
+  it("shows the approved status without a rejection reason", () => {
     render(
       <table>
         <tbody>
@@ -57,7 +59,8 @@ describe("MyEnrollmentApplicationTableRow", () => {
     );
 
     expect(screen.queryByText("Documentación incompleta")).not.toBeInTheDocument();
-    expect(screen.getByText("No corresponde")).toBeInTheDocument();
+    expect(screen.getByText("Confirmada definitivamente")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /ver motivo de rechazo/ })).not.toBeInTheDocument();
   });
 
   it("shows the training path instead of the study plan", () => {

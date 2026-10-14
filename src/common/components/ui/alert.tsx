@@ -1,5 +1,7 @@
-import * as React from "react";
+import type { ComponentProps } from "react";
+
 import { cva, type VariantProps } from "class-variance-authority";
+import { CircleAlertIcon } from "lucide-react";
 
 import { cn } from "@common/utils/cn.util";
 
@@ -20,11 +22,23 @@ const alertVariants = cva(
   },
 );
 
-function Alert({ className, variant, ...props }: React.ComponentProps<"div"> & VariantProps<typeof alertVariants>) {
-  return <div data-slot="alert" role="alert" className={cn(alertVariants({ variant }), className)} {...props} />;
+function Alert({ className, variant, children, ...props }: ComponentProps<"div"> & VariantProps<typeof alertVariants>) {
+  return (
+    <div data-slot="alert" role="alert" className={cn(alertVariants({ variant }), className)} {...props}>
+      {variant === "destructive" ? (
+        // Preserve explicit icons, including those rendered conditionally or through a fragment.
+        <CircleAlertIcon
+          data-slot="alert-default-icon"
+          aria-hidden="true"
+          className="group-has-[>svg:not([data-slot=alert-default-icon])]/alert:hidden"
+        />
+      ) : null}
+      {children}
+    </div>
+  );
 }
 
-function AlertTitle({ className, ...props }: React.ComponentProps<"div">) {
+function AlertTitle({ className, ...props }: ComponentProps<"div">) {
   return (
     <div
       data-slot="alert-title"
@@ -34,7 +48,7 @@ function AlertTitle({ className, ...props }: React.ComponentProps<"div">) {
   );
 }
 
-function AlertDescription({ className, ...props }: React.ComponentProps<"div">) {
+function AlertDescription({ className, ...props }: ComponentProps<"div">) {
   return (
     <div
       data-slot="alert-description"
@@ -47,8 +61,8 @@ function AlertDescription({ className, ...props }: React.ComponentProps<"div">) 
   );
 }
 
-function AlertAction({ className, ...props }: React.ComponentProps<"div">) {
+function AlertAction({ className, ...props }: ComponentProps<"div">) {
   return <div data-slot="alert-action" className={cn("absolute top-2 right-2", className)} {...props} />;
 }
 
-export { Alert, AlertTitle, AlertDescription, AlertAction };
+export { Alert, AlertAction, AlertDescription, AlertTitle };

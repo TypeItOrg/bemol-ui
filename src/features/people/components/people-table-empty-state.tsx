@@ -1,11 +1,15 @@
-import * as React from "react";
+import type { ReactElement, ReactNode } from "react";
+
 import Link from "next/link";
+
 import { Loader2Icon, PlusIcon, SearchIcon, UserIcon } from "lucide-react";
 
 import { ReturnToLink } from "@common/components/navigation/return-to-link";
 import { Button } from "@common/components/ui/button";
 import { EmptyMedia } from "@common/components/ui/empty";
+import { DATA_TABLE_EMPTY_MESSAGES } from "@common/constants/data-table-empty.constants";
 import type { PaginationQuery } from "@common/types/pagination-query.types";
+
 import { PeopleScope, type PeopleScope as PeopleScopeType } from "@features/people/utils/people-scope.util";
 
 type PeopleTableEmptyStateProps = Pick<PaginationQuery, "search" | "size"> & {
@@ -24,8 +28,8 @@ export function PeopleTableEmptyState({
   search,
   size,
   totalItems,
-}: PeopleTableEmptyStateProps): React.ReactElement {
-  let content: React.ReactNode;
+}: PeopleTableEmptyStateProps): ReactElement {
+  let content: ReactNode;
 
   if (totalItems > 0) {
     content = (
@@ -50,10 +54,8 @@ export function PeopleTableEmptyState({
         <EmptyMedia className="mb-4" variant="icon">
           <SearchIcon className="size-5" />
         </EmptyMedia>
-        <h3 className="text-foreground text-base font-semibold">No se encontraron resultados</h3>
-        <p className="text-muted-foreground mt-1.5 max-w-sm text-sm">
-          No encontramos ningún usuario que coincida con los criterios de búsqueda seleccionados.
-        </p>
+        <h3 className="text-foreground text-base font-semibold">No se encontraron usuarios</h3>
+        <p className="text-muted-foreground mt-1.5 max-w-sm text-sm">{DATA_TABLE_EMPTY_MESSAGES.FILTERED_DESCRIPTION}</p>
       </div>
     );
   } else {

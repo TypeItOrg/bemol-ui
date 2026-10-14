@@ -1,6 +1,9 @@
 "use client";
 
+import type { ReactElement } from "react";
+
 import Link from "next/link";
+
 import { KeyRoundIcon, Loader2Icon, SearchIcon, UserLockIcon, UsersIcon } from "lucide-react";
 
 import { ReturnToLink } from "@common/components/navigation/return-to-link";
@@ -10,6 +13,8 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@common/co
 import { useDataTableNavigation } from "@common/components/ui/data-table-navigation";
 import { EmptyMedia } from "@common/components/ui/empty";
 import type { PaginatedResponse } from "@common/types/paginated-response.types";
+import { getDataTableEmptyContent } from "@common/utils/data-table-empty-content.util";
+
 import { InstitutionRolesPagination } from "@features/roles/components/institution-roles-pagination";
 import type { InstitutionRole } from "@features/roles/types/institution-role.types";
 
@@ -19,8 +24,23 @@ type InstitutionRolesTablePresentationProps = {
   canUpdate: boolean;
 };
 
-export function InstitutionRolesTablePresentation({ roles, search, canUpdate }: InstitutionRolesTablePresentationProps): React.ReactElement {
-  const { isPending } = useDataTableNavigation();
+export function InstitutionRolesTablePresentation({ roles, search, canUpdate }: InstitutionRolesTablePresentationProps): ReactElement {
+  const { isPending, navigate } = useDataTableNavigation();
+
+  const hasFilters = search.trim() !== "";
+
+  const hasItemsOnOtherPages = roles.totalItems > 0;
+
+  const EmptyIcon = hasFilters && !hasItemsOnOtherPages ? SearchIcon : UserLockIcon;
+
+  const emptyContent = getDataTableEmptyContent({
+    hasItemsOnOtherPages,
+    hasFilters,
+    pageTitle: "No hay roles en esta página",
+    filteredTitle: "No se encontraron roles",
+    emptyTitle: "No hay roles registrados",
+    emptyDescription: "Todavía no hay roles cargados en esta institución.",
+  });
 
   return (
     <div className="flex h-full flex-col justify-between gap-4">
@@ -74,16 +94,15 @@ export function InstitutionRolesTablePresentation({ roles, search, canUpdate }: 
         ) : (
           <div className="bg-muted/25 text-muted-foreground flex h-full flex-1 flex-col items-center justify-center rounded-lg border px-4 py-12 text-center">
             <EmptyMedia className="mb-4" variant="icon">
-              <SearchIcon className="size-5" />
+              <EmptyIcon className="size-5" />
             </EmptyMedia>
-            <h3 className="text-foreground text-base font-semibold">
-              {search.trim() !== "" ? "No se encontraron resultados" : "No hay roles registrados"}
-            </h3>
-            <p className="text-muted-foreground mt-1.5 max-w-sm text-sm">
-              {search.trim() !== ""
-                ? "No encontramos ningún rol que coincida con los criterios de búsqueda seleccionados."
-                : "Todavía no hay roles cargados en esta institución."}
-            </p>
+            <h3 className="text-foreground text-base font-semibold">{emptyContent.title}</h3>
+            <p className="text-muted-foreground mt-1.5 max-w-sm text-sm">{emptyContent.description}</p>
+            {hasItemsOnOtherPages ? (
+              <Button type="button" variant="outline" size="sm" className="mt-6" onClick={() => navigate({ page: "0" })}>
+                Volver a la primera página
+              </Button>
+            ) : null}
           </div>
         )}
 

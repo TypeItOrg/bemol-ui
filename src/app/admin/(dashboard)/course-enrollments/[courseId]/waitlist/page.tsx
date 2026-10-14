@@ -1,13 +1,19 @@
+import type { ReactElement } from "react";
+
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import { PlatformBreadcrumb } from "@features/platform-auth/components/platform-breadcrumb";
-import { requirePlatformAccount } from "@features/platform-auth/services/get-platform-account.service";
-import { fetchPlatformCourseWaitlist } from "@features/course-enrollments/services/course-enrollment.service";
+import { ClipboardListIcon } from "lucide-react";
+
+import { DataTableNavigationProvider } from "@common/components/ui/data-table-navigation";
+
 import { CourseWaitlistTable } from "@features/course-enrollments/components/course-waitlist-table";
+import { fetchCourseWaitlistOptions, fetchPlatformCourseWaitlist } from "@features/course-enrollments/services/course-enrollment.service";
+import { parseCourseWaitlistFilters } from "@features/course-enrollments/utils/course-waitlist-filters.util";
+import { PlatformBreadcrumb } from "@features/platform-auth/components/platform-breadcrumb";
 import { PlatformPageIcon } from "@features/platform-auth/components/platform-page-icon";
 import { PlatformPageShell } from "@features/platform-auth/components/platform-page-shell";
-import { ClipboardListIcon } from "lucide-react";
+import { requirePlatformAccount } from "@features/platform-auth/services/get-platform-account.service";
 
 export const metadata: Metadata = { title: "Lista de espera" };
 
@@ -16,18 +22,26 @@ export default async function PlatformCourseWaitlistPage({
   searchParams,
 }: {
   params: Promise<{ courseId: string }>;
-  searchParams: Promise<{ institutionId?: string }>;
-}): Promise<React.ReactElement> {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}): Promise<ReactElement> {
   await requirePlatformAccount();
-  const [{ courseId }, { institutionId }] = await Promise.all([params, searchParams]);
 
-  if (!institutionId) {
+  const [{ courseId }, query] = await Promise.all([params, searchParams]);
+
+  const institutionId = query.institutionId;
+
+  const parsed = parseCourseWaitlistFilters(query);
+
+  if (typeof institutionId !== "string" || !institutionId || !parsed.success) {
     notFound();
   }
 
-  const entries = await fetchPlatformCourseWaitlist(institutionId, courseId);
+  const [entries, options] = await Promise.all([
+    fetchPlatformCourseWaitlist(institutionId, courseId, parsed.data),
+    fetchCourseWaitlistOptions("admin", institutionId, courseId),
+  ]);
 
-  if (!entries) {
+  if (!entries || !options) {
     notFound();
   }
 
@@ -36,14 +50,25 @@ export default async function PlatformCourseWaitlistPage({
       title="Lista de espera"
       breadcrumb={
         <PlatformBreadcrumb
-          hiddenSegments={[courseId]}
-          segmentLabels={{ "course-enrollments": "Cursos" }}
-          segmentHrefs={{ "course-enrollments": "/admin/courses" }}
+          segmentLabels={{ "course-enrollments": "Cursos", [courseId]: options.courseName }}
+          segmentHrefs={{
+            "course-enrollments": "/admin/courses",
+            [courseId]: `/admin/institutions/${institutionId}/academic/courses/${courseId}`,
+          }}
         />
       }
       actions={<PlatformPageIcon icon={ClipboardListIcon} />}
     >
-      <CourseWaitlistTable entries={entries} institutionId={institutionId} scope="admin" canEnroll />
+      <DataTableNavigationProvider>
+        <CourseWaitlistTable
+          entries={entries}
+          filters={parsed.data}
+          preferredShifts={options.preferredShifts}
+          institutionId={institutionId}
+          scope="admin"
+          canEnroll
+        />
+      </DataTableNavigationProvider>
     </PlatformPageShell>
   );
 }

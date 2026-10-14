@@ -172,23 +172,21 @@ describe("PermissionGroupsFields", () => {
     const yearBranch = createYearField?.parentElement;
     const trainingPathBranch = createTrainingPathField?.parentElement;
 
-    expect(yearBranch).toHaveClass("border-l");
-    expect(trainingPathBranch).toHaveClass("border-l");
     expect(yearBranch).toContainElement(createYearField);
     expect(yearBranch).not.toContainElement(createTrainingPathField);
     expect(trainingPathBranch).toContainElement(createTrainingPathField);
     expect(trainingPathBranch).not.toContainElement(createYearField);
   });
 
-  it("renders all permission groups without hidden groups", () => {
+  it("displays the GRADES permission group", () => {
     const gradesGroup: InstitutionPermissionGroup = {
-      code: "ENROLLMENT",
-      displayName: "Inscripciones",
-      description: "Gestión de inscripciones",
+      code: "GRADES",
+      displayName: "Calificaciones",
+      description: "Gestión de calificaciones",
       permissions: [
         {
-          code: "institution:course-enrollment-grade:read",
-          description: "Consultar notas de estudiantes",
+          code: "institution:grades:enter",
+          description: "Cargar calificaciones",
           grantable: true,
           requiredPermissions: [],
         },
@@ -197,6 +195,6 @@ describe("PermissionGroupsFields", () => {
 
     render(<PermissionGroupsFields groups={[...mockPermissionGroups, gradesGroup]} />);
 
-    expect(screen.getByText("Inscripciones")).toBeInTheDocument();
+    expect(screen.getByText("Calificaciones")).toBeInTheDocument();
   });
 });

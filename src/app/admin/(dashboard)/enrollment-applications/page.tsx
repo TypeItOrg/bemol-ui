@@ -1,10 +1,13 @@
-import { AcademicScope } from "@features/academic/utils/academic-scope.util";
+import { Suspense, type ReactElement } from "react";
+
 import type { Metadata } from "next";
-import { Suspense } from "react";
+
 import { ClipboardListIcon } from "lucide-react";
 
 import { DataTableNavigationProvider } from "@common/components/ui/data-table-navigation";
+
 import { fetchTrainingPaths } from "@features/academic/services/academic.service";
+import { AcademicScope } from "@features/academic/utils/academic-scope.util";
 import { EnrollmentApplicationFilters } from "@features/enrollment-applications/components/enrollment-application-filters";
 import { EnrollmentApplicationTableContainer } from "@features/enrollment-applications/components/enrollment-application-table";
 import { EnrollmentApplicationTableSkeleton } from "@features/enrollment-applications/components/enrollment-application-table-skeleton";
@@ -23,11 +26,27 @@ export default async function PlatformEnrollmentApplicationsPage({
   searchParams,
 }: {
   searchParams: Promise<EnrollmentApplicationSearchParams>;
-}): Promise<React.ReactElement> {
+}): Promise<ReactElement> {
   const resolvedSearchParams = await searchParams;
-  const { page, size, status, trainingPathId, open, pendingDocuments } = parseEnrollmentApplicationPaginationParams(resolvedSearchParams);
-  const dataPromise = fetchPlatformEnrollmentApplications({ page, size, status, trainingPathId, open, pendingDocuments });
-  const { items: trainingPaths } = await fetchTrainingPaths(AcademicScope.ADMIN, undefined, { active: true, size: 100, sort: "name,asc" });
+
+  const { page, size, status, trainingPathId, open, pendingDocuments, pendingCourses } =
+    parseEnrollmentApplicationPaginationParams(resolvedSearchParams);
+
+  const dataPromise = fetchPlatformEnrollmentApplications({
+    page,
+    size,
+    status,
+    trainingPathId,
+    open,
+    pendingDocuments,
+    pendingCourses,
+  });
+
+  const { items: trainingPaths } = await fetchTrainingPaths(AcademicScope.ADMIN, undefined, {
+    active: true,
+    size: 100,
+    sort: "name,asc",
+  });
 
   return (
     <PlatformPageShell title="Solicitudes de inscripción" breadcrumb={<PlatformBreadcrumb />} actions={<PlatformPageIcon icon={ClipboardListIcon} />}>
@@ -37,6 +56,7 @@ export default async function PlatformEnrollmentApplicationsPage({
           trainingPathId={trainingPathId}
           open={open}
           pendingDocuments={pendingDocuments}
+          pendingCourses={pendingCourses}
           canFilterDocuments={true}
           trainingPaths={trainingPaths}
           size={size}
@@ -46,7 +66,7 @@ export default async function PlatformEnrollmentApplicationsPage({
             page={page}
             size={size}
             status={status}
-            hasFilters={Boolean(status || trainingPathId || open || pendingDocuments)}
+            hasFilters={Boolean(status || trainingPathId || open || pendingDocuments || pendingCourses !== undefined)}
             dataPromise={dataPromise}
             canApprove
             canReject

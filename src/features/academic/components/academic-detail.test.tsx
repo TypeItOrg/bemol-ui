@@ -1,8 +1,3 @@
-jest.mock("next/navigation", () => ({
-  usePathname: () => "/training-paths/2d9ec931-453c-4778-86a9-dc40a06d0247",
-  useSearchParams: () => new URLSearchParams(),
-}));
-
 import { render, screen, within } from "@testing-library/react";
 
 import { AcademicDetail } from "@features/academic/components/academic-detail";
@@ -10,6 +5,11 @@ import { AcademicResource } from "@features/academic/types/academic-resource.typ
 import type { Course } from "@features/academic/types/course.types";
 import type { StudyPlan } from "@features/academic/types/study-plan.types";
 import type { TrainingPath } from "@features/academic/types/training-path.types";
+
+jest.mock("next/navigation", () => ({
+  usePathname: () => "/training-paths/2d9ec931-453c-4778-86a9-dc40a06d0247",
+  useSearchParams: () => new URLSearchParams(),
+}));
 
 const STUDY_PLAN: StudyPlan = {
   id: "019f9c3d-9663-77da-a21b-5c811c040616",
@@ -168,7 +168,11 @@ describe("AcademicDetail", () => {
     { effectiveFrom: null, effectiveTo: null, expected: "Sin período definido" },
     { effectiveFrom: "2026-01-01", effectiveTo: null, expected: "Desde 01/01/2026" },
     { effectiveFrom: null, effectiveTo: "2026-12-31", expected: "Hasta 31/12/2026" },
-    { effectiveFrom: "2026-01-01", effectiveTo: "2026-12-31", expected: "Del 01/01/2026 al 31/12/2026" },
+    {
+      effectiveFrom: "2026-01-01",
+      effectiveTo: "2026-12-31",
+      expected: "Del 01/01/2026 al 31/12/2026",
+    },
   ])("shows study-plan validity as $expected", ({ effectiveFrom, effectiveTo, expected }) => {
     render(<AcademicDetail item={{ ...STUDY_PLAN, effectiveFrom, effectiveTo }} resource={AcademicResource.STUDY_PLAN} basePath="" canEdit />);
 
@@ -178,7 +182,7 @@ describe("AcademicDetail", () => {
     expect(validity).toHaveTextContent(expected);
   });
 
-  it("renders course summary and classes section with styled icon, teachers, days, period, cupo, and schedules", () => {
+  it("renders course summary and classes section with styled icon, teachers, days, capacity and schedules", () => {
     render(<AcademicDetail item={COURSE} resource={AcademicResource.COURSE} basePath="" canEdit />);
 
     const info = screen.getByRole("region", { name: "Información del curso" });
@@ -193,7 +197,9 @@ describe("AcademicDetail", () => {
     expect(within(classesRegion).getByText("Clase 1")).toBeInTheDocument();
     expect(within(classesRegion).getByText("Ana Garcia")).toBeInTheDocument();
     expect(within(classesRegion).getByText("Lunes")).toBeInTheDocument();
-    expect(within(classesRegion).getByText("60 min")).toBeInTheDocument();
+    expect(within(classesRegion).getByText("Total:")).toBeInTheDocument();
+    expect(within(classesRegion).getByText("Restantes:")).toBeInTheDocument();
+    expect(within(classesRegion).getByText("No disponible")).toBeInTheDocument();
     expect(within(classesRegion).getByText("4")).toBeInTheDocument();
     expect(within(classesRegion).getByText("08:00 a 12:00")).toBeInTheDocument();
   });
@@ -201,7 +207,12 @@ describe("AcademicDetail", () => {
   it("shows the associated instrument for an instrumental course and a placeholder otherwise", () => {
     const { rerender } = render(
       <AcademicDetail
-        item={{ ...COURSE, academicSpaceInstrumental: true, instrumentId: "instrument-1", instrumentName: "Piano" }}
+        item={{
+          ...COURSE,
+          academicSpaceInstrumental: true,
+          instrumentId: "instrument-1",
+          instrumentName: "Piano",
+        }}
         resource={AcademicResource.COURSE}
         basePath=""
         canEdit

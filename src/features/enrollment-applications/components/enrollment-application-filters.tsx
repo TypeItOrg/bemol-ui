@@ -1,12 +1,15 @@
 "use client";
 
+import type { ReactElement } from "react";
+
 import { DataTableFilters, type DataTableSelectFilter } from "@common/components/ui/data-table-filters";
+
 import type { TrainingPath } from "@features/academic/types/training-path.types";
-import type { EnrollmentApplicationStatus } from "@features/enrollment-applications/types/enrollment-application-status.types";
 import {
   ENROLLMENT_APPLICATION_FILTER_MESSAGES,
   ENROLLMENT_APPLICATION_STATUS_OPTIONS,
 } from "@features/enrollment-applications/constants/enrollment-application.constants";
+import type { EnrollmentApplicationStatus } from "@features/enrollment-applications/types/enrollment-application-status.types";
 
 const ALL_STATUSES = "all";
 
@@ -22,6 +25,7 @@ type EnrollmentApplicationFiltersProps = {
   trainingPathId?: string;
   open?: boolean;
   pendingDocuments?: boolean;
+  pendingCourses?: boolean;
   canFilterDocuments?: boolean;
   trainingPaths?: readonly TrainingPath[];
 };
@@ -32,9 +36,10 @@ export function EnrollmentApplicationFilters({
   trainingPathId,
   open,
   pendingDocuments,
+  pendingCourses,
   canFilterDocuments = false,
   trainingPaths,
-}: EnrollmentApplicationFiltersProps): React.ReactElement {
+}: EnrollmentApplicationFiltersProps): ReactElement {
   const statusFilter: DataTableSelectFilter = {
     defaultValue: ALL_STATUSES,
     label: "Estado",
@@ -43,7 +48,20 @@ export function EnrollmentApplicationFilters({
     value: status ?? ALL_STATUSES,
   };
 
-  const selectFilters: DataTableSelectFilter[] = [statusFilter];
+  const selectFilters: DataTableSelectFilter[] = [
+    statusFilter,
+    {
+      defaultValue: "all",
+      label: "Resolución de cursos",
+      name: "pendingCourses",
+      options: [
+        { label: "Todos los cursos", value: "all" },
+        { label: "Cursos pendientes", value: "true" },
+        { label: "Cursos resueltos", value: "false" },
+      ],
+      value: pendingCourses === undefined ? "all" : String(pendingCourses),
+    },
+  ];
 
   if (canFilterDocuments) {
     selectFilters.push({
@@ -57,6 +75,7 @@ export function EnrollmentApplicationFilters({
       value: pendingDocuments ? "true" : "all",
     });
   }
+
   if (trainingPaths) {
     selectFilters.push({
       defaultValue: ALL_TRAINING_PATHS,
@@ -64,9 +83,17 @@ export function EnrollmentApplicationFilters({
       name: "trainingPathId",
       options: [
         { label: "Todos los trayectos", value: ALL_TRAINING_PATHS },
-        ...trainingPaths.map((trainingPath) => ({ label: trainingPath.name, value: trainingPath.id })),
+        ...trainingPaths.map((trainingPath) => ({
+          label: trainingPath.name,
+          value: trainingPath.id,
+        })),
         ...(trainingPathId && !trainingPaths.some((trainingPath) => trainingPath.id === trainingPathId)
-          ? [{ label: ENROLLMENT_APPLICATION_FILTER_MESSAGES.UNAVAILABLE_TRAINING_PATH, value: trainingPathId }]
+          ? [
+              {
+                label: ENROLLMENT_APPLICATION_FILTER_MESSAGES.UNAVAILABLE_TRAINING_PATH,
+                value: trainingPathId,
+              },
+            ]
           : []),
       ],
       value: trainingPathId ?? ALL_TRAINING_PATHS,

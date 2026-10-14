@@ -1,6 +1,6 @@
 "use client";
 
-import * as React from "react";
+import { useCallback, type ReactElement } from "react";
 
 import { AsyncDropdown } from "@common/components/ui/async-dropdown";
 import type { PaginatedResponse } from "@common/types/paginated-response.types";
@@ -17,6 +17,7 @@ export function DocumentDefinitionPicker({
   applicationId,
   forTrainingPathCreation = false,
   value,
+  selectedValues,
   onSelect,
   disabled = false,
 }: {
@@ -26,28 +27,41 @@ export function DocumentDefinitionPicker({
   applicationId?: string;
   forTrainingPathCreation?: boolean;
   value?: DocumentDefinition;
+  selectedValues?: readonly string[];
   onSelect: (item: DocumentDefinition) => void;
   disabled?: boolean;
-}): React.ReactElement {
-  const fetchPage = React.useCallback(
+}): ReactElement {
+  const fetchPage = useCallback(
     async ({ page, search, size, signal }: { page: number; search: string; size: number; signal?: AbortSignal }) => {
-      const query = new URLSearchParams({ page: String(page), size: String(size), search, active: "true" });
+      const query = new URLSearchParams({
+        page: String(page),
+        size: String(size),
+        search,
+        active: "true",
+      });
+
       if (forTrainingPathCreation) {
         query.set("forTrainingPathCreation", "true");
       }
+
       if (applicationId) {
         query.set("applicationId", applicationId);
       }
+
       if (trainingPathId) {
         query.set("trainingPathId", trainingPathId);
       }
 
       const data = await fetchDocumentCatalog<PaginatedResponse<DocumentDefinition>>(scope, institutionId, `?${query}`, signal);
 
-      return { items: data.items, nextPage: data.page + 1 < data.totalPages ? data.page + 1 : null };
+      return {
+        items: data.items,
+        nextPage: data.page + 1 < data.totalPages ? data.page + 1 : null,
+      };
     },
     [scope, institutionId, trainingPathId, applicationId, forTrainingPathCreation],
   );
+
   return (
     <FormField name="document-definition" label="Documento del catálogo" required>
       <AsyncDropdown<DocumentDefinition>
@@ -55,6 +69,13 @@ export function DocumentDefinitionPicker({
         aria-required
         disabled={disabled}
         value={value?.id}
+        selectedValues={selectedValues}
+        selectedLabel={
+          selectedValues?.length
+            ? `${selectedValues.length} ${selectedValues.length === 1 ? "documento seleccionado" : "documentos seleccionados"}`
+            : undefined
+        }
+        closeOnSelect={selectedValues === undefined}
         defaultOption={value ? { value: value.id, label: value.name } : undefined}
         queryKey={["document-definitions", scope, institutionId, trainingPathId, applicationId, forTrainingPathCreation]}
         fetchPage={fetchPage}

@@ -1,8 +1,11 @@
+import { Suspense, type ReactElement } from "react";
+
 import type { Metadata } from "next";
-import { Suspense } from "react";
+
 import { ClipboardListIcon } from "lucide-react";
 
 import { DataTableNavigationProvider } from "@common/components/ui/data-table-navigation";
+
 import { EnrollmentApplicationFilters } from "@features/enrollment-applications/components/enrollment-application-filters";
 import { EnrollmentApplicationTableSkeleton } from "@features/enrollment-applications/components/enrollment-application-table-skeleton";
 import { MyEnrollmentApplicationTableContainer } from "@features/enrollment-applications/components/my-enrollment-application-table";
@@ -27,7 +30,7 @@ export default async function MyEnrollmentApplicationsPage({
   searchParams,
 }: {
   searchParams: Promise<EnrollmentApplicationSearchParams>;
-}): Promise<React.ReactElement> {
+}): Promise<ReactElement> {
   const user = await requireInstitutionalUser();
 
   if (!canViewOwnEnrollmentApplications(user)) {
@@ -35,15 +38,23 @@ export default async function MyEnrollmentApplicationsPage({
   }
 
   const resolvedSearchParams = await searchParams;
-  const { page, size, status } = parseEnrollmentApplicationPaginationParams(resolvedSearchParams);
-  const dataPromise = fetchMyEnrollmentApplications(user.institutionId, { page, size, status });
+
+  const { page, size, status, pendingCourses } = parseEnrollmentApplicationPaginationParams(resolvedSearchParams);
+
+  const dataPromise = fetchMyEnrollmentApplications(user.institutionId, { page, size, status, pendingCourses });
 
   return (
     <PlatformPageShell title="Mis inscripciones" breadcrumb={<InstitutionalBreadcrumb />} actions={<PlatformPageIcon icon={ClipboardListIcon} />}>
       <DataTableNavigationProvider>
-        <EnrollmentApplicationFilters status={status} size={size} />
+        <EnrollmentApplicationFilters status={status} pendingCourses={pendingCourses} size={size} />
         <Suspense fallback={<EnrollmentApplicationTableSkeleton />}>
-          <MyEnrollmentApplicationTableContainer page={page} size={size} status={status} dataPromise={dataPromise} />
+          <MyEnrollmentApplicationTableContainer
+            page={page}
+            size={size}
+            status={status}
+            hasFilters={Boolean(status || pendingCourses !== undefined)}
+            dataPromise={dataPromise}
+          />
         </Suspense>
       </DataTableNavigationProvider>
     </PlatformPageShell>

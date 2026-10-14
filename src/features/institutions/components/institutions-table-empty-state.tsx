@@ -1,10 +1,13 @@
-import * as React from "react";
+import type { PropsWithChildren, ReactElement, ReactNode } from "react";
+
 import Link from "next/link";
+
 import { BuildingIcon, Loader2Icon, PlusIcon, SearchIcon } from "lucide-react";
 
 import { ReturnToLink } from "@common/components/navigation/return-to-link";
 import { Button } from "@common/components/ui/button";
 import { EmptyMedia } from "@common/components/ui/empty";
+import { DATA_TABLE_EMPTY_MESSAGES } from "@common/constants/data-table-empty.constants";
 
 type InstitutionsTableEmptyStateProps = {
   active: boolean | undefined;
@@ -14,15 +17,10 @@ type InstitutionsTableEmptyStateProps = {
   totalItems: number;
 };
 
-export function InstitutionsTableEmptyState({
-  active,
-  isNavigating,
-  search,
-  size,
-  totalItems,
-}: InstitutionsTableEmptyStateProps): React.ReactElement {
+export function InstitutionsTableEmptyState({ active, isNavigating, search, size, totalItems }: InstitutionsTableEmptyStateProps): ReactElement {
   const hasFilters = search.trim() !== "" || active !== undefined;
-  let content: React.ReactNode;
+
+  let content: ReactNode;
 
   if (totalItems > 0) {
     content = (
@@ -37,10 +35,8 @@ export function InstitutionsTableEmptyState({
     );
   } else if (hasFilters) {
     content = (
-      <EmptyState icon={<SearchIcon className="size-5" />} title="No se encontraron resultados">
-        <p className="text-muted-foreground mt-1.5 max-w-sm text-sm">
-          No encontramos ninguna institución que coincida con los criterios de búsqueda seleccionados.
-        </p>
+      <EmptyState icon={<SearchIcon className="size-5" />} title="No se encontraron instituciones">
+        <p className="text-muted-foreground mt-1.5 max-w-sm text-sm">{DATA_TABLE_EMPTY_MESSAGES.FILTERED_DESCRIPTION}</p>
       </EmptyState>
     );
   } else {
@@ -71,7 +67,7 @@ export function InstitutionsTableEmptyState({
   );
 }
 
-function EmptyState({ children, icon, title }: React.PropsWithChildren<{ icon: React.ReactNode; title: string }>): React.ReactElement {
+function EmptyState({ children, icon, title }: PropsWithChildren<{ icon: ReactNode; title: string }>): ReactElement {
   return (
     <div className="bg-muted/25 text-muted-foreground flex h-full flex-col items-center justify-center rounded-lg border px-4 py-12 text-center">
       <EmptyMedia className="mb-4" variant="icon">

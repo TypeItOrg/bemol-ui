@@ -1,9 +1,18 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+
+import { DataTableNavigationProvider } from "@common/components/ui/data-table-navigation";
+import { TooltipProvider } from "@common/components/ui/tooltip";
+
 import { CourseWaitlistTable } from "@features/course-enrollments/components/course-waitlist-table";
 import type { CourseWaitlistEntry } from "@features/course-enrollments/types/course-waitlist-entry.types";
 
 const refresh = jest.fn();
-jest.mock("next/navigation", () => ({ useRouter: () => ({ refresh }) }));
+jest.mock("next/navigation", () => ({
+  useRouter: () => ({ refresh, push: jest.fn(), replace: jest.fn() }),
+  usePathname: () => "/courses/course-1/waitlist",
+  useSearchParams: () => new URLSearchParams(),
+}));
 jest.mock("@features/enrollment-applications/components/enrollment-application-courses-management", () => ({
   EnrollmentApplicationCourseDialog: ({ applicationId }: { applicationId: string }) => <div role="dialog">Solicitud {applicationId}</div>,
 }));
@@ -49,21 +58,46 @@ const ENTRY: CourseWaitlistEntry = {
 };
 
 describe("CourseWaitlistTable", () => {
-  it("keeps a free seat until an authorized user explicitly opens the acceptance flow", () => {
-    render(<CourseWaitlistTable entries={[ENTRY]} canEnroll />);
+  it("keeps a free seat until an authorized user explicitly opens the acceptance flow", async () => {
+    const user = userEvent.setup();
+    render(
+      <TooltipProvider>
+        <DataTableNavigationProvider>
+          <CourseWaitlistTable entries={[ENTRY]} canEnroll />
+        </DataTableNavigationProvider>
+      </TooltipProvider>,
+    );
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     expect(screen.getByText("Ana Pérez")).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Incorporar" }));
+    await user.click(screen.getByRole("button", { name: "Abrir acciones de Ana Pérez" }));
+    await user.click(screen.getByRole("menuitem", { name: "Incorporar" }));
     expect(screen.getByRole("dialog")).toHaveTextContent("parent-1");
   });
 
-  it("blocks incorporation without capacity", () => {
-    render(<CourseWaitlistTable entries={[{ ...ENTRY, hasCapacity: false }]} canEnroll />);
-    expect(screen.getByRole("button", { name: "Incorporar" })).toBeDisabled();
+  it("blocks incorporation without capacity", async () => {
+    const user = userEvent.setup();
+    render(
+      <TooltipProvider>
+        <DataTableNavigationProvider>
+          <CourseWaitlistTable entries={[{ ...ENTRY, hasCapacity: false }]} canEnroll />
+        </DataTableNavigationProvider>
+      </TooltipProvider>,
+    );
+    await user.click(screen.getByRole("button", { name: "Abrir acciones de Ana Pérez" }));
+    expect(screen.getByRole("menuitem", { name: "Incorporar" })).toHaveAttribute("aria-disabled", "true");
+    await user.click(screen.getByRole("menuitem", { name: "Incorporar" }));
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 
   it("does not offer incorporation without permission", () => {
-    render(<CourseWaitlistTable entries={[ENTRY]} />);
-    expect(screen.queryByRole("button", { name: "Incorporar" })).not.toBeInTheDocument();
+    render(
+      <TooltipProvider>
+        <DataTableNavigationProvider>
+          <CourseWaitlistTable entries={[ENTRY]} />
+        </DataTableNavigationProvider>
+      </TooltipProvider>,
+    );
+    expect(screen.queryByRole("button", { name: /Abrir acciones/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole("menuitem", { name: "Incorporar" })).not.toBeInTheDocument();
   });
 });

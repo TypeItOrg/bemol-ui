@@ -1,11 +1,13 @@
+import type { ReactElement } from "react";
+
 import { Skeleton } from "@common/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@common/components/ui/table";
 
-export function PlatformPeopleTableSkeleton(): React.ReactElement {
+export function PlatformPeopleTableSkeleton(): ReactElement {
   return (
     <div className="flex h-full flex-col gap-4">
       <div className="h-full overflow-hidden rounded-lg border">
-        <Table containerClassName="table-scrollbar" className="min-w-260">
+        <Table className="min-w-260">
           <TableHeader className="bg-muted sticky top-0 z-10 [&_tr]:border-b">
             <TableRow>
               <TableHead className="w-16 pl-4">

@@ -1,11 +1,11 @@
 "use client";
 
-import * as React from "react";
-import { GraduationCapIcon, CircleAlertIcon } from "lucide-react";
-import { useActionState } from "react";
+import { useActionState, useRef, useState, type ReactElement } from "react";
 
+import { ChevronDownIcon, CircleAlertIcon } from "lucide-react";
+
+import { ReturnToLink } from "@common/components/navigation/return-to-link";
 import { Alert, AlertDescription } from "@common/components/ui/alert";
-import { Button } from "@common/components/ui/button";
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -15,8 +15,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@common/components/ui/alert-dialog";
+import { Button } from "@common/components/ui/button";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@common/components/ui/dropdown-menu";
 import { cn } from "@common/utils/cn.util";
-import { updateAcademicStatusAction } from "@features/academic/actions/academic-resource.action";
+
+import { updateAcademicStatusAction } from "@features/academic/actions/update-academic-status.action";
+import { COURSE_STATUS_DIALOG_CONFIG } from "@features/academic/config/course-status-dialog.config";
 import type { AcademicActionState } from "@features/academic/types/academic-action-state.types";
 import { AcademicResource } from "@features/academic/types/academic-resource.types";
 import type { CourseStatus } from "@features/academic/types/course-status.types";
@@ -25,6 +29,7 @@ import type { AcademicScope } from "@features/academic/utils/academic-scope.util
 type CourseStatusDialogProps = {
   id: string;
   institutionId: string;
+  onCloseAutoFocus?: (event: Event) => void;
   onOpenChange: (open: boolean) => void;
   open: boolean;
   resourceLabel: string;
@@ -33,88 +38,39 @@ type CourseStatusDialogProps = {
   targetStatus: CourseStatus;
 };
 
-type CourseStatusDialogConfig = {
-  actionLabel: string;
-  description: (resourceLabel: string) => React.ReactNode;
-  icon: typeof GraduationCapIcon;
-  iconClassName: string;
-  pendingLabel: string;
-  title: string;
-  variant: "default" | "destructive";
-};
-
-const COURSE_STATUS_DIALOG_CONFIG: Record<CourseStatus, CourseStatusDialogConfig> = {
-  ACTIVE: {
-    actionLabel: "Activar curso",
-    description: (resourceLabel) => (
-      <>
-        El curso <span className="text-foreground font-semibold">{resourceLabel}</span> volverá a estar activo para la institución.
-      </>
-    ),
-    icon: GraduationCapIcon,
-    iconClassName: "bg-primary/10 text-primary",
-    pendingLabel: "Activando…",
-    title: "Activar curso",
-    variant: "default",
-  },
-  INACTIVE: {
-    actionLabel: "Desactivar curso",
-    description: (resourceLabel) => (
-      <>
-        El curso <span className="text-foreground font-semibold">{resourceLabel}</span> dejará de estar activo. Los planes de estudio asociados no
-        podrán desactivarse mientras tenga cursos activos.
-      </>
-    ),
-    icon: GraduationCapIcon,
-    iconClassName: "bg-destructive/10 text-destructive",
-    pendingLabel: "Desactivando…",
-    title: "Desactivar curso",
-    variant: "destructive",
-  },
-  CLOSED: {
-    actionLabel: "Finalizar curso",
-    description: (resourceLabel) => (
-      <>
-        El curso <span className="text-foreground font-semibold">{resourceLabel}</span> se cerrará de forma definitiva y no podrá volver a editarse ni
-        cambiar de estado. Se finalizarán sus cursadas y se liberarán los horarios. Los resultados ya registrados se conservarán; los demás quedarán
-        pendientes de resultado. Las solicitudes de este curso pendientes o en lista de espera serán rechazadas y se quitará de los borradores.
-      </>
-    ),
-    icon: GraduationCapIcon,
-    iconClassName: "bg-destructive/10 text-destructive",
-    pendingLabel: "Finalizando…",
-    title: "Finalizar curso",
-    variant: "destructive",
-  },
-};
-
 const INITIAL_STATE: AcademicActionState = {};
 
 export function CourseStatusDialog({
   id,
   institutionId,
+  onCloseAutoFocus,
   onOpenChange,
   open,
   resourceLabel,
   returnTo,
   scope,
   targetStatus,
-}: CourseStatusDialogProps): React.ReactElement {
+}: CourseStatusDialogProps): ReactElement {
   const [state, formAction, isPending] = useActionState(
     updateAcademicStatusAction.bind(null, scope, institutionId, AcademicResource.COURSE, id, returnTo),
     INITIAL_STATE,
   );
+
   const config = COURSE_STATUS_DIALOG_CONFIG[targetStatus];
+
   const Icon = config.icon;
 
   function handleOpenChange(nextOpen: boolean): void {
-    if (isPending && !nextOpen) return;
+    if (isPending && !nextOpen) {
+      return;
+    }
+
     onOpenChange(nextOpen);
   }
 
   return (
     <AlertDialog open={open} onOpenChange={handleOpenChange}>
-      <AlertDialogContent>
+      <AlertDialogContent onCloseAutoFocus={onCloseAutoFocus}>
         <form action={formAction}>
           <AlertDialogHeader>
             <div className={cn(config.iconClassName, "mb-1 flex size-12 items-center justify-center rounded-2xl")}>
@@ -147,7 +103,9 @@ export function CourseStatusDialog({
   );
 }
 
-export function CourseDetailStatusActions({
+export function CourseDetailActions({
+  canChangeStatus,
+  canEdit,
   courseStatus,
   id,
   institutionId,
@@ -155,27 +113,70 @@ export function CourseDetailStatusActions({
   returnTo,
   scope,
 }: {
+  canChangeStatus: boolean;
+  canEdit: boolean;
   courseStatus: CourseStatus;
   id: string;
   institutionId: string;
   resourceLabel: string;
   returnTo: string;
   scope: AcademicScope;
-}): React.ReactElement | null {
-  const [toggleOpen, setToggleOpen] = React.useState(false);
-  const [finalizeOpen, setFinalizeOpen] = React.useState(false);
-  if (courseStatus === "CLOSED") return null;
+}): ReactElement | null {
+  const actionsTriggerRef = useRef<HTMLButtonElement>(null);
+
+  const [toggleOpen, setToggleOpen] = useState(false);
+
+  const [finalizeOpen, setFinalizeOpen] = useState(false);
+
+  if (courseStatus === "CLOSED" || (!canEdit && !canChangeStatus)) {
+    return null;
+  }
+
   const toggleTarget: CourseStatus = courseStatus === "ACTIVE" ? "INACTIVE" : "ACTIVE";
+
   const toggleConfig = COURSE_STATUS_DIALOG_CONFIG[toggleTarget];
+
+  function restoreActionsFocus(event: Event): void {
+    event.preventDefault();
+    actionsTriggerRef.current?.focus();
+  }
+
   return (
-    <div className="flex flex-wrap items-center gap-2">
-      <Button type="button" size="lg" variant={toggleConfig.variant} onClick={() => setToggleOpen(true)}>
-        {toggleTarget === "ACTIVE" ? "Activar" : "Desactivar"}
-      </Button>
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button ref={actionsTriggerRef} type="button" size="lg" variant="outline">
+            Acciones
+            <ChevronDownIcon aria-hidden="true" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-44 p-1.5">
+          {canEdit ? (
+            <DropdownMenuItem asChild>
+              <ReturnToLink href={`${returnTo}/edit`} className="px-2.5 py-1.5">
+                Editar
+              </ReturnToLink>
+            </DropdownMenuItem>
+          ) : null}
+          {canChangeStatus ? (
+            <>
+              {canEdit && toggleTarget !== "ACTIVE" ? <DropdownMenuSeparator /> : null}
+              <DropdownMenuItem variant={toggleConfig.variant} className="px-2.5 py-1.5" onSelect={() => setToggleOpen(true)}>
+                {toggleTarget === "ACTIVE" ? "Activar" : "Desactivar"}
+              </DropdownMenuItem>
+              {toggleTarget === "ACTIVE" ? <DropdownMenuSeparator /> : null}
+              <DropdownMenuItem variant="destructive" className="px-2.5 py-1.5" onSelect={() => setFinalizeOpen(true)}>
+                Finalizar
+              </DropdownMenuItem>
+            </>
+          ) : null}
+        </DropdownMenuContent>
+      </DropdownMenu>
       {toggleOpen ? (
         <CourseStatusDialog
           id={id}
           institutionId={institutionId}
+          onCloseAutoFocus={restoreActionsFocus}
           onOpenChange={setToggleOpen}
           open={toggleOpen}
           resourceLabel={resourceLabel}
@@ -184,13 +185,11 @@ export function CourseDetailStatusActions({
           targetStatus={toggleTarget}
         />
       ) : null}
-      <Button type="button" size="lg" variant="destructive" onClick={() => setFinalizeOpen(true)}>
-        Finalizar
-      </Button>
       {finalizeOpen ? (
         <CourseStatusDialog
           id={id}
           institutionId={institutionId}
+          onCloseAutoFocus={restoreActionsFocus}
           onOpenChange={setFinalizeOpen}
           open={finalizeOpen}
           resourceLabel={resourceLabel}
@@ -199,6 +198,6 @@ export function CourseDetailStatusActions({
           targetStatus="CLOSED"
         />
       ) : null}
-    </div>
+    </>
   );
 }

@@ -1,12 +1,14 @@
-import { formatStudyPlanLabel } from "@features/academic/utils/study-plan-label.util";
+import { useState, type ReactElement } from "react";
+
 import { ClockIcon, Music2Icon } from "lucide-react";
-import * as React from "react";
 
 import { Badge } from "@common/components/ui/badge";
 import { Button } from "@common/components/ui/button";
-import { COURSE_DAY_LABELS } from "@features/course-enrollments/constants/course-enrollment.constants";
-import { COURSE_ENROLLMENT_GRADE_MESSAGES } from "@features/course-enrollments/constants/course-enrollment-grade.constants";
+
 import { StudentGradeDialog } from "@features/course-enrollments/components/student-grade-dialog";
+import { COURSE_ENROLLMENT_GRADE_MESSAGES } from "@features/course-enrollments/constants/course-enrollment-grade.constants";
+import { formatStudyPlanLabel } from "@features/academic/utils/study-plan-label.util";
+import { COURSE_DAY_LABELS } from "@features/course-enrollments/constants/course-enrollment.constants";
 import { MY_SUBJECTS_MESSAGES } from "@features/course-enrollments/constants/my-subjects.constants";
 import { COURSE_ENROLLMENT_STATUS } from "@features/course-enrollments/types/course-enrollment-status.types";
 import type { CourseEnrollment } from "@features/course-enrollments/types/course-enrollment.types";
@@ -19,17 +21,23 @@ type MySubjectCardProps = {
   onMutation: (enrollment: CourseEnrollment, mode: "withdraw" | "academic") => void;
 };
 
-export function MySubjectCard({ enrollment, canWithdraw, canUpdateAcademicStatus, onMutation }: MySubjectCardProps): React.ReactElement {
-  const [isGradesOpen, setIsGradesOpen] = React.useState(false);
+export function MySubjectCard({ enrollment, canWithdraw, canUpdateAcademicStatus, onMutation }: MySubjectCardProps): ReactElement {
+  const [isGradesOpen, setIsGradesOpen] = useState(false);
   const isEnrolled = enrollment.status === COURSE_ENROLLMENT_STATUS.ENROLLED;
+
   const isWithdrawn =
     enrollment.status === COURSE_ENROLLMENT_STATUS.WITHDRAWN || enrollment.status === COURSE_ENROLLMENT_STATUS.ADMINISTRATIVELY_WITHDRAWN;
+
   const showWithdraw = canWithdraw && isEnrolled;
+
   const showAcademicAction = canUpdateAcademicStatus && !isWithdrawn;
+
   const days = Object.keys(COURSE_DAY_LABELS);
+
   const schedules = enrollment.schedules
     .filter((schedule) => !isEnrolled || !schedule.releasedAt)
     .toSorted((a, b) => days.indexOf(a.dayOfWeek) - days.indexOf(b.dayOfWeek) || a.startTime.localeCompare(b.startTime));
+
   const context = [formatStudyPlanLabel(enrollment), enrollment.academicLevelName].filter(Boolean).join(" · ");
 
   return (
@@ -66,7 +74,7 @@ export function MySubjectCard({ enrollment, canWithdraw, canUpdateAcademicStatus
             </div>
           </dl>
         </div>
-        <div className="min-w-0 border-t pt-4 @xl/subject:border-t-0 @xl/subject:border-l @xl/subject:pt-0 @xl/subject:pl-6">
+        <div className="-mx-4 min-w-0 border-t px-4 pt-4 @xl/subject:mx-0 @xl/subject:border-t-0 @xl/subject:border-l @xl/subject:px-0 @xl/subject:pt-0 @xl/subject:pl-6">
           <h3 className="text-muted-foreground mb-2 flex items-center gap-2 text-xs font-medium tracking-wider uppercase">
             <ClockIcon className="size-3.5" aria-hidden="true" />
             {isEnrolled ? "Horarios" : "Horarios de la cursada"}
@@ -93,9 +101,7 @@ export function MySubjectCard({ enrollment, canWithdraw, canUpdateAcademicStatus
         </div>
       </div>
       <div className="flex flex-wrap gap-2 border-t px-4 py-3">
-        <Button variant="outline" size="sm" onClick={() => setIsGradesOpen(true)}>
-          {COURSE_ENROLLMENT_GRADE_MESSAGES.VIEW_GRADES}
-        </Button>
+        <Button variant="outline" size="sm" onClick={() => setIsGradesOpen(true)}>{COURSE_ENROLLMENT_GRADE_MESSAGES.VIEW_GRADES}</Button>
           {showWithdraw ? (
             <Button variant="outline" size="sm" onClick={() => onMutation(enrollment, "withdraw")}>
               Registrar baja

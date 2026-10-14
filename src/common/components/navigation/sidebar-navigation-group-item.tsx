@@ -1,8 +1,10 @@
 "use client";
 
+import { useEffect, useRef, useState, type ReactElement } from "react";
+
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+
 import { ChevronRightIcon } from "lucide-react";
 
 import { useSidebarNavigationState } from "@common/components/navigation/sidebar-navigation-state-provider";
@@ -32,17 +34,27 @@ type SidebarNavigationGroupItemProps = {
   navigation: MobileSidebarNavigation;
 };
 
-export function SidebarNavigationGroupItem({ group, navigation }: SidebarNavigationGroupItemProps): React.ReactElement | null {
+export function SidebarNavigationGroupItem({ group, navigation }: SidebarNavigationGroupItemProps): ReactElement | null {
   const pathname = usePathname();
+
   const { isMobile, state: sidebarState } = useSidebar();
+
   const { groupStates, setGroupOpen } = useSidebarNavigationState();
-  const activeUrl = group.items.find((item) => navigation.isActive(item.url, item.exact))?.url;
+
+  const suppressNextTooltipFocus = useRef(false);
+
+  const activeItem = group.items.find((item) => navigation.isActive(item.url, item.exact));
+
+  const activeUrl = activeItem?.url;
+
   const navigationKey = `${pathname}:${activeUrl ?? ""}`;
+
   const [expansion, setExpansion] = useState({
     navigationKey,
     open: groupStates[group.id] ?? Boolean(activeUrl),
     animate: false,
   });
+
   const Icon = group.icon;
 
   // Reopen on navigation into this group, not on unrelated renders or a manual close.
@@ -63,19 +75,37 @@ export function SidebarNavigationGroupItem({ group, navigation }: SidebarNavigat
   const groupButtonClassName = `${SIDEBAR_NAVIGATION_BUTTON_CLASS_NAME} data-open:hover:bg-muted-foreground/10 data-open:hover:text-foreground data-active:bg-muted-foreground/10 data-active:text-foreground`;
 
   if (!isMobile && sidebarState === "collapsed") {
+    const CollapsedIcon = activeItem?.icon ?? Icon;
+
+    const collapsedLabel = activeItem ? `${group.title} › ${activeItem.ariaLabel ?? activeItem.title}` : group.title;
+
     return (
       <SidebarMenuItem>
-        <DropdownMenu modal={false}>
+        <DropdownMenu
+          modal={false}
+          onOpenChange={(open) => {
+            if (open) {
+              suppressNextTooltipFocus.current = false;
+            }
+          }}
+        >
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
               type="button"
-              aria-label={group.title}
-              tooltip={group.title}
-              isActive={Boolean(activeUrl)}
-              className={groupButtonClassName}
+              aria-label={collapsedLabel}
+              tooltip={collapsedLabel}
+              isActive={Boolean(activeItem)}
+              onFocus={(event) => {
+                if (suppressNextTooltipFocus.current) {
+                  suppressNextTooltipFocus.current = false;
+                  // Keep Radix's restored focus without reopening the tooltip after navigation.
+                  event.preventDefault();
+                }
+              }}
+              className={`${SIDEBAR_NAVIGATION_BUTTON_CLASS_NAME} ${SIDEBAR_NAVIGATION_ACTIVE_CLASS_NAME} data-active:data-open:hover:bg-primary data-active:data-open:hover:text-primary-foreground`}
             >
-              <Icon aria-hidden="true" />
-              <span className="sr-only">{group.title}</span>
+              <CollapsedIcon aria-hidden="true" />
+              <span className="sr-only">{collapsedLabel}</span>
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent side="right" align="start" sideOffset={8} className="min-w-60 motion-reduce:animate-none">
@@ -83,6 +113,7 @@ export function SidebarNavigationGroupItem({ group, navigation }: SidebarNavigat
             <DropdownMenuSeparator />
             {group.items.map((item) => {
               const isActive = navigation.isActive(item.url, item.exact);
+
               const ItemIcon = item.icon;
 
               return (
@@ -97,7 +128,10 @@ export function SidebarNavigationGroupItem({ group, navigation }: SidebarNavigat
                     prefetch
                     aria-label={item.ariaLabel}
                     aria-current={isActive ? "page" : undefined}
-                    onNavigate={() => navigation.handleNavigation(item.url)}
+                    onNavigate={() => {
+                      suppressNextTooltipFocus.current = true;
+                      navigation.handleNavigation(item.url);
+                    }}
                   >
                     <ItemIcon aria-hidden="true" />
                     <span>{item.title}</span>
@@ -133,6 +167,7 @@ export function SidebarNavigationGroupItem({ group, navigation }: SidebarNavigat
           <SidebarMenuSub className="my-1 mr-0 ml-4 gap-0 pr-0 pl-2">
             {group.items.map((item) => {
               const isActive = navigation.isActive(item.url, item.exact);
+
               const ItemIcon = item.icon;
 
               return (

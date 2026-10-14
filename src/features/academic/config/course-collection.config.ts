@@ -1,14 +1,16 @@
-import { formatStudyPlanName } from "@features/academic/utils/study-plan-label.util";
 import { GraduationCapIcon } from "lucide-react";
 
 import { serializeSpringSort } from "@common/utils/sort-query.util";
+
 import { fetchCourse, fetchCourses } from "@features/academic/services/academic.service";
 import type { AcademicCollectionConfig } from "@features/academic/types/academic-collection-config.types";
 import type { AcademicCollection } from "@features/academic/types/academic-collection.types";
 import { AcademicResource } from "@features/academic/types/academic-resource.types";
+import type { CourseStatus } from "@features/academic/types/course-status.types";
 import { deletionFilter, toOptions } from "@features/academic/utils/academic-collection-filters.util";
 import { academicSpaceFormatLabels, academicSpaceTypeLabels, courseStatusLabels } from "@features/academic/utils/academic-labels.util";
 import { COURSE_SORT_FIELDS } from "@features/academic/utils/academic-pagination.util";
+import { formatStudyPlanName } from "@features/academic/utils/study-plan-label.util";
 
 export const courseCollectionConfig: AcademicCollectionConfig = {
   resource: AcademicResource.COURSE,
@@ -20,7 +22,9 @@ export const courseCollectionConfig: AcademicCollectionConfig = {
   columns: {
     primaryLabel: "Espacio académico",
     detailLabels: ["Trayecto formativo", "Plan de estudio", "Ciclo lectivo", "Nivel", "Tipo", "Formato", "Instrumento"],
-    sortableFields: COURSE_SORT_FIELDS,
+    sortableFields: COURSE_SORT_FIELDS.slice(0, 8),
+    statusSortField: "status",
+    institutionSortField: "institution.name",
   },
   searchPlaceholder: "Buscar por espacio o institución...",
   canRead: (access) => access.courseRead,
@@ -40,18 +44,28 @@ export const courseCollectionConfig: AcademicCollectionConfig = {
     active,
     courseStatus,
     academicSpaceId,
+    academicLevelId,
+    type,
+    format,
+    instrumentId,
     trainingPathId,
     studyPlanId,
     year,
     deleted,
   }) => {
-    const status = courseStatus ?? (active === undefined ? undefined : active ? "ACTIVE" : "INACTIVE");
+    const status = courseStatus ?? getCourseStatusFromActive(active);
+
     return fetchCourses(scope, global ? undefined : institutionId, {
       page,
       size,
       search,
-      status: status as import("@features/academic/types/course-status.types").CourseStatus | undefined,
+      status: status as CourseStatus | undefined,
       academicSpaceId,
+      academicLevelId,
+      type,
+      format,
+      instrumentId: instrumentId === "none" ? undefined : instrumentId,
+      withoutInstrument: instrumentId === "none" ? true : undefined,
       trainingPathId,
       studyPlanId,
       year,
@@ -62,8 +76,9 @@ export const courseCollectionConfig: AcademicCollectionConfig = {
   },
   fetchDetail: fetchCourse,
   getTitle: (item) => (item as Extract<AcademicCollection, { classes: unknown }>).academicSpaceName,
-  filters: ({ active, courseStatus, deleted }) => {
-    const status = courseStatus ?? (active === undefined ? undefined : active ? "ACTIVE" : "INACTIVE");
+  filters: ({ active, courseStatus, deleted, type, format }) => {
+    const status = courseStatus ?? getCourseStatusFromActive(active);
+
     return [
       {
         defaultValue: "all",
@@ -72,14 +87,32 @@ export const courseCollectionConfig: AcademicCollectionConfig = {
         options: [{ value: "all", label: "Todos" }, ...toOptions(courseStatusLabels)],
         value: status ?? "all",
       },
+      {
+        defaultValue: "all",
+        label: "Tipo",
+        name: "type",
+        options: [{ value: "all", label: "Todos los tipos" }, ...toOptions(academicSpaceTypeLabels)],
+        value: type ?? "all",
+      },
+      {
+        defaultValue: "all",
+        label: "Formato",
+        name: "format",
+        options: [{ value: "all", label: "Todos los formatos" }, ...toOptions(academicSpaceFormatLabels)],
+        value: format ?? "all",
+      },
       deletionFilter(deleted),
     ];
   },
   toRow: (item) => {
     const course = item as Extract<AcademicCollection, { classes: unknown }>;
+
     const statusLabel = courseStatusLabels[course.status] ?? (course.active ? "Activo" : "Inactivo");
+
     const isActive = course.status === "ACTIVE" || (!course.status && course.active);
+
     const statusValue = course.status ?? (course.active ? "ACTIVE" : "INACTIVE");
+
     return {
       id: course.id,
       institutionId: course.institutionId,
@@ -101,3 +134,11 @@ export const courseCollectionConfig: AcademicCollectionConfig = {
     };
   },
 };
+
+function getCourseStatusFromActive(active: boolean | undefined): CourseStatus | undefined {
+  if (active === undefined) {
+    return undefined;
+  }
+
+  return active ? "ACTIVE" : "INACTIVE";
+}

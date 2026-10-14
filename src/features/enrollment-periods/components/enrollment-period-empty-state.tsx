@@ -1,10 +1,13 @@
+import type { ReactElement, ReactNode } from "react";
+
 import { CalendarRangeIcon, SearchIcon } from "lucide-react";
 
-import { Button } from "@common/components/ui/button";
+import { DataTableEmptyStateActions } from "@common/components/ui/data-table-empty-state-actions";
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@common/components/ui/empty";
+import { DATA_TABLE_EMPTY_MESSAGES } from "@common/constants/data-table-empty.constants";
 
 type EnrollmentPeriodEmptyStateProps = {
-  createAction?: React.ReactNode;
+  createAction?: ReactNode;
   hasFilters: boolean;
   hasItemsOnOtherPages: boolean;
   onFirstPage: () => void;
@@ -15,9 +18,11 @@ export function EnrollmentPeriodEmptyState({
   hasFilters,
   hasItemsOnOtherPages,
   onFirstPage,
-}: EnrollmentPeriodEmptyStateProps): React.ReactElement {
+}: EnrollmentPeriodEmptyStateProps): ReactElement {
   const Icon = hasFilters ? SearchIcon : CalendarRangeIcon;
+
   let title = "No hay períodos de inscripción";
+
   let description = "Creá un período de inscripción para definir cuándo se reciben nuevas solicitudes de estudiantes.";
 
   if (hasItemsOnOtherPages) {
@@ -25,7 +30,7 @@ export function EnrollmentPeriodEmptyState({
     description = "Volvé a la primera página para ver los períodos de inscripción disponibles.";
   } else if (hasFilters) {
     title = "No se encontraron períodos";
-    description = "No encontramos períodos de inscripción que coincidan con los filtros aplicados.";
+    description = DATA_TABLE_EMPTY_MESSAGES.FILTERED_DESCRIPTION;
   }
 
   return (
@@ -37,14 +42,12 @@ export function EnrollmentPeriodEmptyState({
         <EmptyTitle className="mt-2 text-base">{title}</EmptyTitle>
         <EmptyDescription>{description}</EmptyDescription>
       </EmptyHeader>
-      <div className="mt-6 flex flex-wrap justify-center gap-2">
-        {createAction}
-        {hasItemsOnOtherPages ? (
-          <Button type="button" variant="outline" size="lg" onClick={onFirstPage}>
-            Volver a la primera página
-          </Button>
-        ) : null}
-      </div>
+      <DataTableEmptyStateActions
+        createAction={createAction}
+        hasFilters={hasFilters}
+        hasItemsOnOtherPages={hasItemsOnOtherPages}
+        onFirstPage={onFirstPage}
+      />
     </Empty>
   );
 }

@@ -1,23 +1,28 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
-import { INSTITUTIONAL_AUTH_ERROR_MESSAGES } from "@features/institutional-auth/constants/error-messages.constants";
+import { beginInstitutionalPasskeyLogin } from "@features/institutional-auth/actions/begin-passkey-login.action";
+import { finishPasskeyLogin } from "@features/institutional-auth/actions/finish-passkey-login.action";
+import { identifyInstitutionalUser } from "@features/institutional-auth/actions/identify-institutional-user.action";
 import { InstitutionalLoginForm } from "@features/institutional-auth/components/institutional-login-form";
+import { INSTITUTIONAL_AUTH_ERROR_MESSAGES } from "@features/institutional-auth/constants/error-messages.constants";
 
 jest.mock("@features/institutional-auth/components/institution-picker", () => ({
-  InstitutionPicker: () => <input name="institutionId" defaultValue="inst-1" aria-label="Institución" />,
+  InstitutionPicker: ({ onValueChange }: { onValueChange: (value: string, item: { id: string; name: string }) => void }) => (
+    <input aria-label="Institución" onChange={(event) => onValueChange("inst-1", { id: "inst-1", name: event.target.value })} />
+  ),
 }));
 
 jest.mock("@features/institutional-auth/actions/identify-institutional-user.action", () => ({
   identifyInstitutionalUser: jest.fn(),
 }));
 
-jest.mock("@features/institutional-auth/actions/institutional-password-login.action", () => ({
-  institutionalPasswordLogin: jest.fn(),
+jest.mock("@features/institutional-auth/actions/institutional-credentials-login.action", () => ({
+  institutionalCredentialsLogin: jest.fn(),
 }));
 
 jest.mock("@features/institutional-auth/actions/begin-passkey-login.action", () => ({
-  beginPasskeyLogin: jest.fn(),
+  beginInstitutionalPasskeyLogin: jest.fn(),
 }));
 
 jest.mock("@features/institutional-auth/actions/finish-passkey-login.action", () => ({
@@ -28,18 +33,15 @@ jest.mock("@features/institutional-auth/actions/consume-institutional-login-flas
   consumeInstitutionalLoginFlashes: jest.fn(),
 }));
 
-import { identifyInstitutionalUser } from "@features/institutional-auth/actions/identify-institutional-user.action";
-import { beginPasskeyLogin } from "@features/institutional-auth/actions/begin-passkey-login.action";
-import { finishPasskeyLogin } from "@features/institutional-auth/actions/finish-passkey-login.action";
-
 const identifyMock = jest.mocked(identifyInstitutionalUser);
-const beginMock = jest.mocked(beginPasskeyLogin);
+const beginMock = jest.mocked(beginInstitutionalPasskeyLogin);
 const finishMock = jest.mocked(finishPasskeyLogin);
 
 describe("InstitutionalLoginForm", () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    identifyMock.mockResolvedValue({});
+    identifyMock.mockReset().mockResolvedValue({});
+    beginMock.mockReset();
+    finishMock.mockReset();
   });
 
   describe("passkey ceremony lifecycle", () => {
@@ -59,21 +61,32 @@ describe("InstitutionalLoginForm", () => {
         resolve = res;
         reject = rej;
       });
+
       return { promise, resolve, reject };
     }
 
     async function goToPasskeyStep() {
       const user = userEvent.setup();
-      identifyMock.mockResolvedValue({ loginAttemptId: "attempt-9", nextStep: "PASSKEY" });
-      beginMock.mockResolvedValue({ ceremonyId: "ceremony-9", options: validOptions });
+      beginMock.mockResolvedValue({
+        loginAttemptId: "attempt-9",
+        ceremonyId: "ceremony-9",
+        options: validOptions,
+      });
       finishMock.mockResolvedValue({});
-      Object.defineProperty(window, "PublicKeyCredential", { value: function () {}, configurable: true });
-      Object.defineProperty(navigator, "credentials", { value: { create: jest.fn(), get: getMock }, configurable: true });
+      Object.defineProperty(window, "PublicKeyCredential", {
+        value: function () {},
+        configurable: true,
+      });
+      Object.defineProperty(navigator, "credentials", {
+        value: { create: jest.fn(), get: getMock },
+        configurable: true,
+      });
 
       const view = render(<InstitutionalLoginForm />);
 
+      await user.type(screen.getByLabelText("Institución"), "Boero");
       await user.type(screen.getByLabelText(/Documento/), "12345678");
-      await user.click(screen.getByRole("button", { name: "Continuar" }));
+      await user.click(screen.getByRole("button", { name: "Usar una llave de acceso" }));
       await screen.findByRole("heading", { name: "Ingresá con tu llave de acceso" });
 
       return view;
@@ -97,6 +110,11 @@ describe("InstitutionalLoginForm", () => {
 
       await waitFor(() => {
         expect(beginMock).toHaveBeenCalledTimes(1);
+        expect(beginMock).toHaveBeenCalledWith({
+          institutionId: "inst-1",
+          institutionName: "Boero",
+          documentNumber: "12345678",
+        });
         expect(getMock).toHaveBeenCalledTimes(1);
       });
     });

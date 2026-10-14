@@ -239,6 +239,19 @@
   }
 }
 
+/* Preserve the input theme when a browser applies its native autofill colors. */
+input:is([data-slot="input"], [data-slot="input-group-control"]):is(:autofill, :-webkit-autofill) {
+  -webkit-text-fill-color: var(--foreground);
+  caret-color: var(--foreground);
+  box-shadow:
+    inset 0 0 0 1000px var(--background),
+    var(--tw-inset-shadow, 0 0 #0000),
+    var(--tw-inset-ring-shadow, 0 0 #0000),
+    var(--tw-ring-offset-shadow, 0 0 #0000),
+    var(--tw-ring-shadow, 0 0 #0000),
+    var(--tw-shadow, 0 0 #0000);
+}
+
 @layer utilities {
   .sidebar-navigation-collapse[data-animate="true"][data-state="open"] {
     animation: sidebarNavigationOpen 150ms ease-out;
@@ -260,39 +273,5 @@
     .animate-fade-in-up {
       animation: none;
     }
-  }
-
-  .table-scrollbar {
-    scrollbar-color: var(--primary) transparent;
-    scrollbar-width: thin;
-  }
-
-  .table-scrollbar::-webkit-scrollbar {
-    -webkit-appearance: none;
-    width: 0.375rem;
-    height: 0.375rem;
-  }
-
-  .table-scrollbar::-webkit-scrollbar-button,
-  .table-scrollbar::-webkit-scrollbar-button:horizontal:decrement,
-  .table-scrollbar::-webkit-scrollbar-button:horizontal:increment,
-  .table-scrollbar::-webkit-scrollbar-button:horizontal:start,
-  .table-scrollbar::-webkit-scrollbar-button:horizontal:end {
-    -webkit-appearance: none;
-    display: none;
-    width: 0;
-    height: 0;
-  }
-
-  .table-scrollbar::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  .table-scrollbar::-webkit-scrollbar-thumb {
-    background-color: var(--primary);
-  }
-
-  .table-scrollbar::-webkit-scrollbar-corner {
-    background: transparent;
   }
 }

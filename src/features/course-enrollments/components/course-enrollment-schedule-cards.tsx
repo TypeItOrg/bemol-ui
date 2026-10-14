@@ -1,6 +1,9 @@
+import type { ReactElement } from "react";
+
 import { CalendarDaysIcon, ClockIcon } from "lucide-react";
 
 import { Badge } from "@common/components/ui/badge";
+
 import { COURSE_DAY_LABELS } from "@features/course-enrollments/constants/course-enrollment.constants";
 import type { CourseEnrollment } from "@features/course-enrollments/types/course-enrollment.types";
 
@@ -8,9 +11,11 @@ type CourseEnrollmentScheduleCardsProps = {
   schedules: CourseEnrollment["schedules"];
 };
 
-export function CourseEnrollmentScheduleCards({ schedules }: CourseEnrollmentScheduleCardsProps): React.ReactElement {
+export function CourseEnrollmentScheduleCards({ schedules }: CourseEnrollmentScheduleCardsProps): ReactElement {
   const days = [...new Set(schedules.map((schedule) => schedule.dayOfWeek))];
+
   const dayOrder = Object.keys(COURSE_DAY_LABELS);
+
   days.sort((a, b) => dayOrder.indexOf(a) - dayOrder.indexOf(b));
 
   return (
@@ -23,12 +28,12 @@ export function CourseEnrollmentScheduleCards({ schedules }: CourseEnrollmentSch
             </div>
             <h3 className="text-sm font-semibold">{COURSE_DAY_LABELS[day] ?? day}</h3>
           </div>
-          <ul className="divide-y px-4">
+          <ul className="divide-y">
             {schedules
               .filter((schedule) => schedule.dayOfWeek === day)
               .sort((a, b) => a.startTime.localeCompare(b.startTime))
               .map((schedule) => (
-                <li key={schedule.id} className="flex flex-wrap items-center justify-between gap-2 py-4">
+                <li key={schedule.id} className="flex flex-wrap items-center justify-between gap-2 px-4 py-4">
                   <div className="flex items-center gap-2">
                     <ClockIcon className="text-muted-foreground size-4 shrink-0" aria-hidden="true" />
                     <span className="text-base font-semibold tabular-nums">

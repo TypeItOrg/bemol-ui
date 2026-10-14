@@ -1,3 +1,5 @@
+import type { AriaAttributes, ComponentType, ReactNode } from "react";
+
 import type { AsyncDropdownDefaultOption } from "@common/types/async-dropdown-default-option.types";
 import type { AsyncDropdownFetchPageInput } from "@common/types/async-dropdown-fetch-page-input.types";
 import type { AsyncDropdownPage } from "@common/types/async-dropdown-page.types";
@@ -5,7 +7,8 @@ import type { AsyncDropdownRenderItemState } from "@common/types/async-dropdown-
 
 export type AsyncDropdownProps<TItem> = {
   ariaInvalid?: boolean;
-  "aria-required"?: React.AriaAttributes["aria-required"];
+  "aria-describedby"?: AriaAttributes["aria-describedby"];
+  "aria-required"?: AriaAttributes["aria-required"];
   className?: string;
   contentClassName?: string;
   clearLabel?: string;
@@ -15,14 +18,19 @@ export type AsyncDropdownProps<TItem> = {
   defaultOption?: AsyncDropdownDefaultOption;
   disabled?: boolean;
   emptyDescription?: string;
-  emptyIcon?: React.ComponentType<{ className?: string }> | React.ReactNode;
+  emptyIcon?: ComponentType<{ className?: string }> | ReactNode;
   emptyMessage?: string;
   emptyTitle?: string;
   errorMessage?: string;
   estimateSize?: number;
   fetchPage: (input: AsyncDropdownFetchPageInput) => Promise<AsyncDropdownPage<TItem>>;
   getItemLabel: (item: TItem) => string;
+  getItemDisplayLabel?: (item: TItem) => string;
+  getItemDescription?: (item: TItem) => string | undefined;
+  getItemGroup?: (item: TItem) => string | undefined;
   getItemValue: (item: TItem) => string;
+  groupOrder?: readonly string[];
+  compareGroups?: (left: string, right: string) => number;
   id?: string;
   listClassName?: string;
   listHeight?: number;
@@ -33,7 +41,7 @@ export type AsyncDropdownProps<TItem> = {
   pageSize?: number;
   placeholder?: string;
   queryKey: readonly unknown[];
-  renderItem?: (item: TItem, state: AsyncDropdownRenderItemState) => React.ReactNode;
+  renderItem?: (item: TItem, state: AsyncDropdownRenderItemState) => ReactNode;
   resetSearchOnClose?: boolean;
   searchPlaceholder?: string;
   selectedLabel?: string;

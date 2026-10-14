@@ -1,5 +1,7 @@
 "use client";
 
+import type { ReactElement } from "react";
+
 import { Loader2Icon } from "lucide-react";
 
 import { Badge } from "@common/components/ui/badge";
@@ -7,6 +9,7 @@ import { useDataTableNavigation } from "@common/components/ui/data-table-navigat
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@common/components/ui/table";
 import type { PaginatedResponse } from "@common/types/paginated-response.types";
 import type { PaginationParams } from "@common/types/pagination-params.types";
+
 import { InstitutionalSessionsPagination } from "@features/institutional-auth/components/institutional-sessions-pagination";
 import type { ActiveSession } from "@features/institutional-auth/types/active-session.types";
 import { formatSessionStartedAt } from "@features/institutional-auth/utils/session-started-at.util";
@@ -16,7 +19,7 @@ type InstitutionalSessionsTablePresentationProps = PaginationParams & {
   data: PaginatedResponse<ActiveSession>;
 };
 
-export function InstitutionalSessionsTablePresentation({ data, page, size }: InstitutionalSessionsTablePresentationProps): React.ReactElement {
+export function InstitutionalSessionsTablePresentation({ data, page, size }: InstitutionalSessionsTablePresentationProps): ReactElement {
   const { isPending, navigate } = useDataTableNavigation();
 
   if (data.items.length === 0) {
@@ -26,7 +29,7 @@ export function InstitutionalSessionsTablePresentation({ data, page, size }: Ins
   return (
     <div className="flex h-full flex-col gap-4">
       <div className="relative h-full overflow-hidden rounded-lg border" aria-busy={isPending}>
-        <Table containerClassName="table-scrollbar" className="min-w-160">
+        <Table className="min-w-160">
           <TableHeader className="bg-muted sticky top-0 z-10 [&_tr]:border-b">
             <TableRow>
               <TableHead>Iniciada</TableHead>
