@@ -6,7 +6,7 @@ import { Alert, AlertDescription } from "@common/components/ui/alert";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@common/components/ui/dialog";
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@common/components/ui/empty";
 import { Skeleton } from "@common/components/ui/skeleton";
-import { BookOpenIcon, CircleAlertIcon } from "lucide-react";
+import { CircleAlertIcon, ScrollTextIcon } from "lucide-react";
 import { COURSE_ENROLLMENT_GRADE_MESSAGES } from "@features/course-enrollments/constants/course-enrollment-grade.constants";
 import { fetchStudentGradesClient } from "@features/course-enrollments/services/course-enrollment-grade-client.service";
 import { formatGradeValue } from "@features/course-enrollments/utils/course-enrollment-grade-format.util";
@@ -72,7 +72,7 @@ export function StudentGradeDialog({ enrollment, open, onOpenChange }: StudentGr
           <Empty className="min-h-56 p-6">
             <EmptyHeader className="max-w-sm">
               <EmptyMedia variant="icon">
-                <BookOpenIcon className="size-5" aria-hidden="true" />
+                <ScrollTextIcon className="size-5" aria-hidden="true" />
               </EmptyMedia>
               <EmptyTitle className="text-base">Todavía no hay notas</EmptyTitle>
               <EmptyDescription>{COURSE_ENROLLMENT_GRADE_MESSAGES.NO_PUBLISHED_GRADES}</EmptyDescription>
