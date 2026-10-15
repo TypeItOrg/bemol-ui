@@ -128,7 +128,7 @@ export function getInstitutionalNavigationSections(user: InstitutionalUser): Ins
       label: "Personal",
       items: [
         { title: "Cuenta", url: "/account", icon: UserRoundIcon },
-        ...(canManageDependents(user) ? [{ title: "Mis personas a cargo", url: GUARDIAN_DEPENDENTS_PAGE_PATH, icon: UsersIcon }] : []),
+        ...(canManageDependents(user) ? [{ title: "Personas a cargo", url: GUARDIAN_DEPENDENTS_PAGE_PATH, icon: UsersIcon }] : []),
       ],
     },
   ];

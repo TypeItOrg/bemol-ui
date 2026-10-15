@@ -19,7 +19,9 @@ function renderDialog(overrides: { onClose?: () => void; onSuccess?: () => void 
     <UnlinkGuardianDependentDialog
       dependentName="Mateo Gonzalez"
       dependentPersonId={DEPENDENT_ID}
+      dependentDocumentNumber="12345678"
       institutionId={INSTITUTION_ID}
+      isPendingRequest={false}
       onClose={overrides.onClose ?? jest.fn()}
       onSuccess={overrides.onSuccess ?? jest.fn()}
     />,

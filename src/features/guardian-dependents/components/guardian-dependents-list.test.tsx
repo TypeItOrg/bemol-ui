@@ -1,11 +1,20 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import { GuardianDependentsList } from "@features/guardian-dependents/components/guardian-dependents-list";
 import type { GuardianDependent } from "@features/guardian-dependents/types/guardian-dependent.types";
+import type { GuardianDependentsQuery } from "@features/guardian-dependents/types/guardian-dependents-query.types";
+
+const mockNavigate = jest.fn();
+const mockPush = jest.fn();
 
 jest.mock("next/navigation", () => ({
-  useRouter: () => ({ push: jest.fn() }),
+  useRouter: () => ({ push: mockPush, refresh: jest.fn() }),
+  usePathname: () => "/my-dependents",
+  useSearchParams: () => new URLSearchParams("sortField=lastName&sortDirection=asc"),
+}));
+jest.mock("@common/components/ui/data-table-navigation", () => ({
+  useDataTableNavigation: () => ({ navigate: mockNavigate, isPending: false }),
 }));
 jest.mock("@features/guardian-dependents/actions/create-guardian-dependent.action", () => ({
   createGuardianDependentAction: jest.fn(),
@@ -37,164 +46,146 @@ function buildDependent(overrides: Partial<GuardianDependent> = {}): GuardianDep
   };
 }
 
+function renderList(items: GuardianDependent[], overrides: Partial<GuardianDependentsQuery> = {}, totalItems = items.length): void {
+  const query: GuardianDependentsQuery = {
+    page: 0,
+    size: 10,
+    search: "",
+    sort: { field: "createdAt", direction: "desc" },
+    ...overrides,
+  };
+
+  render(
+    <GuardianDependentsList
+      institutionId={INSTITUTION_ID}
+      query={query}
+      data={{ items, page: query.page, size: query.size, totalItems, totalPages: Math.ceil(totalItems / query.size) }}
+    />,
+  );
+}
+
 describe("GuardianDependentsList", () => {
-  it("renders each dependent with document, relationship and active applications", () => {
-    render(<GuardianDependentsList dependents={[buildDependent()]} institutionId={INSTITUTION_ID} />);
-
-    expect(screen.getByText("Mateo Gonzalez")).toBeInTheDocument();
-    expect(screen.getByText("DNI")).toBeInTheDocument();
-    expect(screen.getByText("12345678")).toBeInTheDocument();
-    expect(screen.getByText("Edad")).toBeInTheDocument();
-    expect(screen.getByText("8 años")).toBeInTheDocument();
-    expect(screen.getByText("Tu vínculo")).toBeInTheDocument();
-    expect(screen.getByText("Madre")).toBeInTheDocument();
-    expect(screen.getByText("Sos su contacto principal")).toBeInTheDocument();
-    expect(screen.getByText(/2 inscripciones activas/)).toBeInTheDocument();
+  beforeEach(() => {
+    mockNavigate.mockClear();
+    mockPush.mockClear();
   });
 
-  it("shows the approved status and lets the tutor enroll or remove the person", () => {
-    render(<GuardianDependentsList dependents={[buildDependent()]} institutionId={INSTITUTION_ID} />);
-
-    expect(screen.getByText("Aprobada")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Inscribir a Mateo Gonzalez" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Quitar a Mateo Gonzalez" })).toBeInTheDocument();
+  it("renders separate names, document, relationship and active applications", () => {
+    renderList([buildDependent()]);
+    expect(screen.getByRole("cell", { name: "Mateo" })).toBeInTheDocument();
+    expect(screen.getByRole("cell", { name: "Gonzalez" })).toBeInTheDocument();
+    expect(screen.getByRole("cell", { name: "12345678" })).toBeInTheDocument();
+    expect(screen.getByRole("cell", { name: "8 años" })).toBeInTheDocument();
+    expect(screen.getByRole("cell", { name: "Madre" })).toBeInTheDocument();
+    expect(screen.getByText("2 inscripciones activas")).toBeInTheDocument();
+    expect(screen.getAllByRole("columnheader")[0]).toHaveAccessibleName("Acciones");
   });
 
-  it("shows a pending link with a cancellation action", () => {
-    render(
-      <GuardianDependentsList
-        dependents={[buildDependent({ status: "PENDING", firstName: null, lastName: null, activeApplicationsCount: 0, roles: [] })]}
-        institutionId={INSTITUTION_ID}
-      />,
-    );
-
-    expect(screen.getByText("Pendiente de validación")).toBeInTheDocument();
-    expect(screen.getByText("DNI 12345678")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Quitar a DNI 12345678" })).toHaveTextContent("Cancelar solicitud");
-    expect(screen.queryByRole("button", { name: /Inscribir a/ })).not.toBeInTheDocument();
-    expect(screen.queryByText(/inscripci[oó]n(es)? activa/)).not.toBeInTheDocument();
+  it("shows approved actions in the leading contextual menu", async () => {
+    const user = userEvent.setup();
+    renderList([buildDependent()]);
+    await user.click(screen.getByRole("button", { name: "Abrir acciones de Mateo Gonzalez" }));
+    expect(screen.getByRole("menuitem", { name: "Inscribir" })).toBeInTheDocument();
+    expect(screen.getByRole("menuitem", { name: "Quitar vinculación" })).toBeInTheDocument();
   });
 
-  it("shows a rejected link without actions", () => {
-    render(
-      <GuardianDependentsList
-        dependents={[buildDependent({ status: "REJECTED", firstName: null, lastName: null, activeApplicationsCount: 0, roles: [] })]}
-        institutionId={INSTITUTION_ID}
-      />,
-    );
-
-    expect(screen.getByText("Rechazada")).toBeInTheDocument();
-    expect(screen.getByText("DNI 12345678")).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /Inscribir a/ })).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /Quitar a/ })).not.toBeInTheDocument();
-    expect(screen.queryByText(/inscripci[oó]n(es)? activa/)).not.toBeInTheDocument();
+  it("shows pending details inside the status pill and permits cancellation only", async () => {
+    const user = userEvent.setup();
+    renderList([buildDependent({ status: "PENDING", activeApplicationsCount: 0, roles: [] })]);
+    expect(screen.getByText("Sin inscripciones")).toHaveClass("text-muted-foreground", "italic");
+    expect(screen.queryByText(/La institución todavía/)).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: /Ver detalle del estado/ }));
+    expect(screen.getByText(/La institución todavía/)).toBeInTheDocument();
+    await user.keyboard("{Escape}");
+    await user.pointer({ keys: "[MouseRight]", target: screen.getByRole("cell", { name: "Mateo" }) });
+    expect(screen.getByRole("menuitem", { name: "Cancelar solicitud" })).toBeInTheDocument();
+    expect(screen.queryByRole("menuitem", { name: "Inscribir" })).not.toBeInTheDocument();
+    await user.click(screen.getByRole("menuitem", { name: "Cancelar solicitud" }));
+    expect(screen.getByRole("alertdialog")).toHaveTextContent("La institución ya no podrá aprobar esta solicitud");
+    expect(screen.getByRole("button", { name: "Volver" })).toBeInTheDocument();
   });
 
-  it("omits the primary contact line when the guardian is not the primary contact", () => {
-    render(<GuardianDependentsList dependents={[buildDependent({ isPrimaryContact: false })]} institutionId={INSTITUTION_ID} />);
-
-    expect(screen.queryByText("Sos su contacto principal")).not.toBeInTheDocument();
+  it("shows a rejected link without management actions or invented names", () => {
+    renderList([buildDependent({ status: "REJECTED", firstName: null, lastName: null, activeApplicationsCount: 0, roles: [] })]);
+    expect(screen.getByRole("button", { name: /Ver detalle del estado: Rechazada/ })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Abrir acciones/ })).not.toBeInTheDocument();
+    const row = screen.getAllByRole("row")[1];
+    expect(within(row).getAllByRole("cell")[1]).toHaveTextContent("Nombre no informado");
+    expect(within(row).getAllByRole("cell")[2]).toHaveTextContent("Apellido no informado");
   });
 
-  it("shows a dash when the birth date is unknown", () => {
-    render(<GuardianDependentsList dependents={[buildDependent({ birthDate: null })]} institutionId={INSTITUTION_ID} />);
+  it("shows whether the guardian is the primary contact", () => {
+    renderList([buildDependent({ isPrimaryContact: false })]);
+    expect(screen.getByRole("cell", { name: "No" })).toBeInTheDocument();
+  });
 
-    expect(screen.getByRole("cell", { name: "—" })).toBeInTheDocument();
+  it("shows an explicit fallback when the birth date is unknown", () => {
+    renderList([buildDependent({ birthDate: null })]);
+    expect(screen.getByRole("cell", { name: "Edad no informada" })).toBeInTheDocument();
   });
 
   it("renders the empty state when there are no dependents", () => {
-    render(<GuardianDependentsList dependents={[]} institutionId={INSTITUTION_ID} />);
-
-    expect(
-      screen.getByText("Todavía no tenés ninguna persona a cargo. Solicitá la vinculación con tu primera persona para comenzar sus inscripciones."),
-    ).toBeInTheDocument();
+    renderList([]);
+    expect(screen.getByText("No hay personas a cargo")).toBeInTheDocument();
   });
 
-  it("filters dependents by name (ignoring case and accents) or DNI", async () => {
+  it("sends search changes to server navigation instead of filtering the current page", async () => {
     const user = userEvent.setup();
-    const dependents = [
-      buildDependent(),
-      buildDependent({ personGuardianId: "g2", dependentPersonId: "d2", firstName: "Sofía", lastName: "Pérez", documentNumber: "87654321" }),
-    ];
-    render(<GuardianDependentsList dependents={dependents} institutionId={INSTITUTION_ID} />);
-    const search = screen.getByRole("textbox", { name: "Buscar por nombre o DNI" });
-
-    await user.type(search, "sofia");
-    expect(screen.queryByText("Mateo Gonzalez")).not.toBeInTheDocument();
-    expect(screen.getByText("Sofía Pérez")).toBeInTheDocument();
-
-    await user.clear(search);
-    await user.type(search, "1234");
-    expect(screen.getByText("Mateo Gonzalez")).toBeInTheDocument();
-    expect(screen.queryByText("Sofía Pérez")).not.toBeInTheDocument();
+    renderList([buildDependent()]);
+    await user.type(screen.getByRole("textbox", { name: /^Buscar/ }), "sofia");
+    await waitFor(() => expect(mockNavigate).toHaveBeenCalledWith({ search: "sofia", page: "0", size: "10" }, { replace: true }));
   });
 
-  it("starts filtered when an initial search is provided", () => {
-    const dependents = [
-      buildDependent(),
-      buildDependent({ personGuardianId: "g2", dependentPersonId: "d2", firstName: "Sofía", lastName: "Pérez", documentNumber: "87654321" }),
-    ];
-    render(<GuardianDependentsList dependents={dependents} initialSearch="87654321" institutionId={INSTITUTION_ID} />);
-
-    expect(screen.getByRole("textbox", { name: "Buscar por nombre o DNI" })).toHaveValue("87654321");
-    expect(screen.getByText("Sofía Pérez")).toBeInTheDocument();
-    expect(screen.queryByText("Mateo Gonzalez")).not.toBeInTheDocument();
-  });
-
-  it("shows a no-results message and can clear the search", async () => {
+  it("starts with the server search and sends sort changes to page zero", async () => {
     const user = userEvent.setup();
-    render(<GuardianDependentsList dependents={[buildDependent()]} institutionId={INSTITUTION_ID} />);
+    renderList([buildDependent()], { search: "12345678" });
+    expect(screen.getByRole("textbox", { name: /^Buscar/ })).toHaveValue("12345678");
+    await user.click(screen.getByRole("button", { name: /Ordenar por Apellido/ }));
+    expect(mockNavigate).toHaveBeenCalledWith({ page: "0", sortField: "lastName", sortDirection: "asc" });
+  });
 
-    await user.type(screen.getByRole("textbox", { name: "Buscar por nombre o DNI" }), "zzz");
-    expect(screen.getByText("No encontramos personas a cargo que coincidan con tu búsqueda.")).toBeInTheDocument();
-
+  it("shows a filtered empty state and can clear the search", async () => {
+    const user = userEvent.setup();
+    renderList([], { search: "zzz" });
+    expect(screen.getByText("No se encontraron personas a cargo")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Limpiar búsqueda" }));
-    expect(screen.getByText("Mateo Gonzalez")).toBeInTheDocument();
+    await waitFor(() => expect(mockNavigate).toHaveBeenCalledWith({ search: "", page: "0", size: "10" }, { replace: true }));
   });
 
-  it("opens the creation dialog from the header button", async () => {
-    const user = userEvent.setup();
-    render(<GuardianDependentsList dependents={[buildDependent()]} institutionId={INSTITUTION_ID} />);
-
+  it("links to the request page from the collection action", async () => {
+    renderList([buildDependent()]);
+    expect(screen.getByRole("link", { name: "Solicitar vinculación" })).toHaveAttribute(
+      "href",
+      "/my-dependents/new?returnTo=%2Fmy-dependents%3FsortField%3DlastName%26sortDirection%3Dasc",
+    );
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
-
-    await user.click(screen.getByRole("button", { name: "Solicitar vinculación" }));
-
-    expect(screen.getByRole("dialog")).toBeInTheDocument();
   });
 
-  it("opens the creation dialog from the empty state", async () => {
-    const user = userEvent.setup();
-    render(<GuardianDependentsList dependents={[]} institutionId={INSTITUTION_ID} />);
-
-    await user.click(screen.getAllByRole("button", { name: "Solicitar vinculación" })[0]);
-
-    expect(screen.getByRole("dialog")).toBeInTheDocument();
+  it("links to the request page from an empty collection", async () => {
+    renderList([]);
+    expect(screen.getByRole("link", { name: "Solicitar vinculación" })).toHaveAttribute(
+      "href",
+      "/my-dependents/new?returnTo=%2Fmy-dependents%3FsortField%3DlastName%26sortDirection%3Dasc",
+    );
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 
   it("selects the dependent workspace before starting enrollment", async () => {
     const user = userEvent.setup();
-
-    render(<GuardianDependentsList dependents={[buildDependent()]} institutionId={INSTITUTION_ID} />);
-
-    await user.click(screen.getByRole("button", { name: "Inscribir a Mateo Gonzalez" }));
-
+    renderList([buildDependent()]);
+    await user.click(screen.getByRole("button", { name: "Abrir acciones de Mateo Gonzalez" }));
+    await user.click(screen.getByRole("menuitem", { name: "Inscribir" }));
     const { setGuardianWorkspaceAction } = await import("@features/guardian-workspace/actions/set-guardian-workspace.action");
-    expect(setGuardianWorkspaceAction).toHaveBeenCalledWith("019f9c3a-f891-7bc5-a98d-e65332998002");
+    await waitFor(() => expect(setGuardianWorkspaceAction).toHaveBeenCalledWith("019f9c3a-f891-7bc5-a98d-e65332998002"));
   });
 
   it("opens the unlink confirmation for the chosen dependent and can dismiss it", async () => {
     const user = userEvent.setup();
-    render(<GuardianDependentsList dependents={[buildDependent()]} institutionId={INSTITUTION_ID} />);
-
-    expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
-
-    await user.click(screen.getByRole("button", { name: "Quitar a Mateo Gonzalez" }));
-
+    renderList([buildDependent()]);
+    await user.click(screen.getByRole("button", { name: "Abrir acciones de Mateo Gonzalez" }));
+    await user.click(screen.getByRole("menuitem", { name: "Quitar vinculación" }));
     expect(screen.getByRole("alertdialog")).toHaveTextContent("Mateo Gonzalez");
-
     await user.click(screen.getByRole("button", { name: "Cancelar" }));
-
     expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
   });
 });

@@ -68,7 +68,7 @@ export default async function EnrollmentPage({ searchParams }: { searchParams: P
           <AlertCircleIcon className="size-4" />
           <AlertTitle>Todavía no tenés personas a cargo</AlertTitle>
           <AlertDescription>
-            Como tutor, solo podés inscribir a personas a tu cargo. Agregalas en <Link href="/my-dependents">Mis personas a cargo</Link>.
+            Como tutor, solo podés inscribir a personas a tu cargo. Agregalas en <Link href="/my-dependents">Personas a cargo</Link>.
           </AlertDescription>
         </Alert>
       </PlatformPageShell>

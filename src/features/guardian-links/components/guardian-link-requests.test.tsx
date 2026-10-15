@@ -79,18 +79,18 @@ describe("GuardianLinkRequests", () => {
     render(<GuardianLinkRequests institutionId={INSTITUTION_ID} requests={[]} />);
 
     expect(screen.getByText("No hay solicitudes de vinculación")).toBeInTheDocument();
-    expect(screen.getByRole("textbox", { name: "Nombre de estudiante o tutor" })).toBeInTheDocument();
-    expect(screen.getByRole("textbox", { name: "DNI" })).toBeInTheDocument();
-    expect(screen.getByRole("combobox", { name: "Filtrar por estado" })).toBeInTheDocument();
+    expect(screen.getByRole("textbox", { name: "Buscar" })).toBeInTheDocument();
+    expect(screen.getAllByRole("textbox")).toHaveLength(1);
+    expect(screen.getByRole("combobox", { name: "Estado" })).toBeInTheDocument();
   });
 
   it("uses the search empty state when filters have no matches", async () => {
     const user = userEvent.setup();
     render(<GuardianLinkRequests institutionId={INSTITUTION_ID} requests={[buildRequest()]} />);
 
-    await user.type(screen.getByRole("textbox", { name: "Nombre de estudiante o tutor" }), "Persona inexistente");
+    await user.type(screen.getByRole("textbox", { name: "Buscar" }), "Persona inexistente");
 
-    expect(screen.getByText("No se encontraron solicitudes")).toBeInTheDocument();
+    expect(await screen.findByText("No se encontraron solicitudes")).toBeInTheDocument();
     expect(screen.getByText("No encontramos solicitudes que coincidan con los filtros.")).toBeInTheDocument();
   });
 
@@ -125,13 +125,14 @@ describe("GuardianLinkRequests", () => {
     });
     render(<GuardianLinkRequests institutionId={INSTITUTION_ID} requests={[buildRequest(), secondRequest]} />);
 
-    await user.type(screen.getByRole("textbox", { name: "Nombre de estudiante o tutor" }), "Laura");
+    await user.type(screen.getByRole("textbox", { name: "Buscar" }), "Laura");
+    await waitFor(() => expect(screen.queryByText("Ana García")).not.toBeInTheDocument());
     expect(screen.getByText("Laura García")).toBeInTheDocument();
     expect(screen.queryByText("Ana García")).not.toBeInTheDocument();
 
-    await user.clear(screen.getByRole("textbox", { name: "Nombre de estudiante o tutor" }));
-    await user.type(screen.getByRole("textbox", { name: "DNI" }), "35123456");
-    expect(screen.getAllByText("Ana García")).toHaveLength(1);
+    await user.clear(screen.getByRole("textbox", { name: "Buscar" }));
+    await user.type(screen.getByRole("textbox", { name: "Buscar" }), "35123456");
+    expect(await screen.findByText("Ana García")).toBeInTheDocument();
   });
 
   it("marks a request as rejected after a successful rejection", async () => {
@@ -140,7 +141,7 @@ describe("GuardianLinkRequests", () => {
 
     await user.click(screen.getByRole("button", { name: "Rechazar" }));
 
-    await user.click(screen.getByRole("combobox", { name: "Filtrar por estado" }));
+    await user.click(screen.getByRole("combobox", { name: "Estado" }));
     await user.click(await screen.findByRole("option", { name: "Rechazadas" }));
 
     expect(await screen.findAllByText("Rechazadas")).toHaveLength(2);

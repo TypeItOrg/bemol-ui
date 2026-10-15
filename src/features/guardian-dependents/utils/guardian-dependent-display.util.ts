@@ -1,11 +1,11 @@
 import type { GuardianDependent } from "@features/guardian-dependents/types/guardian-dependent.types";
 import { GUARDIAN_LINK_STATUS } from "@features/guardian-dependents/types/guardian-link-status.types";
 
-/** The API hides the name until the link is approved, so the document is the only identifier left. */
+/** Use declared or approved names; a document number is not a person name. */
 export function getGuardianDependentName(dependent: Pick<GuardianDependent, "firstName" | "lastName" | "documentNumber">): string {
   const fullName = [dependent.firstName, dependent.lastName].filter(Boolean).join(" ");
 
-  return fullName || `DNI ${dependent.documentNumber}`;
+  return fullName;
 }
 
 /** Only approved links let the tutor represent the person, so only those can be selected to work with. */

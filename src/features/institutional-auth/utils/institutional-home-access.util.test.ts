@@ -79,7 +79,7 @@ describe("institutional home access", () => {
     expect(links).toEqual([
       expect.objectContaining({
         href: "/guardian-links",
-        title: "Solicitudes de vinculación",
+        title: "Vinculaciones",
         description: "Validá las solicitudes de tutores para vincular personas a cargo.",
       }),
     ]);

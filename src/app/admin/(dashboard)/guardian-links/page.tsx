@@ -11,13 +11,13 @@ import { PlatformBreadcrumb } from "@features/platform-auth/components/platform-
 import { PlatformPageIcon } from "@features/platform-auth/components/platform-page-icon";
 import { PlatformPageShell } from "@features/platform-auth/components/platform-page-shell";
 
-export const metadata: Metadata = { title: "Solicitudes de vinculación" };
+export const metadata: Metadata = { title: "Vinculaciones" };
 
 export default async function PlatformGuardianLinksPage(): Promise<ReactElement> {
   const requests = await fetchAllPlatformGuardianLinkRequests();
 
   return (
-    <PlatformPageShell title="Solicitudes de vinculación" breadcrumb={<PlatformBreadcrumb />} actions={<PlatformPageIcon icon={UsersIcon} />}>
+    <PlatformPageShell title="Vinculaciones" breadcrumb={<PlatformBreadcrumb />} actions={<PlatformPageIcon icon={UsersIcon} />}>
       <GuardianLinkRequests attachmentPathMode="platform" onResolve={resolvePlatformGuardianLinkAction} requests={requests} showInstitution />
     </PlatformPageShell>
   );

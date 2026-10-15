@@ -24,7 +24,7 @@ export function GuardianWorkspaceMenuItems({ onNavigate }: { onNavigate: (url: s
   if (dependents.length === 0) {
     return (
       <>
-        <DropdownMenuLabel>Workspace</DropdownMenuLabel>
+        <DropdownMenuLabel>Personas a cargo</DropdownMenuLabel>
         <DropdownMenuItem asChild>
           <Link href={GUARDIAN_DEPENDENTS_PAGE_PATH} onClick={() => onNavigate(GUARDIAN_DEPENDENTS_PAGE_PATH)}>
             <UsersRoundIcon />
@@ -37,7 +37,7 @@ export function GuardianWorkspaceMenuItems({ onNavigate }: { onNavigate: (url: s
 
   return (
     <>
-      <DropdownMenuLabel>Trabajando con</DropdownMenuLabel>
+      <DropdownMenuLabel>Personas a cargo</DropdownMenuLabel>
       <DropdownMenuRadioGroup value={activeDependent?.dependentPersonId ?? ""} onValueChange={selectDependent}>
         {dependents.map((dependent) => (
           <DropdownMenuRadioItem disabled={isPending} key={dependent.dependentPersonId} value={dependent.dependentPersonId}>

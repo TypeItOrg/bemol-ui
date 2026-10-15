@@ -23,7 +23,9 @@ import type { GuardianDependentActionState } from "@features/guardian-dependents
 type UnlinkGuardianDependentDialogProps = {
   dependentName: string;
   dependentPersonId: string;
+  dependentDocumentNumber: string;
   institutionId: string;
+  isPendingRequest: boolean;
   onClose: () => void;
   onSuccess: () => void;
 };
@@ -31,7 +33,9 @@ type UnlinkGuardianDependentDialogProps = {
 export function UnlinkGuardianDependentDialog({
   dependentName,
   dependentPersonId,
+  dependentDocumentNumber,
   institutionId,
+  isPendingRequest,
   onClose,
   onSuccess,
 }: UnlinkGuardianDependentDialogProps): ReactElement {
@@ -48,6 +52,16 @@ export function UnlinkGuardianDependentDialog({
       return { error: GUARDIAN_DEPENDENT_MESSAGES.UNLINK };
     }
   }, {});
+
+  const submitLabel = isPendingRequest ? "Cancelar solicitud" : "Quitar";
+
+  const pendingLabel = isPendingRequest ? "Cancelando…" : "Quitando…";
+
+  let title = isPendingRequest ? "Cancelar solicitud de vinculación" : "Quitar vinculación";
+
+  if (dependentName) {
+    title = isPendingRequest ? `Cancelar solicitud de ${dependentName}` : `Quitar a ${dependentName}`;
+  }
 
   function handleSubmit(event: SyntheticEvent<HTMLFormElement>): void {
     event.preventDefault();
@@ -74,9 +88,12 @@ export function UnlinkGuardianDependentDialog({
             <div className="bg-destructive/10 text-destructive mb-1 flex size-12 items-center justify-center rounded-2xl">
               <UserMinusIcon aria-hidden="true" className="size-6" />
             </div>
-            <AlertDialogTitle>Quitar a {dependentName}</AlertDialogTitle>
+            <AlertDialogTitle>{title}</AlertDialogTitle>
             <AlertDialogDescription>
-              Vas a perder el acceso a las solicitudes de inscripción de esta persona. Las solicitudes no se eliminan.
+              <span className="mb-2 block font-medium">Documento: {dependentDocumentNumber}</span>
+              {isPendingRequest
+                ? "La institución ya no podrá aprobar esta solicitud de vinculación."
+                : "Vas a perder el acceso a las solicitudes de inscripción de esta persona. Las solicitudes no se eliminan."}
             </AlertDialogDescription>
           </AlertDialogHeader>
           {state.error ? (
@@ -87,10 +104,10 @@ export function UnlinkGuardianDependentDialog({
           ) : null}
           <AlertDialogFooter className="mt-5">
             <AlertDialogCancel disabled={isPending} type="button">
-              Cancelar
+              {isPendingRequest ? "Volver" : "Cancelar"}
             </AlertDialogCancel>
             <Button disabled={isPending} type="submit" variant="destructive">
-              {isPending ? "Quitando…" : "Quitar"}
+              {isPending ? pendingLabel : submitLabel}
             </Button>
           </AlertDialogFooter>
         </form>

@@ -36,7 +36,7 @@ export type InstitutionalHomeLink = {
 
 const PERSONAL_LINK: InstitutionalHomeLink = {
   href: "/account",
-  title: "Mi cuenta",
+  title: "Cuenta",
   description: "Administrá tus datos, contraseña y sesiones.",
   icon: UserRoundIcon,
 };
@@ -104,7 +104,7 @@ export function getInstitutionalEnrollmentHomeLinks(user: InstitutionalUser): In
   if (canManageDependents(user)) {
     links.push({
       href: GUARDIAN_DEPENDENTS_PAGE_PATH,
-      title: "Mis personas a cargo",
+      title: "Personas a cargo",
       description: "Registrá y gestioná a los menores a tu cargo para inscribirlos.",
       icon: UsersIcon,
     });
@@ -164,7 +164,7 @@ export function getInstitutionalEnrollmentHomeLinks(user: InstitutionalUser): In
   if (hasInstitutionalPermission(user, INSTITUTIONAL_PERMISSION.GUARDIAN_LINK_REVIEW)) {
     links.push({
       href: GUARDIAN_LINKS_PAGE_PATH,
-      title: "Solicitudes de vinculación",
+      title: "Vinculaciones",
       description: "Validá las solicitudes de tutores para vincular personas a cargo.",
       icon: UsersIcon,
     });

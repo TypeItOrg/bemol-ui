@@ -144,7 +144,7 @@ describe("getInstitutionalNavigationSections", () => {
 
     expect(sections.find((section) => section.label === "Personal")?.items).toEqual([
       expect.objectContaining({ title: "Cuenta", url: "/account" }),
-      expect.objectContaining({ title: "Mis personas a cargo", url: "/my-dependents" }),
+      expect.objectContaining({ title: "Personas a cargo", url: "/my-dependents" }),
     ]);
   });
 

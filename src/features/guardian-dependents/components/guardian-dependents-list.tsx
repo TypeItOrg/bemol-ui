@@ -1,254 +1,184 @@
 "use client";
 
-/* eslint-disable max-lines */
-
 import { useState, useTransition, type ReactElement } from "react";
 
 import { useRouter } from "next/navigation";
 
-import { ClipboardPlusIcon, PhoneCallIcon, PlusIcon, SearchIcon, UserMinusIcon, UsersIcon, XIcon } from "lucide-react";
+import { Loader2Icon, PlusIcon } from "lucide-react";
 
-import { Badge } from "@common/components/ui/badge";
+import { ReturnToLink } from "@common/components/navigation/return-to-link";
 import { Button } from "@common/components/ui/button";
-import { EmptyMedia } from "@common/components/ui/empty";
-import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from "@common/components/ui/input-group";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@common/components/ui/table";
+import { DataTableAdvancedFiltersTrigger } from "@common/components/ui/data-table-advanced-filters-trigger";
+import { useDataTableNavigation } from "@common/components/ui/data-table-navigation";
+import { DataTablePagination } from "@common/components/ui/data-table-pagination";
+import { DataTableSortableHead } from "@common/components/ui/data-table-sortable-head";
+import { Sheet } from "@common/components/ui/sheet";
+import { Table, TableBody, TableHead, TableHeader, TableRow } from "@common/components/ui/table";
+import type { PaginatedResponse } from "@common/types/paginated-response.types";
+import { PAGE_SIZE_OPTIONS } from "@common/utils/pagination-query.util";
 
 import { ENROLLMENT_PAGE_PATH } from "@features/enrollment-applications/constants/enrollment-application.constants";
-import { calculateAge } from "@features/enrollment-applications/schemas/enrollment-application.schema";
-import { AddGuardianDependentDialog } from "@features/guardian-dependents/components/add-guardian-dependent-dialog";
+import { GuardianDependentRow } from "@features/guardian-dependents/components/guardian-dependent-row";
+import { GuardianDependentsEmptyState } from "@features/guardian-dependents/components/guardian-dependents-empty-state";
+import { GuardianDependentsFilters } from "@features/guardian-dependents/components/guardian-dependents-filters";
 import { UnlinkGuardianDependentDialog } from "@features/guardian-dependents/components/unlink-guardian-dependent-dialog";
-import { GUARDIAN_LINK_STATUS_LABELS, GUARDIAN_RELATIONSHIP_LABELS } from "@features/guardian-dependents/constants/guardian-dependent.constants";
 import type { GuardianDependent } from "@features/guardian-dependents/types/guardian-dependent.types";
-import { GUARDIAN_LINK_STATUS, type GuardianLinkStatus } from "@features/guardian-dependents/types/guardian-link-status.types";
+import type { GuardianDependentsQuery } from "@features/guardian-dependents/types/guardian-dependents-query.types";
 import { getGuardianDependentName } from "@features/guardian-dependents/utils/guardian-dependent-display.util";
 import { setGuardianWorkspaceAction } from "@features/guardian-workspace/actions/set-guardian-workspace.action";
+import { PlatformCollectionActions } from "@features/platform-auth/components/platform-collection-actions";
 
-type GuardianDependentsListProps = { dependents: GuardianDependent[]; institutionId: string; initialSearch?: string };
-
-const ADD_LABEL = "Solicitar vinculación";
-
-const STATUS_BADGE_VARIANT: Record<GuardianLinkStatus, "success" | "secondary" | "destructive" | "outline"> = {
-  [GUARDIAN_LINK_STATUS.ACTIVE]: "success",
-  [GUARDIAN_LINK_STATUS.PENDING]: "secondary",
-  [GUARDIAN_LINK_STATUS.REJECTED]: "destructive",
-  [GUARDIAN_LINK_STATUS.ENDED]: "outline",
+type GuardianDependentsListProps = {
+  data: PaginatedResponse<GuardianDependent>;
+  institutionId: string;
+  query: GuardianDependentsQuery;
 };
 
-function normalize(text: string): string {
-  return text
-    .normalize("NFD")
-    .replace(/\p{Diacritic}/gu, "")
-    .toLowerCase();
-}
-
-function matchesSearch(dependent: GuardianDependent, search: string): boolean {
-  const term = normalize(search.trim());
-
-  return normalize(getGuardianDependentName(dependent)).includes(term) || dependent.documentNumber.includes(term);
-}
-
-export function GuardianDependentsList({ dependents, institutionId, initialSearch = "" }: GuardianDependentsListProps): ReactElement {
+export function GuardianDependentsList({ data, institutionId, query }: GuardianDependentsListProps): ReactElement {
   const router = useRouter();
 
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const { isPending: isNavigating, navigate } = useDataTableNavigation();
 
   const [dependentToUnlink, setDependentToUnlink] = useState<GuardianDependent | null>(null);
 
-  const [search, setSearch] = useState(initialSearch);
-
   const [isSelectingWorkspace, startSelectingWorkspace] = useTransition();
 
-  const visibleDependents = dependents.filter((dependent) => matchesSearch(dependent, search));
+  const [workspaceError, setWorkspaceError] = useState<string>();
+
+  const isFiltered = Boolean(query.search || query.status || query.relationship || query.primaryContact !== undefined);
 
   function handleEnrollment(dependentPersonId: string): void {
-    startSelectingWorkspace(async () => {
-      const result = await setGuardianWorkspaceAction(dependentPersonId);
+    setWorkspaceError(undefined);
 
-      if ("success" in result) {
-        router.push(ENROLLMENT_PAGE_PATH);
+    startSelectingWorkspace(async () => {
+      try {
+        const result = await setGuardianWorkspaceAction(dependentPersonId);
+
+        if ("success" in result) {
+          router.push(ENROLLMENT_PAGE_PATH);
+        } else {
+          setWorkspaceError(result.error);
+        }
+      } catch {
+        setWorkspaceError("No se pudo seleccionar a la persona. Intentá nuevamente.");
       }
     });
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      {dependents.length > 0 ? (
-        <>
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <SearchInput value={search} onChange={setSearch} />
-            <AddButton onClick={() => setIsDialogOpen(true)} />
-          </div>
-          {visibleDependents.length > 0 ? (
-            <div className="relative h-full overflow-hidden rounded-lg border">
-              <Table containerClassName="table-scrollbar" className="min-w-220">
-                <TableHeader className="bg-muted sticky top-0 z-10 [&_tr]:border-b">
-                  <TableRow className="hover:bg-muted/50 data-[state=selected]:bg-muted h-11 border-b transition-colors">
-                    <TableHead>Persona</TableHead>
-                    <TableHead>DNI</TableHead>
-                    <TableHead>Edad</TableHead>
-                    <TableHead>Tu vínculo</TableHead>
-                    <TableHead>Estado</TableHead>
-                    <TableHead>Inscripciones</TableHead>
-                    <TableHead className="w-52 text-right">Acciones</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {visibleDependents.map((dependent) => (
-                    <DependentRow
-                      dependent={dependent}
-                      isSelectingWorkspace={isSelectingWorkspace}
-                      key={dependent.personGuardianId}
-                      onEnroll={() => handleEnrollment(dependent.dependentPersonId)}
-                      onUnlink={() => setDependentToUnlink(dependent)}
+    <Sheet>
+      <div className="flex h-full min-h-0 flex-col gap-4">
+        <PlatformCollectionActions className="sm:justify-between">
+          <Button asChild size="lg">
+            <ReturnToLink href="/my-dependents/new">
+              <PlusIcon aria-hidden="true" />
+              Solicitar vinculación
+            </ReturnToLink>
+          </Button>
+          <DataTableAdvancedFiltersTrigger count={query.primaryContact === undefined ? 0 : 1} label="Filtros avanzados" />
+        </PlatformCollectionActions>
+
+        <GuardianDependentsFilters query={query} />
+
+        {workspaceError ? (
+          <p className="text-destructive text-sm" role="alert">
+            {workspaceError}
+          </p>
+        ) : null}
+
+        <div
+          className={data.items.length === 0 ? "relative h-full" : "relative min-h-0 flex-1 overflow-hidden rounded-lg border"}
+          aria-busy={isNavigating}
+        >
+          {data.items.length === 0 ? (
+            <GuardianDependentsEmptyState hasFilters={isFiltered} />
+          ) : (
+            <Table className="min-w-250">
+              <TableHeader className="bg-muted sticky top-0 z-10 [&_tr]:border-b">
+                <TableRow className="hover:bg-muted/50 h-11">
+                  <TableHead className="w-16 pl-4">
+                    <span className="sr-only">Acciones</span>
+                  </TableHead>
+                  {(
+                    [
+                      ["firstName", "Nombre"],
+                      ["lastName", "Apellido"],
+                      ["documentNumber", "Documento Nacional de Identidad"],
+                    ] as const
+                  ).map(([field, label]) => (
+                    <DataTableSortableHead
+                      key={field}
+                      field={field}
+                      label={label}
+                      sort={query.sort}
+                      onSortChange={(sort) => navigate({ page: "0", sortField: sort.field, sortDirection: sort.direction })}
                     />
                   ))}
-                </TableBody>
-              </Table>
-            </div>
-          ) : (
-            <p className="text-muted-foreground bg-muted/25 rounded-lg border px-4 py-10 text-center text-sm">
-              No encontramos personas a cargo que coincidan con tu búsqueda.
-            </p>
+                  <TableHead>Edad</TableHead>
+                  <DataTableSortableHead
+                    field="relationship"
+                    label="Tu vínculo"
+                    sort={query.sort}
+                    onSortChange={(sort) => navigate({ page: "0", sortField: sort.field, sortDirection: sort.direction })}
+                  />
+                  <TableHead>Contacto principal</TableHead>
+                  <DataTableSortableHead
+                    field="status"
+                    label="Estado"
+                    sort={query.sort}
+                    onSortChange={(sort) => navigate({ page: "0", sortField: sort.field, sortDirection: sort.direction })}
+                  />
+                  <TableHead>Inscripciones</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {data.items.map((dependent) => (
+                  <GuardianDependentRow
+                    key={dependent.personGuardianId}
+                    dependent={dependent}
+                    isSelectingWorkspace={isSelectingWorkspace}
+                    onEnroll={() => handleEnrollment(dependent.dependentPersonId)}
+                    onUnlink={() => setDependentToUnlink(dependent)}
+                  />
+                ))}
+              </TableBody>
+            </Table>
           )}
-        </>
-      ) : (
-        <div className="bg-muted/25 text-muted-foreground flex flex-col items-center justify-center rounded-lg border px-4 py-12 text-center">
-          <EmptyMedia className="mb-4" variant="icon">
-            <UsersIcon className="size-5" />
-          </EmptyMedia>
-          <h3 className="text-foreground text-base font-semibold">No hay personas a cargo</h3>
-          <p className="text-muted-foreground mt-1.5 mb-6 max-w-sm text-sm">
-            Todavía no tenés ninguna persona a cargo. Solicitá la vinculación con tu primera persona para comenzar sus inscripciones.
-          </p>
-          <AddButton onClick={() => setIsDialogOpen(true)} />
-        </div>
-      )}
-
-      {isDialogOpen ? (
-        <AddGuardianDependentDialog institutionId={institutionId} onClose={() => setIsDialogOpen(false)} onSuccess={() => setIsDialogOpen(false)} />
-      ) : null}
-
-      {dependentToUnlink ? (
-        <UnlinkGuardianDependentDialog
-          dependentName={getGuardianDependentName(dependentToUnlink)}
-          dependentPersonId={dependentToUnlink.dependentPersonId}
-          institutionId={institutionId}
-          onClose={() => setDependentToUnlink(null)}
-          onSuccess={() => setDependentToUnlink(null)}
-        />
-      ) : null}
-    </div>
-  );
-}
-
-function SearchInput({ value, onChange }: { value: string; onChange: (value: string) => void }): ReactElement {
-  return (
-    <InputGroup className="h-9 w-full sm:max-w-sm">
-      <InputGroupAddon align="inline-start">
-        <SearchIcon aria-hidden="true" className="text-muted-foreground size-4 shrink-0" />
-      </InputGroupAddon>
-      <InputGroupInput
-        aria-label="Buscar por nombre o DNI"
-        maxLength={100}
-        onChange={(event) => onChange(event.target.value)}
-        placeholder="Buscar por nombre o DNI"
-        value={value}
-      />
-      {value.length > 0 ? (
-        <InputGroupAddon align="inline-end">
-          <InputGroupButton aria-label="Limpiar búsqueda" onClick={() => onChange("")} size="icon-sm" type="button">
-            <XIcon aria-hidden="true" />
-          </InputGroupButton>
-        </InputGroupAddon>
-      ) : null}
-    </InputGroup>
-  );
-}
-
-function AddButton({ onClick }: { onClick: () => void }): ReactElement {
-  return (
-    <Button onClick={onClick} type="button">
-      <PlusIcon aria-hidden="true" />
-      {ADD_LABEL}
-    </Button>
-  );
-}
-
-function DependentRow({
-  dependent,
-  isSelectingWorkspace,
-  onEnroll,
-  onUnlink,
-}: {
-  dependent: GuardianDependent;
-  isSelectingWorkspace: boolean;
-  onEnroll: () => void;
-  onUnlink: () => void;
-}): ReactElement {
-  const age = calculateAge(dependent.birthDate ?? undefined);
-
-  const name = getGuardianDependentName(dependent);
-
-  const isActive = dependent.status === GUARDIAN_LINK_STATUS.ACTIVE;
-
-  const canUnlink = isActive || dependent.status === GUARDIAN_LINK_STATUS.PENDING;
-
-  return (
-    <TableRow className="h-12">
-      <TableCell className="font-medium">
-        <div className="flex min-w-44 flex-col gap-1">
-          <span>{name}</span>
-          {dependent.isPrimaryContact ? (
-            <span className="text-primary flex items-center gap-1.5 text-xs font-medium">
-              <PhoneCallIcon aria-hidden="true" className="size-3.5" />
-              Sos su contacto principal
-            </span>
+          {isNavigating ? (
+            <div className="bg-background/55 absolute inset-0 z-20 flex items-center justify-center rounded-lg backdrop-blur-[1px]">
+              <Loader2Icon className="text-muted-foreground size-5 animate-spin" aria-label="Cargando personas a cargo" role="status" />
+            </div>
           ) : null}
         </div>
-      </TableCell>
-      <TableCell>{dependent.documentNumber}</TableCell>
-      <TableCell>{age === null || age === undefined ? "—" : `${age} años`}</TableCell>
-      <TableCell>{GUARDIAN_RELATIONSHIP_LABELS[dependent.relationship]}</TableCell>
-      <TableCell>
-        <div className="flex max-w-64 flex-col items-start gap-1.5">
-          <Badge variant={STATUS_BADGE_VARIANT[dependent.status]}>{GUARDIAN_LINK_STATUS_LABELS[dependent.status]}</Badge>
-          {!isActive ? (
-            <span className="text-muted-foreground text-xs whitespace-normal">
-              {dependent.status === GUARDIAN_LINK_STATUS.PENDING
-                ? "La institución todavía tiene que validar la vinculación. Hasta entonces no podés gestionar a esta persona."
-                : "La institución rechazó la vinculación. No podés gestionar a esta persona."}
-            </span>
-          ) : null}
-        </div>
-      </TableCell>
-      <TableCell>
-        {isActive ? (
-          <span className={dependent.activeApplicationsCount > 0 ? "text-foreground font-medium" : "text-muted-foreground"}>
-            {dependent.activeApplicationsCount} {dependent.activeApplicationsCount === 1 ? "inscripción activa" : "inscripciones activas"}
-          </span>
-        ) : (
-          <span className="text-muted-foreground">—</span>
-        )}
-      </TableCell>
-      <TableCell className="w-52 text-right">
-        {canUnlink ? (
-          <div className="flex justify-end gap-2">
-            {isActive ? (
-              <Button aria-label={`Inscribir a ${name}`} disabled={isSelectingWorkspace} onClick={onEnroll} size="sm" type="button">
-                <ClipboardPlusIcon aria-hidden="true" />
-                Inscribir
-              </Button>
-            ) : null}
-            <Button aria-label={`Quitar a ${name}`} onClick={onUnlink} size="sm" type="button" variant="outline">
-              <UserMinusIcon aria-hidden="true" />
-              {dependent.status === GUARDIAN_LINK_STATUS.PENDING ? "Cancelar solicitud" : "Quitar"}
-            </Button>
-          </div>
-        ) : (
-          <span className="text-muted-foreground">—</span>
-        )}
-      </TableCell>
-    </TableRow>
+
+        {data.items.length > 0 ? (
+          <DataTablePagination
+            page={data.page}
+            size={data.size}
+            totalPages={data.totalPages}
+            summaryLabel={`${data.totalItems} ${data.totalItems === 1 ? "persona a cargo." : "personas a cargo."}`}
+            pageSizeOptions={PAGE_SIZE_OPTIONS}
+            isPending={isNavigating}
+            onPageChange={(page) => navigate({ page: String(page), size: String(query.size) })}
+            onPageSizeChange={(size) => navigate({ page: "0", size })}
+          />
+        ) : null}
+
+        {dependentToUnlink ? (
+          <UnlinkGuardianDependentDialog
+            dependentName={getGuardianDependentName(dependentToUnlink)}
+            dependentDocumentNumber={dependentToUnlink.documentNumber}
+            isPendingRequest={dependentToUnlink.status === "PENDING"}
+            dependentPersonId={dependentToUnlink.dependentPersonId}
+            institutionId={institutionId}
+            onClose={() => setDependentToUnlink(null)}
+            onSuccess={() => {
+              setDependentToUnlink(null);
+              router.refresh();
+            }}
+          />
+        ) : null}
+      </div>
+    </Sheet>
   );
 }

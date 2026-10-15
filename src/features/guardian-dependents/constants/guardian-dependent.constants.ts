@@ -29,9 +29,10 @@ export const GUARDIAN_ATTACHMENT_MAX_BYTES = 10 * 1024 * 1024;
 export const GUARDIAN_DEPENDENT_MESSAGES = {
   FETCH: "No se pudieron cargar las personas a tu cargo.",
   CREATE: "No se pudo registrar a la persona a cargo.",
+  RETURN_FAILED: "La solicitud se registró, pero no pudimos volver al listado. Volvé a Personas a cargo para consultarla.",
   UNLINK: "No se pudo quitar a la persona a cargo.",
   ATTACHMENTS_FAILED:
-    "Tu solicitud se registró, pero no pudimos adjuntar la documentación. Cerrá esta ventana y contactá a la institución para completarla.",
+    "Tu solicitud se registró, pero no pudimos adjuntar la documentación. Volvé al listado y contactá a la institución para completarla.",
   ATTACHMENT_TOO_MANY: "Podés adjuntar hasta 5 documentos.",
   ATTACHMENT_REQUIRED: "Seleccioná un documento para adjuntar.",
   ATTACHMENT_TOO_LARGE: "Cada documento puede pesar hasta 10 MB.",

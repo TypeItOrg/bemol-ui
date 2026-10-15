@@ -9,9 +9,9 @@ import { CheckIcon, FileTextIcon, SearchIcon, UsersIcon, XIcon } from "lucide-re
 import { Alert, AlertDescription } from "@common/components/ui/alert";
 import { Badge } from "@common/components/ui/badge";
 import { Button } from "@common/components/ui/button";
+import { DataTableFilterSelect } from "@common/components/ui/data-table-filter-select";
+import { DataTableSearchFilter } from "@common/components/ui/data-table-search-filter";
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@common/components/ui/empty";
-import { Input } from "@common/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@common/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@common/components/ui/table";
 import { formatDisplayDate } from "@common/utils/date-input.util";
 
@@ -57,8 +57,6 @@ export function GuardianLinkRequests({
 
   const [search, setSearch] = useState("");
 
-  const [documentNumber, setDocumentNumber] = useState("");
-
   const [status, setStatus] = useState<StatusFilter>("ALL");
 
   const normalizedSearch = search.trim().toLocaleLowerCase();
@@ -72,11 +70,10 @@ export function GuardianLinkRequests({
 
         return (
           (status === "ALL" || request.status === status) &&
-          (!normalizedSearch || people.includes(normalizedSearch)) &&
-          (!documentNumber.trim() || documents.includes(documentNumber.trim()))
+          (!normalizedSearch || people.includes(normalizedSearch) || documents.includes(normalizedSearch))
         );
       }),
-    [documentNumber, normalizedSearch, rows, status],
+    [normalizedSearch, rows, status],
   );
 
   function updateRow(requestId: string, nextStatus: GuardianLinkStatus): void {
@@ -84,15 +81,8 @@ export function GuardianLinkRequests({
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      <GuardianLinkFilters
-        documentNumber={documentNumber}
-        onDocumentNumberChange={setDocumentNumber}
-        onSearchChange={setSearch}
-        onStatusChange={(value) => setStatus(value as StatusFilter)}
-        search={search}
-        status={status}
-      />
+    <div className="flex h-full flex-col gap-4">
+      <GuardianLinkFilters onSearchChange={setSearch} onStatusChange={setStatus} search={search} status={status} />
 
       {filteredRows.length === 0 ? (
         <EmptyRequests hasFilters={rows.length > 0} />
@@ -133,47 +123,28 @@ export function GuardianLinkRequests({
 
 function GuardianLinkFilters({
   search,
-  documentNumber,
   status,
   onSearchChange,
-  onDocumentNumberChange,
   onStatusChange,
 }: {
   search: string;
-  documentNumber: string;
   status: StatusFilter;
   onSearchChange: (value: string) => void;
-  onDocumentNumberChange: (value: string) => void;
-  onStatusChange: (value: string) => void;
+  onStatusChange: (value: StatusFilter) => void;
 }): ReactElement {
   return (
-    <div className="bg-muted/25 flex flex-row flex-wrap gap-3 rounded-lg border p-4 md:items-end">
-      <label className="flex min-w-56 flex-1 flex-col gap-1.5 text-sm font-medium">
-        Nombre de estudiante o tutor
-        <div className="relative">
-          <SearchIcon aria-hidden="true" className="text-muted-foreground absolute top-2.5 left-3 size-4" />
-          <Input className="pl-9" onChange={(event) => onSearchChange(event.target.value)} placeholder="Buscar por nombre…" value={search} />
-        </div>
-      </label>
-      <label className="flex min-w-44 flex-1 flex-col gap-1.5 text-sm font-medium">
-        DNI
-        <Input onChange={(event) => onDocumentNumberChange(event.target.value)} placeholder="Buscar por DNI…" value={documentNumber} />
-      </label>
-      <label className="flex min-w-48 flex-1 flex-col gap-1.5 text-sm font-medium">
-        Estado
-        <Select onValueChange={onStatusChange} value={status}>
-          <SelectTrigger aria-label="Filtrar por estado">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {Object.entries(STATUS_LABELS).map(([value, label]) => (
-              <SelectItem key={value} value={value}>
-                {label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </label>
+    <div className="bg-muted/25 flex flex-row flex-wrap gap-3 rounded-lg border p-4 md:items-end [&>*]:flex-[1_0_min(250px,100%)]">
+      <DataTableSearchFilter initialValue={search} onValueChange={onSearchChange} placeholder="Buscar por nombre, apellido o documento..." />
+      <DataTableFilterSelect
+        filter={{
+          defaultValue: "ALL",
+          label: "Estado",
+          name: "status",
+          options: Object.entries(STATUS_LABELS).map(([value, label]) => ({ value: value as StatusFilter, label })),
+          value: status,
+        }}
+        onValueChange={onStatusChange}
+      />
     </div>
   );
 }

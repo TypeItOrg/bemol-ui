@@ -24,8 +24,8 @@ describe("getGuardianDependentName", () => {
     expect(getGuardianDependentName(createDependent())).toBe("Mateo González");
   });
 
-  it("falls back to the document while the name is hidden", () => {
-    expect(getGuardianDependentName(createDependent({ firstName: null, lastName: null }))).toBe("DNI 54123456");
+  it("does not substitute the document for a missing name", () => {
+    expect(getGuardianDependentName(createDependent({ firstName: null, lastName: null }))).toBe("");
   });
 });
 

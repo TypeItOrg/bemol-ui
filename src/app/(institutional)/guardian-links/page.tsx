@@ -15,7 +15,7 @@ import { PlatformPageIcon } from "@features/platform-auth/components/platform-pa
 import { PlatformPageShell } from "@features/platform-auth/components/platform-page-shell";
 
 export async function generateMetadata(): Promise<Metadata> {
-  return getInstitutionalMetadata("Solicitudes de vinculación");
+  return getInstitutionalMetadata("Vinculaciones");
 }
 
 export default async function GuardianLinksPage(): Promise<ReactElement> {
@@ -28,7 +28,7 @@ export default async function GuardianLinksPage(): Promise<ReactElement> {
   const requests = await fetchInstitutionGuardianLinkRequests(user.institutionId);
 
   return (
-    <PlatformPageShell title="Solicitudes de vinculación" breadcrumb={<InstitutionalBreadcrumb />} actions={<PlatformPageIcon icon={UsersIcon} />}>
+    <PlatformPageShell title="Vinculaciones" breadcrumb={<InstitutionalBreadcrumb />} actions={<PlatformPageIcon icon={UsersIcon} />}>
       <GuardianLinkRequests institutionId={user.institutionId} requests={requests} />
     </PlatformPageShell>
   );

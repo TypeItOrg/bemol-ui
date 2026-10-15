@@ -33,7 +33,7 @@ export function InstitutionalRegisterForm(): ReactElement {
   return (
     <ActionForm action={formAction} className="flex flex-col justify-center p-5 sm:p-8">
       <InstitutionalAuthStepHeader
-        title="Formá parte"
+        title="Crear cuenta"
         description="Completá tus datos para registrarte en una institución."
         showInstitutionName={false}
       />

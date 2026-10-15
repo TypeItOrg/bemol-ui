@@ -36,8 +36,14 @@ interface MyEnrollmentApplicationDetailPageProps {
   }>;
 }
 
-export async function generateMetadata(): Promise<Metadata> {
-  return getInstitutionalMetadata("Detalle de inscripción");
+export async function generateMetadata({ params }: Pick<MyEnrollmentApplicationDetailPageProps, "params">): Promise<Metadata> {
+  const { applicationId } = await params;
+
+  await requireInstitutionalUser();
+
+  const application = await fetchEnrollmentApplicationById(applicationId).catch(() => null);
+
+  return getInstitutionalMetadata(application?.status === ENROLLMENT_APPLICATION_STATUS.DRAFT ? "Continuar inscripción" : "Detalle de inscripción");
 }
 
 export default async function MyEnrollmentApplicationDetailPage({

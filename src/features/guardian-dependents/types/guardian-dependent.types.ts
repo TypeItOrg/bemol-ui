@@ -6,7 +6,7 @@ export type GuardianDependent = {
   dependentPersonId: string;
   status: GuardianLinkStatus;
   documentNumber: string;
-  // Hidden by the API until the institution approves the link.
+  // Declared names until approval; legacy requests without declared names remain null.
   firstName: string | null;
   lastName: string | null;
   birthDate: string | null;
