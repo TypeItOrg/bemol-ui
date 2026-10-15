@@ -172,7 +172,7 @@ export function CourseEnrollmentDetailGradeSection({
         <CardTitle className="text-base">Notas</CardTitle>
         {showAddButton ? (
           <Button
-            size="sm"
+            size="lg"
             onClick={() => {
               setFormGrade(undefined);
               setIsFormOpen(true);
