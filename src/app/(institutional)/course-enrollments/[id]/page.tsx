@@ -71,7 +71,6 @@ export default async function CourseEnrollmentDetailPage({
         canCreate={hasTrainingPathPermission(user, INSTITUTIONAL_PERMISSION.COURSE_ENROLLMENT_GRADE_CREATE, enrollment.trainingPathId)}
         canUpdate={hasTrainingPathPermission(user, INSTITUTIONAL_PERMISSION.COURSE_ENROLLMENT_GRADE_UPDATE, enrollment.trainingPathId)}
         canDelete={hasTrainingPathPermission(user, INSTITUTIONAL_PERMISSION.COURSE_ENROLLMENT_GRADE_DELETE, enrollment.trainingPathId)}
-        canPublish={hasTrainingPathPermission(user, INSTITUTIONAL_PERMISSION.COURSE_ENROLLMENT_GRADE_PUBLISH, enrollment.trainingPathId)}
       />
     </PlatformPageShell>
   );
