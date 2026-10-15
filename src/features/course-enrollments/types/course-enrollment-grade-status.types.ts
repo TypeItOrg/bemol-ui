@@ -5,5 +5,4 @@ export const COURSE_ENROLLMENT_GRADE_STATUS = {
   PENDING_DELETION: "PENDING_DELETION",
 } as const;
 
-export type CourseEnrollmentGradeStatus =
-  (typeof COURSE_ENROLLMENT_GRADE_STATUS)[keyof typeof COURSE_ENROLLMENT_GRADE_STATUS];
+export type CourseEnrollmentGradeStatus = (typeof COURSE_ENROLLMENT_GRADE_STATUS)[keyof typeof COURSE_ENROLLMENT_GRADE_STATUS];

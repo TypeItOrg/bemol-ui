@@ -65,10 +65,15 @@ export default async function CourseEnrollmentsPage({
   const canCreate = hasInstitutionalPermission(user, INSTITUTIONAL_PERMISSION.COURSE_ENROLLMENT_CREATE);
 
   const canReadGrades = hasInstitutionalPermission(user, INSTITUTIONAL_PERMISSION.COURSE_ENROLLMENT_GRADE_READ);
+
   const canCreateGrades = hasInstitutionalPermission(user, INSTITUTIONAL_PERMISSION.COURSE_ENROLLMENT_GRADE_CREATE);
+
   const canUpdateGrades = hasInstitutionalPermission(user, INSTITUTIONAL_PERMISSION.COURSE_ENROLLMENT_GRADE_UPDATE);
+
   const canDeleteGrades = hasInstitutionalPermission(user, INSTITUTIONAL_PERMISSION.COURSE_ENROLLMENT_GRADE_DELETE);
+
   const canPublishGrades = hasInstitutionalPermission(user, INSTITUTIONAL_PERMISSION.COURSE_ENROLLMENT_GRADE_PUBLISH);
+
   const canWithdraw = hasInstitutionalPermission(user, INSTITUTIONAL_PERMISSION.COURSE_ENROLLMENT_WITHDRAW);
 
   const canUpdateAcademicStatus = hasInstitutionalPermission(user, INSTITUTIONAL_PERMISSION.COURSE_ENROLLMENT_ACADEMIC_STATUS_UPDATE);
@@ -77,7 +82,11 @@ export default async function CourseEnrollmentsPage({
     <PlatformPageShell title="Cursadas" breadcrumb={<InstitutionalBreadcrumb />} actions={<PlatformPageIcon icon={GraduationCapIcon} />}>
       {canCreate || canPublishGrades ? (
         <div className="flex flex-wrap items-center gap-2">
-          {canCreate ? <Button asChild size="lg"><Link href={appendReturnTo("/course-enrollments/new", returnTo)}>Alta manual</Link></Button> : null}
+          {canCreate ? (
+            <Button asChild size="lg">
+              <Link href={appendReturnTo("/course-enrollments/new", returnTo)}>Alta manual</Link>
+            </Button>
+          ) : null}
           {canPublishGrades ? <BulkPublishGradesButton /> : null}
         </div>
       ) : null}

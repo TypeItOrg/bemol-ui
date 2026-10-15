@@ -21,11 +21,7 @@ function parseGradeValue(raw: unknown): number | undefined {
 }
 
 export const courseEnrollmentGradeSchema = z.object({
-  evaluation: z
-    .string()
-    .trim()
-    .min(1, "La evaluación es obligatoria.")
-    .max(150, "La evaluación no debe superar los 150 caracteres."),
+  evaluation: z.string().trim().min(1, "La evaluación es obligatoria.").max(150, "La evaluación no debe superar los 150 caracteres."),
   value: z.preprocess(
     parseGradeValue,
     z
@@ -35,6 +31,7 @@ export const courseEnrollmentGradeSchema = z.object({
       .refine(
         (grade) => {
           const decimals = String(grade).split(".")[1];
+
           return !decimals || decimals.length <= 2;
         },
         { message: "La nota admite como máximo dos decimales." },

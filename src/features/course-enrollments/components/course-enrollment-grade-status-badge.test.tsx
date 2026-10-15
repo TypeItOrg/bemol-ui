@@ -12,7 +12,7 @@ describe("CourseEnrollmentGradeStatusBadge", () => {
   it("renders published status", () => {
     render(<CourseEnrollmentGradeStatusBadge status="PUBLISHED" />);
 
-    expect(screen.getByText("Publicado")).toBeInTheDocument();
+    expect(screen.getByText("Calificación registrada")).toBeInTheDocument();
   });
 
   it("renders pending changes status", () => {

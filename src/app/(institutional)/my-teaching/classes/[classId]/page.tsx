@@ -49,8 +49,17 @@ export default async function TeacherClassPage({
       actions={<PublishGradesButton classId={classId} mode="teacher" />}
     >
       <DataTableNavigationProvider>
-        <CourseEnrollmentTable data={data} page={page} size={size} emptyMessage="Esta clase todavía no tiene cursadas."
-          gradeMode="teacher" canReadGrades canCreateGrade canUpdateGrade canDeleteGrade />
+        <CourseEnrollmentTable
+          data={data}
+          page={page}
+          size={size}
+          emptyMessage="Esta clase todavía no tiene cursadas."
+          gradeMode="teacher"
+          canReadGrades
+          canCreateGrade
+          canUpdateGrade
+          canDeleteGrade
+        />
       </DataTableNavigationProvider>
     </PlatformPageShell>
   );

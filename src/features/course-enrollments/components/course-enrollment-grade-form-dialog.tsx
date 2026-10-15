@@ -1,16 +1,19 @@
 "use client";
 
-import { ActionForm } from "@common/components/action-form";
-import { safelyRunAction } from "@common/utils/safe-action.util";
-import * as React from "react";
+import { useActionState } from "react";
+import type { ReactElement } from "react";
+
 import { CircleAlertIcon } from "lucide-react";
 import { toast } from "sonner";
 
+import { ActionForm } from "@common/components/action-form";
 import { Alert, AlertDescription } from "@common/components/ui/alert";
 import { Button } from "@common/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@common/components/ui/dialog";
 import { Field, FieldLabel } from "@common/components/ui/field";
 import { Input } from "@common/components/ui/input";
+import { safelyRunAction } from "@common/utils/safe-action.util";
+
 import {
   createInstitutionalGradeAction,
   createTeacherGradeAction,
@@ -30,16 +33,8 @@ type GradeFormDialogProps = {
   onSaved: () => void;
 };
 
-export function CourseEnrollmentGradeFormDialog({
-  mode,
-  enrollmentId,
-  classId,
-  grade,
-  open,
-  onOpenChange,
-  onSaved,
-}: GradeFormDialogProps): React.ReactElement {
-  const [state, formAction, isPending] = React.useActionState(async (_previous: { error?: string }, formData: FormData) => {
+function GradeFormContent({ mode, enrollmentId, classId, grade, onOpenChange, onSaved }: Omit<GradeFormDialogProps, "open">): ReactElement {
+  const [state, formAction, isPending] = useActionState(async (_previous: { error?: string }, formData: FormData) => {
     async function run(): Promise<{ error?: string; draft?: boolean; pending?: boolean }> {
       if (grade) {
         if (mode === "teacher") {
@@ -88,13 +83,9 @@ export function CourseEnrollmentGradeFormDialog({
     onOpenChange(nextOpen);
   }
 
-  if (!open) {
-    return <></>;
-  }
-
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-md">
+    <Dialog open onOpenChange={handleOpenChange}>
+      <DialogContent className="max-w-[calc(100%_-_2.5rem)] sm:max-w-md">
         <ActionForm action={formAction} className="space-y-4">
           <DialogHeader>
             <DialogTitle>{grade ? COURSE_ENROLLMENT_GRADE_MESSAGES.EDIT_GRADE : COURSE_ENROLLMENT_GRADE_MESSAGES.ADD_GRADE}</DialogTitle>
@@ -148,5 +139,31 @@ export function CourseEnrollmentGradeFormDialog({
         </ActionForm>
       </DialogContent>
     </Dialog>
+  );
+}
+
+export function CourseEnrollmentGradeFormDialog({
+  mode,
+  enrollmentId,
+  classId,
+  grade,
+  open,
+  onOpenChange,
+  onSaved,
+}: GradeFormDialogProps): ReactElement {
+  if (!open) {
+    return <></>;
+  }
+
+  return (
+    <GradeFormContent
+      key={grade ? `edit-${grade.id}-${grade.version}` : "create"}
+      mode={mode}
+      enrollmentId={enrollmentId}
+      classId={classId}
+      grade={grade}
+      onOpenChange={onOpenChange}
+      onSaved={onSaved}
+    />
   );
 }

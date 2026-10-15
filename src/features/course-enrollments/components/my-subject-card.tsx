@@ -5,9 +5,9 @@ import { ClockIcon, Music2Icon } from "lucide-react";
 import { Badge } from "@common/components/ui/badge";
 import { Button } from "@common/components/ui/button";
 
+import { formatStudyPlanLabel } from "@features/academic/utils/study-plan-label.util";
 import { StudentGradeDialog } from "@features/course-enrollments/components/student-grade-dialog";
 import { COURSE_ENROLLMENT_GRADE_MESSAGES } from "@features/course-enrollments/constants/course-enrollment-grade.constants";
-import { formatStudyPlanLabel } from "@features/academic/utils/study-plan-label.util";
 import { COURSE_DAY_LABELS } from "@features/course-enrollments/constants/course-enrollment.constants";
 import { MY_SUBJECTS_MESSAGES } from "@features/course-enrollments/constants/my-subjects.constants";
 import { COURSE_ENROLLMENT_STATUS } from "@features/course-enrollments/types/course-enrollment-status.types";
@@ -23,6 +23,7 @@ type MySubjectCardProps = {
 
 export function MySubjectCard({ enrollment, canWithdraw, canUpdateAcademicStatus, onMutation }: MySubjectCardProps): ReactElement {
   const [isGradesOpen, setIsGradesOpen] = useState(false);
+
   const isEnrolled = enrollment.status === COURSE_ENROLLMENT_STATUS.ENROLLED;
 
   const isWithdrawn =
@@ -101,17 +102,19 @@ export function MySubjectCard({ enrollment, canWithdraw, canUpdateAcademicStatus
         </div>
       </div>
       <div className="flex flex-wrap gap-2 border-t px-4 py-3">
-        <Button variant="outline" size="sm" onClick={() => setIsGradesOpen(true)}>{COURSE_ENROLLMENT_GRADE_MESSAGES.VIEW_GRADES}</Button>
-          {showWithdraw ? (
-            <Button variant="outline" size="sm" onClick={() => onMutation(enrollment, "withdraw")}>
-              Registrar baja
-            </Button>
-          ) : null}
-          {showAcademicAction ? (
-            <Button variant="outline" size="sm" onClick={() => onMutation(enrollment, "academic")}>
-              Registrar resultado
-            </Button>
-          ) : null}
+        <Button variant="outline" size="sm" onClick={() => setIsGradesOpen(true)}>
+          {COURSE_ENROLLMENT_GRADE_MESSAGES.VIEW_GRADES}
+        </Button>
+        {showWithdraw ? (
+          <Button variant="outline" size="sm" onClick={() => onMutation(enrollment, "withdraw")}>
+            Registrar baja
+          </Button>
+        ) : null}
+        {showAcademicAction ? (
+          <Button variant="outline" size="sm" onClick={() => onMutation(enrollment, "academic")}>
+            Registrar resultado
+          </Button>
+        ) : null}
       </div>
       <StudentGradeDialog enrollment={enrollment} open={isGradesOpen} onOpenChange={setIsGradesOpen} />
     </article>

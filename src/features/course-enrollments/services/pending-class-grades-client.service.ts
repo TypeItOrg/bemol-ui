@@ -1,4 +1,5 @@
 import { parseHttpResponse } from "@common/utils/http-response-error.util";
+
 import type { PendingClassGrades } from "@features/course-enrollments/types/pending-class-grades.types";
 
 export async function fetchPendingClassesClient(): Promise<PendingClassGrades[]> {

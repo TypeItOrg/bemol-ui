@@ -1,6 +1,6 @@
 "use client";
 
-import * as React from "react";
+import { useEffect } from "react";
 
 export const GRADES_CHANGED_EVENT = "course-enrollment-grades-changed";
 
@@ -11,7 +11,7 @@ export function notifyGradesChanged(): void {
 }
 
 export function useGradesChangedListener(onChanged: () => void): void {
-  React.useEffect(() => {
+  useEffect(() => {
     if (typeof window === "undefined") {
       return;
     }

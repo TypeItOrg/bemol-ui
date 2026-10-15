@@ -14,14 +14,14 @@ import type { PaginatedResponse } from "@common/types/paginated-response.types";
 import { getDataTableEmptyContent } from "@common/utils/data-table-empty-content.util";
 
 import { CourseEnrollmentGradeDialog } from "@features/course-enrollments/components/course-enrollment-grade-dialog";
-import { INSTITUTIONAL_PERMISSION as P } from "@features/institutional-auth/types/institutional-permission.types";
-import { scopeIncludesTrainingPath } from "@features/institutional-auth/utils/institutional-permission.util";
 import { CourseEnrollmentMutationDialog } from "@features/course-enrollments/components/course-enrollment-mutation-dialog";
 import { CourseEnrollmentPagination } from "@features/course-enrollments/components/course-enrollment-pagination";
 import { CourseEnrollmentResultsTable } from "@features/course-enrollments/components/course-enrollment-results-table";
 import type { AcademicEnrollmentStatus } from "@features/course-enrollments/types/academic-enrollment-status.types";
 import type { CourseEnrollmentStatus } from "@features/course-enrollments/types/course-enrollment-status.types";
 import type { CourseEnrollment } from "@features/course-enrollments/types/course-enrollment.types";
+import { INSTITUTIONAL_PERMISSION as P } from "@features/institutional-auth/types/institutional-permission.types";
+import { scopeIncludesTrainingPath } from "@features/institutional-auth/utils/institutional-permission.util";
 
 type CourseEnrollmentTableProps = {
   permissionScopes?: import("@features/institutional-auth/types/institutional-user.types").InstitutionalUser["permissionScopes"];
@@ -68,6 +68,7 @@ export function CourseEnrollmentTable({
   }>();
 
   const [gradeEnrollment, setGradeEnrollment] = useState<CourseEnrollment | null>(null);
+
   const hasFilters = status !== undefined || academicStatus !== undefined;
 
   const hasItemsOnOtherPages = data.totalItems > 0;
@@ -145,12 +146,32 @@ export function CourseEnrollmentTable({
       <CourseEnrollmentPagination page={page} size={size} totalItems={data.totalItems} totalPages={data.totalPages} />
 
       {gradeEnrollment && gradeMode ? (
-        <CourseEnrollmentGradeDialog enrollment={gradeEnrollment} mode={gradeMode}
-          canCreate={gradeMode === "teacher" ? canCreateGrade : canCreateGrade && scopeIncludesTrainingPath(permissionScopes, P.COURSE_ENROLLMENT_GRADE_CREATE, gradeEnrollment.trainingPathId)}
-          canUpdate={gradeMode === "teacher" ? canUpdateGrade : canUpdateGrade && scopeIncludesTrainingPath(permissionScopes, P.COURSE_ENROLLMENT_GRADE_UPDATE, gradeEnrollment.trainingPathId)}
-          canDelete={gradeMode === "teacher" ? canDeleteGrade : canDeleteGrade && scopeIncludesTrainingPath(permissionScopes, P.COURSE_ENROLLMENT_GRADE_DELETE, gradeEnrollment.trainingPathId)}
-          open onOpenChange={(open) => { if (!open) setGradeEnrollment(null); }}
-          onChanged={() => router.refresh()} />
+        <CourseEnrollmentGradeDialog
+          enrollment={gradeEnrollment}
+          mode={gradeMode}
+          canCreate={
+            gradeMode === "teacher"
+              ? canCreateGrade
+              : canCreateGrade && scopeIncludesTrainingPath(permissionScopes, P.COURSE_ENROLLMENT_GRADE_CREATE, gradeEnrollment.trainingPathId)
+          }
+          canUpdate={
+            gradeMode === "teacher"
+              ? canUpdateGrade
+              : canUpdateGrade && scopeIncludesTrainingPath(permissionScopes, P.COURSE_ENROLLMENT_GRADE_UPDATE, gradeEnrollment.trainingPathId)
+          }
+          canDelete={
+            gradeMode === "teacher"
+              ? canDeleteGrade
+              : canDeleteGrade && scopeIncludesTrainingPath(permissionScopes, P.COURSE_ENROLLMENT_GRADE_DELETE, gradeEnrollment.trainingPathId)
+          }
+          open
+          onOpenChange={(open) => {
+            if (!open) {
+              setGradeEnrollment(null);
+            }
+          }}
+          onChanged={() => router.refresh()}
+        />
       ) : null}
       {mutation ? (
         <CourseEnrollmentMutationDialog
