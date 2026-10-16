@@ -23,6 +23,8 @@ export const COURSE_ENROLLMENT_GRADE_MESSAGES = {
 
 export const COURSE_ENROLLMENT_GRADE_HISTORY_PAGE_SIZE = 20;
 
+export const COURSE_ENROLLMENT_GRADE_BULK_PUBLISH_LIMIT = 20;
+
 export const COURSE_ENROLLMENT_GRADE_STATUS_LABELS: Record<string, string> = {
   DRAFT: "Borrador",
   PUBLISHED: "Calificación registrada",

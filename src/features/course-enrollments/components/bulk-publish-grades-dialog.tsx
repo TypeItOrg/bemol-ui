@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { ReactElement } from "react";
 
 import { CircleAlertIcon, ScrollTextIcon } from "lucide-react";
@@ -15,63 +15,112 @@ import { BulkPublishGradesForm } from "@features/course-enrollments/components/b
 import { fetchPendingClassesClient } from "@features/course-enrollments/services/pending-class-grades-client.service";
 import type { PendingClassGrades } from "@features/course-enrollments/types/pending-class-grades.types";
 
+const LOAD_ERROR = "No se pudieron cargar las clases con cambios. Reintentá.";
+
+const REFRESH_ERROR = "No se pudieron actualizar las clases con cambios. Reintentá.";
+
 type BulkPublishGradesDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onPublished: () => void;
 };
 
-export function BulkPublishGradesDialog({ open, onOpenChange, onPublished }: BulkPublishGradesDialogProps): ReactElement {
+type PendingClassesOutcome = { status: "ok"; classes: PendingClassGrades[] } | { status: "stale" } | { status: "error" };
+
+function BulkPublishDialogContent({ onOpenChange, onPublished }: Omit<BulkPublishGradesDialogProps, "open">): ReactElement {
   const [classes, setClasses] = useState<PendingClassGrades[]>([]);
 
   const [isLoading, setIsLoading] = useState(true);
 
   const [loadError, setLoadError] = useState<string | null>(null);
 
+  const [hasReport, setHasReport] = useState(false);
+
   const [isPublishing, setIsPublishing] = useState(false);
 
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const [refreshError, setRefreshError] = useState<string | null>(null);
+
+  const requestIdRef = useRef(0);
+
   useEffect(() => {
-    if (!open) {
-      return;
-    }
+    let active = true;
 
-    let cancelled = false;
-
-    fetchPendingClassesClient()
+    void fetchPendingClassesClient()
       .then((data) => {
-        if (!cancelled) {
+        if (active) {
           setClasses(data);
           setLoadError(null);
         }
       })
       .catch(() => {
-        if (!cancelled) {
-          setLoadError("No se pudieron cargar las clases con cambios. Reintentá.");
+        if (active) {
+          setLoadError(LOAD_ERROR);
         }
       })
       .finally(() => {
-        if (!cancelled) {
+        if (active) {
           setIsLoading(false);
         }
       });
 
     return () => {
-      cancelled = true;
+      active = false;
     };
-  }, [open]);
+  }, []);
+
+  async function loadPendingClasses(): Promise<PendingClassesOutcome> {
+    const requestId = requestIdRef.current + 1;
+
+    requestIdRef.current = requestId;
+
+    try {
+      const data = await fetchPendingClassesClient();
+
+      return requestIdRef.current === requestId ? { status: "ok", classes: data } : { status: "stale" };
+    } catch {
+      return requestIdRef.current === requestId ? { status: "error" } : { status: "stale" };
+    }
+  }
 
   async function handleRetry(): Promise<void> {
     setIsLoading(true);
     setLoadError(null);
 
-    try {
-      setClasses(await fetchPendingClassesClient());
-    } catch {
-      setClasses([]);
-      setLoadError("No se pudieron cargar las clases con cambios. Reintentá.");
-    } finally {
-      setIsLoading(false);
+    const outcome = await loadPendingClasses();
+
+    if (outcome.status === "stale") {
+      return;
     }
+
+    if (outcome.status === "ok") {
+      setClasses(outcome.classes);
+    } else {
+      setClasses([]);
+      setLoadError(LOAD_ERROR);
+    }
+
+    setIsLoading(false);
+  }
+
+  async function handleRefreshPendingClasses(): Promise<void> {
+    setIsRefreshing(true);
+    setRefreshError(null);
+
+    const outcome = await loadPendingClasses();
+
+    if (outcome.status === "stale") {
+      return;
+    }
+
+    if (outcome.status === "ok") {
+      setClasses(outcome.classes);
+    } else {
+      setRefreshError(REFRESH_ERROR);
+    }
+
+    setIsRefreshing(false);
   }
 
   function handleOpenChange(next: boolean): void {
@@ -82,12 +131,8 @@ export function BulkPublishGradesDialog({ open, onOpenChange, onPublished }: Bul
     onOpenChange(next);
   }
 
-  if (!open) {
-    return <></>;
-  }
-
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
+    <Dialog open onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-[calc(100%_-_2.5rem)] sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Publicar notas</DialogTitle>
@@ -134,7 +179,7 @@ export function BulkPublishGradesDialog({ open, onOpenChange, onPublished }: Bul
             </DialogFooter>
           </>
         ) : null}
-        {!isLoading && !loadError && classes.length === 0 ? (
+        {!isLoading && !loadError && classes.length === 0 && !hasReport ? (
           <>
             <Empty className="min-h-56 p-6">
               <EmptyHeader className="max-w-sm">
@@ -155,16 +200,27 @@ export function BulkPublishGradesDialog({ open, onOpenChange, onPublished }: Bul
             </DialogFooter>
           </>
         ) : null}
-        {!isLoading && !loadError && classes.length > 0 ? (
+        {!isLoading && !loadError && (classes.length > 0 || hasReport) ? (
           <BulkPublishGradesForm
-            key="bulk-form"
             classes={classes}
+            isRefreshing={isRefreshing}
+            refreshError={refreshError}
+            onRefreshPendingClasses={() => void handleRefreshPendingClasses()}
             onOpenChange={onOpenChange}
             onPublished={onPublished}
             onPendingChange={setIsPublishing}
+            onReportAvailable={() => setHasReport(true)}
           />
         ) : null}
       </DialogContent>
     </Dialog>
   );
+}
+
+export function BulkPublishGradesDialog({ open, onOpenChange, onPublished }: BulkPublishGradesDialogProps): ReactElement {
+  if (!open) {
+    return <></>;
+  }
+
+  return <BulkPublishDialogContent onOpenChange={onOpenChange} onPublished={onPublished} />;
 }

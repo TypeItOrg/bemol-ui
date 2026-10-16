@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 
 import { INVALID_ACTION_ARGUMENTS, isValidUuid } from "@common/utils/action-argument.util";
 
+import { COURSE_ENROLLMENT_GRADE_BULK_PUBLISH_LIMIT } from "@features/course-enrollments/constants/course-enrollment-grade.constants";
 import { requireInstitutionalUser } from "@features/institutional-auth/services/get-institutional-user.service";
 import { institutionalApiFetch } from "@features/institutional-auth/services/institutional-api-fetch.service";
 
@@ -50,6 +51,10 @@ export async function publishBulkInstitutionalGradesAction(classIds: string[]): 
   }
 
   const uniqueIds = [...new Set(classIds)];
+
+  if (uniqueIds.length > COURSE_ENROLLMENT_GRADE_BULK_PUBLISH_LIMIT) {
+    return { error: `No se pueden publicar más de ${COURSE_ENROLLMENT_GRADE_BULK_PUBLISH_LIMIT} clases por lote.` };
+  }
 
   const user = await requireInstitutionalUser();
 
