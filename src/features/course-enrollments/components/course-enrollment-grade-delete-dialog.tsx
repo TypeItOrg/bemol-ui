@@ -29,12 +29,15 @@ type GradeDeleteDialogProps = {
   onDeleted: (grade: CourseEnrollmentGrade) => void;
 };
 
-export function CourseEnrollmentGradeDeleteDialog({ grade, onOpenChange, onConfirm, onDeleted }: GradeDeleteDialogProps): ReactElement {
-  const [state, formAction, isPending] = useActionState(async (): Promise<{ error?: string }> => {
-    if (!grade) {
-      return {};
-    }
+type DeleteConfirmFormProps = {
+  grade: CourseEnrollmentGrade;
+  onOpenChange: (open: boolean) => void;
+  onConfirm: (grade: CourseEnrollmentGrade) => Promise<{ error?: string }>;
+  onDeleted: (grade: CourseEnrollmentGrade) => void;
+};
 
+function DeleteConfirmForm({ grade, onOpenChange, onConfirm, onDeleted }: DeleteConfirmFormProps): ReactElement {
+  const [state, formAction, isPending] = useActionState(async (): Promise<{ error?: string }> => {
     const result = await safelyRunAction(onConfirm(grade), "No se pudo eliminar la nota.");
 
     if (result.error) {
@@ -58,10 +61,6 @@ export function CourseEnrollmentGradeDeleteDialog({ grade, onOpenChange, onConfi
     }
 
     onOpenChange(next);
-  }
-
-  if (!grade) {
-    return <></>;
   }
 
   return (
@@ -94,4 +93,12 @@ export function CourseEnrollmentGradeDeleteDialog({ grade, onOpenChange, onConfi
       </AlertDialogContent>
     </AlertDialog>
   );
+}
+
+export function CourseEnrollmentGradeDeleteDialog({ grade, onOpenChange, onConfirm, onDeleted }: GradeDeleteDialogProps): ReactElement {
+  if (!grade) {
+    return <></>;
+  }
+
+  return <DeleteConfirmForm key={grade.id} grade={grade} onOpenChange={onOpenChange} onConfirm={onConfirm} onDeleted={onDeleted} />;
 }
