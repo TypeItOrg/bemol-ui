@@ -15,7 +15,7 @@ describe("PublishGradesDialog", () => {
       />,
     );
 
-    expect(screen.getByText("Publicar notas")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Publicar notas" })).toBeInTheDocument();
     expect(screen.getByText(/12 cambios pendientes para 8 estudiantes/)).toBeInTheDocument();
     expect(screen.getByText(/afecta a toda la clase/)).toBeInTheDocument();
   });
