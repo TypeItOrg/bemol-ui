@@ -21,6 +21,8 @@ export const COURSE_ENROLLMENT_GRADE_MESSAGES = {
   VIEW_GRADES: "Ver notas",
 } as const;
 
+export const COURSE_ENROLLMENT_GRADE_HISTORY_PAGE_SIZE = 20;
+
 export const COURSE_ENROLLMENT_GRADE_STATUS_LABELS: Record<string, string> = {
   DRAFT: "Borrador",
   PUBLISHED: "Calificación registrada",
