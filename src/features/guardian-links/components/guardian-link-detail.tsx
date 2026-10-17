@@ -101,6 +101,16 @@ export function GuardianLinkDetail({
             <SectionHeader icon={UsersIcon} title="Datos de la vinculación" description="Personas vinculadas y relación entre ellas." />
           </header>
           <div className="grid gap-5 md:grid-cols-2 md:gap-6">
+            {showInstitution ? (
+              <section className="bg-background col-span-full min-w-0 space-y-1 rounded-xl border p-4 sm:p-5" aria-label="Institución">
+                <div className="flex min-h-5 items-center">
+                  <h3 className={DETAIL_LABEL_CLASS_NAME}>Institución</h3>
+                </div>
+                <p className="text-lg leading-snug font-semibold break-words">
+                  <OptionalValue value={request.institution?.name} fallback="Sin institución" />
+                </p>
+              </section>
+            ) : null}
             <PersonDetails title="Representante" person={request.tutor} relationship={GUARDIAN_RELATIONSHIP_LABELS[request.relationship]} />
             <PersonDetails
               title="Persona representada"
@@ -108,16 +118,6 @@ export function GuardianLinkDetail({
               relationship={REPRESENTED_RELATIONSHIP_LABELS[request.relationship]}
             />
           </div>
-          {showInstitution ? (
-            <dl>
-              <div className="space-y-1">
-                <dt className={DETAIL_LABEL_CLASS_NAME}>Institución</dt>
-                <dd>
-                  <OptionalValue value={request.institution?.name} fallback="Sin institución" />
-                </dd>
-              </div>
-            </dl>
-          ) : null}
         </section>
         {request.attachments.length > 0 ? (
           <section className="bg-muted/25 space-y-5 rounded-xl border p-4 sm:p-5" aria-label="Documentación de la vinculación">
