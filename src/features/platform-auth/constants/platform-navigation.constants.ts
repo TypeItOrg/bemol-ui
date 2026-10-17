@@ -11,6 +11,7 @@ import {
   LibraryBigIcon,
   Music2Icon,
   RouteIcon,
+  ScrollTextIcon,
   UserLockIcon,
   UsersIcon,
 } from "lucide-react";
@@ -105,12 +106,19 @@ const PLATFORM_NAVIGATION_ITEM = {
   icon: FingerprintIcon,
 } as const satisfies NavigationItem;
 
+const PLATFORM_AUDIT_NAVIGATION_ITEM = {
+  title: "Auditoría",
+  url: "/admin/audit-events",
+  icon: ScrollTextIcon,
+} as const satisfies NavigationItem;
+
 export const PLATFORM_NAVIGATION_ITEMS = [
   PRIMARY_NAVIGATION_ITEM,
   ...MANAGEMENT_NAVIGATION_ITEMS,
   ...ACADEMIC_NAVIGATION_ITEMS,
   ...ENROLLMENT_NAVIGATION_ITEMS,
   PLATFORM_NAVIGATION_ITEM,
+  PLATFORM_AUDIT_NAVIGATION_ITEM,
 ] as const satisfies readonly NavigationItem[];
 
 export const PLATFORM_PRIMARY_NAVIGATION_ITEM = PRIMARY_NAVIGATION_ITEM;
@@ -135,6 +143,6 @@ export const PLATFORM_NAVIGATION_SECTIONS = [
   },
   {
     label: "Plataforma",
-    items: [PLATFORM_NAVIGATION_ITEM],
+    items: [PLATFORM_NAVIGATION_ITEM, PLATFORM_AUDIT_NAVIGATION_ITEM],
   },
 ] as const;

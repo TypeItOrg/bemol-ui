@@ -13,6 +13,7 @@ const ROUTE_LABELS: Readonly<Record<string, string>> = {
   documentation: "Documentación",
   institutions: "Instituciones",
   accounts: "Administradores",
+  "audit-events": "Auditoría",
   new: "Nuevo",
   people: "Usuarios",
   roles: "Roles",
