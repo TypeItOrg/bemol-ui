@@ -17,6 +17,8 @@ const OPERATION_LABELS: Record<string, string> = {
   PUBLISHED: "Nota publicada",
   DELETED_DRAFT: "Borrador eliminado",
   DELETED_PUBLISHED: "Nota eliminada al publicar",
+  DISCARDED_DRAFT_ON_EXIT: "Borrador descartado al finalizar la cursada",
+  REVERTED_TO_PUBLISHED_ON_EXIT: "Cambios sin publicar descartados",
   BASELINE: "Estado inicial registrado",
 };
 
@@ -36,6 +38,7 @@ function resolveSnapshot(event: CourseEnrollmentGradeHistoryEvent): {
     event.operation === "PUBLISHED" ||
     event.operation === "DELETED_DRAFT" ||
     event.operation === "DELETED_PUBLISHED" ||
+    event.operation === "DISCARDED_DRAFT_ON_EXIT" ||
     event.operation === "MARKED_FOR_DELETION" ||
     event.operation === "CANCELLED_DELETION"
   ) {
@@ -46,6 +49,18 @@ function resolveSnapshot(event: CourseEnrollmentGradeHistoryEvent): {
     value: formatMaybeGrade(event.valueAfter) ?? formatMaybeGrade(event.publishedValueAfter) ?? "—",
     evaluation: event.evaluationAfter ?? "—",
   };
+}
+
+function resolveActorName(event: CourseEnrollmentGradeHistoryEvent): string {
+  if (event.actor?.fullName) {
+    return event.actor.fullName;
+  }
+
+  if (event.operation === "DISCARDED_DRAFT_ON_EXIT" || event.operation === "REVERTED_TO_PUBLISHED_ON_EXIT") {
+    return "Sistema";
+  }
+
+  return "—";
 }
 
 export function CourseEnrollmentGradeHistoryRow({ event }: { event: CourseEnrollmentGradeHistoryEvent }): ReactElement {
@@ -67,7 +82,7 @@ export function CourseEnrollmentGradeHistoryRow({ event }: { event: CourseEnroll
           "—"
         )}
       </TableCell>
-      <TableCell>{event.actor?.fullName ?? "—"}</TableCell>
+      <TableCell>{resolveActorName(event)}</TableCell>
     </TableRow>
   );
 }
