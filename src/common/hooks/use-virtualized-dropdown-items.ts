@@ -96,7 +96,7 @@ export function useVirtualizedDropdownItems<TItem>({
 
   const measuredViewportHeight = measureRows ? Math.min(listHeight, Math.max(estimateSize, virtualContentHeight)) : viewportHeight;
 
-  const hasScrollableOverflow = virtualContentHeight > measuredViewportHeight;
+  const hasScrollableOverflow = virtualContentHeight > (rowVirtualizer.scrollRect?.height ?? measuredViewportHeight);
 
   const lastVirtualIndex = virtualItems.at(-1)?.index;
 

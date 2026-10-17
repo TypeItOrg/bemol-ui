@@ -70,7 +70,7 @@ export function VirtualizedDropdownItems<TItem>({
       ref={parentRef}
       aria-busy={isFetchingNextPage}
       onScroll={rememberScrollAnchor}
-      className={cn("overflow-y-auto overscroll-contain", hasScrollableOverflow && !getItemGroup && "pr-2", listClassName)}
+      className={cn("min-h-0 overflow-y-auto overscroll-contain", hasScrollableOverflow && !getItemGroup && "pr-2", listClassName)}
       style={{ height: measuredViewportHeight }}
     >
       <div className="relative w-full" style={{ height: virtualContentHeight }}>
@@ -103,7 +103,7 @@ export function VirtualizedDropdownItems<TItem>({
                 key={virtualItem.key}
                 ref={measureRows ? rowVirtualizer.measureElement : undefined}
                 data-index={virtualItem.index}
-                className={cn("absolute top-0 left-0 w-full", getItemGroup && "px-1")}
+                className={cn("absolute top-0 left-0 w-full", getItemGroup && "px-1 pb-2")}
                 style={rowStyle}
               >
                 <CommandItem

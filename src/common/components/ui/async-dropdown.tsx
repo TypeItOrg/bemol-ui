@@ -117,10 +117,27 @@ export function AsyncDropdown<TItem>({
           clearLabel={clearLabel}
           clearValue={clearValue}
         />
-        <PopoverContent align="start" className={cn("w-(--radix-popover-trigger-width) gap-0 p-0", contentClassName)}>
-          <Command className={getItemGroup ? "px-0 [&_[data-slot=command-input-wrapper]]:px-2" : undefined} shouldFilter={false} loop>
+        <PopoverContent
+          align="start"
+          collisionPadding={8}
+          className={cn(
+            "max-h-(--radix-popover-content-available-height) w-(--radix-popover-trigger-width) gap-0 overflow-hidden p-0",
+            contentClassName,
+          )}
+        >
+          <Command
+            className={cn(
+              "max-h-(--radix-popover-content-available-height) min-h-0 [&_[data-slot=command-input-wrapper]]:shrink-0",
+              getItemGroup && "px-0 [&_[data-slot=command-input-wrapper]]:px-2",
+            )}
+            shouldFilter={false}
+            loop
+          >
             <CommandInput disabled={disabled} onValueChange={setSearch} placeholder={searchPlaceholder} value={search} />
-            <CommandList aria-multiselectable={selectedValues !== undefined || undefined} className="max-h-none overflow-visible p-0">
+            <CommandList
+              aria-multiselectable={selectedValues !== undefined || undefined}
+              className="flex max-h-none min-h-0 flex-col overflow-y-auto p-0 [&>[cmdk-list-sizer]]:flex [&>[cmdk-list-sizer]]:min-h-0 [&>[cmdk-list-sizer]]:flex-col"
+            >
               <AsyncDropdownList
                 emptyDescription={emptyDescription}
                 emptyIcon={emptyIcon}

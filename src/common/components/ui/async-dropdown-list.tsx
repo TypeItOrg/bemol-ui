@@ -84,7 +84,12 @@ export function AsyncDropdownList<TItem>({
     );
   } else {
     commandListContent = (
-      <CommandGroup className={cn("px-1 pt-2 pb-1", getItemGroup && "px-0")}>
+      <CommandGroup
+        className={cn(
+          "flex min-h-0 flex-col px-1 pt-2 pb-1 [&>[cmdk-group-items]]:flex [&>[cmdk-group-items]]:min-h-0 [&>[cmdk-group-items]]:flex-col",
+          getItemGroup && "px-0",
+        )}
+      >
         {items.length === 0 ? (
           <CommandItem
             className="h-9"
