@@ -1,4 +1,4 @@
-import { ClipboardListIcon, SettingsIcon } from "lucide-react";
+import { ClipboardListIcon, HistoryIcon, SettingsIcon } from "lucide-react";
 
 import type { SidebarNavigationSection } from "@common/types/sidebar-navigation-section.types";
 import type { NavigationItem } from "@common/utils/navigation.util";
@@ -52,11 +52,21 @@ export function getAcademicSidebarNavigationSections(
     },
   );
 
-  return groupSidebarNavigationSection(enrollmentSections, {
+  const configuredSections = groupSidebarNavigationSection(enrollmentSections, {
     sectionLabel: "Académico",
     id: "academic-settings",
     title: "Configuración",
     icon: SettingsIcon,
     urls: ["/academic-years", "/academic-spaces", "/instruments", "/shifts", "/documentation"].map((url) => `${prefix}${url}`),
   });
+
+  return scope === "platform"
+    ? groupSidebarNavigationSection(configuredSections, {
+        sectionLabel: "Plataforma",
+        id: "platform-activity",
+        title: "Actividad",
+        icon: HistoryIcon,
+        urls: ["/admin/audit-events", "/admin/emails"],
+      })
+    : configuredSections;
 }

@@ -10,6 +10,7 @@ export type AuditFilters = {
   module?: AuditModule;
   personId?: string;
   action?: string;
+  mailType?: string;
   actorKind?: AuditActorKind;
   actorId?: string;
   requestId?: string;

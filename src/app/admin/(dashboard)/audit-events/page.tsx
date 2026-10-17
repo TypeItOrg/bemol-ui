@@ -1,9 +1,12 @@
 import { Suspense, type ReactElement } from "react";
 
+import { redirect } from "next/navigation";
+
 import { ScrollTextIcon } from "lucide-react";
 
 import { DataTableNavigationProvider } from "@common/components/ui/data-table-navigation";
 import { Skeleton } from "@common/components/ui/skeleton";
+import { getQueryParamValue } from "@common/utils/query-param.util";
 
 import { fetchInstitution } from "@features/institutions/services/fetch-institution.service";
 import { AuditEventsFilters } from "@features/platform-audit/components/audit-events-filters";
@@ -19,7 +22,23 @@ import { PlatformPageShell } from "@features/platform-auth/components/platform-p
 export const metadata = { title: "Auditoría", description: "Consultá la actividad registrada en toda la plataforma." };
 
 export default async function AuditEventsPage({ searchParams }: { searchParams: Promise<AuditSearchParams> }): Promise<ReactElement> {
-  const filters = parseAuditFilters(await searchParams);
+  const params = await searchParams;
+
+  if (getQueryParamValue(params.module) === "EMAILS") {
+    const query = new URLSearchParams();
+
+    for (const key of ["page", "size", "search", "action", "mailType", "institutionId", "requestId", "from", "to"]) {
+      const value = getQueryParamValue(params[key]);
+
+      if (value) {
+        query.set(key, value);
+      }
+    }
+
+    redirect(`/admin/emails?${query}`);
+  }
+
+  const filters = parseAuditFilters(params);
 
   const [institution, selectedActorLabel, person] = await Promise.all([
     filters.institutionId ? fetchInstitution(filters.institutionId) : null,

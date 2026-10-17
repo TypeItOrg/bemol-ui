@@ -11,7 +11,11 @@ export async function AuditEventsTableContainer({ filters }: { filters: AuditFil
     data = await fetchAuditEvents({ ...filters, page: Math.max(0, data.totalPages - 1) });
   }
 
-  const hasFilters = Object.entries(filters).some(([key, value]) => !["page", "size", "dateError"].includes(key) && value !== undefined);
+  const mailView = filters.module === "EMAILS";
 
-  return <AuditEventsTable data={data} hasFilters={hasFilters} />;
+  const hasFilters = Object.entries(filters).some(
+    ([key, value]) => !["page", "size", "dateError"].includes(key) && !(mailView && key === "module") && value !== undefined,
+  );
+
+  return <AuditEventsTable data={data} hasFilters={hasFilters} mailView={mailView} />;
 }

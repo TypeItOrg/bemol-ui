@@ -82,7 +82,9 @@ export function AuditEventsFilters({
             value: filters.module ?? "all",
             options: [
               { value: "all", label: "Todos los módulos" },
-              ...Object.entries(AUDIT_MODULE_LABELS).map(([value, label]) => ({ value, label })),
+              ...Object.entries(AUDIT_MODULE_LABELS)
+                .filter(([value]) => value !== "EMAILS")
+                .map(([value, label]) => ({ value, label })),
             ],
           }}
           onValueChange={(value) => update({ module: value === "all" ? undefined : value, action: undefined })}

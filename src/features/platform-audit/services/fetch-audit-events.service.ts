@@ -10,7 +10,7 @@ import { platformApiFetch } from "@features/platform-auth/services/platform-api-
 export async function fetchAuditEvents(filters: AuditFilters): Promise<PaginatedResponse<AuditEvent>> {
   const response = await platformApiFetch(`/api/v1/admin/audit-events?${buildAuditApiParams(filters)}`);
 
-  return parseHttpResponse(response, "No se pudo cargar la auditoría.");
+  return parseHttpResponse(response, filters.module === "EMAILS" ? "No se pudieron cargar los correos." : "No se pudo cargar la auditoría.");
 }
 
 export async function fetchAuditEvent(id: string): Promise<AuditEvent | null> {

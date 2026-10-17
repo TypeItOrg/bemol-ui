@@ -2,11 +2,12 @@ import type { ReactElement } from "react";
 
 import { DETAIL_LABEL_CLASS_NAME } from "@common/constants/detail-label.constants";
 
+import { AuditMailChanges } from "@features/platform-audit/components/audit-mail-changes";
 import { AuditOperationChanges } from "@features/platform-audit/components/audit-operation-changes";
 import { AUDIT_ACTION_MODULES } from "@features/platform-audit/constants/audit-labels.constants";
 import type { AuditEvent } from "@features/platform-audit/types/audit-event.types";
 
-export function AuditEventChanges({
+export function renderAuditEventChanges({
   event,
   roleLabels,
   permissionLabels,
@@ -14,8 +15,16 @@ export function AuditEventChanges({
   event: AuditEvent;
   roleLabels: Readonly<Record<string, string>>;
   permissionLabels: Readonly<Record<string, string>>;
-}): ReactElement {
+}): ReactElement | null {
   const details = event.details;
+
+  if (Object.keys(details).length === 0) {
+    return null;
+  }
+
+  if (AUDIT_ACTION_MODULES[event.action] === "EMAILS") {
+    return <AuditMailChanges event={event} />;
+  }
 
   if (event.action === "PERSON_ROLES_CHANGED") {
     return (
@@ -78,7 +87,7 @@ export function AuditEventChanges({
   }
 
   if (fields.length === 0) {
-    return <p className="text-muted-foreground text-sm">Este evento no incluye detalles adicionales.</p>;
+    return null;
   }
 
   return (

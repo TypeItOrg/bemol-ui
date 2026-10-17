@@ -14,6 +14,7 @@ const ROUTE_LABELS: Readonly<Record<string, string>> = {
   institutions: "Instituciones",
   accounts: "Administradores",
   "audit-events": "Auditoría",
+  emails: "Correos",
   new: "Nuevo",
   people: "Usuarios",
   roles: "Roles",
@@ -87,7 +88,7 @@ function getSegments(
 
     const label = segmentLabels[part] ?? ROUTE_LABELS[part] ?? "Editar";
 
-    const groupLabel = getAcademicBreadcrumbGroupLabel(part);
+    const groupLabel = ["audit-events", "emails"].includes(part) ? "Actividad" : getAcademicBreadcrumbGroupLabel(part);
 
     if (groupLabel) {
       segments.push({ label: groupLabel });

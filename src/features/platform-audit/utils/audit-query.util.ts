@@ -8,6 +8,7 @@ import {
   AUDIT_ACTOR_LABELS,
   AUDIT_MODULE_LABELS,
 } from "@features/platform-audit/constants/audit-labels.constants";
+import { MAIL_RESULT_LABELS, MAIL_TYPE_LABELS } from "@features/platform-audit/constants/mail-labels.constants";
 import type { AuditActorKind } from "@features/platform-audit/types/audit-actor-kind.types";
 import type { AuditFilters } from "@features/platform-audit/types/audit-filters.types";
 import type { AuditModule } from "@features/platform-audit/types/audit-module.types";
@@ -48,8 +49,9 @@ export function parseAuditFilters(params: AuditSearchParams): AuditFilters {
     actorKind,
     actorId: actorKind && actorKind !== "ANONYMOUS" ? parseUuidQueryParam(params.actorId) : undefined,
     search: getQueryParamValue(params.search)?.trim().slice(0, 100) || undefined,
-    module: auditModule,
-    action: action && (!auditModule || AUDIT_ACTION_MODULES[action] === auditModule) ? action : undefined,
+    module: auditModule !== "EMAILS" ? auditModule : undefined,
+    action:
+      action && AUDIT_ACTION_MODULES[action] !== "EMAILS" && (!auditModule || AUDIT_ACTION_MODULES[action] === auditModule) ? action : undefined,
     personId: parseUuidQueryParam(params.personId) ?? parseUuidQueryParam(params.subjectPersonId),
     requestId: getQueryParamValue(params.requestId)?.trim().slice(0, 100) || undefined,
     from,
@@ -58,10 +60,28 @@ export function parseAuditFilters(params: AuditSearchParams): AuditFilters {
   };
 }
 
+export function parseMailFilters(params: AuditSearchParams): AuditFilters {
+  const base = parseAuditFilters(params);
+
+  return {
+    page: base.page,
+    size: base.size,
+    search: base.search,
+    institutionId: parseUuidQueryParam(params.institutionId),
+    requestId: base.requestId,
+    from: base.from,
+    to: base.to,
+    dateError: base.dateError,
+    module: "EMAILS",
+    action: catalogValue(getQueryParamValue(params.action), MAIL_RESULT_LABELS),
+    mailType: catalogValue(getQueryParamValue(params.mailType), MAIL_TYPE_LABELS),
+  };
+}
+
 export function buildAuditApiParams(filters: AuditFilters): URLSearchParams {
   const params = new URLSearchParams({ page: String(filters.page), size: String(filters.size) });
 
-  for (const name of ["scope", "institutionId", "search", "module", "personId", "action", "actorKind", "actorId", "requestId"] as const) {
+  for (const name of ["scope", "institutionId", "search", "module", "personId", "action", "actorKind", "actorId", "requestId", "mailType"] as const) {
     const value = filters[name];
 
     if (value) {

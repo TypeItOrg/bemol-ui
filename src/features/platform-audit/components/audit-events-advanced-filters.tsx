@@ -5,9 +5,8 @@ import type { ReactElement } from "react";
 import { AsyncDropdown } from "@common/components/ui/async-dropdown";
 import { DataTableFilterSelect } from "@common/components/ui/data-table-filter-select";
 
-import { fetchPlatformInstitutionOptions } from "@features/institutions/services/fetch-platform-institution-options.service";
-import type { InstitutionSummary } from "@features/institutions/types/institution-summary.types";
 import { AuditIdentifierFilter } from "@features/platform-audit/components/audit-identifier-filter";
+import { AuditInstitutionFilter } from "@features/platform-audit/components/audit-institution-filter";
 import { AUDIT_ACTION_LABELS, AUDIT_ACTOR_LABELS, AUDIT_MODULE_LABELS } from "@features/platform-audit/constants/audit-labels.constants";
 import { fetchAuditActionOptions } from "@features/platform-audit/services/fetch-audit-actions.service";
 import { fetchAuditActorOptions } from "@features/platform-audit/services/fetch-audit-actors.service";
@@ -28,28 +27,11 @@ export function AuditEventsAdvancedFilters({
 }): ReactElement {
   return (
     <div className="flex min-w-0 flex-col gap-4">
-      <div className="flex min-w-0 flex-col gap-1.5">
-        <label htmlFor="audit-institution" className="text-foreground text-sm font-medium">
-          Institución
-        </label>
-        <AsyncDropdown<InstitutionSummary>
-          id="audit-institution"
-          className="min-w-0"
-          clearable
-          clearLabel="Limpiar institución"
-          defaultOption={{ label: "Todas las instituciones", value: undefined }}
-          fetchPage={fetchPlatformInstitutionOptions}
-          getItemLabel={(institution) => institution.name}
-          getItemValue={(institution) => institution.id}
-          onValueChange={(value) => onChange({ institutionId: value, scope: value && filters.scope === "PLATFORM" ? undefined : filters.scope })}
-          pageSize={20}
-          placeholder="Seleccionar institución"
-          queryKey={["platform", "audit-institutions"]}
-          searchPlaceholder="Buscar institución…"
-          selectedLabel={institutionName ?? (filters.institutionId ? "Institución no disponible" : undefined)}
-          value={filters.institutionId}
-        />
-      </div>
+      <AuditInstitutionFilter
+        value={filters.institutionId}
+        selectedLabel={institutionName}
+        onValueChange={(value) => onChange({ institutionId: value, scope: value && filters.scope === "PLATFORM" ? undefined : filters.scope })}
+      />
       <div className="flex min-w-0 flex-col gap-1.5">
         <label htmlFor="audit-action" className="text-foreground text-sm font-medium">
           Acción

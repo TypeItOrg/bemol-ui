@@ -9,9 +9,12 @@ export const AUDIT_MODULE_LABELS: Readonly<Record<AuditModule, string>> = {
   COURSES: "Cursos",
   STUDY_PLANS: "Planes de estudio",
   DOCUMENTATION: "Documentación",
+  EMAILS: "Correos",
 };
 
 export const AUDIT_ACTION_MODULES: Readonly<Record<string, AuditModule>> = {
+  EMAIL_SENT: "EMAILS",
+  EMAIL_FAILED: "EMAILS",
   PERSON_OWN_ACCESS_INVITED: "USERS",
   PERSON_OWN_ACCESS_INVITATION_CANCELLED: "USERS",
   PERSON_OWN_ACCESS_CHANGED: "USERS",
@@ -67,6 +70,8 @@ export const AUDIT_ACTION_MODULES: Readonly<Record<string, AuditModule>> = {
 };
 
 export const AUDIT_ACTION_LABELS: Readonly<Record<string, string>> = {
+  EMAIL_SENT: "Correo enviado",
+  EMAIL_FAILED: "Envío de correo fallido",
   PERSON_OWN_ACCESS_INVITED: "Acceso propio invitado",
   PERSON_OWN_ACCESS_INVITATION_CANCELLED: "Invitación de acceso cancelada",
   PERSON_OWN_ACCESS_CHANGED: "Acceso propio modificado",
@@ -122,6 +127,7 @@ export const AUDIT_ACTION_LABELS: Readonly<Record<string, string>> = {
 };
 
 export const AUDIT_ENTITY_LABELS: Readonly<Record<string, string>> = {
+  EMAIL: "Correo",
   PERSON: "Persona",
   PERSON_ACCESS_INVITATION: "Invitación de acceso",
   ENROLLMENT_APPLICATION: "Solicitud de inscripción",
@@ -150,6 +156,5 @@ export const AUDIT_ORIGIN_LABELS: Readonly<Record<string, string>> = {
   INSTITUTIONAL_ADMINISTRATION: "Administración institucional",
   PLATFORM_ADMINISTRATION: "Administración de plataforma",
   SELF_SERVICE: "Autogestión",
+  MAIL_DELIVERY: "Envío de correo",
 };
-
-export const AUDIT_TIME_ZONE_LABEL = "Hora de Córdoba (UTC−03:00)";

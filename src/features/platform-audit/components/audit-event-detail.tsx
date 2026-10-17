@@ -8,13 +8,12 @@ import { SectionHeader } from "@common/components/section-header";
 import { Button } from "@common/components/ui/button";
 import { DETAIL_LABEL_CLASS_NAME } from "@common/constants/detail-label.constants";
 
-import { AuditEventChanges } from "@features/platform-audit/components/audit-event-changes";
+import { renderAuditEventChanges } from "@features/platform-audit/components/audit-event-changes";
 import {
   AUDIT_ACTION_LABELS,
   AUDIT_ACTOR_LABELS,
   AUDIT_ENTITY_LABELS,
   AUDIT_ORIGIN_LABELS,
-  AUDIT_TIME_ZONE_LABEL,
 } from "@features/platform-audit/constants/audit-labels.constants";
 import type { AuditEvent } from "@features/platform-audit/types/audit-event.types";
 import { auditActorName, auditInstitutionName, formatAuditDateTime } from "@features/platform-audit/utils/audit-display.util";
@@ -30,18 +29,20 @@ export function AuditEventDetail({
   roleLabels: Readonly<Record<string, string>>;
   permissionLabels: Readonly<Record<string, string>>;
 }): ReactElement {
+  const changes = renderAuditEventChanges({ event, roleLabels, permissionLabels });
+
   return (
     <>
       <div>
         <Button asChild variant="outline" size="lg">
-          <Link href={returnTo}>Volver a la auditoría</Link>
+          <Link href={returnTo}>Volver</Link>
         </Button>
       </div>
       <section className="bg-muted/25 space-y-5 rounded-xl border p-4 sm:p-5">
         <SectionHeader
           icon={ScrollTextIcon}
           title={AUDIT_ACTION_LABELS[event.action] ?? "Acción no catalogada"}
-          description={`${formatAuditDateTime(event.occurredAt)} · ${AUDIT_TIME_ZONE_LABEL}`}
+          description={formatAuditDateTime(event.occurredAt)}
           descriptionBreakpoint="sm"
         />
         <dl className="grid gap-5 sm:grid-cols-2">
@@ -67,7 +68,7 @@ export function AuditEventDetail({
         <SectionHeader
           icon={UsersIcon}
           title="Personas y ámbito"
-          description="Los nombres corresponden a los datos actuales. Los identificadores preservan la referencia histórica."
+          description="Nombres actuales e identificadores históricos."
           descriptionBreakpoint="sm"
         />
         <dl className="grid gap-5 sm:grid-cols-2">
@@ -97,15 +98,17 @@ export function AuditEventDetail({
           {event.institutionId ? <DetailItem label="Identificador de la institución" value={event.institutionId} /> : null}
         </dl>
       </section>
-      <section className="bg-muted/25 space-y-5 rounded-xl border p-4 sm:p-5">
-        <SectionHeader
-          icon={ClipboardListIcon}
-          title="Detalles de la operación"
-          description="Estado registrado al momento del evento."
-          descriptionBreakpoint="sm"
-        />
-        <AuditEventChanges event={event} roleLabels={roleLabels} permissionLabels={permissionLabels} />
-      </section>
+      {changes ? (
+        <section className="bg-muted/25 space-y-5 rounded-xl border p-4 sm:p-5">
+          <SectionHeader
+            icon={ClipboardListIcon}
+            title="Detalles de la operación"
+            description="Estado registrado al momento del evento."
+            descriptionBreakpoint="sm"
+          />
+          {changes}
+        </section>
+      ) : null}
     </>
   );
 }

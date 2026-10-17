@@ -10,6 +10,7 @@ import {
   HouseIcon,
   LibraryBigIcon,
   Music2Icon,
+  MailIcon,
   RouteIcon,
   ScrollTextIcon,
   UserLockIcon,
@@ -112,6 +113,12 @@ const PLATFORM_AUDIT_NAVIGATION_ITEM = {
   icon: ScrollTextIcon,
 } as const satisfies NavigationItem;
 
+const PLATFORM_EMAIL_NAVIGATION_ITEM = {
+  title: "Correos",
+  url: "/admin/emails",
+  icon: MailIcon,
+} as const satisfies NavigationItem;
+
 export const PLATFORM_NAVIGATION_ITEMS = [
   PRIMARY_NAVIGATION_ITEM,
   ...MANAGEMENT_NAVIGATION_ITEMS,
@@ -119,6 +126,7 @@ export const PLATFORM_NAVIGATION_ITEMS = [
   ...ENROLLMENT_NAVIGATION_ITEMS,
   PLATFORM_NAVIGATION_ITEM,
   PLATFORM_AUDIT_NAVIGATION_ITEM,
+  PLATFORM_EMAIL_NAVIGATION_ITEM,
 ] as const satisfies readonly NavigationItem[];
 
 export const PLATFORM_PRIMARY_NAVIGATION_ITEM = PRIMARY_NAVIGATION_ITEM;
@@ -143,6 +151,6 @@ export const PLATFORM_NAVIGATION_SECTIONS = [
   },
   {
     label: "Plataforma",
-    items: [PLATFORM_NAVIGATION_ITEM, PLATFORM_AUDIT_NAVIGATION_ITEM],
+    items: [PLATFORM_NAVIGATION_ITEM, PLATFORM_AUDIT_NAVIGATION_ITEM, PLATFORM_EMAIL_NAVIGATION_ITEM],
   },
 ] as const;

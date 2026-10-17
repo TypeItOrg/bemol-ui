@@ -1,6 +1,6 @@
 import type { ReactElement } from "react";
 
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
 import { ScrollTextIcon } from "lucide-react";
 
@@ -34,6 +34,10 @@ export default async function AuditEventPage({
 
   if (!event) {
     notFound();
+  }
+
+  if (event.entityType === "EMAIL") {
+    redirect(`/admin/emails/${eventId}`);
   }
 
   const returnTo = getSafeReturnTo((await searchParams).returnTo, "/admin/audit-events");
