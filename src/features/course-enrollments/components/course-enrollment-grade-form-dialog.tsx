@@ -35,7 +35,7 @@ type GradeFormDialogProps = {
 
 function GradeFormContent({ mode, enrollmentId, classId, grade, onOpenChange, onSaved }: Omit<GradeFormDialogProps, "open">): ReactElement {
   const [state, formAction, isPending] = useActionState(async (_previous: { error?: string }, formData: FormData) => {
-    async function run(): Promise<{ error?: string; draft?: boolean; pending?: boolean }> {
+    async function run(): Promise<{ error?: string; draft?: boolean; pending?: boolean; unchanged?: boolean; unconfirmed?: boolean }> {
       if (grade) {
         if (mode === "teacher") {
           if (!classId) {
@@ -66,6 +66,10 @@ function GradeFormContent({ mode, enrollmentId, classId, grade, onOpenChange, on
         toast.success(COURSE_ENROLLMENT_GRADE_MESSAGES.DRAFT_SAVED);
       } else if (result.pending) {
         toast.success(COURSE_ENROLLMENT_GRADE_MESSAGES.CHANGES_SAVED);
+      } else if (result.unchanged) {
+        toast(COURSE_ENROLLMENT_GRADE_MESSAGES.UNCHANGED);
+      } else if (result.unconfirmed) {
+        toast(COURSE_ENROLLMENT_GRADE_MESSAGES.UNCONFIRMED);
       }
 
       onOpenChange(false);

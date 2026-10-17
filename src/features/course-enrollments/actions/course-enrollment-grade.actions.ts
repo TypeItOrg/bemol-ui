@@ -9,7 +9,7 @@ import { courseEnrollmentGradeSchema } from "@features/course-enrollments/schema
 import { requireInstitutionalUser } from "@features/institutional-auth/services/get-institutional-user.service";
 import { institutionalApiFetch } from "@features/institutional-auth/services/institutional-api-fetch.service";
 
-type GradeActionResult = { error?: string; draft?: boolean; pending?: boolean };
+type GradeActionResult = { error?: string; draft?: boolean; pending?: boolean; unchanged?: boolean; unconfirmed?: boolean };
 
 type GradeFormBody = { evaluation: string; value: number };
 
@@ -36,7 +36,7 @@ function revalidateGradePaths(): void {
   revalidatePath("/my-course-enrollments");
 }
 
-async function sendGradeRequest(path: string, init: RequestInit, fallbackMessage: string): Promise<GradeActionResult> {
+async function sendGradeRequest(path: string, init: RequestInit, fallbackMessage: string, unchangedIfVersion?: number): Promise<GradeActionResult> {
   const user = await requireInstitutionalUser();
 
   const response = institutionalApiFetch(`/api/v1/institutions/${user.institutionId}${path}`, init);
@@ -49,33 +49,53 @@ async function sendGradeRequest(path: string, init: RequestInit, fallbackMessage
 
   revalidateGradePaths();
 
-  return {};
+  if (unchangedIfVersion === undefined) {
+    return {};
+  }
+
+  return resolveUpdateResult(await response, unchangedIfVersion);
 }
 
-async function saveGrade(path: string, formData: FormData, extraBody?: Record<string, unknown>): Promise<GradeActionResult> {
+async function resolveUpdateResult(response: Response, expectedVersion: number): Promise<GradeActionResult> {
+  try {
+    const body = (await response.json()) as { version?: unknown };
+
+    if (body.version === expectedVersion) {
+      return { unchanged: true };
+    }
+  } catch {
+    // Without the authoritative version the result must stay unconfirmed.
+    return { unconfirmed: true };
+  }
+
+  return { pending: true };
+}
+
+async function saveGrade(path: string, formData: FormData, expectedVersion?: number): Promise<GradeActionResult> {
   const body = parseGradeForm(formData);
 
   if (!body) {
     return { error: "Revisá la evaluación y la nota (1 a 10, hasta 2 decimales)." };
   }
 
-  const isUpdate = extraBody !== undefined;
+  const isUpdate = expectedVersion !== undefined;
 
   const result = await sendGradeRequest(
     path,
     {
       method: isUpdate ? "PATCH" : "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...body, ...extraBody }),
+      body: JSON.stringify(isUpdate ? { ...body, expectedVersion } : body),
     },
     "No se pudo guardar la nota.",
+    expectedVersion,
   );
 
   if (result.error) {
     return result;
   }
 
-  return isUpdate ? { pending: true } : { draft: true };
+  return isUpdate ? result : { draft: true };
 }
 
 export async function createInstitutionalGradeAction(enrollmentId: string, formData: FormData): Promise<GradeActionResult> {
@@ -96,9 +116,7 @@ export async function updateInstitutionalGradeAction(
     return { error: INVALID_ACTION_ARGUMENTS };
   }
 
-  return saveGrade(`/course-enrollments/${enrollmentId}/grades/${gradeId}`, formData, {
-    expectedVersion,
-  });
+  return saveGrade(`/course-enrollments/${enrollmentId}/grades/${gradeId}`, formData, expectedVersion);
 }
 
 export async function deleteInstitutionalGradeAction(enrollmentId: string, gradeId: string, expectedVersion?: number): Promise<GradeActionResult> {
@@ -150,7 +168,7 @@ export async function updateTeacherGradeAction(
     return { error: INVALID_ACTION_ARGUMENTS };
   }
 
-  return saveGrade(`/teacher/classes/${classId}/enrollments/${enrollmentId}/grades/${gradeId}`, formData, { expectedVersion });
+  return saveGrade(`/teacher/classes/${classId}/enrollments/${enrollmentId}/grades/${gradeId}`, formData, expectedVersion);
 }
 
 export async function deleteTeacherGradeAction(

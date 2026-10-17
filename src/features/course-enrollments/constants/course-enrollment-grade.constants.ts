@@ -12,6 +12,8 @@ export const COURSE_ENROLLMENT_GRADE_MESSAGES = {
   NO_PUBLISHED_GRADES: "Todavía no hay notas publicadas para esta materia.",
   DRAFT_SAVED: "Nota guardada como borrador.",
   CHANGES_SAVED: "Cambios guardados. Se harán visibles cuando se publiquen las notas de la clase.",
+  UNCHANGED: "No hubo cambios; la nota quedó igual.",
+  UNCONFIRMED: "No pudimos confirmar si hubo cambios; revisá la nota.",
   DELETE_DRAFT_CONFIRM: "¿Eliminar este borrador? Esta acción no se puede deshacer y no afecta a los estudiantes.",
   DELETE_PUBLISHED_CONFIRM: "La nota seguirá visible para el estudiante hasta que se publiquen las notas de la clase.",
   PUBLISH_CONFIRM_TITLE: "Publicar notas",
