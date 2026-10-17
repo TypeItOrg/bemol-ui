@@ -5,6 +5,5 @@ export type InstitutionalRegisterInput = {
   birthDate: string;
   documentNumber: string;
   email: string;
-  isGuardian: boolean;
   password: string;
 };

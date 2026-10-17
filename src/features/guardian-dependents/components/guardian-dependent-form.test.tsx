@@ -40,6 +40,8 @@ describe("GuardianDependentForm", () => {
     jest.mocked(finishGuardianDependentRequestAction).mockReset().mockResolvedValue({});
     jest.mocked(createGuardianDependentAction).mockReset().mockResolvedValue({});
     jest.mocked(uploadGuardianDependentDocumentAction).mockReset().mockResolvedValue({ success: true });
+    URL.createObjectURL = jest.fn(() => "blob:preview");
+    URL.revokeObjectURL = jest.fn();
   });
 
   afterEach(() => {
@@ -68,6 +70,8 @@ describe("GuardianDependentForm", () => {
       birthDate: `${BIRTH_YEAR}-01-01`,
       relationship: "MOTHER",
       isPrimaryContact: "false",
+      email: "",
+      ownAccessRequested: "false",
     });
   });
 
@@ -117,7 +121,7 @@ describe("GuardianDependentForm", () => {
   it("shows field and general errors and stays open", async () => {
     const user = userEvent.setup();
     jest.mocked(createGuardianDependentAction).mockResolvedValueOnce({
-      error: "No se pudo registrar a la persona a cargo.",
+      error: "El número de documento debe tener exactamente 8 dígitos.",
       fieldErrors: { documentNumber: "El número de documento debe tener exactamente 8 dígitos." },
     });
     render(<GuardianDependentForm institutionId={INSTITUTION_ID} returnTo={RETURN_TO} />);
@@ -126,7 +130,7 @@ describe("GuardianDependentForm", () => {
     await user.click(screen.getByRole("button", { name: "Solicitar" }));
 
     expect(await screen.findByText("El número de documento debe tener exactamente 8 dígitos.")).toBeInTheDocument();
-    expect(screen.getByText("No se pudo registrar a la persona a cargo.")).toBeInTheDocument();
+    expect(screen.getByText("No se pudo registrar la vinculación. Revisá los campos marcados.")).toBeInTheDocument();
     expect(screen.getByRole("form", { name: "Solicitar vinculación" })).toBeInTheDocument();
     expect(finishGuardianDependentRequestAction).not.toHaveBeenCalled();
   });

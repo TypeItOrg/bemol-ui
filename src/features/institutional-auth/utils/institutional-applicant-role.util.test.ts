@@ -1,10 +1,8 @@
-import { INSTITUTIONAL_PERMISSION } from "@features/institutional-auth/types/institutional-permission.types";
 import type { InstitutionalUser } from "@features/institutional-auth/types/institutional-user.types";
 import {
   canManageDependents,
   canStartEnrollmentApplication,
   canViewOwnEnrollmentApplications,
-  isGuardian,
 } from "@features/institutional-auth/utils/institutional-applicant-role.util";
 
 function createUser(roles: string[], permissions: string[] = []): InstitutionalUser {
@@ -22,7 +20,7 @@ function createUser(roles: string[], permissions: string[] = []): InstitutionalU
 
 describe("institutional applicant role utils", () => {
   describe("canStartEnrollmentApplication", () => {
-    it.each(["Postulante", "Estudiante", "Tutor"])("allows a %s", (role) => {
+    it.each(["Postulante", "Estudiante"])("allows a %s", (role) => {
       expect(canStartEnrollmentApplication(createUser([role]))).toBe(true);
     });
 
@@ -32,24 +30,12 @@ describe("institutional applicant role utils", () => {
   });
 
   describe("canViewOwnEnrollmentApplications", () => {
-    it.each(["Postulante", "Estudiante", "Tutor"])("allows a %s", (role) => {
+    it.each(["Postulante", "Estudiante"])("allows a %s", (role) => {
       expect(canViewOwnEnrollmentApplications(createUser([role]))).toBe(true);
-    });
-
-    it("keeps the applicant views for staff who are also guardians", () => {
-      expect(canViewOwnEnrollmentApplications(createUser(["Tutor", "Administrativo"]))).toBe(true);
     });
   });
 
-  describe("guardians", () => {
-    it("recognizes the guardian role", () => {
-      expect(isGuardian(createUser(["Tutor"]))).toBe(true);
-      expect(isGuardian(createUser(["Postulante"]))).toBe(false);
-    });
-
-    it("manages dependents only with the dependent management permission", () => {
-      expect(canManageDependents(createUser(["Tutor"], [INSTITUTIONAL_PERMISSION.GUARDIAN_DEPENDENT_MANAGE]))).toBe(true);
-      expect(canManageDependents(createUser(["Tutor"]))).toBe(false);
-    });
+  it("allows every institutional user to request representation", () => {
+    expect(canManageDependents(createUser(["Profesor"]))).toBe(true);
   });
 });

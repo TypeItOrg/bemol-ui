@@ -18,7 +18,9 @@ export async function GET(request: Request): Promise<Response> {
   });
 
   try {
-    const response = await institutionalApiFetch(`/api/v1/institutions/${parsed.data.institutionId}/search?${params}`, {
+    const subjectPath = parsed.data.personId ? `/self-service/${parsed.data.personId}` : "";
+
+    const response = await institutionalApiFetch(`/api/v1/institutions/${parsed.data.institutionId}${subjectPath}/search?${params}`, {
       signal: request.signal,
     });
 

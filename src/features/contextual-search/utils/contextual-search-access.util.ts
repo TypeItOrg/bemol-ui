@@ -1,4 +1,35 @@
+import { getAcademicSidebarNavigationSections } from "@features/academic/utils/academic-sidebar-navigation.util";
 import type { ContextualSearchAccessSection } from "@features/contextual-search/types/contextual-search-access-section.types";
+import type { ContextualSearchScope } from "@features/contextual-search/types/contextual-search-scope.types";
+
+export function getContextualSearchAccessSections(
+  sections: readonly ContextualSearchAccessSection[],
+  scope: ContextualSearchScope,
+): ContextualSearchAccessSection[] {
+  if (scope === "self-service") {
+    return [...sections];
+  }
+
+  return getAcademicSidebarNavigationSections(sections, scope).flatMap((section) => {
+    const accessSections: ContextualSearchAccessSection[] = [];
+
+    for (const item of section.items) {
+      if ("items" in item) {
+        accessSections.push({ label: `${section.label} / ${item.title}`, items: item.items });
+      } else {
+        const previousSection = accessSections.at(-1);
+
+        if (previousSection && previousSection.label === section.label) {
+          previousSection.items = [...previousSection.items, item];
+        } else {
+          accessSections.push({ label: section.label, items: [item] });
+        }
+      }
+    }
+
+    return accessSections;
+  });
+}
 
 export function filterContextualSearchAccessSections(
   sections: readonly ContextualSearchAccessSection[],

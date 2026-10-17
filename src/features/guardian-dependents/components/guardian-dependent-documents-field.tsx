@@ -1,13 +1,12 @@
 "use client";
 
-import { useRef, useState, type ReactElement } from "react";
-
-import { FileTextIcon } from "lucide-react";
+import { useCallback, useRef, useState, type ReactElement } from "react";
 
 import { Field, FieldError } from "@common/components/ui/field";
 import { FileDropzone } from "@common/components/ui/file-dropzone";
 import { FileUploadSelection } from "@common/components/ui/file-upload-selection";
 
+import { DocumentFilePreview } from "@features/enrollment-applications/components/document-file-preview";
 import { GUARDIAN_ATTACHMENT_ACCEPT } from "@features/guardian-dependents/constants/guardian-dependent.constants";
 import { validateGuardianDocuments } from "@features/guardian-dependents/utils/guardian-dependent-documents.util";
 
@@ -66,7 +65,7 @@ export function GuardianDependentDocumentsField({
       />
       <FieldError id="dependent-documents-error">{displayedError}</FieldError>
       {files.map((file, index) => (
-        <FileUploadSelection
+        <SelectedDocument
           disabled={disabled}
           file={file}
           key={`${file.name}-${index}`}
@@ -79,11 +78,38 @@ export function GuardianDependentDocumentsField({
             setSelectionError(validateGuardianDocuments(nextFiles));
             selectRef.current?.focus();
           }}
-          preview={<FileTextIcon aria-hidden="true" className="text-muted-foreground size-5" />}
           removeLabel={`Quitar ${file.name}`}
-          statusLabel={displayedError ? "Revisá la selección" : "Listo para adjuntar"}
+          statusLabel={displayedError ? "Revisá la selección" : ""}
         />
       ))}
     </Field>
+  );
+}
+
+function SelectedDocument(props: Parameters<typeof FileUploadSelection>[0] & { file: File }): ReactElement {
+  const [preview, setPreview] = useState<string>();
+
+  const attachPreview = useCallback(
+    (element: HTMLUListElement | null) => {
+      if (!element) {
+        return;
+      }
+
+      const url = URL.createObjectURL(props.file);
+
+      setPreview(url);
+
+      return () => URL.revokeObjectURL(url);
+    },
+    [props.file],
+  );
+
+  return (
+    <FileUploadSelection
+      {...props}
+      ref={attachPreview}
+      preview={preview ? <DocumentFilePreview src={preview} name={props.file.name} contentType={props.file.type} compact /> : undefined}
+      previewAction={preview ? <DocumentFilePreview src={preview} name={props.file.name} contentType={props.file.type} iconOnly /> : undefined}
+    />
   );
 }

@@ -30,16 +30,38 @@ const STATUS_DETAILS: Record<GuardianLinkStatus, string> = {
   ENDED: "La vinculación finalizó. Ya no podés gestionar a esta persona.",
 };
 
+const OWN_ACCESS_STATUS_LABELS: Record<GuardianDependent["ownAccessStatus"], string> = {
+  NO_ACCOUNT: "Sin cuenta",
+  INVITATION_PENDING: "Invitación pendiente",
+  ENABLED: "Habilitado",
+  DISABLED: "Deshabilitado",
+  INSTITUTION_BLOCKED: "Bloqueado por la institución",
+  INSTITUTION_REQUIRED: "Alta a cargo de la institución",
+  UNAVAILABLE: "No disponible",
+};
+
+const OWN_ACCESS_BADGE_VARIANT: Record<GuardianDependent["ownAccessStatus"], "success" | "secondary" | "destructive" | "outline"> = {
+  NO_ACCOUNT: "secondary",
+  INVITATION_PENDING: "secondary",
+  ENABLED: "success",
+  DISABLED: "outline",
+  INSTITUTION_BLOCKED: "destructive",
+  INSTITUTION_REQUIRED: "secondary",
+  UNAVAILABLE: "outline",
+};
+
 export function GuardianDependentRow({
   dependent,
   isSelectingWorkspace,
   onEnroll,
   onUnlink,
+  onManageAccess,
 }: {
   dependent: GuardianDependent;
   isSelectingWorkspace: boolean;
   onEnroll: () => void;
   onUnlink: () => void;
+  onManageAccess?: () => void;
 }): ReactElement {
   const name = getGuardianDependentName(dependent) || "esta persona";
 
@@ -48,6 +70,10 @@ export function GuardianDependentRow({
   const isActive = dependent.status === GUARDIAN_LINK_STATUS.ACTIVE;
 
   const canUnlink = isActive || dependent.status === GUARDIAN_LINK_STATUS.PENDING;
+
+  const isDisablingOwnAccess = dependent.ownAccessStatus === "ENABLED" || dependent.ownAccessStatus === "INVITATION_PENDING";
+
+  const ownAccessActionLabel = isDisablingOwnAccess ? "Deshabilitar acceso propio" : "Habilitar acceso propio";
 
   const tableRow = (
     <TableRow className="h-12">
@@ -59,13 +85,22 @@ export function GuardianDependentRow({
                 <EllipsisVerticalIcon aria-hidden="true" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-48 p-1.5">
+            <DropdownMenuContent align="start" className="w-max max-w-[calc(100vw-2rem)] min-w-48 p-1.5">
               {isActive ? (
                 <>
                   <DropdownMenuItem className="px-2.5 py-1.5" disabled={isSelectingWorkspace} onSelect={onEnroll}>
                     Inscribir
                   </DropdownMenuItem>
-                  <DropdownMenuSeparator />
+                  {isDisablingOwnAccess ? <DropdownMenuSeparator /> : null}
+                  <DropdownMenuItem
+                    className="px-2.5 py-1.5"
+                    disabled={["INSTITUTION_BLOCKED", "INSTITUTION_REQUIRED"].includes(dependent.ownAccessStatus)}
+                    onSelect={onManageAccess}
+                    variant={isDisablingOwnAccess ? "destructive" : "default"}
+                  >
+                    {ownAccessActionLabel}
+                  </DropdownMenuItem>
+                  {!isDisablingOwnAccess ? <DropdownMenuSeparator /> : null}
                 </>
               ) : null}
               <DropdownMenuItem className="px-2.5 py-1.5" onSelect={onUnlink} variant="destructive">
@@ -111,6 +146,11 @@ export function GuardianDependentRow({
           </PopoverContent>
         </Popover>
       </TableCell>
+      <TableCell>
+        <Badge size="lg" className="data-[variant=outline]:text-muted-foreground" variant={OWN_ACCESS_BADGE_VARIANT[dependent.ownAccessStatus]}>
+          {OWN_ACCESS_STATUS_LABELS[dependent.ownAccessStatus]}
+        </Badge>
+      </TableCell>
       <TableCell className="tabular-nums">
         <OptionalValue
           value={
@@ -131,13 +171,22 @@ export function GuardianDependentRow({
   return (
     <ContextMenu>
       <ContextMenuTrigger asChild>{tableRow}</ContextMenuTrigger>
-      <ContextMenuContent className="w-48 p-1.5">
+      <ContextMenuContent className="w-max max-w-[calc(100vw-2rem)] min-w-48 p-1.5">
         {isActive ? (
           <>
             <ContextMenuItem className="px-2.5 py-1.5" disabled={isSelectingWorkspace} onSelect={onEnroll}>
               Inscribir
             </ContextMenuItem>
-            <ContextMenuSeparator />
+            {isDisablingOwnAccess ? <ContextMenuSeparator /> : null}
+            <ContextMenuItem
+              className="px-2.5 py-1.5"
+              disabled={["INSTITUTION_BLOCKED", "INSTITUTION_REQUIRED"].includes(dependent.ownAccessStatus)}
+              onSelect={onManageAccess}
+              variant={isDisablingOwnAccess ? "destructive" : "default"}
+            >
+              {ownAccessActionLabel}
+            </ContextMenuItem>
+            {!isDisablingOwnAccess ? <ContextMenuSeparator /> : null}
           </>
         ) : null}
         <ContextMenuItem className="px-2.5 py-1.5" onSelect={onUnlink} variant="destructive">

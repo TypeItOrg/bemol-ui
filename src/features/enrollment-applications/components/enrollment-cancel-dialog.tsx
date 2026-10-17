@@ -20,6 +20,7 @@ import { cancelEnrollmentApplicationAction } from "@features/enrollment-applicat
 import { ENROLLMENT_MESSAGES } from "@features/enrollment-applications/constants/enrollment-messages.constants";
 import type { ChangeEnrollmentCareerResult } from "@features/enrollment-applications/types/change-enrollment-career-result.types";
 import type { EnrollmentApplicationResponse } from "@features/enrollment-applications/types/enrollment-application-response.types";
+import { useOperatingPersonId } from "@features/guardian-workspace/components/guardian-workspace-provider";
 
 export function EnrollmentCancelDialog({
   applicationId,
@@ -32,12 +33,14 @@ export function EnrollmentCancelDialog({
   onClose: () => void;
   onCancelled: (application: EnrollmentApplicationResponse) => void;
 }) {
+  const personId = useOperatingPersonId();
+
   const [state, action, pending] = useActionState(async (): Promise<ChangeEnrollmentCareerResult> => {
     const result = await safelyRunAction(
       (async () => {
         await beforeCancel?.();
 
-        return cancelEnrollmentApplicationAction(applicationId);
+        return cancelEnrollmentApplicationAction(applicationId, personId);
       })(),
       ENROLLMENT_MESSAGES.CANCEL_APPLICATION_FAILED,
     );

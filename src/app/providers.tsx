@@ -13,6 +13,14 @@ import { getRedirectPath } from "@features/platform-auth/utils/platform-auth-pat
 export function Providers({ children }: { children: ReactNode }): ReactElement {
   const [queryClient] = useState(() => {
     function redirectOnUnauthorized(error: unknown): void {
+      if (isHttpResponseError(error, 403) && window.location.pathname.startsWith("/self-service/")) {
+        // Re-read the same URL on the server: discard stale profile data, never switch identities.
+        client.clear();
+        window.location.reload();
+
+        return;
+      }
+
       if (!isHttpResponseError(error, 401)) {
         return;
       }

@@ -22,9 +22,6 @@ jest.mock("@features/guardian-dependents/actions/create-guardian-dependent.actio
 jest.mock("@features/guardian-dependents/actions/unlink-guardian-dependent.action", () => ({
   unlinkGuardianDependentAction: jest.fn(),
 }));
-jest.mock("@features/guardian-workspace/actions/set-guardian-workspace.action", () => ({
-  setGuardianWorkspaceAction: jest.fn().mockResolvedValue({ success: true }),
-}));
 
 const INSTITUTION_ID = "019f9c3a-f891-7bc5-a98d-e65332998127";
 
@@ -33,6 +30,7 @@ function buildDependent(overrides: Partial<GuardianDependent> = {}): GuardianDep
     personGuardianId: "019f9c3a-f891-7bc5-a98d-e65332998001",
     dependentPersonId: "019f9c3a-f891-7bc5-a98d-e65332998002",
     status: "ACTIVE",
+    ownAccessStatus: "NO_ACCOUNT",
     documentNumber: "12345678",
     firstName: "Mateo",
     lastName: "Gonzalez",
@@ -102,7 +100,7 @@ describe("GuardianDependentsList", () => {
     expect(screen.queryByRole("menuitem", { name: "Inscribir" })).not.toBeInTheDocument();
     await user.click(screen.getByRole("menuitem", { name: "Cancelar solicitud" }));
     expect(screen.getByRole("alertdialog")).toHaveTextContent("La institución ya no podrá aprobar esta solicitud");
-    expect(screen.getByRole("button", { name: "Volver" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Cancelar" })).toBeInTheDocument();
   });
 
   it("shows a rejected link without management actions or invented names", () => {
@@ -175,8 +173,7 @@ describe("GuardianDependentsList", () => {
     renderList([buildDependent()]);
     await user.click(screen.getByRole("button", { name: "Abrir acciones de Mateo Gonzalez" }));
     await user.click(screen.getByRole("menuitem", { name: "Inscribir" }));
-    const { setGuardianWorkspaceAction } = await import("@features/guardian-workspace/actions/set-guardian-workspace.action");
-    await waitFor(() => expect(setGuardianWorkspaceAction).toHaveBeenCalledWith("019f9c3a-f891-7bc5-a98d-e65332998002"));
+    await waitFor(() => expect(mockPush).toHaveBeenCalledWith("/self-service/019f9c3a-f891-7bc5-a98d-e65332998002/enrollment"));
   });
 
   it("opens the unlink confirmation for the chosen dependent and can dismiss it", async () => {

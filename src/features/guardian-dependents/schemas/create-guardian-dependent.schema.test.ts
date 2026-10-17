@@ -8,6 +8,8 @@ function createValidInput(overrides: Record<string, string> = {}) {
     birthDate: "2018-09-10",
     relationship: "FATHER",
     isPrimaryContact: "true",
+    ownAccessRequested: "false",
+    email: "",
     ...overrides,
   };
 }
@@ -27,6 +29,8 @@ describe("createGuardianDependentSchema", () => {
       birthDate: "2018-09-10",
       relationship: "FATHER",
       isPrimaryContact: true,
+      ownAccessRequested: false,
+      email: undefined,
     });
     expect(createGuardianDependentSchema.parse(createValidInput({ isPrimaryContact: "false" })).isPrimaryContact).toBe(false);
   });

@@ -19,7 +19,6 @@ function renderDialog(overrides: { onClose?: () => void; onSuccess?: () => void 
     <UnlinkGuardianDependentDialog
       dependentName="Mateo Gonzalez"
       dependentPersonId={DEPENDENT_ID}
-      dependentDocumentNumber="12345678"
       institutionId={INSTITUTION_ID}
       isPendingRequest={false}
       onClose={overrides.onClose ?? jest.fn()}
@@ -87,5 +86,28 @@ describe("UnlinkGuardianDependentDialog", () => {
     await userEvent.setup().click(screen.getByRole("button", { name: "Cancelar" }));
 
     expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it("renders the expected title, formatted message, and actions for pending requests", () => {
+    render(
+      <UnlinkGuardianDependentDialog
+        dependentName="Mateo Gonzalez"
+        dependentPersonId={DEPENDENT_ID}
+        institutionId={INSTITUTION_ID}
+        isPendingRequest={true}
+        onClose={jest.fn()}
+        onSuccess={jest.fn()}
+      />,
+    );
+
+    expect(screen.getByRole("heading", { name: "Cancelar solicitud" })).toBeInTheDocument();
+    const dialog = screen.getByRole("alertdialog");
+    expect(dialog).toHaveTextContent(
+      "¿Estás seguro de cancelar la solicitud de Mateo Gonzalez? La institución ya no podrá aprobar esta solicitud de vinculación.",
+    );
+    const highlightedName = screen.getByText("Mateo Gonzalez");
+    expect(highlightedName).toHaveClass("text-foreground", "font-semibold");
+    expect(screen.getByRole("button", { name: "Cancelar" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Cancelar solicitud" })).toBeInTheDocument();
   });
 });

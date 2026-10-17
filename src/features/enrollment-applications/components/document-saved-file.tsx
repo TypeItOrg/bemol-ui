@@ -9,6 +9,7 @@ import { DocumentFilePreview } from "@features/enrollment-applications/component
 import type { DocumentDelivery } from "@features/enrollment-applications/types/document-delivery.types";
 import { formatEnrollmentApplicationDateTime } from "@features/enrollment-applications/utils/enrollment-application-date.util";
 import { getAttachmentDownloadUrl } from "@features/enrollment-applications/utils/enrollment-application.util";
+import { useOperatingPersonId } from "@features/guardian-workspace/components/guardian-workspace-provider";
 
 export function DocumentSavedFile({
   file,
@@ -29,6 +30,8 @@ export function DocumentSavedFile({
   primaryAction?: ReactNode;
   onWithdraw?: () => void;
 }): ReactElement {
+  const personId = useOperatingPersonId();
+
   return (
     <FileUploadSelection
       label="Archivo guardado"
@@ -37,7 +40,7 @@ export function DocumentSavedFile({
       preview={
         <DocumentFilePreview
           key={file.id}
-          src={getAttachmentDownloadUrl(applicationId, file.id, scope)}
+          src={getAttachmentDownloadUrl(applicationId, file.id, scope, personId)}
           name={file.originalFileName}
           contentType={file.contentType}
           compact
@@ -45,7 +48,7 @@ export function DocumentSavedFile({
       }
       previewAction={
         <DocumentFilePreview
-          src={getAttachmentDownloadUrl(applicationId, file.id, scope)}
+          src={getAttachmentDownloadUrl(applicationId, file.id, scope, personId)}
           name={file.originalFileName}
           contentType={file.contentType}
           iconOnly

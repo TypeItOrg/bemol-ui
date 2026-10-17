@@ -20,6 +20,7 @@ import {
 import { cn } from "@common/utils/cn.util";
 
 import { DocumentPdfPreview } from "@features/enrollment-applications/components/document-pdf-preview";
+import { reloadForbiddenOperatingProfile } from "@features/guardian-workspace/utils/forbidden-operating-profile.util";
 
 export function DocumentFilePreview({
   src,
@@ -28,6 +29,7 @@ export function DocumentFilePreview({
   compact = false,
   iconOnly = false,
   triggerLabel,
+  trigger,
   className,
 }: {
   src: string;
@@ -36,13 +38,29 @@ export function DocumentFilePreview({
   compact?: boolean;
   iconOnly?: boolean;
   triggerLabel?: ReactNode;
+  trigger?: ReactElement;
   className?: string;
 }): ReactElement {
   const [failedSource, setFailedSource] = useState<string>();
 
   const failed = failedSource === src;
 
-  const onPreviewError = useCallback(() => setFailedSource(src), [src]);
+  const onPreviewError = useCallback(() => {
+    setFailedSource(src);
+
+    // Image/pdf.js failures have no common HTTP error: revalidate the owning application.
+    const applicationPath = src.match(/^\/api\/institutional\/self-service\/[^/]+\/enrollment-applications\/[^/?]+(?=\/)/)?.[0];
+
+    if (applicationPath) {
+      void fetch(applicationPath, { cache: "no-store" })
+        .then((response) => {
+          reloadForbiddenOperatingProfile(response.status, applicationPath);
+
+          return response.body?.cancel();
+        })
+        .catch(() => undefined);
+    }
+  }, [src]);
 
   const isImage = contentType === "image/png" || contentType === "image/jpeg";
 
@@ -81,22 +99,28 @@ export function DocumentFilePreview({
     return <DocumentPdfPreview src={src} name={name} expanded={expanded} onError={onPreviewError} />;
   }
 
+  let previewTrigger = trigger;
+
+  if (!previewTrigger && iconOnly) {
+    previewTrigger = (
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon-lg"
+        className={cn("size-11 shrink-0", triggerLabel && "w-auto gap-2 px-2 @xl/file-selection:w-11 @xl/file-selection:p-0")}
+        aria-label={`Ver ${name}`}
+        title="Ver documento"
+      >
+        <EyeIcon aria-hidden="true" />
+        {triggerLabel}
+      </Button>
+    );
+  }
+
   return (
     <Dialog>
-      {iconOnly ? (
-        <DialogTrigger asChild>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon-lg"
-            className={cn("size-11 shrink-0", triggerLabel && "w-auto gap-2 px-2 @xl/file-selection:w-11 @xl/file-selection:p-0")}
-            aria-label={`Ver ${name}`}
-            title="Ver documento"
-          >
-            <EyeIcon aria-hidden="true" />
-            {triggerLabel}
-          </Button>
-        </DialogTrigger>
+      {previewTrigger ? (
+        <DialogTrigger asChild>{previewTrigger}</DialogTrigger>
       ) : (
         <div
           className={cn(

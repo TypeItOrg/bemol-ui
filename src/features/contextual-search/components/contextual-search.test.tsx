@@ -214,9 +214,9 @@ describe("ContextualSearch", () => {
     const { queryClient } = renderWithQueryClient(
       <ContextualSearch accessSections={institutionalAccessSections} scope="institutional" institutionId={institutionId} />,
     );
-    const platformKey = ["contextual-search", "platform", null, "ma"] as const;
-    const institutionalKey = ["contextual-search", "institutional", institutionId, "ma"] as const;
-    const otherInstitutionKey = ["contextual-search", "institutional", "other-institution", "ma"] as const;
+    const platformKey = ["contextual-search", "platform", null, null, "ma"] as const;
+    const institutionalKey = ["contextual-search", "institutional", institutionId, null, "ma"] as const;
+    const otherInstitutionKey = ["contextual-search", "institutional", "other-institution", null, "ma"] as const;
 
     queryClient.setQueryData(platformKey, userSearchSummary);
     queryClient.setQueryData(institutionalKey, userSearchSummary);

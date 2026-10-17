@@ -15,9 +15,18 @@ import { Textarea } from "@common/components/ui/textarea";
 import { EnrollmentStepCardHeader } from "@features/enrollment-applications/components/enrollment-step-card-header";
 import type { EnrollmentWizardModel } from "@features/enrollment-applications/types/enrollment-wizard-model.types";
 
-type Props = Pick<EnrollmentWizardModel, "healthInclusion" | "updateHealthInclusion" | "getFieldError" | "handleActiveTabChange" | "isMinor">;
+type Props = Pick<
+  EnrollmentWizardModel,
+  "healthInclusion" | "updateHealthInclusion" | "getFieldError" | "handleActiveTabChange" | "requiresRepresentative"
+>;
 
-export function EnrollmentHealthStep({ healthInclusion, updateHealthInclusion, getFieldError, handleActiveTabChange, isMinor }: Props): ReactElement {
+export function EnrollmentHealthStep({
+  healthInclusion,
+  updateHealthInclusion,
+  getFieldError,
+  handleActiveTabChange,
+  requiresRepresentative,
+}: Props): ReactElement {
   return (
     <TabsContent value="health" className="space-y-6">
       <Card className="bg-muted/25 @container sm:[--card-spacing:--spacing(6)]">
@@ -74,8 +83,13 @@ export function EnrollmentHealthStep({ healthInclusion, updateHealthInclusion, g
           <Button type="button" variant="outline" size="lg" onClick={() => handleActiveTabChange("education")} className="gap-1.5">
             Atrás
           </Button>
-          <Button type="button" size="lg" onClick={() => handleActiveTabChange(isMinor ? "responsible" : "spaces")} className="gap-1.5">
-            {isMinor ? "Siguiente: Tutor Legal" : "Siguiente: Cursos"}
+          <Button
+            type="button"
+            size="lg"
+            onClick={() => handleActiveTabChange(requiresRepresentative ? "responsible" : "spaces")}
+            className="gap-1.5"
+          >
+            {requiresRepresentative ? "Siguiente: Representante" : "Siguiente: Cursos"}
           </Button>
         </CardFooter>
       </Card>

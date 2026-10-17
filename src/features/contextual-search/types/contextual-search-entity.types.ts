@@ -1,3 +1,11 @@
 import type { AcademicContextualSearchEntity } from "@features/contextual-search/types/academic-contextual-search-entity.types";
 
-export type ContextualSearchEntity = "institution" | "user" | "role" | "platform-account" | "guardian-dependent" | AcademicContextualSearchEntity;
+export type ContextualSearchEntity =
+  | "institution"
+  | "user"
+  | "role"
+  | "platform-account"
+  | "guardian-dependent"
+  | "enrollment-application"
+  | "course-enrollment"
+  | AcademicContextualSearchEntity;

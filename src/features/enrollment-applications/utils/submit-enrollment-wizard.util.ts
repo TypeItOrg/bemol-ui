@@ -12,7 +12,7 @@ import {
 } from "@features/enrollment-applications/actions/enrollment-application.actions";
 import { ENROLLMENT_MESSAGES } from "@features/enrollment-applications/constants/enrollment-messages.constants";
 import { FIELD_ID_BY_ERROR_PATH } from "@features/enrollment-applications/constants/enrollment-wizard-fields.constants";
-import { enrollmentApplicationSubmissionSchema } from "@features/enrollment-applications/schemas/enrollment-application.schema";
+import { createEnrollmentSubmissionSchema } from "@features/enrollment-applications/schemas/enrollment-application.schema";
 import type { EnrollmentApplicationData } from "@features/enrollment-applications/types/enrollment-application-data.types";
 import type { EnrollmentApplicationResponse } from "@features/enrollment-applications/types/enrollment-application-response.types";
 import type { EnrollmentCourseOption } from "@features/enrollment-applications/types/enrollment-course-option.types";
@@ -31,6 +31,7 @@ export async function submitEnrollmentWizard({
   selectedCourseIds,
   handleActiveTabChange,
   isMinor,
+  actingForOtherPerson = false,
   setPendingFocusFieldId,
   draftSaveQueue,
   setApplication,
@@ -48,6 +49,7 @@ export async function submitEnrollmentWizard({
   selectedCourseIds: string[];
   handleActiveTabChange: (tab: string) => void;
   isMinor: boolean;
+  actingForOtherPerson?: boolean;
   setPendingFocusFieldId: Dispatch<SetStateAction<string | null>>;
   draftSaveQueue: RefObject<Promise<void>>;
   setApplication: Dispatch<SetStateAction<EnrollmentApplicationResponse>>;
@@ -63,7 +65,7 @@ export async function submitEnrollmentWizard({
 
   setInvalidInstrumentGroups([...pendingInstrumentGroups]);
 
-  const parsed = enrollmentApplicationSubmissionSchema.safeParse(structuredData);
+  const parsed = createEnrollmentSubmissionSchema(actingForOtherPerson).safeParse(structuredData);
 
   const issues: z.ZodIssue[] = parsed.success ? [] : [...parsed.error.issues];
 
@@ -106,7 +108,7 @@ export async function submitEnrollmentWizard({
         handleActiveTabChange("education");
       } else if (section === "healthInclusion") {
         handleActiveTabChange("health");
-      } else if (section === "responsible" && isMinor) {
+      } else if (section === "responsible" && (isMinor || actingForOtherPerson)) {
         handleActiveTabChange("responsible");
       } else if (section === "careerSelection" || section === "courses") {
         handleActiveTabChange("spaces");
@@ -127,9 +129,13 @@ export async function submitEnrollmentWizard({
   try {
     await draftSaveQueue.current;
 
-    const savedApplication = await updateEnrollmentDraftAction(application.applicationId, {
-      data: structuredData,
-    }).then(unwrapEnrollmentResult);
+    const savedApplication = await updateEnrollmentDraftAction(
+      application.applicationId,
+      {
+        data: structuredData,
+      },
+      application.personId,
+    ).then(unwrapEnrollmentResult);
 
     setApplication(savedApplication);
 
@@ -150,7 +156,7 @@ export async function submitEnrollmentWizard({
       return { issues: documentIssues };
     }
 
-    setApplication(await submitEnrollmentApplicationAction(application.applicationId).then(unwrapEnrollmentResult));
+    setApplication(await submitEnrollmentApplicationAction(application.applicationId, application.personId).then(unwrapEnrollmentResult));
     router.refresh();
 
     return {};

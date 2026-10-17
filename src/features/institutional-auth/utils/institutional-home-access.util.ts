@@ -17,6 +17,7 @@ import {
 
 import { GUARDIAN_DEPENDENTS_PAGE_PATH } from "@features/guardian-dependents/constants/guardian-dependent.constants";
 import { GUARDIAN_LINKS_PAGE_PATH } from "@features/guardian-links/constants/guardian-link.constants";
+import type { OperatingProfile } from "@features/guardian-workspace/types/operating-profile.types";
 import { INSTITUTIONAL_PERMISSION, type InstitutionalPermission } from "@features/institutional-auth/types/institutional-permission.types";
 import type { InstitutionalUser } from "@features/institutional-auth/types/institutional-user.types";
 import {
@@ -98,19 +99,23 @@ export function getInstitutionalHomeTasks(user: Pick<InstitutionalUser, "permiss
   return MANAGEMENT_TASKS.filter((link) => isHomeLinkVisible(user, link));
 }
 
-export function getInstitutionalEnrollmentHomeLinks(user: InstitutionalUser): InstitutionalHomeLink[] {
+export function getInstitutionalEnrollmentHomeLinks(user: InstitutionalUser, profile?: OperatingProfile | null): InstitutionalHomeLink[] {
+  const represented = Boolean(profile && !profile.self);
+
+  const personId = profile?.personId ?? user.personId;
+
   const links: InstitutionalHomeLink[] = [];
 
-  if (canManageDependents(user)) {
+  if (!represented && canManageDependents(user)) {
     links.push({
       href: GUARDIAN_DEPENDENTS_PAGE_PATH,
       title: "Personas a cargo",
-      description: "Registrá y gestioná a los menores a tu cargo para inscribirlos.",
+      description: "Solicitá autorización para gestionar personas, sean menores o adultas.",
       icon: UsersIcon,
     });
   }
 
-  if (hasInstitutionalPermission(user, INSTITUTIONAL_PERMISSION.COURSE_ENROLLMENT_READ)) {
+  if (!represented && hasInstitutionalPermission(user, INSTITUTIONAL_PERMISSION.COURSE_ENROLLMENT_READ)) {
     links.push({
       href: "/course-enrollments",
       title: "Cursadas",
@@ -119,7 +124,7 @@ export function getInstitutionalEnrollmentHomeLinks(user: InstitutionalUser): In
     });
   }
 
-  if (user.roles.includes("Profesor")) {
+  if (!represented && user.roles.includes("Profesor")) {
     links.push({
       href: "/my-teaching",
       title: "Mis clases",
@@ -134,25 +139,25 @@ export function getInstitutionalEnrollmentHomeLinks(user: InstitutionalUser): In
     });
   }
 
-  if (canStartEnrollmentApplication(user)) {
+  if (personId && (represented ? profile?.canEnroll : canStartEnrollmentApplication(user))) {
     links.push({
-      href: "/enrollment",
+      href: `/self-service/${personId}/enrollment`,
       title: "Nueva inscripción",
       description: "Completá y enviá una nueva solicitud de inscripción.",
       icon: FilePenLineIcon,
     });
   }
 
-  if (canViewOwnEnrollmentApplications(user)) {
+  if (personId && (represented || canViewOwnEnrollmentApplications(user))) {
     links.push({
-      href: "/my-enrollment-applications",
+      href: `/self-service/${personId}/enrollment-applications`,
       title: "Mis inscripciones",
       description: "Consultá el estado y seguimiento de tus trámites de inscripción.",
       icon: UserRoundCheckIcon,
     });
   }
 
-  if (hasInstitutionalPermission(user, INSTITUTIONAL_PERMISSION.ENROLLMENT_APPLICATION_READ)) {
+  if (!represented && hasInstitutionalPermission(user, INSTITUTIONAL_PERMISSION.ENROLLMENT_APPLICATION_READ)) {
     links.push({
       href: "/enrollment-applications",
       title: "Solicitudes de inscripción",
@@ -161,11 +166,11 @@ export function getInstitutionalEnrollmentHomeLinks(user: InstitutionalUser): In
     });
   }
 
-  if (hasInstitutionalPermission(user, INSTITUTIONAL_PERMISSION.GUARDIAN_LINK_REVIEW)) {
+  if (!represented && hasInstitutionalPermission(user, INSTITUTIONAL_PERMISSION.GUARDIAN_LINK_REVIEW)) {
     links.push({
       href: GUARDIAN_LINKS_PAGE_PATH,
       title: "Vinculaciones",
-      description: "Validá las solicitudes de tutores para vincular personas a cargo.",
+      description: "Validá las solicitudes de representación de personas.",
       icon: UsersIcon,
     });
   }
@@ -173,20 +178,24 @@ export function getInstitutionalEnrollmentHomeLinks(user: InstitutionalUser): In
   return links;
 }
 
-export function getInstitutionalFormationHomeLinks(user: InstitutionalUser): InstitutionalHomeLink[] {
-  if (!canViewOwnEnrollmentApplications(user)) {
+export function getInstitutionalFormationHomeLinks(user: InstitutionalUser, profile?: OperatingProfile | null): InstitutionalHomeLink[] {
+  const represented = Boolean(profile && !profile.self);
+
+  const personId = profile?.personId ?? user.personId;
+
+  if (!personId || (!represented && !canViewOwnEnrollmentApplications(user))) {
     return [];
   }
 
   return [
     {
-      href: "/my-course-enrollments",
+      href: `/self-service/${personId}/courses`,
       title: "Mis materias",
       description: "Consultá tus materias y resultados académicos.",
       icon: BookOpenIcon,
     },
     {
-      href: "/my-schedules",
+      href: `/self-service/${personId}/schedules`,
       title: "Mis horarios",
       description: "Organizá tu semana con los días y horarios de tus clases.",
       icon: CalendarRangeIcon,

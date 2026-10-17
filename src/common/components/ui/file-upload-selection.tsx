@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactElement, ReactNode } from "react";
+import type { ReactElement, ReactNode, Ref } from "react";
 
 import { XIcon } from "lucide-react";
 
@@ -8,6 +8,7 @@ import { Button } from "@common/components/ui/button";
 import { cn } from "@common/utils/cn.util";
 
 export function FileUploadSelection({
+  ref,
   label,
   name,
   file,
@@ -20,6 +21,7 @@ export function FileUploadSelection({
   disabled = false,
   onRemove,
 }: {
+  ref?: Ref<HTMLUListElement>;
   label: string;
   name: string;
   file?: File;
@@ -35,7 +37,7 @@ export function FileUploadSelection({
   const hasAdministrativeActions = secondaryActions !== undefined || primaryAction !== undefined;
 
   return (
-    <ul aria-label={label} className="@container/file-selection min-w-0">
+    <ul ref={ref} aria-label={label} className="@container/file-selection min-w-0">
       <li
         className={cn(
           "bg-muted/50 min-w-0 items-center gap-3 rounded-lg p-3",
@@ -53,8 +55,12 @@ export function FileUploadSelection({
             {file ? (
               <>
                 <span className="font-normal whitespace-nowrap tabular-nums">{formatFileSize(file.size)}</span>
-                {" · "}
-                <span>{statusLabel}</span>
+                {statusLabel ? (
+                  <>
+                    {" "}
+                    · <span>{statusLabel}</span>
+                  </>
+                ) : null}
               </>
             ) : (
               statusLabel

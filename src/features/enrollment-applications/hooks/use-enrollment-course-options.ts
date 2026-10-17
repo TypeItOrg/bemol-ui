@@ -16,12 +16,13 @@ export function useEnrollmentCourseOptions({
 }: EnrollmentWizardProps) {
   const queryClient = useQueryClient();
 
-  const queryKey = ["enrollment-course-options", initialApplication.applicationId];
+  const queryKey = ["enrollment-course-options", initialApplication.institutionId, initialApplication.personId, initialApplication.applicationId];
 
   const query = useInfiniteQuery({
     queryKey,
     initialPageParam: initialCourseOptionsPage,
-    queryFn: ({ pageParam, signal }) => fetchEnrollmentCourses(initialApplication.applicationId, { page: pageParam, size: 50, signal }),
+    queryFn: ({ pageParam, signal }) =>
+      fetchEnrollmentCourses(initialApplication.applicationId, { page: pageParam, size: 50, signal, personId: initialApplication.personId }),
     initialData: () => ({
       pages: [
         {

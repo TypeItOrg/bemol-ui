@@ -20,7 +20,7 @@ jest.mock("next/navigation", () => ({
     replace: jest.fn(),
     refresh: jest.fn(),
   }),
-  usePathname: () => "/my-enrollment-applications/app-1",
+  usePathname: () => "/self-service/person-1/enrollment-applications/app-1",
   useSearchParams: () => new URLSearchParams(),
 }));
 
@@ -167,8 +167,9 @@ describe("EnrollmentWizard", () => {
 
     act(() => jest.advanceTimersByTime(1));
     await waitFor(() => expect(updateAction).toHaveBeenCalledTimes(1));
-    const [applicationId, payload] = updateAction.mock.calls[0];
+    const [applicationId, payload, personId] = updateAction.mock.calls[0];
     expect(applicationId).toBe("app-1");
+    expect(personId).toBe("person-1");
     expect(payload.data.academicBackground?.schoolOrigin).toBe("Colegio Nacional");
     expect(await screen.findByText("Borrador guardado")).toBeInTheDocument();
   });
@@ -202,7 +203,7 @@ describe("EnrollmentWizard", () => {
     await userEvent.click(screen.getByRole("tab", { name: /preferencias/i }));
     await confirmSubmission();
 
-    await waitFor(() => expect(submitAction).toHaveBeenCalledWith("app-1"));
+    await waitFor(() => expect(submitAction).toHaveBeenCalledWith("app-1", "person-1"));
     expect(await screen.findByTestId("status-card")).toHaveTextContent("status:SUBMITTED");
   });
 
@@ -216,15 +217,15 @@ describe("EnrollmentWizard", () => {
     const dialog = await screen.findByRole("alertdialog");
     fireEvent.click(within(dialog).getByRole("button", { name: "Cancelar inscripción" }));
 
-    await waitFor(() => expect(cancelAction).toHaveBeenCalledWith("app-1"));
+    await waitFor(() => expect(cancelAction).toHaveBeenCalledWith("app-1", "person-1"));
     expect(await screen.findByTestId("status-card")).toHaveTextContent("status:CANCELLED");
   });
 
   it("does not render responsible tab for adult applicant", async () => {
-    renderWizard();
+    renderWizard({ initialApplication: COMPLETE_DRAFT });
 
     await screen.findByLabelText(/^nombre/i);
-    expect(screen.queryByRole("tab", { name: /tutor legal/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("tab", { name: /representante/i })).not.toBeInTheDocument();
   });
 
   it("renders responsible tab when applicant is a minor (< 18)", async () => {
@@ -241,7 +242,7 @@ describe("EnrollmentWizard", () => {
     });
 
     await screen.findByLabelText(/^nombre/i);
-    expect(screen.getByRole("tab", { name: /tutor legal/i })).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: /representante/i })).toBeInTheDocument();
   });
 
   it("keeps the training path outside the editable wizard", async () => {

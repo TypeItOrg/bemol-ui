@@ -21,7 +21,6 @@ function createForm(overrides: Record<string, string> = {}): FormData {
     lastName: "Garcia",
     birthDate: "2000-01-01",
     email: "ana@example.com",
-    isGuardian: "false",
     password: "password123",
     confirmPassword: "password123",
     ...overrides,
@@ -45,35 +44,17 @@ it("redirects successful registrations to verification without authentication co
   expect(redirect).toHaveBeenCalledWith("/auth/email-verification");
 });
 
-it("registers a guardian when the flag is true and an applicant when it is false", async () => {
-  await expect(registerInstitutional({}, createForm({ isGuardian: "true" }))).rejects.toThrow("NEXT_REDIRECT");
-  await expect(registerInstitutional({}, createForm({ isGuardian: "false" }))).rejects.toThrow("NEXT_REDIRECT");
-
-  expect(registerInstitutionalAccount).toHaveBeenNthCalledWith(1, expect.objectContaining({ isGuardian: true }));
-  expect(registerInstitutionalAccount).toHaveBeenNthCalledWith(2, expect.objectContaining({ isGuardian: false }));
-});
-
-it("rejects a submission without an explicit guardian flag", async () => {
-  const form = createForm();
-  form.delete("isGuardian");
-
-  const state = await registerInstitutional({}, form);
-
-  expect(state.fieldErrors?.isGuardian).toBeDefined();
-  expect(registerInstitutionalAccount).not.toHaveBeenCalled();
-});
-
-it("shows the backend birth date error to underage guardians", async () => {
+it("shows the backend birth date validation error", async () => {
   jest.mocked(registerInstitutionalAccount).mockResolvedValue({
     success: false,
     error: {
       status: 400,
       message: "Se encontraron errores de validación.",
-      fieldErrors: { birthDate: "Para registrarte como tutor debés ser mayor de edad." },
+      fieldErrors: { birthDate: "La fecha de nacimiento no es válida." },
     },
   });
 
-  const state = await registerInstitutional({}, createForm({ isGuardian: "true" }));
+  const state = await registerInstitutional({}, createForm());
 
-  expect(state.fieldErrors?.birthDate).toBe("Para registrarte como tutor debés ser mayor de edad.");
+  expect(state.fieldErrors?.birthDate).toBe("La fecha de nacimiento no es válida.");
 });

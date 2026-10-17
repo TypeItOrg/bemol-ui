@@ -19,7 +19,7 @@ type Props = Pick<
   EnrollmentWizardModel,
   | "preference"
   | "updatePreference"
-  | "isMinor"
+  | "requiresRepresentative"
   | "getFieldError"
   | "shiftOptions"
   | "handleActiveTabChange"
@@ -34,7 +34,7 @@ type Props = Pick<
 export function EnrollmentPreferencesStep({
   preference,
   updatePreference,
-  isMinor,
+  requiresRepresentative,
   getFieldError,
   shiftOptions,
   handleActiveTabChange,
@@ -70,7 +70,7 @@ export function EnrollmentPreferencesStep({
       <Card className="bg-muted/25 @container sm:[--card-spacing:--spacing(6)]">
         <EnrollmentStepCardHeader
           icon={SlidersHorizontalIcon}
-          title={isMinor ? "6. Preferencias y Consentimientos" : "5. Preferencias y Consentimientos"}
+          title={requiresRepresentative ? "6. Preferencias y Consentimientos" : "5. Preferencias y Consentimientos"}
           description="Seleccioná tu turno preferido y manifestá tus autorizaciones institucionales."
         />
         <CardContent className="space-y-5">

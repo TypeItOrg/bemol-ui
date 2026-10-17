@@ -25,7 +25,7 @@ export function EnrollmentWizardSteps({ model }: { model: EnrollmentWizardModel 
       <EnrollmentPersonalStep {...model} />
       <EnrollmentSchoolingStep {...model} />
       <EnrollmentHealthStep {...model} />
-      {model.isMinor ? <EnrollmentResponsibleStep {...model} /> : null}
+      {model.requiresRepresentative ? <EnrollmentResponsibleStep {...model} /> : null}
       <EnrollmentCourseStep {...model} />
       <EnrollmentPreferencesStep {...model} />
       {model.hasDocumentsStep ? (

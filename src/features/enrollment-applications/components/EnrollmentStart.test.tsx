@@ -57,25 +57,25 @@ describe("EnrollmentStart", () => {
 
   it("starts the selected application and navigates to its detail", async () => {
     startAction.mockResolvedValue({ application: { applicationId: "app-1" } } as Awaited<ReturnType<typeof startOrGetEnrollmentApplicationAction>>);
-    render(<EnrollmentStart studyPlans={studyPlans} periods={periods} />);
+    render(<EnrollmentStart personId="own-person" studyPlans={studyPlans} periods={periods} />);
 
     fireEvent.click(screen.getByRole("button", { name: /comenzar inscripción/i }));
 
-    await waitFor(() => expect(startAction).toHaveBeenCalledWith({ trainingPathId: "plan-1" }));
-    expect(mockPush).toHaveBeenCalledWith("/my-enrollment-applications/app-1");
+    await waitFor(() => expect(startAction).toHaveBeenCalledWith({ trainingPathId: "plan-1" }, "own-person"));
+    expect(mockPush).toHaveBeenCalledWith("/self-service/own-person/enrollment-applications/app-1");
   });
 
   it("sends the applicant person when enrolling a dependent", async () => {
     startAction.mockResolvedValue({ application: { applicationId: "app-2" } } as Awaited<ReturnType<typeof startOrGetEnrollmentApplicationAction>>);
-    render(<EnrollmentStart applicantPersonId="dep-1" studyPlans={studyPlans} periods={periods} />);
+    render(<EnrollmentStart personId="dep-1" studyPlans={studyPlans} periods={periods} />);
 
     fireEvent.click(screen.getByRole("button", { name: /comenzar inscripción/i }));
 
-    await waitFor(() => expect(startAction).toHaveBeenCalledWith({ trainingPathId: "plan-1", applicantPersonId: "dep-1" }));
+    await waitFor(() => expect(startAction).toHaveBeenCalledWith({ trainingPathId: "plan-1" }, "dep-1"));
   });
 
   it("shows an unavailable message when there are no options", () => {
-    render(<EnrollmentStart studyPlans={[]} periods={[]} />);
+    render(<EnrollmentStart personId="own-person" studyPlans={[]} periods={[]} />);
     expect(screen.getByText("No hay trayectos disponibles")).toBeInTheDocument();
   });
 });

@@ -1,11 +1,10 @@
 import { revalidatePath } from "next/cache";
 
 import { createGuardianDependentAction } from "@features/guardian-dependents/actions/create-guardian-dependent.action";
-import { GUARDIAN_DEPENDENT_MESSAGES, GUARDIAN_DEPENDENTS_PAGE_PATH } from "@features/guardian-dependents/constants/guardian-dependent.constants";
+import { GUARDIAN_DEPENDENTS_PAGE_PATH, GUARDIAN_DEPENDENT_MESSAGES } from "@features/guardian-dependents/constants/guardian-dependent.constants";
 import { submitGuardianDependent } from "@features/guardian-dependents/utils/submit-guardian-dependent.util";
 import { requireInstitutionalUser } from "@features/institutional-auth/services/get-institutional-user.service";
 import { institutionalApiFetch } from "@features/institutional-auth/services/institutional-api-fetch.service";
-import { INSTITUTIONAL_PERMISSION } from "@features/institutional-auth/types/institutional-permission.types";
 
 jest.mock("next/cache", () => ({ revalidatePath: jest.fn() }));
 jest.mock("@features/institutional-auth/services/institutional-api-fetch.service", () => ({ institutionalApiFetch: jest.fn() }));
@@ -21,6 +20,8 @@ function createForm(overrides: Record<string, string> = {}): FormData {
     birthDate: "2018-09-10",
     relationship: "FATHER",
     isPrimaryContact: "true",
+    email: "",
+    ownAccessRequested: "false",
     ...overrides,
   };
   const form = new FormData();
@@ -50,8 +51,8 @@ function givenUser(overrides: { institutionId?: string; permissions?: string[] }
     lastName: "González",
     documentNumber: "35123456",
     institutionId: overrides.institutionId ?? INSTITUTION_ID,
-    roles: ["Tutor"],
-    permissions: overrides.permissions ?? [INSTITUTIONAL_PERMISSION.GUARDIAN_DEPENDENT_MANAGE],
+    roles: ["Estudiante"],
+    permissions: overrides.permissions ?? [],
   });
 }
 
@@ -71,7 +72,7 @@ describe("createGuardianDependentAction", () => {
 
     expect(result).toEqual({ success: true, personGuardianId: LINK_ID });
     const [path, request] = apiFetchMock.mock.calls[0];
-    expect(path).toBe(`/api/v1/institutions/${INSTITUTION_ID}/guardian/dependents`);
+    expect(path).toBe(`/api/v1/institutions/${INSTITUTION_ID}/representations`);
     expect(request?.method).toBe("POST");
     expect(JSON.parse(String(request?.body))).toEqual({
       documentNumber: "54123456",
@@ -80,6 +81,7 @@ describe("createGuardianDependentAction", () => {
       birthDate: "2018-09-10",
       relationship: "FATHER",
       isPrimaryContact: true,
+      ownAccessRequested: false,
     });
     expect(revalidatePath).toHaveBeenCalledWith(GUARDIAN_DEPENDENTS_PAGE_PATH);
   });
@@ -94,7 +96,7 @@ describe("createGuardianDependentAction", () => {
     expect(result).toEqual({ success: true, personGuardianId: LINK_ID });
     expect(apiFetchMock).toHaveBeenCalledTimes(3);
     const [path, request] = apiFetchMock.mock.calls[1];
-    expect(path).toBe(`/api/v1/institutions/${INSTITUTION_ID}/guardian/dependents/${LINK_ID}/attachments`);
+    expect(path).toBe(`/api/v1/institutions/${INSTITUTION_ID}/representations/${LINK_ID}/attachments`);
     expect(request?.method).toBe("POST");
     expect((request?.body as FormData).get("file")).toBeInstanceOf(File);
   });
@@ -152,17 +154,17 @@ describe("createGuardianDependentAction", () => {
     expect(apiFetchMock).not.toHaveBeenCalled();
   });
 
-  it.each([
-    ["the user lacks the permission", { permissions: [] }],
-    ["the institution is another one", { institutionId: "00000000-0000-4000-8000-000000000099" }],
-  ])("does not call the backend when %s", async (_label, user) => {
-    givenUser(user);
+  it.each([["the institution is another one", { institutionId: "00000000-0000-4000-8000-000000000099" }]])(
+    "does not call the backend when %s",
+    async (_label, user) => {
+      givenUser(user);
 
-    const result = await createGuardianDependentAction(INSTITUTION_ID, {}, createForm());
+      const result = await createGuardianDependentAction(INSTITUTION_ID, {}, createForm());
 
-    expect(result.error).toBeDefined();
-    expect(apiFetchMock).not.toHaveBeenCalled();
-  });
+      expect(result.error).toBeDefined();
+      expect(apiFetchMock).not.toHaveBeenCalled();
+    },
+  );
 
   it("surfaces the backend business error", async () => {
     apiFetchMock.mockResolvedValue(

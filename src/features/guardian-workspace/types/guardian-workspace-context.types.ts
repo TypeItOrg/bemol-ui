@@ -1,9 +1,8 @@
-import type { GuardianDependent } from "@features/guardian-dependents/types/guardian-dependent.types";
+import type { OperatingProfile } from "@features/guardian-workspace/types/operating-profile.types";
 
 export type GuardianWorkspaceContextValue = {
-  dependents: readonly GuardianDependent[];
-  activeDependent: GuardianDependent | null;
-  isPending: boolean;
-  error: string | null;
-  selectDependent: (dependentPersonId: string) => void;
+  institutionId: string;
+  profiles: readonly OperatingProfile[];
+  activeProfile: OperatingProfile | null;
+  personId: string | undefined;
 };

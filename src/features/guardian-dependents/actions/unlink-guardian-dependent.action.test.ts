@@ -4,7 +4,6 @@ import { unlinkGuardianDependentAction } from "@features/guardian-dependents/act
 import { GUARDIAN_DEPENDENTS_PAGE_PATH } from "@features/guardian-dependents/constants/guardian-dependent.constants";
 import { requireInstitutionalUser } from "@features/institutional-auth/services/get-institutional-user.service";
 import { institutionalApiFetch } from "@features/institutional-auth/services/institutional-api-fetch.service";
-import { INSTITUTIONAL_PERMISSION } from "@features/institutional-auth/types/institutional-permission.types";
 
 jest.mock("next/cache", () => ({ revalidatePath: jest.fn() }));
 jest.mock("@features/institutional-auth/services/institutional-api-fetch.service", () => ({ institutionalApiFetch: jest.fn() }));
@@ -26,8 +25,8 @@ describe("unlinkGuardianDependentAction", () => {
       lastName: "González",
       documentNumber: "35123456",
       institutionId: INSTITUTION_ID,
-      roles: ["Tutor"],
-      permissions: [INSTITUTIONAL_PERMISSION.GUARDIAN_DEPENDENT_MANAGE],
+      roles: ["Estudiante"],
+      permissions: [],
     });
   });
 
@@ -38,7 +37,7 @@ describe("unlinkGuardianDependentAction", () => {
 
     expect(result).toEqual({ success: true });
     const [path, request] = apiFetchMock.mock.calls[0];
-    expect(path).toBe(`/api/v1/institutions/${INSTITUTION_ID}/guardian/dependents/${DEPENDENT_ID}`);
+    expect(path).toBe(`/api/v1/institutions/${INSTITUTION_ID}/representations/${DEPENDENT_ID}`);
     expect(request?.method).toBe("DELETE");
     expect(revalidatePath).toHaveBeenCalledWith(GUARDIAN_DEPENDENTS_PAGE_PATH);
   });

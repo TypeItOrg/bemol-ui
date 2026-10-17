@@ -1,11 +1,11 @@
 import { ENROLLMENT_MESSAGES } from "@features/enrollment-applications/constants/enrollment-messages.constants";
 import {
-  calculateAge,
-  personalDataSchema,
   academicBackgroundSchema,
-  healthInclusionSchema,
-  preferenceSchema,
+  calculateAge,
   enrollmentApplicationSubmissionSchema,
+  healthInclusionSchema,
+  personalDataSchema,
+  preferenceSchema,
   startEnrollmentApplicationSchema,
 } from "@features/enrollment-applications/schemas/enrollment-application.schema";
 
@@ -24,16 +24,6 @@ describe("startEnrollmentApplicationSchema", () => {
     };
 
     expect(startEnrollmentApplicationSchema.parse(input)).toEqual(input);
-  });
-
-  it("accepts an application on behalf of a dependent", () => {
-    const applicantPersonId = "00000000-0000-4000-8000-000000000003";
-
-    expect(startEnrollmentApplicationSchema.parse({ ...base, applicantPersonId })).toEqual({ ...base, applicantPersonId });
-  });
-
-  it("rejects an applicantPersonId that is not a UUID", () => {
-    expect(startEnrollmentApplicationSchema.safeParse({ ...base, applicantPersonId: "not-a-uuid" }).success).toBe(false);
   });
 
   it("rejects a missing trainingPathId", () => {

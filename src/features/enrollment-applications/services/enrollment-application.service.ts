@@ -1,15 +1,17 @@
+import { cache } from "react";
+
 import "server-only";
 
 import type { PaginatedResponse } from "@common/types/paginated-response.types";
 import { parseHttpResponse, parseNullableHttpResponse } from "@common/utils/http-response-error.util";
 
-import { ENROLLMENT_APPLICATIONS_API_PATH } from "@features/enrollment-applications/constants/enrollment-application.constants";
 import { ENROLLMENT_MESSAGES } from "@features/enrollment-applications/constants/enrollment-messages.constants";
 import type { EnrollmentApplicationResponse } from "@features/enrollment-applications/types/enrollment-application-response.types";
 import type { EnrollmentApplicationStatus } from "@features/enrollment-applications/types/enrollment-application-status.types";
 import type { EnrollmentApplication } from "@features/enrollment-applications/types/enrollment-application.types";
 import type { StartEnrollmentApplicationInput } from "@features/enrollment-applications/types/start-enrollment-application-input.types";
 import type { UpdateEnrollmentDraftInput } from "@features/enrollment-applications/types/update-enrollment-draft-input.types";
+import { getSelfServiceEnrollmentApiPath } from "@features/guardian-workspace/services/operating-profile.service";
 import { institutionalApiFetch } from "@features/institutional-auth/services/institutional-api-fetch.service";
 import { platformApiFetch } from "@features/platform-auth/services/platform-api-fetch.service";
 
@@ -76,6 +78,7 @@ export type FetchMyEnrollmentApplicationsParams = FetchEnrollmentApplicationsPar
 export async function fetchMyEnrollmentApplications(
   institutionId: string,
   params: FetchMyEnrollmentApplicationsParams,
+  personId?: string,
 ): Promise<PaginatedResponse<EnrollmentApplication>> {
   const searchParams = buildListSearchParams(params);
 
@@ -83,7 +86,7 @@ export async function fetchMyEnrollmentApplications(
     searchParams.set("dependentPersonId", params.dependentPersonId);
   }
 
-  const response = await institutionalApiFetch(`/api/v1/institutions/${institutionId}/my-enrollment-applications?${searchParams}`);
+  const response = await institutionalApiFetch(`${await getSelfServiceEnrollmentApiPath(personId)}?${searchParams}`);
 
   return parseHttpResponse(response, ENROLLMENT_MESSAGES.FETCH_MY);
 }
@@ -118,8 +121,8 @@ function buildListSearchParams(params: FetchEnrollmentApplicationsParams): URLSe
   return searchParams;
 }
 
-export async function fetchEnrollmentApplicationById(applicationId: string): Promise<EnrollmentApplicationResponse> {
-  const response = await institutionalApiFetch(`${ENROLLMENT_APPLICATIONS_API_PATH}/${applicationId}`, {
+async function getEnrollmentApplicationById(applicationId: string, personId?: string): Promise<EnrollmentApplicationResponse> {
+  const response = await institutionalApiFetch(`${await getSelfServiceEnrollmentApiPath(personId)}/${applicationId}`, {
     method: "GET",
   });
 
@@ -132,10 +135,15 @@ export async function fetchEnrollmentApplicationById(applicationId: string): Pro
   return response.json();
 }
 
+export const fetchEnrollmentApplicationById = cache(getEnrollmentApplicationById);
+
 export const getEnrollmentApplication = fetchEnrollmentApplicationById;
 
-export async function startOrGetEnrollmentApplication(input: StartEnrollmentApplicationInput): Promise<EnrollmentApplicationResponse> {
-  const response = await institutionalApiFetch(ENROLLMENT_APPLICATIONS_API_PATH, {
+export async function startOrGetEnrollmentApplication(
+  input: StartEnrollmentApplicationInput,
+  personId?: string,
+): Promise<EnrollmentApplicationResponse> {
+  const response = await institutionalApiFetch(await getSelfServiceEnrollmentApiPath(personId), {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -152,8 +160,12 @@ export async function startOrGetEnrollmentApplication(input: StartEnrollmentAppl
   return response.json();
 }
 
-export async function updateEnrollmentDraft(applicationId: string, input: UpdateEnrollmentDraftInput): Promise<EnrollmentApplicationResponse> {
-  const response = await institutionalApiFetch(`${ENROLLMENT_APPLICATIONS_API_PATH}/${applicationId}/draft`, {
+export async function updateEnrollmentDraft(
+  applicationId: string,
+  input: UpdateEnrollmentDraftInput,
+  personId?: string,
+): Promise<EnrollmentApplicationResponse> {
+  const response = await institutionalApiFetch(`${await getSelfServiceEnrollmentApiPath(personId)}/${applicationId}/draft`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
@@ -170,8 +182,8 @@ export async function updateEnrollmentDraft(applicationId: string, input: Update
   return response.json();
 }
 
-export async function submitEnrollmentApplication(applicationId: string): Promise<EnrollmentApplicationResponse> {
-  const response = await institutionalApiFetch(`${ENROLLMENT_APPLICATIONS_API_PATH}/${applicationId}/submit`, {
+export async function submitEnrollmentApplication(applicationId: string, personId?: string): Promise<EnrollmentApplicationResponse> {
+  const response = await institutionalApiFetch(`${await getSelfServiceEnrollmentApiPath(personId)}/${applicationId}/submit`, {
     method: "POST",
   });
 
@@ -184,8 +196,8 @@ export async function submitEnrollmentApplication(applicationId: string): Promis
   return response.json();
 }
 
-export async function cancelEnrollmentApplication(applicationId: string): Promise<EnrollmentApplicationResponse> {
-  const response = await institutionalApiFetch(`${ENROLLMENT_APPLICATIONS_API_PATH}/${applicationId}/cancel`, {
+export async function cancelEnrollmentApplication(applicationId: string, personId?: string): Promise<EnrollmentApplicationResponse> {
+  const response = await institutionalApiFetch(`${await getSelfServiceEnrollmentApiPath(personId)}/${applicationId}/cancel`, {
     method: "POST",
   });
 

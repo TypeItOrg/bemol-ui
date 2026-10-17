@@ -1,6 +1,6 @@
 import { authenticatedApiFetch } from "@common/services/authenticated-api-fetch.service";
 
-import { resendEmailVerification, changePendingEmail } from "@features/institutional-auth/actions/email-verification.actions";
+import { changePendingEmail, resendEmailVerification } from "@features/institutional-auth/actions/email-verification.actions";
 import { identifyInstitutionalUser } from "@features/institutional-auth/actions/identify-institutional-user.action";
 import { registerInstitutional } from "@features/institutional-auth/actions/institutional-register.action";
 import { requestPasswordRecovery } from "@features/institutional-auth/actions/request-institutional-password-recovery.action";
@@ -36,7 +36,6 @@ function form(): FormData {
     name: "Ana",
     lastName: "Garcia",
     birthDate: "2000-01-01",
-    isGuardian: "false",
     email: "ana@example.com",
     password: "password123",
     confirmPassword: "password123",

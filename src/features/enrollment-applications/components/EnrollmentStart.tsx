@@ -5,14 +5,14 @@ import { startTransition, useActionState, type ReactElement, type ReactNode } fr
 import { useRouter } from "next/navigation";
 
 import { startOrGetEnrollmentApplicationAction } from "@features/enrollment-applications/actions/enrollment-application.actions";
-import { EnrollmentStartSelector } from "@features/enrollment-applications/components/EnrollmentStartSelector";
 import type { EnrollmentStartStudyPlanOption } from "@features/enrollment-applications/components/EnrollmentStartSelector";
+import { EnrollmentStartSelector } from "@features/enrollment-applications/components/EnrollmentStartSelector";
 import type { StartEnrollmentApplicationInput } from "@features/enrollment-applications/types/start-enrollment-application-input.types";
 import type { EnrollmentPeriod } from "@features/enrollment-periods/types/enrollment-period.types";
 
 interface EnrollmentStartProps {
   /** Dependent the application is for; omit to enroll the signed-in user. */
-  applicantPersonId?: string;
+  personId: string;
   studyPlans: EnrollmentStartStudyPlanOption[];
   periods?: EnrollmentPeriod[];
   studyPlanPagination?: ReactNode;
@@ -22,18 +22,18 @@ type EnrollmentStartState = {
   error?: string;
 };
 
-export function EnrollmentStart({ applicantPersonId, studyPlans, studyPlanPagination }: EnrollmentStartProps): ReactElement {
+export function EnrollmentStart({ personId, studyPlans, studyPlanPagination }: EnrollmentStartProps): ReactElement {
   const router = useRouter();
 
   const [state, startApplication, isStarting] = useActionState(
     async (_previous: EnrollmentStartState, input: StartEnrollmentApplicationInput): Promise<EnrollmentStartState> => {
-      const result = await startOrGetEnrollmentApplicationAction(applicantPersonId ? { ...input, applicantPersonId } : input);
+      const result = await startOrGetEnrollmentApplicationAction(input, personId);
 
       if ("error" in result) {
         return { error: result.error };
       }
 
-      router.push(`/my-enrollment-applications/${result.application.applicationId}`);
+      router.push(`/self-service/${personId}/enrollment-applications/${result.application.applicationId}`);
 
       return {};
     },

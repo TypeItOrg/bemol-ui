@@ -1,6 +1,6 @@
 "use client";
 
-import { startTransition, useActionState, type SyntheticEvent, type ReactElement } from "react";
+import { startTransition, useActionState, type ReactElement, type SyntheticEvent } from "react";
 
 import { CircleAlertIcon, UserMinusIcon } from "lucide-react";
 
@@ -23,7 +23,6 @@ import type { GuardianDependentActionState } from "@features/guardian-dependents
 type UnlinkGuardianDependentDialogProps = {
   dependentName: string;
   dependentPersonId: string;
-  dependentDocumentNumber: string;
   institutionId: string;
   isPendingRequest: boolean;
   onClose: () => void;
@@ -33,7 +32,6 @@ type UnlinkGuardianDependentDialogProps = {
 export function UnlinkGuardianDependentDialog({
   dependentName,
   dependentPersonId,
-  dependentDocumentNumber,
   institutionId,
   isPendingRequest,
   onClose,
@@ -57,11 +55,11 @@ export function UnlinkGuardianDependentDialog({
 
   const pendingLabel = isPendingRequest ? "Cancelando…" : "Quitando…";
 
-  let title = isPendingRequest ? "Cancelar solicitud de vinculación" : "Quitar vinculación";
+  const title = isPendingRequest ? "Cancelar solicitud" : "Quitar vinculación";
 
-  if (dependentName) {
-    title = isPendingRequest ? `Cancelar solicitud de ${dependentName}` : `Quitar a ${dependentName}`;
-  }
+  const unlinkQuestion = dependentName ? "¿Estás seguro de quitar la vinculación" : "¿Estás seguro de quitar esta vinculación";
+
+  const question = isPendingRequest ? "¿Estás seguro de cancelar la solicitud" : unlinkQuestion;
 
   function handleSubmit(event: SyntheticEvent<HTMLFormElement>): void {
     event.preventDefault();
@@ -90,7 +88,14 @@ export function UnlinkGuardianDependentDialog({
             </div>
             <AlertDialogTitle>{title}</AlertDialogTitle>
             <AlertDialogDescription>
-              <span className="mb-2 block font-medium">Documento: {dependentDocumentNumber}</span>
+              {question}
+              {dependentName ? (
+                <>
+                  {" de "}
+                  <span className="text-foreground font-semibold">{dependentName}</span>
+                </>
+              ) : null}
+              {"? "}
               {isPendingRequest
                 ? "La institución ya no podrá aprobar esta solicitud de vinculación."
                 : "Vas a perder el acceso a las solicitudes de inscripción de esta persona. Las solicitudes no se eliminan."}
@@ -103,10 +108,10 @@ export function UnlinkGuardianDependentDialog({
             </Alert>
           ) : null}
           <AlertDialogFooter className="mt-5">
-            <AlertDialogCancel disabled={isPending} type="button">
-              {isPendingRequest ? "Volver" : "Cancelar"}
+            <AlertDialogCancel disabled={isPending} size="lg" type="button">
+              Cancelar
             </AlertDialogCancel>
-            <Button disabled={isPending} type="submit" variant="destructive">
+            <Button disabled={isPending} size="lg" type="submit" variant="destructive">
               {isPending ? pendingLabel : submitLabel}
             </Button>
           </AlertDialogFooter>

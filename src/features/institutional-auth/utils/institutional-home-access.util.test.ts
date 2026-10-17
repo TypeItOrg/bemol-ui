@@ -39,19 +39,19 @@ describe("institutional home access", () => {
     } as unknown as InstitutionalUser;
 
     const links = getInstitutionalEnrollmentHomeLinks(user);
-    expect(links.map(({ href }) => href)).toEqual(["/enrollment", "/my-enrollment-applications"]);
+    expect(links.map(({ href }) => href)).toEqual(["/my-dependents", "/self-service/p-1/enrollment", "/self-service/p-1/enrollment-applications"]);
   });
 
   it("puts the dependents link first for users who can manage dependents", () => {
     const user = {
       institutionId: "inst-1",
       personId: "p-1",
-      roles: ["Tutor"],
-      permissions: [INSTITUTIONAL_PERMISSION.GUARDIAN_DEPENDENT_MANAGE, INSTITUTIONAL_PERMISSION.ACADEMIC_OFFER_READ],
+      roles: ["Estudiante"],
+      permissions: [INSTITUTIONAL_PERMISSION.ACADEMIC_OFFER_READ],
     } as unknown as InstitutionalUser;
 
     const links = getInstitutionalEnrollmentHomeLinks(user);
-    expect(links.map(({ href }) => href)).toEqual(["/my-dependents", "/enrollment", "/my-enrollment-applications"]);
+    expect(links.map(({ href }) => href)).toEqual(["/my-dependents", "/self-service/p-1/enrollment", "/self-service/p-1/enrollment-applications"]);
   });
 
   it("returns staff enrollment application link when user has enrollment read permission", () => {
@@ -63,7 +63,7 @@ describe("institutional home access", () => {
     } as unknown as InstitutionalUser;
 
     const links = getInstitutionalEnrollmentHomeLinks(user);
-    expect(links.map(({ href }) => href)).toEqual(["/enrollment-applications"]);
+    expect(links.map(({ href }) => href)).toEqual(["/my-dependents", "/enrollment-applications"]);
   });
 
   it("shows guardian link review separately from dependent management", () => {
@@ -77,10 +77,11 @@ describe("institutional home access", () => {
     const links = getInstitutionalEnrollmentHomeLinks(user);
 
     expect(links).toEqual([
+      expect.objectContaining({ href: "/my-dependents" }),
       expect.objectContaining({
         href: "/guardian-links",
         title: "Vinculaciones",
-        description: "Validá las solicitudes de tutores para vincular personas a cargo.",
+        description: "Validá las solicitudes de representación de personas.",
       }),
     ]);
   });

@@ -17,15 +17,14 @@ import { Table, TableBody, TableHead, TableHeader, TableRow } from "@common/comp
 import type { PaginatedResponse } from "@common/types/paginated-response.types";
 import { PAGE_SIZE_OPTIONS } from "@common/utils/pagination-query.util";
 
-import { ENROLLMENT_PAGE_PATH } from "@features/enrollment-applications/constants/enrollment-application.constants";
 import { GuardianDependentRow } from "@features/guardian-dependents/components/guardian-dependent-row";
 import { GuardianDependentsEmptyState } from "@features/guardian-dependents/components/guardian-dependents-empty-state";
 import { GuardianDependentsFilters } from "@features/guardian-dependents/components/guardian-dependents-filters";
+import { OwnAccessDialog } from "@features/guardian-dependents/components/own-access-dialog";
 import { UnlinkGuardianDependentDialog } from "@features/guardian-dependents/components/unlink-guardian-dependent-dialog";
 import type { GuardianDependent } from "@features/guardian-dependents/types/guardian-dependent.types";
 import type { GuardianDependentsQuery } from "@features/guardian-dependents/types/guardian-dependents-query.types";
 import { getGuardianDependentName } from "@features/guardian-dependents/utils/guardian-dependent-display.util";
-import { setGuardianWorkspaceAction } from "@features/guardian-workspace/actions/set-guardian-workspace.action";
 import { PlatformCollectionActions } from "@features/platform-auth/components/platform-collection-actions";
 
 type GuardianDependentsListProps = {
@@ -39,34 +38,30 @@ export function GuardianDependentsList({ data, institutionId, query }: GuardianD
 
   const { isPending: isNavigating, navigate } = useDataTableNavigation();
 
+  const [personForAccess, setPersonForAccess] = useState<GuardianDependent | null>(null);
+
   const [dependentToUnlink, setDependentToUnlink] = useState<GuardianDependent | null>(null);
 
   const [isSelectingWorkspace, startSelectingWorkspace] = useTransition();
 
-  const [workspaceError, setWorkspaceError] = useState<string>();
-
   const isFiltered = Boolean(query.search || query.status || query.relationship || query.primaryContact !== undefined);
 
   function handleEnrollment(dependentPersonId: string): void {
-    setWorkspaceError(undefined);
-
-    startSelectingWorkspace(async () => {
-      try {
-        const result = await setGuardianWorkspaceAction(dependentPersonId);
-
-        if ("success" in result) {
-          router.push(ENROLLMENT_PAGE_PATH);
-        } else {
-          setWorkspaceError(result.error);
-        }
-      } catch {
-        setWorkspaceError("No se pudo seleccionar a la persona. Intentá nuevamente.");
-      }
-    });
+    startSelectingWorkspace(() => router.push(`/self-service/${dependentPersonId}/enrollment`));
   }
 
   return (
     <Sheet>
+      {personForAccess ? (
+        <OwnAccessDialog
+          institutionId={institutionId}
+          person={personForAccess}
+          onClose={() => setPersonForAccess(null)}
+          onSuccess={() => {
+            setPersonForAccess(null);
+          }}
+        />
+      ) : null}
       <div className="flex h-full min-h-0 flex-col gap-4">
         <PlatformCollectionActions className="sm:justify-between">
           <Button asChild size="lg">
@@ -79,12 +74,6 @@ export function GuardianDependentsList({ data, institutionId, query }: GuardianD
         </PlatformCollectionActions>
 
         <GuardianDependentsFilters query={query} />
-
-        {workspaceError ? (
-          <p className="text-destructive text-sm" role="alert">
-            {workspaceError}
-          </p>
-        ) : null}
 
         <div
           className={data.items.length === 0 ? "relative h-full" : "relative min-h-0 flex-1 overflow-hidden rounded-lg border"}
@@ -128,6 +117,7 @@ export function GuardianDependentsList({ data, institutionId, query }: GuardianD
                     sort={query.sort}
                     onSortChange={(sort) => navigate({ page: "0", sortField: sort.field, sortDirection: sort.direction })}
                   />
+                  <TableHead>Acceso propio</TableHead>
                   <TableHead>Inscripciones</TableHead>
                 </TableRow>
               </TableHeader>
@@ -138,6 +128,7 @@ export function GuardianDependentsList({ data, institutionId, query }: GuardianD
                     dependent={dependent}
                     isSelectingWorkspace={isSelectingWorkspace}
                     onEnroll={() => handleEnrollment(dependent.dependentPersonId)}
+                    onManageAccess={() => setPersonForAccess(dependent)}
                     onUnlink={() => setDependentToUnlink(dependent)}
                   />
                 ))}
@@ -167,7 +158,6 @@ export function GuardianDependentsList({ data, institutionId, query }: GuardianD
         {dependentToUnlink ? (
           <UnlinkGuardianDependentDialog
             dependentName={getGuardianDependentName(dependentToUnlink)}
-            dependentDocumentNumber={dependentToUnlink.documentNumber}
             isPendingRequest={dependentToUnlink.status === "PENDING"}
             dependentPersonId={dependentToUnlink.dependentPersonId}
             institutionId={institutionId}

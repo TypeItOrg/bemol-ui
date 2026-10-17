@@ -6,6 +6,10 @@ import type { EnrollmentCourseOption } from "@features/enrollment-applications/t
 
 import { createTestQueryClient } from "@/../test/utils/render-with-query-client";
 
+jest.mock("next/navigation", () => ({
+  usePathname: () => "/self-service/person-1/enrollment-applications/application-1",
+}));
+
 const INSTRUMENTAL_COURSES: EnrollmentCourseOption[] = [
   {
     courseId: "course-guitar",

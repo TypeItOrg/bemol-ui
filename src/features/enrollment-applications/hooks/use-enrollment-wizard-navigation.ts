@@ -16,7 +16,7 @@ function getServerHydrationSnapshot(): boolean {
   return false;
 }
 
-export function useEnrollmentWizardNavigation(isMinor: boolean, hasDocumentsStep: boolean, isSubmitDialogOpen: boolean) {
+export function useEnrollmentWizardNavigation(requiresRepresentative: boolean, hasDocumentsStep: boolean, isSubmitDialogOpen: boolean) {
   const searchParams = useSearchParams();
 
   const tabTriggerRefs = useRef(new Map<string, HTMLButtonElement>());
@@ -38,7 +38,7 @@ export function useEnrollmentWizardNavigation(isMinor: boolean, hasDocumentsStep
       { id: "personal", label: "Datos Personales" },
       { id: "education", label: "Escolaridad" },
       { id: "health", label: "Salud e Inclusión" },
-      ...(isMinor ? [{ id: "responsible", label: "Tutor Legal" }] : []),
+      ...(requiresRepresentative ? [{ id: "responsible", label: "Representante" }] : []),
       { id: "spaces", label: "Cursos" },
       { id: "preferences", label: "Preferencias" },
       ...(hasDocumentsStep ? [{ id: "documents", label: "Documentación" }] : []),
@@ -48,7 +48,7 @@ export function useEnrollmentWizardNavigation(isMinor: boolean, hasDocumentsStep
       ...tab,
       label: `${index + 1}. ${tab.label}`,
     }));
-  }, [isMinor, hasDocumentsStep]);
+  }, [requiresRepresentative, hasDocumentsStep]);
 
   const effectiveActiveTab = getEffectiveActiveTab(activeTab, visibleTabs);
 

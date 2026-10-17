@@ -1,5 +1,6 @@
 import { AcademicScope } from "@features/academic/utils/academic-scope.util";
 import type { EnrollmentApplicationResponse } from "@features/enrollment-applications/types/enrollment-application-response.types";
+import { getSelfServiceReadPath } from "@features/guardian-workspace/utils/self-service-read-path.util";
 
 export function getApplicantFullName(application: EnrollmentApplicationResponse): string {
   if (application.applicantName?.trim()) {
@@ -120,6 +121,11 @@ export function formatFileSize(bytes?: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-export function getAttachmentDownloadUrl(applicationId: string, attachmentId: string, scope: AcademicScope = AcademicScope.INSTITUTIONAL): string {
-  return `/api/enrollment-applications/${applicationId}/attachments/${attachmentId}/content${AcademicScope.isAdmin(scope) ? `?scope=${AcademicScope.ADMIN}` : ""}`;
+export function getAttachmentDownloadUrl(
+  applicationId: string,
+  attachmentId: string,
+  scope: AcademicScope = AcademicScope.INSTITUTIONAL,
+  personId?: string,
+): string {
+  return `${getSelfServiceReadPath(applicationId, personId)}/attachments/${attachmentId}/content${AcademicScope.isAdmin(scope) ? `?scope=${AcademicScope.ADMIN}` : ""}`;
 }

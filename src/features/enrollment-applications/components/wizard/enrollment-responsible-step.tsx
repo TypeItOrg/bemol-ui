@@ -17,21 +17,27 @@ import { EnrollmentStepCardHeader } from "@features/enrollment-applications/comp
 import { EDUCATION_LEVEL_OPTIONS } from "@features/enrollment-applications/constants/enrollment-application.constants";
 import type { EnrollmentWizardModel } from "@features/enrollment-applications/types/enrollment-wizard-model.types";
 
-type Props = Pick<EnrollmentWizardModel, "responsible" | "updateResponsible" | "getFieldError" | "isMinor" | "handleActiveTabChange">;
+type Props = Pick<EnrollmentWizardModel, "responsible" | "updateResponsible" | "getFieldError" | "requiresRepresentative" | "handleActiveTabChange">;
 
-export function EnrollmentResponsibleStep({ responsible, updateResponsible, getFieldError, isMinor, handleActiveTabChange }: Props): ReactElement {
+export function EnrollmentResponsibleStep({
+  responsible,
+  updateResponsible,
+  getFieldError,
+  requiresRepresentative,
+  handleActiveTabChange,
+}: Props): ReactElement {
   return (
     <TabsContent value="responsible" className="space-y-6">
       <Card className="bg-muted/25 @container sm:[--card-spacing:--spacing(6)]">
         <EnrollmentStepCardHeader
           icon={UsersRoundIcon}
-          title="4. Responsable / Tutor Legal"
-          description="Obligatorio: Al ser menor de 18 años, debés consignar los datos de tu tutor o representante legal."
-          action={<Badge variant="destructive">Obligatorio (Menor)</Badge>}
+          title="4. Representante"
+          description="Datos de quien gestiona la inscripción de la persona representada."
+          action={<Badge variant="destructive">Obligatorio</Badge>}
         />
         <CardContent className="space-y-4">
           <Field data-invalid={!!getFieldError(["responsible", "fullName"])}>
-            <FieldLabel htmlFor="responsibleFullName" required={isMinor}>
+            <FieldLabel htmlFor="responsibleFullName" required={requiresRepresentative}>
               Nombre y Apellido del Responsable
             </FieldLabel>
             <Input
@@ -47,7 +53,7 @@ export function EnrollmentResponsibleStep({ responsible, updateResponsible, getF
 
           <div className="grid gap-4 @min-[48rem]:grid-cols-2">
             <Field data-invalid={!!getFieldError(["responsible", "documentNumber"])}>
-              <FieldLabel htmlFor="responsibleDocumentNumber" required={isMinor}>
+              <FieldLabel htmlFor="responsibleDocumentNumber" required={requiresRepresentative}>
                 DNI del Responsable
               </FieldLabel>
               <NumericInput
@@ -62,7 +68,7 @@ export function EnrollmentResponsibleStep({ responsible, updateResponsible, getF
             </Field>
 
             <Field data-invalid={!!getFieldError(["responsible", "phoneNumber"])}>
-              <FieldLabel htmlFor="responsiblePhoneNumber" required={isMinor}>
+              <FieldLabel htmlFor="responsiblePhoneNumber" required={requiresRepresentative}>
                 Teléfono del Responsable
               </FieldLabel>
               <PhoneInput
@@ -79,7 +85,7 @@ export function EnrollmentResponsibleStep({ responsible, updateResponsible, getF
 
           <div className="grid gap-4 @min-[48rem]:grid-cols-2">
             <Field data-invalid={!!getFieldError(["responsible", "email"])}>
-              <FieldLabel htmlFor="responsibleEmail" required={isMinor}>
+              <FieldLabel htmlFor="responsibleEmail" required={requiresRepresentative}>
                 Correo electrónico
               </FieldLabel>
               <Input
@@ -87,7 +93,7 @@ export function EnrollmentResponsibleStep({ responsible, updateResponsible, getF
                 type="email"
                 value={responsible.email}
                 onChange={(e) => updateResponsible("email", e.target.value)}
-                placeholder="tutor@ejemplo.com"
+                placeholder="representante@ejemplo.com"
                 autoComplete="email"
                 spellCheck={false}
                 aria-invalid={!!getFieldError(["responsible", "email"])}
@@ -96,7 +102,7 @@ export function EnrollmentResponsibleStep({ responsible, updateResponsible, getF
             </Field>
 
             <Field data-invalid={!!getFieldError(["responsible", "occupation"])}>
-              <FieldLabel htmlFor="responsibleOccupation" required={isMinor}>
+              <FieldLabel htmlFor="responsibleOccupation" required={requiresRepresentative}>
                 Ocupación / Profesión
               </FieldLabel>
               <Input
@@ -111,7 +117,7 @@ export function EnrollmentResponsibleStep({ responsible, updateResponsible, getF
           </div>
 
           <Field data-invalid={!!getFieldError(["responsible", "educationLevel"])}>
-            <FieldLabel htmlFor="responsibleEducationLevel" required={isMinor}>
+            <FieldLabel htmlFor="responsibleEducationLevel" required={requiresRepresentative}>
               Nivel de Instrucción
             </FieldLabel>
             <Select value={responsible.educationLevel} onValueChange={(value) => updateResponsible("educationLevel", value)}>

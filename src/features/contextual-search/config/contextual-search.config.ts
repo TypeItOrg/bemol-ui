@@ -3,6 +3,7 @@ import {
   Building2Icon,
   CalendarDaysIcon,
   ClockIcon,
+  ClipboardListIcon,
   FileStackIcon,
   GraduationCapIcon,
   KeyRoundIcon,
@@ -43,6 +44,8 @@ export const CONTEXTUAL_SEARCH_PRESENTATION: Record<ContextualSearchEntity, Enti
   course: { singular: "Curso", plural: "Cursos", icon: GraduationCapIcon },
   shift: { singular: "Turno", plural: "Turnos", icon: ClockIcon },
   "guardian-dependent": { singular: "Persona a cargo", plural: "Personas a cargo", icon: UsersIcon },
+  "enrollment-application": { singular: "Inscripción", plural: "Mis inscripciones", icon: ClipboardListIcon },
+  "course-enrollment": { singular: "Materia", plural: "Mis materias", icon: BookOpenIcon },
 };
 
 export const CONTEXTUAL_SEARCH_STATUS_LABELS: Record<string, string> = {
@@ -54,6 +57,15 @@ export const CONTEXTUAL_SEARCH_STATUS_LABELS: Record<string, string> = {
   PLANNED: "Planificado",
   CLOSED: "Cerrado",
   DRAFT: "Borrador",
+  SUBMITTED: "Enviada",
+  CANCELLED: "Cancelada",
+  REJECTED: "Rechazada",
+  PROVISIONALLY_APPROVED: "Aprobada provisoriamente",
+  APPROVED: "Aprobada",
+  ENROLLED: "En curso",
+  COMPLETED: "Finalizada",
+  WITHDRAWN: "Baja",
+  ADMINISTRATIVELY_WITHDRAWN: "Baja administrativa",
 };
 
 export const CONTEXTUAL_SEARCH_CATEGORY_LABELS: Record<string, string> = {

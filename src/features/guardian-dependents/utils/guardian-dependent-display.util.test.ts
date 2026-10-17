@@ -6,6 +6,7 @@ function createDependent(overrides: Partial<GuardianDependent> = {}): GuardianDe
     personGuardianId: "link-1",
     dependentPersonId: "person-1",
     status: "ACTIVE",
+    ownAccessStatus: "NO_ACCOUNT",
     documentNumber: "54123456",
     firstName: "Mateo",
     lastName: "González",

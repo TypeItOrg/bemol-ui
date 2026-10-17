@@ -3,8 +3,9 @@
 import type { ReactElement } from "react";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
-import { UserRoundIcon, UsersRoundIcon } from "lucide-react";
+import { UsersRoundIcon } from "lucide-react";
 
 import {
   DropdownMenuItem,
@@ -14,45 +15,48 @@ import {
   DropdownMenuSeparator,
 } from "@common/components/ui/dropdown-menu";
 
-import { GUARDIAN_DEPENDENTS_PAGE_PATH } from "@features/guardian-dependents/constants/guardian-dependent.constants";
-import { getGuardianDependentName } from "@features/guardian-dependents/utils/guardian-dependent-display.util";
 import { useGuardianWorkspace } from "@features/guardian-workspace/components/guardian-workspace-provider";
+import { PersonInitialsAvatar } from "@features/guardian-workspace/components/person-initials-avatar";
 
 export function GuardianWorkspaceMenuItems({ onNavigate }: { onNavigate: (url: string) => void }): ReactElement {
-  const { dependents, activeDependent, error, isPending, selectDependent } = useGuardianWorkspace();
+  const { profiles, personId } = useGuardianWorkspace();
 
-  if (dependents.length === 0) {
-    return (
-      <>
-        <DropdownMenuLabel>Personas a cargo</DropdownMenuLabel>
-        <DropdownMenuItem asChild>
-          <Link href={GUARDIAN_DEPENDENTS_PAGE_PATH} onClick={() => onNavigate(GUARDIAN_DEPENDENTS_PAGE_PATH)}>
-            <UsersRoundIcon />
-            Agregar persona a cargo
-          </Link>
-        </DropdownMenuItem>
-      </>
-    );
-  }
+  const router = useRouter();
 
   return (
     <>
-      <DropdownMenuLabel>Personas a cargo</DropdownMenuLabel>
-      <DropdownMenuRadioGroup value={activeDependent?.dependentPersonId ?? ""} onValueChange={selectDependent}>
-        {dependents.map((dependent) => (
-          <DropdownMenuRadioItem disabled={isPending} key={dependent.dependentPersonId} value={dependent.dependentPersonId}>
-            <UserRoundIcon />
-            <span className="min-w-0">
-              <span className="block truncate">{getGuardianDependentName(dependent)}</span>
-              <span className="text-muted-foreground block text-xs">DNI {dependent.documentNumber}</span>
+      <DropdownMenuLabel>Identidad activa</DropdownMenuLabel>
+      <DropdownMenuRadioGroup
+        value={personId ?? ""}
+        onValueChange={(id) => {
+          const url = `/self-service/${id}`;
+
+          // Selecting a profile updates the drawer; only section links schedule its close.
+          router.push(url);
+        }}
+      >
+        {profiles.map((profile) => (
+          <DropdownMenuRadioItem
+            key={profile.personId}
+            value={profile.personId}
+            className="focus:text-popover-foreground data-[state=checked]:bg-accent gap-2.5 py-2 pr-8 pl-2.5 focus:**:text-inherit"
+          >
+            <PersonInitialsAvatar firstName={profile.firstName} lastName={profile.lastName} />
+            <span className="min-w-0 flex-1">
+              <span className="flex min-w-0 items-baseline gap-1" title={`${profile.firstName} ${profile.lastName}`}>
+                <span className="truncate">
+                  {profile.firstName} {profile.lastName}
+                </span>
+                {profile.self ? <span className="text-muted-foreground! shrink-0 text-xs">(Vos)</span> : null}
+              </span>
+              <span className="text-muted-foreground! block truncate text-xs">{profile.documentNumber}</span>
             </span>
           </DropdownMenuRadioItem>
         ))}
       </DropdownMenuRadioGroup>
-      {error ? <p className="text-destructive px-1.5 py-1 text-xs">{error}</p> : null}
       <DropdownMenuSeparator />
-      <DropdownMenuItem asChild>
-        <Link href={GUARDIAN_DEPENDENTS_PAGE_PATH} onClick={() => onNavigate(GUARDIAN_DEPENDENTS_PAGE_PATH)}>
+      <DropdownMenuItem asChild className="px-2.5 py-1.5">
+        <Link href="/my-dependents" onClick={() => onNavigate("/my-dependents")}>
           <UsersRoundIcon />
           Gestionar personas a cargo
         </Link>

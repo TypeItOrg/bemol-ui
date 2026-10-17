@@ -14,4 +14,5 @@ export const contextualSearchRequestSchema = z.object({
 
 export const institutionalContextualSearchRequestSchema = contextualSearchRequestSchema.extend({
   institutionId: z.uuid(),
+  personId: z.uuid().optional(),
 });

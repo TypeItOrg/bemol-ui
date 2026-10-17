@@ -14,7 +14,12 @@ import type { EnrollmentWizardProps } from "@features/enrollment-applications/ty
 import { submitEnrollmentWizard } from "@features/enrollment-applications/utils/submit-enrollment-wizard.util";
 
 export function useEnrollmentWizard(props: EnrollmentWizardProps) {
-  const { initialApplication, initialShifts = [], readOnly: requestedReadOnly = false, returnTo = "/my-enrollment-applications" } = props;
+  const {
+    initialApplication,
+    initialShifts = [],
+    readOnly: requestedReadOnly = false,
+    returnTo = `/self-service/${initialApplication.personId}/enrollment-applications`,
+  } = props;
 
   const router = useRouter();
 
@@ -43,7 +48,11 @@ export function useEnrollmentWizard(props: EnrollmentWizardProps) {
   const hasDocumentsStep =
     Boolean(application.canReadAttachments) && (application.documents?.some((requirement) => requirement.active !== false) ?? false);
 
-  const navigation = useEnrollmentWizardNavigation(form.isMinor, hasDocumentsStep, isSubmitDialogOpen);
+  const actingForOtherPerson = props.actingForOtherPerson ?? false;
+
+  const requiresRepresentative = actingForOtherPerson || form.isMinor;
+
+  const navigation = useEnrollmentWizardNavigation(requiresRepresentative, hasDocumentsStep, isSubmitDialogOpen);
 
   const autosave = useEnrollmentDraftAutosave({
     application,
@@ -102,6 +111,7 @@ export function useEnrollmentWizard(props: EnrollmentWizardProps) {
       selectedCourseIds: courses.selectedCourseIds,
       handleActiveTabChange: navigation.handleActiveTabChange,
       isMinor: form.isMinor,
+      actingForOtherPerson,
       setPendingFocusFieldId: navigation.setPendingFocusFieldId,
       draftSaveQueue: autosave.draftSaveQueue,
       setApplication,
@@ -133,6 +143,8 @@ export function useEnrollmentWizard(props: EnrollmentWizardProps) {
     initialApplication,
     readOnly,
     requestedReadOnly,
+    actingForOtherPerson,
+    requiresRepresentative,
     returnTo,
     documentsBlocked,
     hasDocumentsStep,

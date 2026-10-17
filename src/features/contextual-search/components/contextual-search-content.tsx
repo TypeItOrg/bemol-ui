@@ -28,6 +28,7 @@ type ContextualSearchContentProps = {
   onNavigate: (href: string) => void;
   onRetry: () => void;
   scope: ContextualSearchScope;
+  personId?: string;
   search: string;
 };
 
@@ -41,6 +42,7 @@ export function ContextualSearchContent({
   onNavigate,
   onRetry,
   scope,
+  personId,
   search,
 }: ContextualSearchContentProps): ReactNode {
   const matchingAccessSections = filterContextualSearchAccessSections(accessSections, inputSearch);
@@ -115,7 +117,7 @@ export function ContextualSearchContent({
                   key={item.id}
                   value={`${group.entityType}-${item.id}`}
                   className="items-stretch gap-3 px-2 py-1.5"
-                  onSelect={() => onNavigate(getContextualSearchResultHref(scope, group.entityType, item))}
+                  onSelect={() => onNavigate(getContextualSearchResultHref(scope, group.entityType, item, personId))}
                 >
                   <span className="bg-background text-muted-foreground flex w-8 shrink-0 items-center justify-center rounded-lg">
                     <Icon className="size-4" />

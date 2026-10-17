@@ -2,24 +2,14 @@ import { INSTITUTIONAL_PERMISSION } from "@features/institutional-auth/types/ins
 import type { InstitutionalUser } from "@features/institutional-auth/types/institutional-user.types";
 import { hasInstitutionalPermission } from "@features/institutional-auth/utils/institutional-permission.util";
 
-const INSTITUTIONAL_STAFF_ROLE_NAMES = new Set(["Administrador Institucional", "Administrativo", "Profesor"]);
-
-const GUARDIAN_ROLE_NAME = "Tutor";
-
-const INSTITUTIONAL_APPLICANT_ROLE_NAMES = new Set(["Postulante", "Estudiante", GUARDIAN_ROLE_NAME]);
-
-export function isGuardian(user: InstitutionalUser): boolean {
-  return user.roles.includes(GUARDIAN_ROLE_NAME);
-}
+const INSTITUTIONAL_APPLICANT_ROLE_NAMES = new Set(["Postulante", "Estudiante"]);
 
 export function canViewAcademicNavigation(user: InstitutionalUser): boolean {
-  const hasStaffRole = user.roles.some((role) => INSTITUTIONAL_STAFF_ROLE_NAMES.has(role));
-
-  return hasStaffRole || !isGuardian(user);
+  return Boolean(user.institutionId);
 }
 
 export function canManageDependents(user: InstitutionalUser): boolean {
-  return hasInstitutionalPermission(user, INSTITUTIONAL_PERMISSION.GUARDIAN_DEPENDENT_MANAGE);
+  return Boolean(user.institutionId);
 }
 
 export function canReviewGuardianLinks(user: InstitutionalUser): boolean {

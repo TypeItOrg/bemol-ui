@@ -1,10 +1,26 @@
+import type { ReactElement } from "react";
+
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
-import { formatApplicationDateTime } from "@features/enrollment-applications/utils/enrollment-application.util";
+import { formatEnrollmentApplicationDateTime } from "@features/enrollment-applications/utils/enrollment-application-date.util";
 import { resolveGuardianLinkAction } from "@features/guardian-links/actions/resolve-guardian-link.action";
 import { GuardianLinkRequests } from "@features/guardian-links/components/guardian-link-requests";
 import type { GuardianLinkRequest } from "@features/guardian-links/types/guardian-link-request.types";
+import type { GuardianLinksQuery } from "@features/guardian-links/types/guardian-links-query.types";
+
+const mockNavigate = jest.fn();
+const mockPush = jest.fn();
+const mockRefresh = jest.fn();
+
+jest.mock("next/navigation", () => ({
+  usePathname: () => "/guardian-links",
+  useRouter: () => ({ push: mockPush, refresh: mockRefresh }),
+  useSearchParams: () => new URLSearchParams("page=2&size=20"),
+}));
+jest.mock("@common/components/ui/data-table-navigation", () => ({
+  useDataTableNavigation: () => ({ navigate: mockNavigate, isPending: false }),
+}));
 
 jest.mock("@features/guardian-links/actions/resolve-guardian-link.action", () => ({
   resolveGuardianLinkAction: jest.fn(),
@@ -26,35 +42,68 @@ function buildRequest(overrides: Partial<GuardianLinkRequest> = {}): GuardianLin
   };
 }
 
+function RequestsFixture({
+  requests,
+  institutionId,
+  query: overrides = {},
+}: {
+  requests: GuardianLinkRequest[];
+  institutionId: string;
+  query?: Partial<GuardianLinksQuery>;
+}): ReactElement {
+  const query: GuardianLinksQuery = { page: 0, size: 10, search: "", ...overrides };
+
+  return (
+    <GuardianLinkRequests
+      institutionId={institutionId}
+      query={query}
+      data={{ items: requests, page: query.page, size: query.size, totalItems: requests.length, totalPages: Math.ceil(requests.length / query.size) }}
+    />
+  );
+}
+
 describe("GuardianLinkRequests", () => {
   beforeEach(() => {
+    mockNavigate.mockReset();
+    mockPush.mockReset();
+    mockRefresh.mockReset();
     jest.mocked(resolveGuardianLinkAction).mockReset().mockResolvedValue({ success: true });
   });
 
-  it("shows tutor, person, declared relationship and the supporting documents", () => {
-    render(<GuardianLinkRequests institutionId={INSTITUTION_ID} requests={[buildRequest()]} />);
+  it("shows tutor, person, declared relationship and the supporting document count", () => {
+    render(<RequestsFixture institutionId={INSTITUTION_ID} requests={[buildRequest()]} />);
 
     expect(screen.getByText("Ana García")).toBeInTheDocument();
-    expect(screen.getByText("DNI 35123456")).toBeInTheDocument();
+    expect(screen.getByText("35123456")).toBeInTheDocument();
     expect(screen.getByText("Mateo González")).toBeInTheDocument();
-    expect(screen.getByText("DNI 54123456")).toBeInTheDocument();
-    expect(screen.getByText(/10\/09\/2018/)).toBeInTheDocument();
+    expect(screen.getByText(/^54123456 · .* años$/)).toBeInTheDocument();
+    expect(screen.queryByText(/10\/09\/2018/)).not.toBeInTheDocument();
     expect(screen.getByText(/ años$/)).toBeInTheDocument();
     expect(screen.getByText("Tutor legal")).toBeInTheDocument();
-    const document = screen.getByRole("link", { name: /tutela\.pdf/ });
-    expect(document).toHaveAttribute("href", "/api/institutional/guardian-links/019f9c3a-f891-7bc5-a98d-e65332998001/attachments/a1/content");
+    expect(screen.getByText("1 documento")).toBeInTheDocument();
+  });
+
+  it("opens the request detail while preserving the list origin", async () => {
+    const user = userEvent.setup();
+    const request = buildRequest();
+    render(<RequestsFixture institutionId={INSTITUTION_ID} requests={[request]} query={{ page: 2, size: 20 }} />);
+
+    await user.click(screen.getByRole("button", { name: "Abrir acciones de Mateo González" }));
+    await user.click(await screen.findByRole("menuitem", { name: "Ver detalle" }));
+
+    expect(mockPush).toHaveBeenCalledWith(`/guardian-links/${request.personGuardianId}?returnTo=%2Fguardian-links%3Fpage%3D2%26size%3D20`);
   });
 
   it("shows the request date with time", () => {
     const request = buildRequest();
-    render(<GuardianLinkRequests institutionId={INSTITUTION_ID} requests={[request]} />);
+    render(<RequestsFixture institutionId={INSTITUTION_ID} requests={[request]} />);
 
-    expect(screen.getByText(formatApplicationDateTime(request.createdAt))).toBeInTheDocument();
+    expect(screen.getByText(formatEnrollmentApplicationDateTime(request.createdAt))).toBeInTheDocument();
   });
 
   it("shows pending, accepted and rejected requests in the default view", () => {
     render(
-      <GuardianLinkRequests
+      <RequestsFixture
         institutionId={INSTITUTION_ID}
         requests={[
           buildRequest(),
@@ -64,19 +113,20 @@ describe("GuardianLinkRequests", () => {
       />,
     );
 
-    expect(screen.getByText("Pendientes")).toBeInTheDocument();
-    expect(screen.getByText("Aceptadas")).toBeInTheDocument();
-    expect(screen.getByText("Rechazadas")).toBeInTheDocument();
+    const table = within(screen.getByRole("table"));
+    expect(table.getByRole("cell", { name: "Pendiente" })).toBeInTheDocument();
+    expect(table.getByRole("cell", { name: "Aceptada" })).toBeInTheDocument();
+    expect(table.getByRole("cell", { name: "Rechazada" })).toBeInTheDocument();
   });
 
   it("tells when the request has no supporting documents", () => {
-    render(<GuardianLinkRequests institutionId={INSTITUTION_ID} requests={[buildRequest({ attachments: [] })]} />);
+    render(<RequestsFixture institutionId={INSTITUTION_ID} requests={[buildRequest({ attachments: [] })]} />);
 
-    expect(screen.getByText("Sin documentación")).toBeInTheDocument();
+    expect(within(screen.getByRole("table")).getByRole("cell", { name: "Sin documentación" })).toBeInTheDocument();
   });
 
   it("shows an empty state when nothing is pending", () => {
-    render(<GuardianLinkRequests institutionId={INSTITUTION_ID} requests={[]} />);
+    render(<RequestsFixture institutionId={INSTITUTION_ID} requests={[]} />);
 
     expect(screen.getByText("No hay solicitudes de vinculación")).toBeInTheDocument();
     expect(screen.getByRole("textbox", { name: "Buscar" })).toBeInTheDocument();
@@ -84,67 +134,82 @@ describe("GuardianLinkRequests", () => {
     expect(screen.getByRole("combobox", { name: "Estado" })).toBeInTheDocument();
   });
 
-  it("uses the search empty state when filters have no matches", async () => {
-    const user = userEvent.setup();
-    render(<GuardianLinkRequests institutionId={INSTITUTION_ID} requests={[buildRequest()]} />);
+  it("uses the search empty state when filters have no matches", () => {
+    render(<RequestsFixture institutionId={INSTITUTION_ID} requests={[]} query={{ search: "Persona inexistente" }} />);
 
-    await user.type(screen.getByRole("textbox", { name: "Buscar" }), "Persona inexistente");
-
-    expect(await screen.findByText("No se encontraron solicitudes")).toBeInTheDocument();
+    expect(screen.getByText("No se encontraron solicitudes")).toBeInTheDocument();
     expect(screen.getByText("No encontramos solicitudes que coincidan con los filtros.")).toBeInTheDocument();
   });
 
   it.each([
-    ["Aceptar", "approve"],
-    ["Rechazar", "reject"],
-  ])("sends the %s decision for the request", async (label, decision) => {
+    ["Aceptar", "Aceptar vinculación", "approve"],
+    ["Rechazar", "Rechazar vinculación", "reject"],
+  ])("opens a confirmation dialog before sending the %s decision", async (label, dialogTitle, decision) => {
     const user = userEvent.setup();
-    render(<GuardianLinkRequests institutionId={INSTITUTION_ID} requests={[buildRequest()]} />);
+    render(<RequestsFixture institutionId={INSTITUTION_ID} requests={[buildRequest()]} />);
 
-    await user.click(screen.getByRole("button", { name: label }));
+    await user.click(screen.getByRole("button", { name: "Abrir acciones de Mateo González" }));
+    await user.click(await screen.findByRole("menuitem", { name: label }));
+
+    const dialog = await screen.findByRole("alertdialog");
+    expect(dialog).toHaveTextContent(dialogTitle);
+    expect(resolveGuardianLinkAction).not.toHaveBeenCalled();
+
+    await user.click(within(dialog).getByRole("button", { name: label }));
 
     await waitFor(() => expect(resolveGuardianLinkAction).toHaveBeenCalledWith(INSTITUTION_ID, "019f9c3a-f891-7bc5-a98d-e65332998001", decision));
   });
 
-  it("shows the backend error on the request row", async () => {
+  it("shows the backend error inside the confirmation dialog", async () => {
     const user = userEvent.setup();
     jest.mocked(resolveGuardianLinkAction).mockResolvedValueOnce({ error: "La solicitud de vinculación ya fue resuelta." });
-    render(<GuardianLinkRequests institutionId={INSTITUTION_ID} requests={[buildRequest()]} />);
+    render(<RequestsFixture institutionId={INSTITUTION_ID} requests={[buildRequest()]} />);
 
-    await user.click(screen.getByRole("button", { name: "Aceptar" }));
+    await user.click(screen.getByRole("button", { name: "Abrir acciones de Mateo González" }));
+    await user.click(await screen.findByRole("menuitem", { name: "Aceptar" }));
 
-    const [row] = screen.getAllByRole("row").slice(1);
-    expect(await within(row).findByText("La solicitud de vinculación ya fue resuelta.")).toBeInTheDocument();
+    const dialog = await screen.findByRole("alertdialog");
+    await user.click(within(dialog).getByRole("button", { name: "Aceptar" }));
+
+    expect(await within(dialog).findByText("La solicitud de vinculación ya fue resuelta.")).toBeInTheDocument();
   });
 
-  it("filters by either person's name and by DNI", async () => {
+  it("sends name and document searches to the server and resets the page", async () => {
     const user = userEvent.setup();
-    const secondRequest = buildRequest({
-      personGuardianId: "019f9c3a-f891-7bc5-a98d-e65332998002",
-      tutor: { ...buildRequest().tutor, firstName: "Laura" },
-    });
-    render(<GuardianLinkRequests institutionId={INSTITUTION_ID} requests={[buildRequest(), secondRequest]} />);
+    render(<RequestsFixture institutionId={INSTITUTION_ID} requests={[buildRequest()]} query={{ page: 2, size: 20 }} />);
 
     await user.type(screen.getByRole("textbox", { name: "Buscar" }), "Laura");
-    await waitFor(() => expect(screen.queryByText("Ana García")).not.toBeInTheDocument());
-    expect(screen.getByText("Laura García")).toBeInTheDocument();
-    expect(screen.queryByText("Ana García")).not.toBeInTheDocument();
+    await waitFor(() => expect(mockNavigate).toHaveBeenLastCalledWith({ search: "Laura", page: "0", size: "20" }, { replace: true }));
 
     await user.clear(screen.getByRole("textbox", { name: "Buscar" }));
     await user.type(screen.getByRole("textbox", { name: "Buscar" }), "35123456");
-    expect(await screen.findByText("Ana García")).toBeInTheDocument();
+    await waitFor(() => expect(mockNavigate).toHaveBeenLastCalledWith({ search: "35123456", page: "0", size: "20" }, { replace: true }));
   });
 
-  it("marks a request as rejected after a successful rejection", async () => {
+  it("marks a request as rejected after confirming rejection in the modal", async () => {
     const user = userEvent.setup();
-    render(<GuardianLinkRequests institutionId={INSTITUTION_ID} requests={[buildRequest()]} />);
+    const { rerender } = render(<RequestsFixture institutionId={INSTITUTION_ID} requests={[buildRequest()]} />);
 
-    await user.click(screen.getByRole("button", { name: "Rechazar" }));
+    await user.click(screen.getByRole("button", { name: "Abrir acciones de Mateo González" }));
+    await user.click(await screen.findByRole("menuitem", { name: "Rechazar" }));
+
+    const dialog = await screen.findByRole("alertdialog");
+    await user.click(within(dialog).getByRole("button", { name: "Rechazar" }));
+
+    await waitFor(() => expect(mockRefresh).toHaveBeenCalled());
 
     await user.click(screen.getByRole("combobox", { name: "Estado" }));
-    await user.click(await screen.findByRole("option", { name: "Rechazadas" }));
+    await user.click(await screen.findByRole("option", { name: "Rechazada" }));
 
-    expect(await screen.findAllByText("Rechazadas")).toHaveLength(2);
-    expect(screen.queryByRole("button", { name: "Rechazar" })).not.toBeInTheDocument();
+    expect(mockNavigate).toHaveBeenCalledWith({ status: "REJECTED", page: "0", size: "10" }, { replace: true });
+
+    rerender(<RequestsFixture institutionId={INSTITUTION_ID} requests={[buildRequest({ status: "REJECTED" })]} query={{ status: "REJECTED" }} />);
+
+    expect(within(screen.getByRole("table")).getByRole("cell", { name: "Rechazada" })).toBeInTheDocument();
+    expect(screen.getByRole("combobox", { name: "Estado" })).toHaveTextContent("Rechazada");
+    await user.click(screen.getByRole("button", { name: "Abrir acciones de Mateo González" }));
+    expect(await screen.findByRole("menuitem", { name: "Ver detalle" })).toBeInTheDocument();
+    expect(screen.queryByRole("menuitem", { name: "Aceptar" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("menuitem", { name: "Rechazar" })).not.toBeInTheDocument();
   });
 });

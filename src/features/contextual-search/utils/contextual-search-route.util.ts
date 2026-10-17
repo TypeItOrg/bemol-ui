@@ -21,11 +21,34 @@ export function getContextualSearchResultHref(
   scope: ContextualSearchScope,
   entityType: ContextualSearchEntity,
   item: ContextualSearchResult,
+  personId?: string,
 ): string {
+  if (scope === CONTEXTUAL_SEARCH_SCOPE.SELF_SERVICE) {
+    if (!personId) {
+      throw new Error("La búsqueda de autoservicio requiere una persona seleccionada.");
+    }
+
+    const root = `/self-service/${personId}`;
+
+    if (entityType === "enrollment-application") {
+      return `${root}/enrollment-applications/${item.id}`;
+    }
+
+    if (entityType === "course-enrollment") {
+      return `${root}/courses?${new URLSearchParams({ status: item.status ?? "ENROLLED" })}`;
+    }
+
+    throw new Error(`La entidad ${entityType} no pertenece a la búsqueda de autoservicio.`);
+  }
+
   return scope === CONTEXTUAL_SEARCH_SCOPE.INSTITUTIONAL ? getInstitutionalResultHref(entityType, item) : getPlatformResultHref(entityType, item);
 }
 
 export function getContextualSearchViewAllHref(scope: ContextualSearchScope, entityType: ContextualSearchEntity, search: string): string | null {
+  if (scope === CONTEXTUAL_SEARCH_SCOPE.SELF_SERVICE) {
+    return null;
+  }
+
   const searchParams = new URLSearchParams({ search });
 
   return scope === CONTEXTUAL_SEARCH_SCOPE.INSTITUTIONAL
@@ -44,6 +67,8 @@ function getPlatformResultHref(entityType: ContextualSearchEntity, item: Context
     case "user":
       return `/admin/institutions/${getRequiredInstitutionId(item)}/people/${item.id}`;
     case "guardian-dependent":
+    case "enrollment-application":
+    case "course-enrollment":
       throw new Error(PLATFORM_SCOPE_ERROR(entityType));
     case "academic-year":
     case "training-path":
@@ -76,6 +101,8 @@ function getInstitutionalResultHref(entityType: ContextualSearchEntity, item: Co
       return `/${getAcademicResource(entityType)}/${item.id}`;
     case "institution":
     case "platform-account":
+    case "enrollment-application":
+    case "course-enrollment":
       throw new Error(`La entidad ${entityType} no pertenece a la búsqueda institucional.`);
   }
 }
@@ -89,6 +116,8 @@ function getPlatformCollectionHref(entityType: ContextualSearchEntity, searchPar
     case "user":
       return `/admin/people?${searchParams}`;
     case "guardian-dependent":
+    case "enrollment-application":
+    case "course-enrollment":
       throw new Error(PLATFORM_SCOPE_ERROR(entityType));
     case "role":
       return `/admin/roles?${searchParams}`;
@@ -136,6 +165,8 @@ function getInstitutionalCollectionHref(entityType: ContextualSearchEntity, sear
       return `/${getAcademicResource(entityType)}?${searchParams}`;
     case "institution":
     case "platform-account":
+    case "enrollment-application":
+    case "course-enrollment":
       throw new Error(`La entidad ${entityType} no pertenece a la búsqueda institucional.`);
   }
 }

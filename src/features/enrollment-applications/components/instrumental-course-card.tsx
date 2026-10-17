@@ -14,6 +14,7 @@ import { fetchEnrollmentCourses } from "@features/enrollment-applications/servic
 import type { EnrollmentApplicationCourse } from "@features/enrollment-applications/types/enrollment-application-course.types";
 import type { EnrollmentCourseOption } from "@features/enrollment-applications/types/enrollment-course-option.types";
 import { enrollmentCourseGroupKey } from "@features/enrollment-applications/utils/enrollment-course-group.util";
+import { useOperatingPersonId } from "@features/guardian-workspace/components/guardian-workspace-provider";
 
 export function InstrumentalCourseCard({
   applicationId,
@@ -36,6 +37,8 @@ export function InstrumentalCourseCard({
   showError: boolean;
   onToggle: (checked: boolean) => void;
 }): ReactElement {
+  const personId = useOperatingPersonId();
+
   const course = variants[0];
 
   const key = enrollmentCourseGroupKey(course);
@@ -60,6 +63,7 @@ export function InstrumentalCourseCard({
   const fetchInstruments = useCallback(
     async (input: AsyncDropdownFetchPageInput) => {
       const page = await fetchEnrollmentCourses(applicationId, {
+        personId,
         ...input,
         studyPlanSpaceId: course.studyPlanSpaceId,
         academicYear: course.academicYear,
@@ -70,7 +74,7 @@ export function InstrumentalCourseCard({
         nextPage: page.page + 1 < page.totalPages ? page.page + 1 : null,
       };
     },
-    [applicationId, course.studyPlanSpaceId, course.academicYear],
+    [personId, applicationId, course.studyPlanSpaceId, course.academicYear],
   );
 
   return (

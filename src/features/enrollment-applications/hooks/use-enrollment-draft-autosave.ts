@@ -87,9 +87,11 @@ export function useEnrollmentDraftAutosave({
             return null;
           }
 
-          return updateEnrollmentDraftAction(targetApplicationId, { data: JSON.parse(dataSignature) as EnrollmentApplicationData }).then(
-            unwrapEnrollmentResult,
-          );
+          return updateEnrollmentDraftAction(
+            targetApplicationId,
+            { data: JSON.parse(dataSignature) as EnrollmentApplicationData },
+            application.personId,
+          ).then(unwrapEnrollmentResult);
         });
 
         draftSaveQueue.current = request.then(
@@ -119,7 +121,7 @@ export function useEnrollmentDraftAutosave({
     return () => {
       active = false;
     };
-  }, [autosaveTarget, debouncedSignature, saveDraft, setApplication]);
+  }, [application.personId, autosaveTarget, debouncedSignature, saveDraft, setApplication]);
 
   return { saving, saveError: autosaveState.error, draftSaveQueue };
 }

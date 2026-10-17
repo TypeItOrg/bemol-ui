@@ -6,6 +6,7 @@ import { mutateDocument } from "@features/enrollment-applications/actions/docume
 import { DOCUMENT_MESSAGES } from "@features/enrollment-applications/constants/documentation.constants";
 import type { DocumentActionState } from "@features/enrollment-applications/types/document-action-state.types";
 import type { DocumentUploadProps } from "@features/enrollment-applications/types/document-upload-props.types";
+import { useOperatingPersonId } from "@features/guardian-workspace/components/guardian-workspace-provider";
 
 export function useDocumentUpload({
   applicationId,
@@ -16,6 +17,8 @@ export function useDocumentUpload({
   disabled: externallyDisabled,
   onBlockedChange,
 }: DocumentUploadProps) {
+  const personId = useOperatingPersonId();
+
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   const [committed, setCommitted] = useState(false);
@@ -40,7 +43,7 @@ export function useDocumentUpload({
     // A failed detail refresh must not upload the already-saved file again.
     if (!committed) {
       try {
-        const result = await mutateDocument(scope, applicationId, "upload", requirement.id, previous, form);
+        const result = await mutateDocument(scope, applicationId, "upload", requirement.id, previous, form, personId);
 
         if (!result.success) {
           return result;

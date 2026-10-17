@@ -8,5 +8,7 @@ export type PersonSummary = {
   email: string | null;
   phoneNumber: string | null;
   enabled: boolean;
+  hasAccount: boolean;
+  accessInvitationPending: boolean;
   roles?: PersonSummaryRole[];
 };

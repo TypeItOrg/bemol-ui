@@ -69,7 +69,17 @@ export function InstitutionalBreadcrumb({
 }: InstitutionalBreadcrumbProps): ReactElement {
   const pathname = usePathname();
 
-  const segments = getSegments(pathname, segmentLabels, segmentHrefs, hiddenSegments, trailingLabel);
+  const profileRoot = pathname.match(/^\/self-service\/[^/]+/)?.[0];
+
+  const profileLabels = profileRoot ? { ...segmentLabels, "enrollment-applications": "Mis inscripciones", courses: "Mis materias" } : segmentLabels;
+
+  const profileHiddenSegments = profileRoot ? [...hiddenSegments, ...pathname.split("/").slice(1, 3)] : hiddenSegments;
+
+  const segments = getSegments(pathname, profileLabels, segmentHrefs, profileHiddenSegments, trailingLabel);
+
+  if (profileRoot && segments[0]) {
+    segments[0].href = profileRoot;
+  }
 
   return (
     <Breadcrumb className="text-muted-foreground max-w-full min-w-0">

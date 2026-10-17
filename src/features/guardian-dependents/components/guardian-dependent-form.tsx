@@ -1,6 +1,6 @@
 "use client";
 
-import { startTransition, useActionState, useState, type SyntheticEvent, type ReactElement } from "react";
+import { startTransition, useActionState, useState, type ReactElement, type SyntheticEvent } from "react";
 
 import { unstable_rethrow, useRouter } from "next/navigation";
 
@@ -54,6 +54,8 @@ export function GuardianDependentForm({ institutionId, returnTo }: { institution
     birthDate: "",
     relationship: "",
     isPrimaryContact: "false",
+    email: "",
+    ownAccessRequested: "false",
   });
 
   const fieldsDisabled = isPending || Boolean(state.requestCreated);
@@ -65,6 +67,10 @@ export function GuardianDependentForm({ institutionId, returnTo }: { institution
   const [submittedDocuments, setSubmittedDocuments] = useState<File[]>();
 
   const canSubmit = !fieldsDisabled && createGuardianDependentSchema.safeParse(values).success && !validateGuardianDocuments(documents);
+
+  const hasFieldErrors = Object.keys(state.fieldErrors ?? {}).length > 0;
+
+  const alertError = hasFieldErrors ? GUARDIAN_DEPENDENT_MESSAGES.INVALID_FORM : state.error;
 
   function handleSubmit(event: SyntheticEvent<HTMLFormElement>): void {
     event.preventDefault();
@@ -93,10 +99,10 @@ export function GuardianDependentForm({ institutionId, returnTo }: { institution
       onDrop={rejectFileDragOutside}
       onSubmit={handleSubmit}
     >
-      {state.error ? (
+      {alertError ? (
         <Alert variant="destructive">
           <AlertCircleIcon aria-hidden="true" className="size-4" />
-          <AlertDescription>{state.error}</AlertDescription>
+          <AlertDescription>{alertError}</AlertDescription>
         </Alert>
       ) : null}
 

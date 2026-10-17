@@ -5,6 +5,8 @@ import type { EnrollmentApplication } from "@features/enrollment-applications/ty
 
 jest.mock("next/navigation", () => ({
   useRouter: () => ({ refresh: jest.fn() }),
+  usePathname: () => "/self-service/00000000-0000-4000-8000-000000000003/enrollment-applications",
+  useSearchParams: () => new URLSearchParams(),
 }));
 
 const INSTITUTION_ID = "00000000-0000-4000-8000-000000000001";

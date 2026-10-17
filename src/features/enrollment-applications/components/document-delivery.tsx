@@ -14,6 +14,7 @@ import { DOCUMENT_STATUS_LABELS } from "@features/enrollment-applications/consta
 import type { DocumentDelivery } from "@features/enrollment-applications/types/document-delivery.types";
 import { formatEnrollmentApplicationDateTime } from "@features/enrollment-applications/utils/enrollment-application-date.util";
 import { getAttachmentDownloadUrl } from "@features/enrollment-applications/utils/enrollment-application.util";
+import { useOperatingPersonId } from "@features/guardian-workspace/components/guardian-workspace-provider";
 
 export function Delivery({
   file,
@@ -26,13 +27,15 @@ export function Delivery({
   scope: AcademicScope;
   showReviewStatus?: boolean;
 }): ReactElement {
+  const personId = useOperatingPersonId();
+
   return (
     <div className="@container/delivery min-w-0 space-y-3 text-sm">
       <div className="flex min-w-0 items-center gap-3">
         <p className="min-w-0 flex-1 font-medium break-all">{file.originalFileName}</p>
         <Button asChild variant="ghost" size="icon-lg" className="size-11 shrink-0">
           <a
-            href={getAttachmentDownloadUrl(applicationId, file.id, scope)}
+            href={getAttachmentDownloadUrl(applicationId, file.id, scope, personId)}
             target="_blank"
             rel="noreferrer"
             aria-label={`Descargar ${file.originalFileName}`}
@@ -45,7 +48,7 @@ export function Delivery({
       <div className="grid items-start gap-4 @md/delivery:grid-cols-[12rem_minmax(0,1fr)]">
         <DocumentFilePreview
           key={file.id}
-          src={getAttachmentDownloadUrl(applicationId, file.id, scope)}
+          src={getAttachmentDownloadUrl(applicationId, file.id, scope, personId)}
           name={file.originalFileName}
           contentType={file.contentType}
         />

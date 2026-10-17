@@ -7,6 +7,7 @@ import { renderWithQueryClient as render } from "@/../test/utils/render-with-que
 
 jest.mock("next/navigation", () => ({
   useRouter: () => ({ refresh: jest.fn() }),
+  usePathname: () => "/self-service/019183ab-0000-7000-8000-000000000003/enrollment-applications/019183ab-0000-7000-8000-000000000001",
 }));
 
 jest.mock("@features/enrollment-applications/actions/documentation.actions", () => ({

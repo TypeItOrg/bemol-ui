@@ -17,7 +17,7 @@ export function getContextualSearchLabels(entityType: ContextualSearchEntity, it
   return {
     title: item.title,
     subtitle:
-      entityType === "course" && item.subtitle
+      (entityType === "course" || entityType === "course-enrollment") && item.subtitle
         ? formatStudyPlanName({ name: item.subtitle, studyPlanVersion: item.studyPlanVersion })
         : item.subtitle,
   };

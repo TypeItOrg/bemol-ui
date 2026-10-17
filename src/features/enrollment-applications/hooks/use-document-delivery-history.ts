@@ -9,8 +9,14 @@ import { parseHttpResponse } from "@common/utils/http-response-error.util";
 import type { AcademicScope } from "@features/academic/utils/academic-scope.util";
 import { DOCUMENT_MESSAGES } from "@features/enrollment-applications/constants/documentation.constants";
 import type { DocumentDelivery } from "@features/enrollment-applications/types/document-delivery.types";
+import { useOperatingInstitutionId, useOperatingPersonId } from "@features/guardian-workspace/components/guardian-workspace-provider";
+import { getSelfServiceReadPath } from "@features/guardian-workspace/utils/self-service-read-path.util";
 
 export function useDocumentDeliveryHistory(applicationId: string, scope: AcademicScope, requirementId: string) {
+  const personId = useOperatingPersonId();
+
+  const institutionId = useOperatingInstitutionId();
+
   const [pagination, setPagination] = useState({ applicationId, requirementId, scope, page: 0 });
 
   const identityChanged = pagination.applicationId !== applicationId || pagination.requirementId !== requirementId || pagination.scope !== scope;
@@ -22,11 +28,11 @@ export function useDocumentDeliveryHistory(applicationId: string, scope: Academi
   const page = identityChanged ? 0 : pagination.page;
 
   const query = useQuery({
-    queryKey: ["document-delivery-history", scope, applicationId, requirementId, page],
+    queryKey: [institutionId, personId, "document-delivery-history", scope, applicationId, requirementId, page],
     queryFn: async ({ signal }) => {
       const params = new URLSearchParams({ scope, requirementId, page: String(page) });
 
-      const response = await fetch(`/api/enrollment-applications/${applicationId}/documents?${params}`, { cache: "no-store", signal });
+      const response = await fetch(`${getSelfServiceReadPath(applicationId, personId)}/documents?${params}`, { cache: "no-store", signal });
 
       return parseHttpResponse<{ items: DocumentDelivery[]; totalPages: number }>(response, DOCUMENT_MESSAGES.readFailed);
     },

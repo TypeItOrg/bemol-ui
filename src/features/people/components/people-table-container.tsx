@@ -15,6 +15,7 @@ type PeopleTableContainerProps = PeoplePaginationParams & {
   canManageRoles?: boolean;
   canDelete?: boolean;
   canUpdateStatus?: boolean;
+  canInviteAccess?: boolean;
 };
 
 export async function PeopleTableContainer(props: PeopleTableContainerProps): Promise<ReactElement> {
@@ -32,6 +33,7 @@ export async function PeopleTableContainer(props: PeopleTableContainerProps): Pr
     canManageRoles = false,
     canDelete = true,
     canUpdateStatus = false,
+    canInviteAccess = false,
   } = props;
 
   const data = await dataPromise;
@@ -52,6 +54,7 @@ export async function PeopleTableContainer(props: PeopleTableContainerProps): Pr
       canManageRoles={canManageRoles}
       canDelete={canDelete}
       canUpdateStatus={canUpdateStatus}
+      canInviteAccess={canInviteAccess}
     />
   );
 }

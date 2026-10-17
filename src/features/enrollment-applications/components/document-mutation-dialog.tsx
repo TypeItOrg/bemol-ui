@@ -24,6 +24,7 @@ import { DOCUMENT_MESSAGES } from "@features/enrollment-applications/constants/d
 import type { DocumentActionState } from "@features/enrollment-applications/types/document-action-state.types";
 import type { DocumentRequirement } from "@features/enrollment-applications/types/document-requirement.types";
 import { getAttachmentDownloadUrl } from "@features/enrollment-applications/utils/enrollment-application.util";
+import { useOperatingPersonId } from "@features/guardian-workspace/components/guardian-workspace-provider";
 
 export function DocumentMutation({
   applicationId,
@@ -40,6 +41,8 @@ export function DocumentMutation({
   onClose: () => void;
   onSaved: () => Promise<void>;
 }): ReactElement {
+  const personId = useOperatingPersonId();
+
   const withdrawing = operation === "withdraw";
 
   const attachment = requirement.currentAttachment;
@@ -50,7 +53,7 @@ export function DocumentMutation({
 
   const [state, action, pending] = useActionState(async (previous: DocumentActionState, form: FormData): Promise<DocumentActionState> => {
     try {
-      const result = await mutateDocument(scope, applicationId, operation, attachment!.id, previous, form);
+      const result = await mutateDocument(scope, applicationId, operation, attachment!.id, previous, form, personId);
 
       if (result.success) {
         await onSaved();
@@ -94,7 +97,7 @@ export function DocumentMutation({
               <div className="relative w-14 shrink-0 self-stretch">
                 <DocumentFilePreview
                   key={attachment.id}
-                  src={getAttachmentDownloadUrl(applicationId, attachment.id, scope)}
+                  src={getAttachmentDownloadUrl(applicationId, attachment.id, scope, personId)}
                   name={attachment.originalFileName}
                   contentType={attachment.contentType}
                   compact
@@ -109,7 +112,7 @@ export function DocumentMutation({
             {attachment ? (
               <div className="flex shrink-0 items-center">
                 <DocumentFilePreview
-                  src={getAttachmentDownloadUrl(applicationId, attachment.id, scope)}
+                  src={getAttachmentDownloadUrl(applicationId, attachment.id, scope, personId)}
                   name={attachment.originalFileName}
                   contentType={attachment.contentType}
                   iconOnly

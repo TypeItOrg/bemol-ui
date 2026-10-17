@@ -10,6 +10,8 @@ import { Button } from "@common/components/ui/button";
 import { EmptyMedia } from "@common/components/ui/empty";
 import { DATA_TABLE_EMPTY_MESSAGES } from "@common/constants/data-table-empty.constants";
 
+import { useOperatingPersonId } from "@features/guardian-workspace/components/guardian-workspace-provider";
+
 type MyEnrollmentApplicationEmptyStateProps = {
   hasFilter: boolean;
   isNavigating: boolean;
@@ -23,6 +25,8 @@ export function MyEnrollmentApplicationEmptyState({
   size,
   totalItems,
 }: MyEnrollmentApplicationEmptyStateProps): ReactElement {
+  const personId = useOperatingPersonId();
+
   let content: ReactNode;
 
   if (totalItems > 0) {
@@ -36,7 +40,7 @@ export function MyEnrollmentApplicationEmptyState({
           La página seleccionada no contiene elementos. Podés volver a la primera página para ver los resultados.
         </p>
         <Button asChild variant="outline" size="sm">
-          <Link href={`/my-enrollment-applications?size=${size}`}>Volver a la primera página</Link>
+          <Link href={`/self-service/${personId}/enrollment-applications?size=${size}`}>Volver a la primera página</Link>
         </Button>
       </div>
     );

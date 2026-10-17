@@ -5,7 +5,7 @@ import { GUARDIAN_RELATIONSHIP, type GuardianRelationship } from "@features/guar
 export const GUARDIAN_DEPENDENTS_PAGE_PATH = "/my-dependents";
 
 export function getGuardianDependentsApiPath(institutionId: string): string {
-  return `/api/v1/institutions/${institutionId}/guardian/dependents`;
+  return `/api/v1/institutions/${institutionId}/representations`;
 }
 
 export const GUARDIAN_RELATIONSHIP_LABELS: Record<GuardianRelationship, string> = {
@@ -48,4 +48,5 @@ export const GUARDIAN_DEPENDENT_MESSAGES = {
   INVALID_BIRTH_DATE: "La persona debe tener al menos 3 años.",
   INVALID_RELATIONSHIP: "Seleccioná el vínculo.",
   INVALID_PRIMARY_CONTACT: "Indicá si es tu contacto principal.",
+  INVALID_FORM: "No se pudo registrar la vinculación. Revisá los campos marcados.",
 } as const;

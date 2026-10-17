@@ -17,10 +17,12 @@ import { fetchContextualSearch } from "@features/contextual-search/services/fetc
 import type { ContextualSearchAccessSection } from "@features/contextual-search/types/contextual-search-access-section.types";
 import type { ContextualSearchScope } from "@features/contextual-search/types/contextual-search-scope.types";
 import type { ContextualSearchShortcutPlatform } from "@features/contextual-search/types/contextual-search-shortcut-platform.types";
-import { omitContextualSearchAccessItems } from "@features/contextual-search/utils/contextual-search-access.util";
+import { getContextualSearchAccessSections, omitContextualSearchAccessItems } from "@features/contextual-search/utils/contextual-search-access.util";
 
 type ContextualSearchScopeProps =
-  { scope: "platform"; institutionId?: never; className?: string } | { scope: "institutional"; institutionId: string; className?: string };
+  | { scope: "platform"; institutionId?: never; className?: string }
+  | { scope: "institutional"; institutionId: string; personId?: string; className?: string }
+  | { scope: "self-service"; institutionId: string; personId: string; className?: string };
 
 type ContextualSearchProps = ContextualSearchScopeProps & {
   accessSections: readonly ContextualSearchAccessSection[];
@@ -37,11 +39,16 @@ const CONTEXTUAL_SEARCH_COPY: Record<ContextualSearchScope, { label: string; pla
     label: "Buscar en la institución",
     placeholder: "Buscar en la institución...",
   },
+  "self-service": {
+    label: "Buscar en este perfil",
+    placeholder: "Buscar en este perfil...",
+  },
 };
 
 const CONTEXTUAL_SEARCH_EXCLUDED_ACCESS_URLS: Record<ContextualSearchScope, readonly string[]> = {
   platform: ["/admin"],
   institutional: ["/", "/account"],
+  "self-service": [],
 };
 
 export function ContextualSearch(props: ContextualSearchProps): ReactElement {
@@ -57,15 +64,20 @@ export function ContextualSearch(props: ContextualSearchProps): ReactElement {
 
   const copy = CONTEXTUAL_SEARCH_COPY[scope];
 
-  const institutionId = props.scope === "institutional" ? props.institutionId : null;
+  const institutionId = props.scope !== "platform" ? props.institutionId : null;
+
+  const personId = props.scope !== "platform" ? (props.personId ?? null) : null;
 
   const debouncedSearch = useDebouncedValue(value.trim(), 300);
 
   const canSearch = debouncedSearch.length >= 2;
 
-  const contextualSearchQueryKey = useMemo(() => ["contextual-search", scope, institutionId] as const, [institutionId, scope]);
+  const contextualSearchQueryKey = useMemo(() => ["contextual-search", scope, institutionId, personId] as const, [institutionId, personId, scope]);
 
-  const visibleAccessSections = omitContextualSearchAccessItems(accessSections, CONTEXTUAL_SEARCH_EXCLUDED_ACCESS_URLS[scope]);
+  const visibleAccessSections = omitContextualSearchAccessItems(
+    getContextualSearchAccessSections(accessSections, scope),
+    CONTEXTUAL_SEARCH_EXCLUDED_ACCESS_URLS[scope],
+  );
 
   const openSearch = useCallback(() => {
     queryClient.removeQueries({ queryKey: contextualSearchQueryKey });
@@ -74,15 +86,23 @@ export function ContextualSearch(props: ContextualSearchProps): ReactElement {
 
   const query = useQuery({
     queryKey: [...contextualSearchQueryKey, debouncedSearch],
-    queryFn: ({ signal }) =>
-      fetchContextualSearch(
-        props.scope === "institutional"
-          ? { scope: "institutional", institutionId: props.institutionId, search: debouncedSearch }
-          : { scope: "platform", search: debouncedSearch },
-        signal,
-      ),
+    queryFn: ({ signal }) => {
+      if (props.scope === "platform") {
+        return fetchContextualSearch({ scope: "platform", search: debouncedSearch }, signal);
+      }
+
+      if (props.scope === "self-service") {
+        return fetchContextualSearch(
+          { scope: "self-service", institutionId: props.institutionId, personId: props.personId, search: debouncedSearch },
+          signal,
+        );
+      }
+
+      return fetchContextualSearch({ scope: "institutional", institutionId: props.institutionId, search: debouncedSearch }, signal);
+    },
     enabled: open && canSearch,
     staleTime: 30_000,
+    gcTime: props.scope === "self-service" ? 0 : undefined,
     retry: false,
   });
 
@@ -174,6 +194,7 @@ export function ContextualSearch(props: ContextualSearchProps): ReactElement {
               isError={query.isError}
               groups={query.data?.groups ?? []}
               scope={scope}
+              personId={personId ?? undefined}
               onRetry={() => void query.refetch()}
               onNavigate={navigate}
             />

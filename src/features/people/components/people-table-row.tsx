@@ -11,6 +11,9 @@ import { PeopleScope, type PeopleScope as PeopleScopeType } from "@features/peop
 
 type PeopleTableRowProps = {
   canDelete: boolean;
+  canInviteAccess?: boolean;
+  onInviteAccess: (person: PersonSummary) => void;
+  onCancelInvitation: (person: PersonSummary) => void;
   canManageRoles: boolean;
   canUpdate: boolean;
   canUpdateStatus: boolean;
@@ -24,6 +27,9 @@ type PeopleTableRowProps = {
 
 export function PeopleTableRow({
   canDelete,
+  canInviteAccess = false,
+  onInviteAccess,
+  onCancelInvitation,
   canManageRoles,
   canUpdate,
   canUpdateStatus,
@@ -44,11 +50,19 @@ export function PeopleTableRow({
 
   const canDeletePerson = canDelete && !isSelf;
 
-  const canUpdatePersonStatus = canUpdateStatus && !isSelf;
+  const canUpdatePersonStatus = canUpdateStatus && !isSelf && person.hasAccount !== false;
+
+  const canInvitePerson = canInviteAccess && !isSelf && PeopleScope.isInstitutional(scope) && !person.hasAccount;
 
   const canEditOrManage = canEditPerson || (PeopleScope.isInstitutional(scope) && canManageRoles && !isSelf);
 
   const editLabel = canEditPerson ? "Editar" : "Administrar";
+
+  let statusLabel = person.enabled ? "Activo" : "Inactivo";
+
+  if (!person.hasAccount) {
+    statusLabel = person.accessInvitationPending ? "Invitación pendiente" : "Sin cuenta";
+  }
 
   const tableRow = (
     <TableRow className="hover:bg-muted/50 h-11 border-b transition-colors">
@@ -61,6 +75,9 @@ export function PeopleTableRow({
           canEdit={canEditOrManage}
           editLabel={editLabel}
           canDelete={canDeletePerson}
+          canInviteAccess={canInvitePerson}
+          onInviteAccess={() => onInviteAccess(person)}
+          onCancelInvitation={() => onCancelInvitation(person)}
           canUpdateStatus={canUpdatePersonStatus}
           onDelete={() => onDelete(person)}
           onUpdateStatus={() => onUpdateStatus(person)}
@@ -76,7 +93,7 @@ export function PeopleTableRow({
       <TableCell>{person.email ? person.email : <span className="text-muted-foreground/60">Sin email</span>}</TableCell>
       {PeopleScope.isInstitutional(scope) ? (
         <TableCell>
-          <Badge variant={person.enabled ? "secondary" : "outline"}>{person.enabled ? "Activo" : "Inactivo"}</Badge>
+          <Badge variant={person.enabled ? "secondary" : "outline"}>{statusLabel}</Badge>
         </TableCell>
       ) : null}
       <TableCell>
@@ -109,6 +126,16 @@ export function PeopleTableRow({
             <PersonNavigationLink href={personHref} className="px-2.5 py-1.5">
               {editLabel}
             </PersonNavigationLink>
+          </ContextMenuItem>
+        ) : null}
+        {canInvitePerson ? (
+          <ContextMenuItem className="px-2.5 py-1.5" onSelect={() => onInviteAccess(person)}>
+            {person.accessInvitationPending ? "Reenviar invitación" : "Invitar a activar acceso"}
+          </ContextMenuItem>
+        ) : null}
+        {canInvitePerson && person.accessInvitationPending ? (
+          <ContextMenuItem className="px-2.5 py-1.5" variant="destructive" onSelect={() => onCancelInvitation(person)}>
+            Cancelar invitación
           </ContextMenuItem>
         ) : null}
         {canUpdatePersonStatus && !person.enabled ? (

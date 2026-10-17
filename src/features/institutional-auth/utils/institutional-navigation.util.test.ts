@@ -4,6 +4,7 @@ import { getInstitutionalNavigationSections } from "@features/institutional-auth
 
 const USER: InstitutionalUser = {
   userId: "9512b687-3587-414d-a086-45b83016d16a",
+  personId: "d1f697f9-a8e5-4558-96c2-b18236cc5f49",
   name: "Ana",
   lastName: "Pérez",
   documentNumber: "12345678",
@@ -95,63 +96,26 @@ describe("getInstitutionalNavigationSections", () => {
     });
 
     expect(sections.find((section) => section.label === "Inscripciones")?.items).toEqual([
-      expect.objectContaining({ title: "Nueva inscripción", url: "/enrollment" }),
-      expect.objectContaining({ title: "Mis inscripciones", url: "/my-enrollment-applications" }),
+      expect.objectContaining({ title: "Nueva inscripción", url: `/self-service/${USER.personId}/enrollment` }),
+      expect.objectContaining({ title: "Mis inscripciones", url: `/self-service/${USER.personId}/enrollment-applications` }),
     ]);
     expect(sections.find((section) => section.label === "Formación")?.items).toEqual([
-      expect.objectContaining({ title: "Mis materias", url: "/my-course-enrollments" }),
-      expect.objectContaining({ title: "Mis horarios", url: "/my-schedules" }),
-    ]);
-  });
-
-  it("hides academic navigation for guardians while keeping enrollment access", () => {
-    const sections = getInstitutionalNavigationSections({
-      ...USER,
-      roles: ["Tutor"],
-      permissions: [
-        INSTITUTIONAL_PERMISSION.ACADEMIC_OFFER_READ,
-        INSTITUTIONAL_PERMISSION.ACADEMIC_YEAR_READ,
-        INSTITUTIONAL_PERMISSION.STUDY_PLAN_READ,
-        INSTITUTIONAL_PERMISSION.GUARDIAN_DEPENDENT_MANAGE,
-      ],
-    });
-
-    expect(sections.find((section) => section.label === "Académico")).toBeUndefined();
-    expect(sections.find((section) => section.label === "Inscripciones")?.items).toEqual([
-      expect.objectContaining({ title: "Nueva inscripción", url: "/enrollment" }),
-      expect.objectContaining({ title: "Mis inscripciones", url: "/my-enrollment-applications" }),
-    ]);
-  });
-
-  it("keeps academic navigation for staff users with a guardian role", () => {
-    const sections = getInstitutionalNavigationSections({
-      ...USER,
-      roles: ["Tutor", "Administrador Institucional"],
-      permissions: [INSTITUTIONAL_PERMISSION.STUDY_PLAN_READ],
-    });
-
-    expect(sections.find((section) => section.label === "Académico")?.items).toEqual([
-      expect.objectContaining({ title: "Planes de estudio", url: "/study-plans" }),
+      expect.objectContaining({ title: "Mis materias", url: `/self-service/${USER.personId}/courses` }),
+      expect.objectContaining({ title: "Mis horarios", url: `/self-service/${USER.personId}/schedules` }),
     ]);
   });
 
   it("lists the dependents page under Personal, after Cuenta, for users who can manage dependents", () => {
     const sections = getInstitutionalNavigationSections({
       ...USER,
-      roles: ["Tutor"],
-      permissions: [INSTITUTIONAL_PERMISSION.GUARDIAN_DEPENDENT_MANAGE],
+      roles: ["Estudiante"],
+      permissions: [],
     });
 
     expect(sections.find((section) => section.label === "Personal")?.items).toEqual([
       expect.objectContaining({ title: "Cuenta", url: "/account" }),
       expect.objectContaining({ title: "Personas a cargo", url: "/my-dependents" }),
     ]);
-  });
-
-  it("hides the dependents page without the manage permission", () => {
-    const sections = getInstitutionalNavigationSections({ ...USER, roles: ["Postulante"] });
-
-    expect(sections.flatMap((section) => section.items).some((item) => item.url === "/my-dependents")).toBe(false);
   });
 
   it("hides the applicant section for staff roles even with the management permission", () => {
@@ -184,7 +148,10 @@ describe("getInstitutionalNavigationSections", () => {
 
     expect(personalSection).toEqual({
       label: "Personal",
-      items: [expect.objectContaining({ title: "Cuenta", url: "/account" })],
+      items: [
+        expect.objectContaining({ title: "Cuenta", url: "/account" }),
+        expect.objectContaining({ title: "Personas a cargo", url: "/my-dependents" }),
+      ],
     });
   });
   it("shows teaching without granting administration and preserves student access for teachers", () => {
@@ -195,8 +162,8 @@ describe("getInstitutionalNavigationSections", () => {
     expect(items).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ url: "/my-teaching" }),
-        expect.objectContaining({ url: "/my-course-enrollments" }),
-        expect.objectContaining({ url: "/enrollment" }),
+        expect.objectContaining({ url: `/self-service/${USER.personId}/courses` }),
+        expect.objectContaining({ url: `/self-service/${USER.personId}/enrollment` }),
       ]),
     );
     expect(items).not.toEqual(expect.arrayContaining([expect.objectContaining({ url: "/course-enrollments" })]));

@@ -19,6 +19,7 @@ import type { EnrollmentWizardModel } from "@features/enrollment-applications/ty
 
 type Props = Pick<
   EnrollmentWizardModel,
+  | "actingForOtherPerson"
   | "getFieldError"
   | "firstName"
   | "lastName"
@@ -34,6 +35,7 @@ type Props = Pick<
 >;
 
 export function EnrollmentPersonalStep({
+  actingForOtherPerson,
   getFieldError,
   firstName,
   lastName,
@@ -54,13 +56,17 @@ export function EnrollmentPersonalStep({
           icon={UserRoundIcon}
           title="1. Datos Personales y Contacto"
           description={
-            <>
-              Actualizá tus datos desde{" "}
-              <ReturnToLink href="/account/edit" className="underline underline-offset-4">
-                Cuenta
-              </ReturnToLink>
-              ; para cambiar el documento, contactá a la institución.
-            </>
+            actingForOtherPerson ? (
+              "Estos datos pertenecen a la persona representada. Para corregirlos, contactá a la institución; tu cuenta personal no modifica este perfil."
+            ) : (
+              <>
+                Actualizá tus datos desde{" "}
+                <ReturnToLink href="/account/edit" className="underline underline-offset-4">
+                  Cuenta
+                </ReturnToLink>
+                ; para cambiar el documento, contactá a la institución.
+              </>
+            )
           }
         />
         <CardContent className="space-y-4">
@@ -140,7 +146,7 @@ export function EnrollmentPersonalStep({
             </Field>
 
             <Field data-invalid={!!getFieldError(["personalData", "email"])}>
-              <FieldLabel htmlFor="email" required>
+              <FieldLabel htmlFor="email" required={!actingForOtherPerson}>
                 Correo electrónico
               </FieldLabel>
               <Input

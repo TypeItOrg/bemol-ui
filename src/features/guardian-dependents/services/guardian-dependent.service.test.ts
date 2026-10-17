@@ -6,6 +6,7 @@ const DEPENDENT: GuardianDependent = {
   personGuardianId: "00000000-0000-4000-8000-0000000000a1",
   dependentPersonId: "00000000-0000-4000-8000-0000000000b2",
   status: "ACTIVE",
+  ownAccessStatus: "NO_ACCOUNT",
   documentNumber: "54123456",
   firstName: "Mateo",
   lastName: "González",
@@ -39,7 +40,7 @@ describe("guardian dependent service", () => {
 
     const result = await fetchGuardianDependents(INSTITUTION_ID);
 
-    expect(institutionalApiFetchMock).toHaveBeenCalledWith(`/api/v1/institutions/${INSTITUTION_ID}/guardian/dependents`);
+    expect(institutionalApiFetchMock).toHaveBeenCalledWith(`/api/v1/institutions/${INSTITUTION_ID}/representations`);
     expect(result).toEqual([DEPENDENT]);
   });
 

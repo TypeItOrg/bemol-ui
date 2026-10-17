@@ -105,8 +105,8 @@ describe("enrollment course pagination", () => {
     expect(result.current.courseOptionsError).toBeUndefined();
     expect(result.current.courseOptions).toEqual([COURSE]);
     expect(fetchMock.mock.calls.map(([input]) => input)).toEqual([
-      "/api/enrollment-applications/application-a/courses?page=1&size=50",
-      "/api/enrollment-applications/application-a/courses?page=1&size=50",
+      "/api/institutional/self-service/person-a/enrollment-applications/application-a/courses?page=1&size=50",
+      "/api/institutional/self-service/person-a/enrollment-applications/application-a/courses?page=1&size=50",
     ]);
   });
 });

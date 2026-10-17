@@ -81,6 +81,11 @@ export default async function PeoplePage({ searchParams }: { searchParams: Promi
             canManageRoles={canManageRoles}
             canDelete={hasInstitutionalPermission(user, INSTITUTIONAL_PERMISSION.PERSON_DELETE)}
             canUpdateStatus={hasInstitutionalPermission(user, INSTITUTIONAL_PERMISSION.USER_STATUS_UPDATE)}
+            canInviteAccess={
+              canCreate &&
+              hasInstitutionalPermission(user, INSTITUTIONAL_PERMISSION.USER_STATUS_UPDATE) &&
+              hasInstitutionalPermission(user, INSTITUTIONAL_PERMISSION.ROLE_ASSIGN)
+            }
           />
         </Suspense>
       </DataTableNavigationProvider>

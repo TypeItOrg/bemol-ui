@@ -10,6 +10,4 @@ export type InstitutionalRegistrationFieldsProps = {
   isPending: boolean;
   birthDate: Date | undefined;
   setBirthDate: Dispatch<SetStateAction<Date | undefined>>;
-  isGuardian: boolean;
-  onGuardianChange: (checked: boolean) => void;
 };

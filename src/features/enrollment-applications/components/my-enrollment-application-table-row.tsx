@@ -18,6 +18,7 @@ import { EnrollmentCancelDialog } from "@features/enrollment-applications/compon
 import { ENROLLMENT_APPLICATION_STATUS } from "@features/enrollment-applications/types/enrollment-application-status.types";
 import type { EnrollmentApplication } from "@features/enrollment-applications/types/enrollment-application.types";
 import { formatEnrollmentApplicationDate } from "@features/enrollment-applications/utils/enrollment-application-date.util";
+import { useOperatingPersonId } from "@features/guardian-workspace/components/guardian-workspace-provider";
 
 type MyEnrollmentApplicationTableRowProps = {
   application: EnrollmentApplication;
@@ -40,13 +41,15 @@ export function MyEnrollmentApplicationTableRow({
   currentPersonId,
   showApplicant = false,
 }: MyEnrollmentApplicationTableRowProps): ReactElement {
+  const personId = useOperatingPersonId();
+
   const router = useRouter();
 
   const [isCancelOpen, setIsCancelOpen] = useState(false);
 
   const canCancel = application.status === ENROLLMENT_APPLICATION_STATUS.DRAFT;
 
-  const detailHref = `/my-enrollment-applications/${application.applicationId}`;
+  const detailHref = `/self-service/${personId}/enrollment-applications/${application.applicationId}`;
 
   const detailLabel = canCancel ? "Continuar inscripción" : "Ver detalle";
 

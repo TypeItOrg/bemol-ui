@@ -2,13 +2,20 @@ import { parseHttpResponse } from "@common/utils/http-response-error.util";
 
 import type { ContextualSearchSummary } from "@features/contextual-search/types/contextual-search-summary.types";
 
-type FetchContextualSearchOptions = { scope: "platform"; search: string } | { scope: "institutional"; search: string; institutionId: string };
+type FetchContextualSearchOptions =
+  | { scope: "platform"; search: string }
+  | { scope: "institutional"; search: string; institutionId: string }
+  | { scope: "self-service"; search: string; institutionId: string; personId: string };
 
 export async function fetchContextualSearch(options: FetchContextualSearchOptions, signal: AbortSignal): Promise<ContextualSearchSummary> {
   const params = new URLSearchParams({ search: options.search, limit: "5" });
 
-  if (options.scope === "institutional") {
+  if (options.scope !== "platform") {
     params.set("institutionId", options.institutionId);
+  }
+
+  if (options.scope === "self-service") {
+    params.set("personId", options.personId);
   }
 
   const response = await fetch(`/api/${options.scope === "platform" ? "admin" : "institutional"}/search?${params}`, {

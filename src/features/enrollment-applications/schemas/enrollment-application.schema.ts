@@ -14,7 +14,6 @@ export const startEnrollmentApplicationSchema = z.object({
   enrollmentPeriodId: z.uuid().optional(),
   trainingPathId: z.string().uuid(ENROLLMENT_MESSAGES.TRAINING_PATH_ID_INVALID),
   academicYearId: z.string().uuid(ENROLLMENT_MESSAGES.ACADEMIC_YEAR_ID_INVALID).optional(),
-  applicantPersonId: z.string().uuid(ENROLLMENT_MESSAGES.APPLICANT_PERSON_ID_INVALID).optional(),
 });
 
 // Paso: Trayecto Formativo
@@ -73,114 +72,116 @@ export const updateEnrollmentDraftSchema = z.object({
 });
 
 // Schema completo y estricto para Enviar Inscripción (valida los pasos y reglas condicionales)
-export const enrollmentApplicationSubmissionSchema = z
-  .object({
-    // A minor has no email of their own (their contact is the responsible's), so it is checked below only for adults.
-    personalData: personalDataSchema.extend({ email: z.string().trim().nullish() }),
-    academicBackground: academicBackgroundSchema,
-    healthInclusion: healthInclusionSchema,
-    responsible: responsibleSchema,
-    careerSelection: careerSelectionSchema,
-    courses: enrollmentCoursesSchema.min(1, ENROLLMENT_MESSAGES.SPACE_REQUIRED),
-    preference: preferenceSchema,
-    attachments: z.array(enrollmentAttachmentSchema).default([]),
-  })
-  .superRefine((data, ctx) => {
-    // 1. Condicional: Si edad < 18, tutor legal obligatorio
-    const age = calculateAge(data.personalData.birthDate);
+export function createEnrollmentSubmissionSchema(actingForOtherPerson = false) {
+  return z
+    .object({
+      // Represented people use their representative's contact, regardless of age.
+      personalData: personalDataSchema.extend({ email: z.string().trim().nullish() }),
+      academicBackground: academicBackgroundSchema,
+      healthInclusion: healthInclusionSchema,
+      responsible: responsibleSchema,
+      careerSelection: careerSelectionSchema,
+      courses: enrollmentCoursesSchema.min(1, ENROLLMENT_MESSAGES.SPACE_REQUIRED),
+      preference: preferenceSchema,
+      attachments: z.array(enrollmentAttachmentSchema).default([]),
+    })
+    .superRefine((data, ctx) => {
+      // 1. Condicional: Si edad < 18, tutor legal obligatorio
+      const age = calculateAge(data.personalData.birthDate);
 
-    const isMinor = age !== null && age < 18;
+      const isMinor = age !== null && age < 18;
 
-    if (!isMinor) {
-      const email = data.personalData.email;
+      if (!isMinor && !actingForOtherPerson) {
+        const email = data.personalData.email;
 
-      if (!email) {
-        ctx.addIssue({ code: z.ZodIssueCode.custom, message: ENROLLMENT_MESSAGES.EMAIL_REQUIRED, path: ["personalData", "email"] });
-      } else if (!z.email().safeParse(email).success) {
-        ctx.addIssue({ code: z.ZodIssueCode.custom, message: ENROLLMENT_MESSAGES.EMAIL_INVALID, path: ["personalData", "email"] });
+        if (!email) {
+          ctx.addIssue({ code: z.ZodIssueCode.custom, message: ENROLLMENT_MESSAGES.EMAIL_REQUIRED, path: ["personalData", "email"] });
+        } else if (!z.email().safeParse(email).success) {
+          ctx.addIssue({ code: z.ZodIssueCode.custom, message: ENROLLMENT_MESSAGES.EMAIL_INVALID, path: ["personalData", "email"] });
+        }
+      } else {
+        const resp = data.responsible;
+
+        if (!resp?.fullName || resp.fullName.trim().length === 0) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: ENROLLMENT_MESSAGES.RESPONSIBLE_NAME_REQUIRED,
+            path: ["responsible", "fullName"],
+          });
+        }
+
+        if (!resp?.documentNumber || resp.documentNumber.trim().length === 0) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: ENROLLMENT_MESSAGES.RESPONSIBLE_DOCUMENT_REQUIRED,
+            path: ["responsible", "documentNumber"],
+          });
+        }
+
+        if (!resp?.phoneNumber || resp.phoneNumber.trim().length === 0) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: ENROLLMENT_MESSAGES.RESPONSIBLE_PHONE_REQUIRED,
+            path: ["responsible", "phoneNumber"],
+          });
+        }
+
+        if (!resp?.email || resp.email.trim().length === 0) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: ENROLLMENT_MESSAGES.RESPONSIBLE_EMAIL_REQUIRED,
+            path: ["responsible", "email"],
+          });
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(resp.email.trim())) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: ENROLLMENT_MESSAGES.RESPONSIBLE_EMAIL_INVALID,
+            path: ["responsible", "email"],
+          });
+        }
+
+        if (!resp?.occupation || resp.occupation.trim().length === 0) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: ENROLLMENT_MESSAGES.RESPONSIBLE_OCCUPATION_REQUIRED,
+            path: ["responsible", "occupation"],
+          });
+        }
+
+        if (!resp?.educationLevel || resp.educationLevel.trim().length === 0) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: ENROLLMENT_MESSAGES.RESPONSIBLE_EDUCATION_REQUIRED,
+            path: ["responsible", "educationLevel"],
+          });
+        }
       }
-    }
 
-    if (isMinor) {
-      const resp = data.responsible;
-
-      if (!resp?.fullName || resp.fullName.trim().length === 0) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: ENROLLMENT_MESSAGES.RESPONSIBLE_NAME_REQUIRED,
-          path: ["responsible", "fullName"],
-        });
+      // 2. Condicional: Si recibe ajustes razonables, detalle e informe de salud obligatorios
+      if (data.healthInclusion.receivesReasonableAdjustments) {
+        if (!data.healthInclusion.adjustmentDetails || data.healthInclusion.adjustmentDetails.trim().length === 0) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: ENROLLMENT_MESSAGES.ADJUSTMENT_DETAILS_REQUIRED,
+            path: ["healthInclusion", "adjustmentDetails"],
+          });
+        }
       }
 
-      if (!resp?.documentNumber || resp.documentNumber.trim().length === 0) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: ENROLLMENT_MESSAGES.RESPONSIBLE_DOCUMENT_REQUIRED,
-          path: ["responsible", "documentNumber"],
-        });
+      // 3. Condicional: Si es reingresante, docente previo obligatorio
+      if (data.preference.isReenrolling) {
+        if (!data.preference.previousTeacher || data.preference.previousTeacher.trim().length === 0) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: ENROLLMENT_MESSAGES.PREVIOUS_TEACHER_REQUIRED,
+            path: ["preference", "previousTeacher"],
+          });
+        }
       }
+    });
+}
 
-      if (!resp?.phoneNumber || resp.phoneNumber.trim().length === 0) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: ENROLLMENT_MESSAGES.RESPONSIBLE_PHONE_REQUIRED,
-          path: ["responsible", "phoneNumber"],
-        });
-      }
-
-      if (!resp?.email || resp.email.trim().length === 0) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: ENROLLMENT_MESSAGES.RESPONSIBLE_EMAIL_REQUIRED,
-          path: ["responsible", "email"],
-        });
-      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(resp.email.trim())) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: ENROLLMENT_MESSAGES.RESPONSIBLE_EMAIL_INVALID,
-          path: ["responsible", "email"],
-        });
-      }
-
-      if (!resp?.occupation || resp.occupation.trim().length === 0) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: ENROLLMENT_MESSAGES.RESPONSIBLE_OCCUPATION_REQUIRED,
-          path: ["responsible", "occupation"],
-        });
-      }
-
-      if (!resp?.educationLevel || resp.educationLevel.trim().length === 0) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: ENROLLMENT_MESSAGES.RESPONSIBLE_EDUCATION_REQUIRED,
-          path: ["responsible", "educationLevel"],
-        });
-      }
-    }
-
-    // 2. Condicional: Si recibe ajustes razonables, detalle e informe de salud obligatorios
-    if (data.healthInclusion.receivesReasonableAdjustments) {
-      if (!data.healthInclusion.adjustmentDetails || data.healthInclusion.adjustmentDetails.trim().length === 0) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: ENROLLMENT_MESSAGES.ADJUSTMENT_DETAILS_REQUIRED,
-          path: ["healthInclusion", "adjustmentDetails"],
-        });
-      }
-    }
-
-    // 3. Condicional: Si es reingresante, docente previo obligatorio
-    if (data.preference.isReenrolling) {
-      if (!data.preference.previousTeacher || data.preference.previousTeacher.trim().length === 0) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: ENROLLMENT_MESSAGES.PREVIOUS_TEACHER_REQUIRED,
-          path: ["preference", "previousTeacher"],
-        });
-      }
-    }
-  });
+export const enrollmentApplicationSubmissionSchema = createEnrollmentSubmissionSchema();
 
 export type EnrollmentApplicationSubmissionInput = z.infer<typeof enrollmentApplicationSubmissionSchema>;
 

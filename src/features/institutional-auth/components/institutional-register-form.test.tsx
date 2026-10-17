@@ -15,26 +15,25 @@ async function typeBirthDate(year: number): Promise<void> {
   await userEvent.type(screen.getByPlaceholderText("dd/mm/aaaa"), `01/01/${year}`);
 }
 
-describe("InstitutionalRegisterForm guardian birth date", () => {
+describe("InstitutionalRegisterForm birth date", () => {
   const currentYear = new Date().getFullYear();
 
-  it("clears a minor birth date when the guardian switch is turned on", async () => {
+  it("preserves a minor birth date without guardian registration controls", async () => {
     const { container } = render(<InstitutionalRegisterForm />);
 
     await typeBirthDate(currentYear - 10);
-    expect(getBirthDateValue(container)).not.toBe("");
 
-    await userEvent.click(screen.getByRole("switch"));
-
-    expect(getBirthDateValue(container)).toBe("");
+    expect(getBirthDateValue(container)).toBe(`${currentYear - 10}-01-01`);
+    expect(screen.queryByRole("switch")).not.toBeInTheDocument();
+    expect(container.querySelector('input[name="isGuardian"]')).not.toBeInTheDocument();
   });
 
-  it("keeps an adult birth date when the guardian switch is turned on", async () => {
+  it("preserves an adult birth date without guardian registration controls", async () => {
     const { container } = render(<InstitutionalRegisterForm />);
 
     await typeBirthDate(currentYear - 30);
-    await userEvent.click(screen.getByRole("switch"));
 
     expect(getBirthDateValue(container)).toBe(`${currentYear - 30}-01-01`);
+    expect(screen.queryByRole("switch")).not.toBeInTheDocument();
   });
 });

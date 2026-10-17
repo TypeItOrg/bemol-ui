@@ -4,18 +4,15 @@ import Image from "next/image";
 
 import { Separator } from "@common/components/ui/separator";
 
-import type { InstitutionalPerson } from "@features/institutional-auth/types/institutional-person.types";
-import type { InstitutionalUser } from "@features/institutional-auth/types/institutional-user.types";
-
 export function InstitutionalHomeHero({
   greeting,
-  user,
-  person,
+  name,
+  institutionName,
   primaryRole,
 }: {
   greeting: "Buenos días" | "Buenas tardes" | "Buenas noches";
-  user: InstitutionalUser;
-  person: InstitutionalPerson | null;
+  name: string;
+  institutionName?: string;
   primaryRole: string;
 }): ReactElement {
   return (
@@ -42,10 +39,10 @@ export function InstitutionalHomeHero({
               className="text-2xl font-bold tracking-tight text-pretty drop-shadow-sm @2xl/home-hero:text-3xl @4xl/home-hero:text-4xl"
             >
               <span className="@2xl/home-hero:hidden">Hola,</span>
-              <span className="hidden @2xl/home-hero:inline">{greeting},</span> {user.name}
+              <span className="hidden @2xl/home-hero:inline">{greeting},</span> {name}
             </h1>
             <p className="line-clamp-1 text-sm leading-snug font-medium text-white drop-shadow-sm @2xl/home-hero:line-clamp-none @2xl/home-hero:text-base @2xl/home-hero:text-white/85">
-              {person?.institutionName ?? "Institución"}
+              {institutionName ?? "Institución"}
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-sm font-medium text-white/90 drop-shadow-sm @2xl/home-hero:gap-x-4 @2xl/home-hero:text-base @2xl/home-hero:text-white/75">

@@ -47,10 +47,10 @@ export function InstitutionalLogoutDialog({ onClose }: InstitutionalLogoutDialog
             <AlertDialogDescription>¿Querés cerrar tu sesión? Vas a tener que volver a ingresar para acceder a tu cuenta.</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="mt-5">
-            <AlertDialogCancel disabled={isPending} type="button">
+            <AlertDialogCancel disabled={isPending} size="lg" type="button">
               Cancelar
             </AlertDialogCancel>
-            <Button disabled={isPending} type="submit" variant="destructive">
+            <Button disabled={isPending} size="lg" type="submit" variant="destructive">
               {isPending ? "Cerrando sesión…" : "Cerrar sesión"}
             </Button>
           </AlertDialogFooter>

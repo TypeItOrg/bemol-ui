@@ -1,284 +1,288 @@
 "use client";
 
-/* eslint-disable max-lines, no-nested-ternary */
+/* eslint-disable max-lines */
 
-import { useMemo, useState, useTransition, type ReactElement } from "react";
+import { useState, type ReactElement } from "react";
 
-import { CheckIcon, FileTextIcon, SearchIcon, UsersIcon, XIcon } from "lucide-react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
-import { Alert, AlertDescription } from "@common/components/ui/alert";
-import { Badge } from "@common/components/ui/badge";
+import { EllipsisVerticalIcon, Loader2Icon, SearchIcon, UsersIcon } from "lucide-react";
+
+import { OptionalValue } from "@common/components/optional-value";
 import { Button } from "@common/components/ui/button";
-import { DataTableFilterSelect } from "@common/components/ui/data-table-filter-select";
-import { DataTableSearchFilter } from "@common/components/ui/data-table-search-filter";
+import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuSeparator, ContextMenuTrigger } from "@common/components/ui/context-menu";
+import { DataTableFilters } from "@common/components/ui/data-table-filters";
+import { useDataTableNavigation } from "@common/components/ui/data-table-navigation";
+import { DataTablePagination } from "@common/components/ui/data-table-pagination";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@common/components/ui/dropdown-menu";
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@common/components/ui/empty";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@common/components/ui/table";
-import { formatDisplayDate } from "@common/utils/date-input.util";
+import type { PaginatedResponse } from "@common/types/paginated-response.types";
+import { PAGE_SIZE_OPTIONS } from "@common/utils/pagination-query.util";
+import { appendReturnTo } from "@common/utils/return-to.util";
 
-import { calculateAge } from "@features/enrollment-applications/schemas/enrollment-application.schema";
-import { formatApplicationDateTime } from "@features/enrollment-applications/utils/enrollment-application.util";
+import { formatEnrollmentApplicationDateTime } from "@features/enrollment-applications/utils/enrollment-application-date.util";
 import { GUARDIAN_RELATIONSHIP_LABELS } from "@features/guardian-dependents/constants/guardian-dependent.constants";
 import { GUARDIAN_LINK_STATUS, type GuardianLinkStatus } from "@features/guardian-dependents/types/guardian-link-status.types";
 import { getGuardianDependentName } from "@features/guardian-dependents/utils/guardian-dependent-display.util";
 import { resolveGuardianLinkAction } from "@features/guardian-links/actions/resolve-guardian-link.action";
-import {
-  getGuardianLinkAttachmentContentPath,
-  getPlatformGuardianLinkAttachmentContentPath,
-} from "@features/guardian-links/constants/guardian-link.constants";
+import { ApproveGuardianLinkDialog } from "@features/guardian-links/components/approve-guardian-link-dialog";
+import { PersonCell, RequestStatus } from "@features/guardian-links/components/guardian-link-display";
+import { RejectGuardianLinkDialog } from "@features/guardian-links/components/reject-guardian-link-dialog";
 import type { GuardianLinkDecision } from "@features/guardian-links/types/guardian-link-decision.types";
-import type { GuardianLinkPerson } from "@features/guardian-links/types/guardian-link-person.types";
 import type { GuardianLinkRequest } from "@features/guardian-links/types/guardian-link-request.types";
+import type { GuardianLinksQuery } from "@features/guardian-links/types/guardian-links-query.types";
 
 type GuardianLinkRequestsProps = {
-  requests: GuardianLinkRequest[];
+  data: PaginatedResponse<GuardianLinkRequest>;
+  query: GuardianLinksQuery;
   institutionId?: string;
   onResolve?: (institutionId: string, linkId: string, decision: GuardianLinkDecision) => Promise<{ error?: string }>;
-  attachmentPathMode?: "institutional" | "platform";
   showInstitution?: boolean;
 };
 type StatusFilter = "ALL" | GuardianLinkStatus;
 
 const STATUS_LABELS: Record<StatusFilter, string> = {
   ALL: "Todos los estados",
-  PENDING: "Pendientes",
-  ACTIVE: "Aceptadas",
-  REJECTED: "Rechazadas",
-  ENDED: "Finalizadas",
+  PENDING: "Pendiente",
+  ACTIVE: "Aceptada",
+  REJECTED: "Rechazada",
+  ENDED: "Finalizada",
 };
 
 export function GuardianLinkRequests({
-  requests,
+  data,
+  query,
   institutionId,
   onResolve = resolveGuardianLinkAction,
-  attachmentPathMode = "institutional",
   showInstitution = false,
 }: GuardianLinkRequestsProps): ReactElement {
-  const [rows, setRows] = useState(requests);
+  const router = useRouter();
 
-  const [search, setSearch] = useState("");
+  const { isPending: isNavigating, navigate } = useDataTableNavigation();
 
-  const [status, setStatus] = useState<StatusFilter>("ALL");
+  const [requestToApprove, setRequestToApprove] = useState<GuardianLinkRequest | null>(null);
 
-  const normalizedSearch = search.trim().toLocaleLowerCase();
+  const [requestToReject, setRequestToReject] = useState<GuardianLinkRequest | null>(null);
 
-  const filteredRows = useMemo(
-    () =>
-      rows.filter((request) => {
-        const people = `${getGuardianDependentName(request.tutor)} ${getGuardianDependentName(request.dependent)}`.toLocaleLowerCase();
+  const pathname = usePathname();
 
-        const documents = `${request.tutor.documentNumber} ${request.dependent.documentNumber}`;
-
-        return (
-          (status === "ALL" || request.status === status) &&
-          (!normalizedSearch || people.includes(normalizedSearch) || documents.includes(normalizedSearch))
-        );
-      }),
-    [normalizedSearch, rows, status],
-  );
-
-  function updateRow(requestId: string, nextStatus: GuardianLinkStatus): void {
-    setRows((currentRows) => currentRows.map((row) => (row.personGuardianId === requestId ? { ...row, status: nextStatus } : row)));
-  }
+  const searchParams = useSearchParams();
 
   return (
-    <div className="flex h-full flex-col gap-4">
-      <GuardianLinkFilters onSearchChange={setSearch} onStatusChange={setStatus} search={search} status={status} />
+    <div className="flex h-full min-h-0 flex-col gap-4">
+      <GuardianLinkFilters query={query} />
 
-      {filteredRows.length === 0 ? (
-        <EmptyRequests hasFilters={rows.length > 0} />
-      ) : (
-        <div className="overflow-hidden rounded-lg border">
+      <div
+        className={data.items.length === 0 ? "relative h-full" : "relative min-h-0 flex-1 overflow-hidden rounded-lg border"}
+        aria-busy={isNavigating}
+      >
+        {data.items.length === 0 ? (
+          <EmptyRequests hasFilters={Boolean(query.search || query.status || query.hasDocumentation !== undefined)} />
+        ) : (
           <Table containerClassName="table-scrollbar" className="min-w-240">
             <TableHeader className="bg-muted sticky top-0 z-10 [&_tr]:border-b">
-              <TableRow>
+              <TableRow className="hover:bg-muted/50 h-11">
+                <TableHead className="w-16 pl-4">
+                  <span className="sr-only">Acciones</span>
+                </TableHead>
                 {showInstitution ? <TableHead>Institución</TableHead> : null}
-                <TableHead>Tutor</TableHead>
-                <TableHead>Estudiante</TableHead>
+                <TableHead>Representante</TableHead>
+                <TableHead>Persona representada</TableHead>
                 <TableHead>Vínculo</TableHead>
-                <TableHead>Solicitud</TableHead>
+                <TableHead>Fecha de solicitud</TableHead>
                 <TableHead>Documentación</TableHead>
                 <TableHead>Estado</TableHead>
-                <TableHead className="w-52 text-right">Acciones</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredRows.map((request) => (
+              {data.items.map((request) => (
                 <RequestRow
-                  attachmentPathMode={attachmentPathMode}
-                  institutionId={institutionId}
                   key={request.personGuardianId}
-                  onResolve={onResolve}
-                  onResolved={updateRow}
+                  onView={() => router.push(appendReturnTo(`${pathname}/${request.personGuardianId}`, `${pathname}?${searchParams.toString()}`))}
+                  onApprove={() => setRequestToApprove(request)}
+                  onReject={() => setRequestToReject(request)}
                   request={request}
                   showInstitution={showInstitution}
                 />
               ))}
             </TableBody>
           </Table>
-        </div>
-      )}
+        )}
+        {isNavigating ? (
+          <div className="bg-background/55 absolute inset-0 z-20 flex items-center justify-center rounded-lg backdrop-blur-[1px]">
+            <Loader2Icon className="text-muted-foreground size-5 animate-spin" aria-label="Cargando vinculaciones" role="status" />
+          </div>
+        ) : null}
+      </div>
+
+      {data.items.length > 0 ? (
+        <DataTablePagination
+          page={data.page}
+          size={data.size}
+          totalPages={data.totalPages}
+          summaryLabel={`${data.totalItems} ${data.totalItems === 1 ? "vinculación." : "vinculaciones."}`}
+          pageSizeOptions={PAGE_SIZE_OPTIONS}
+          isPending={isNavigating}
+          onPageChange={(page) => navigate({ page: String(page), size: String(query.size) })}
+          onPageSizeChange={(size) => navigate({ page: "0", size })}
+        />
+      ) : null}
+
+      {requestToApprove ? (
+        <ApproveGuardianLinkDialog
+          institutionId={institutionId}
+          onApproved={() => {
+            setRequestToApprove(null);
+            router.refresh();
+          }}
+          onClose={() => setRequestToApprove(null)}
+          onResolve={onResolve}
+          request={requestToApprove}
+        />
+      ) : null}
+
+      {requestToReject ? (
+        <RejectGuardianLinkDialog
+          institutionId={institutionId}
+          onClose={() => setRequestToReject(null)}
+          onRejected={() => {
+            setRequestToReject(null);
+            router.refresh();
+          }}
+          onResolve={onResolve}
+          request={requestToReject}
+        />
+      ) : null}
     </div>
   );
 }
 
-function GuardianLinkFilters({
-  search,
-  status,
-  onSearchChange,
-  onStatusChange,
-}: {
-  search: string;
-  status: StatusFilter;
-  onSearchChange: (value: string) => void;
-  onStatusChange: (value: StatusFilter) => void;
-}): ReactElement {
+function GuardianLinkFilters({ query }: { query: GuardianLinksQuery }): ReactElement {
   return (
-    <div className="bg-muted/25 flex flex-row flex-wrap gap-3 rounded-lg border p-4 md:items-end [&>*]:flex-[1_0_min(250px,100%)]">
-      <DataTableSearchFilter initialValue={search} onValueChange={onSearchChange} placeholder="Buscar por nombre, apellido o documento..." />
-      <DataTableFilterSelect
-        filter={{
+    <DataTableFilters
+      search={query.search}
+      searchPlaceholder="Buscar por nombre, apellido o documento..."
+      size={query.size}
+      selectFilters={[
+        {
           defaultValue: "ALL",
           label: "Estado",
           name: "status",
-          options: Object.entries(STATUS_LABELS).map(([value, label]) => ({ value: value as StatusFilter, label })),
-          value: status,
-        }}
-        onValueChange={onStatusChange}
-      />
-    </div>
+          options: Object.entries(STATUS_LABELS).map(([value, label]) => ({ value, label })),
+          value: query.status ?? "ALL",
+        },
+        {
+          defaultValue: "ALL",
+          label: "Documentación",
+          name: "hasDocumentation",
+          options: [
+            { value: "ALL", label: "Toda la documentación" },
+            { value: "true", label: "Con documentación" },
+            { value: "false", label: "Sin documentación" },
+          ],
+          value: query.hasDocumentation === undefined ? "ALL" : String(query.hasDocumentation),
+        },
+      ]}
+    />
   );
 }
 
 function RequestRow({
   request,
-  institutionId,
-  onResolve,
-  onResolved,
-  attachmentPathMode,
+  onApprove,
+  onReject,
+  onView,
   showInstitution,
 }: {
   request: GuardianLinkRequest;
-  institutionId?: string;
-  onResolve: (institutionId: string, linkId: string, decision: GuardianLinkDecision) => Promise<{ error?: string }>;
-  onResolved: (requestId: string, status: GuardianLinkStatus) => void;
-  attachmentPathMode: "institutional" | "platform";
+  onView: () => void;
+  onApprove: () => void;
+  onReject: () => void;
   showInstitution: boolean;
 }): ReactElement {
-  const [error, setError] = useState<string | null>(null);
+  const isPendingStatus = request.status === GUARDIAN_LINK_STATUS.PENDING;
 
-  const [isPending, startTransition] = useTransition();
+  const dependentName = getGuardianDependentName(request.dependent) || "esta solicitud";
 
-  const getAttachmentPath =
-    attachmentPathMode === "platform"
-      ? getPlatformGuardianLinkAttachmentContentPath
-      : (_institutionId: string, linkId: string, attachmentId: string) => getGuardianLinkAttachmentContentPath(linkId, attachmentId);
-
-  function resolve(decision: GuardianLinkDecision): void {
-    const requestInstitutionId = institutionId ?? request.institution?.institutionId;
-
-    if (!requestInstitutionId) {
-      setError("La solicitud no tiene una institución asociada.");
-
-      return;
-    }
-
-    setError(null);
-    startTransition(async () => {
-      try {
-        const result = await onResolve(requestInstitutionId, request.personGuardianId, decision);
-
-        if (result.error) {
-          setError(result.error);
-
-          return;
-        }
-
-        onResolved(request.personGuardianId, decision === "approve" ? GUARDIAN_LINK_STATUS.ACTIVE : GUARDIAN_LINK_STATUS.REJECTED);
-      } catch {
-        setError("No se pudo resolver la solicitud.");
-      }
-    });
-  }
-
-  return (
-    <TableRow>
-      {showInstitution ? <TableCell>{request.institution?.name ?? "Sin institución"}</TableCell> : null}
+  const tableRow = (
+    <TableRow className="h-12">
+      <TableCell className="w-16 pl-4">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button aria-label={`Abrir acciones de ${dependentName}`} size="icon" type="button" variant="ghost">
+              <EllipsisVerticalIcon aria-hidden="true" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start" className="w-48 p-1.5">
+            <DropdownMenuItem className="px-2.5 py-1.5" onSelect={onView}>
+              Ver detalle
+            </DropdownMenuItem>
+            {isPendingStatus ? (
+              <>
+                <DropdownMenuItem className="px-2.5 py-1.5" onSelect={onApprove}>
+                  Aceptar
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem className="px-2.5 py-1.5" onSelect={onReject} variant="destructive">
+                  Rechazar
+                </DropdownMenuItem>
+              </>
+            ) : null}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </TableCell>
+      {showInstitution ? (
+        <TableCell>
+          <OptionalValue value={request.institution?.name} fallback="Sin institución" />
+        </TableCell>
+      ) : null}
       <TableCell>
         <PersonCell person={request.tutor} />
       </TableCell>
       <TableCell>
         <PersonCell person={request.dependent} />
-        <div className="text-muted-foreground mt-1 text-xs">
-          {request.dependent.birthDate ? formatDisplayDate(request.dependent.birthDate) : "Sin fecha de nacimiento"} ·{" "}
-          {formatAge(request.dependent.birthDate)}
-        </div>
       </TableCell>
       <TableCell>{GUARDIAN_RELATIONSHIP_LABELS[request.relationship]}</TableCell>
-      <TableCell>{formatApplicationDateTime(request.createdAt)}</TableCell>
+      <TableCell>{formatEnrollmentApplicationDateTime(request.createdAt)}</TableCell>
       <TableCell>
-        {request.attachments.length > 0 ? (
-          <div className="flex max-w-56 flex-col gap-1">
-            {request.attachments.map((attachment) => (
-              <a
-                className="text-primary inline-flex items-center gap-1.5 truncate hover:underline"
-                href={getAttachmentPath(request.institution?.institutionId ?? institutionId ?? "", request.personGuardianId, attachment.id)}
-                key={attachment.id}
-                rel="noreferrer"
-                target="_blank"
-              >
-                <FileTextIcon aria-hidden="true" className="size-4 shrink-0" />
-                {attachment.originalFileName}
-              </a>
-            ))}
-          </div>
-        ) : (
-          <span className="text-muted-foreground">Sin documentación</span>
-        )}
-      </TableCell>
-      <TableCell>
-        <Badge
-          variant={
-            request.status === GUARDIAN_LINK_STATUS.ACTIVE
-              ? "success"
-              : request.status === GUARDIAN_LINK_STATUS.REJECTED
-                ? "destructive"
-                : "secondary"
+        <OptionalValue
+          value={
+            request.attachments.length > 0 ? (
+              <p>
+                {request.attachments.length} {request.attachments.length === 1 ? "documento" : "documentos"}
+              </p>
+            ) : null
           }
-        >
-          {STATUS_LABELS[request.status]}
-        </Badge>
+          fallback="Sin documentación"
+        />
       </TableCell>
-      <TableCell className="text-right">
-        {request.status === GUARDIAN_LINK_STATUS.PENDING ? (
-          <div className="flex justify-end gap-2">
-            <Button disabled={isPending} onClick={() => resolve("reject")} size="sm" type="button" variant="outline">
-              <XIcon aria-hidden="true" />
-              Rechazar
-            </Button>
-            <Button disabled={isPending} onClick={() => resolve("approve")} size="sm" type="button">
-              <CheckIcon aria-hidden="true" />
-              Aceptar
-            </Button>
-          </div>
-        ) : (
-          <span className="text-muted-foreground text-sm">Sin acciones</span>
-        )}
-        {error ? (
-          <Alert className="mt-2 text-left" variant="destructive">
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        ) : null}
+      <TableCell>
+        <RequestStatus status={request.status} />
       </TableCell>
     </TableRow>
   );
-}
 
-function PersonCell({ person }: { person: GuardianLinkPerson }): ReactElement {
   return (
-    <div>
-      <div className="font-medium">{getGuardianDependentName(person)}</div>
-      <div className="text-muted-foreground text-xs">DNI {person.documentNumber}</div>
-    </div>
+    <ContextMenu>
+      <ContextMenuTrigger asChild>{tableRow}</ContextMenuTrigger>
+      <ContextMenuContent className="w-48 p-1.5">
+        <ContextMenuItem className="px-2.5 py-1.5" onSelect={onView}>
+          Ver detalle
+        </ContextMenuItem>
+        {isPendingStatus ? (
+          <>
+            <ContextMenuItem className="px-2.5 py-1.5" onSelect={onApprove}>
+              Aceptar
+            </ContextMenuItem>
+            <ContextMenuSeparator />
+            <ContextMenuItem className="px-2.5 py-1.5" onSelect={onReject} variant="destructive">
+              Rechazar
+            </ContextMenuItem>
+          </>
+        ) : null}
+      </ContextMenuContent>
+    </ContextMenu>
   );
 }
 
@@ -295,15 +299,9 @@ function EmptyRequests({ hasFilters }: { hasFilters: boolean }): ReactElement {
         <EmptyDescription>
           {hasFilters
             ? "No encontramos solicitudes que coincidan con los filtros."
-            : "Cuando un tutor solicite vincularse, la solicitud aparecerá acá para validarla."}
+            : "Cuando una persona solicite representar a otra, la solicitud aparecerá acá para validarla."}
         </EmptyDescription>
       </EmptyHeader>
     </Empty>
   );
-}
-
-function formatAge(birthDate: string | null): string {
-  const age = calculateAge(birthDate ?? undefined);
-
-  return age === null ? "Edad no disponible" : `${age} años`;
 }

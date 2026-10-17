@@ -3,6 +3,7 @@ import { parseHttpResponse } from "@common/utils/http-response-error.util";
 
 import { ENROLLMENT_MESSAGES } from "@features/enrollment-applications/constants/enrollment-messages.constants";
 import type { EnrollmentCourseOption } from "@features/enrollment-applications/types/enrollment-course-option.types";
+import { getSelfServiceReadPath } from "@features/guardian-workspace/utils/self-service-read-path.util";
 
 export async function fetchEnrollmentCourses(
   applicationId: string,
@@ -13,6 +14,7 @@ export async function fetchEnrollmentCourses(
     studyPlanSpaceId?: string;
     academicYear?: number;
     signal?: AbortSignal;
+    personId?: string;
   } = {},
 ): Promise<PaginatedResponse<EnrollmentCourseOption>> {
   const searchParams = new URLSearchParams({
@@ -32,7 +34,10 @@ export async function fetchEnrollmentCourses(
     searchParams.set("academicYear", String(params.academicYear));
   }
 
-  const response = await fetch(`/api/enrollment-applications/${applicationId}/courses?${searchParams}`, { cache: "no-store", signal: params.signal });
+  const response = await fetch(`${getSelfServiceReadPath(applicationId, params.personId)}/courses?${searchParams}`, {
+    cache: "no-store",
+    signal: params.signal,
+  });
 
   return parseHttpResponse(response, ENROLLMENT_MESSAGES.FETCH_COURSES_FAILED);
 }

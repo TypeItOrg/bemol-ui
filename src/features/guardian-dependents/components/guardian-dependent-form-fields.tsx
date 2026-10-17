@@ -2,10 +2,13 @@
 
 import { useState, type ReactElement } from "react";
 
+import { CircleQuestionMarkIcon } from "lucide-react";
+
 import { Badge } from "@common/components/ui/badge";
 import { DatePicker } from "@common/components/ui/date-picker";
 import { Field, FieldError, FieldLabel } from "@common/components/ui/field";
 import { Input } from "@common/components/ui/input";
+import { Popover, PopoverContent, PopoverTrigger } from "@common/components/ui/popover";
 import { NumericInput } from "@common/components/ui/restricted-input";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@common/components/ui/select";
 
@@ -35,6 +38,8 @@ export function GuardianDependentFormFields({
     birthDate: string;
     relationship: string;
     isPrimaryContact: string;
+    email: string;
+    ownAccessRequested: string;
   };
 }): ReactElement {
   const [birthDate, setBirthDate] = useState<Date>();
@@ -155,6 +160,55 @@ export function GuardianDependentFormFields({
           />
           <FieldError errors={getErrors("isPrimaryContact")} />
         </Field>
+
+        <div className="grid items-start gap-4 @xl/dependent-fields:col-span-full @xl/dependent-fields:grid-cols-2">
+          <Field data-invalid={!!fieldErrors?.ownAccessRequested}>
+            <div className="flex items-center gap-2">
+              <FieldLabel htmlFor="dependent-own-access">Acceso propio a la plataforma</FieldLabel>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button
+                    aria-label="Información sobre el acceso propio"
+                    className="text-muted-foreground hover:text-foreground focus-visible:ring-ring rounded-sm focus-visible:ring-2 focus-visible:outline-none"
+                    type="button"
+                  >
+                    <CircleQuestionMarkIcon aria-hidden="true" className="size-4" />
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent align="start" className="max-w-[calc(100vw-2rem)] p-3">
+                  <p>Podés gestionar sus trámites sin crearle una cuenta. La invitación se envía después de aprobar la vinculación.</p>
+                </PopoverContent>
+              </Popover>
+            </div>
+            <FormSelect
+              id="dependent-own-access"
+              name="ownAccessRequested"
+              value={values.ownAccessRequested}
+              onValueChange={(value) => onChange("ownAccessRequested", value)}
+              disabled={disabled}
+              options={[
+                { value: "false", label: "Sin acceso propio" },
+                { value: "true", label: "Invitar a activar su cuenta" },
+              ]}
+            />
+            <FieldError errors={getErrors("ownAccessRequested")} />
+          </Field>
+          <Field data-invalid={!!fieldErrors?.email}>
+            <FieldLabel htmlFor="dependent-email" required={values.ownAccessRequested === "true"}>
+              Correo de la persona
+            </FieldLabel>
+            <Input
+              id="dependent-email"
+              name="email"
+              type="email"
+              autoComplete="email"
+              value={values.email}
+              onChange={(event) => onChange("email", event.target.value)}
+              disabled={disabled}
+            />
+            <FieldError errors={getErrors("email")} />
+          </Field>
+        </div>
       </div>
     </div>
   );

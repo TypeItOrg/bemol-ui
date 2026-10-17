@@ -11,12 +11,15 @@ import { type PeopleScope as PeopleScopeType } from "@features/people/utils/peop
 
 export function PersonActionsMenu({
   canDelete,
+  canInviteAccess = false,
   canEdit,
   canUpdateStatus,
   editLabel,
   institutionId,
   isSelf,
   onDelete,
+  onInviteAccess,
+  onCancelInvitation,
   onUpdateStatus,
   person,
   scope,
@@ -46,6 +49,16 @@ export function PersonActionsMenu({
               </PersonNavigationLink>
             </DropdownMenuItem>
           ) : null}
+          {canInviteAccess ? (
+            <DropdownMenuItem className="px-2.5 py-1.5" onSelect={onInviteAccess}>
+              {person.accessInvitationPending ? "Reenviar invitación" : "Invitar a activar acceso"}
+            </DropdownMenuItem>
+          ) : null}
+          {canInviteAccess && person.accessInvitationPending ? (
+            <DropdownMenuItem className="px-2.5 py-1.5" variant="destructive" onSelect={onCancelInvitation}>
+              Cancelar invitación
+            </DropdownMenuItem>
+          ) : null}
           {canUpdateStatus && !person.enabled ? (
             <DropdownMenuItem className="px-2.5 py-1.5" onSelect={onUpdateStatus}>
               Activar acceso
@@ -72,6 +85,9 @@ export function PersonActionsMenu({
 
 export type PersonActionsMenuProps = {
   canDelete: boolean;
+  canInviteAccess?: boolean;
+  onInviteAccess: () => void;
+  onCancelInvitation: () => void;
   canEdit: boolean;
   canUpdateStatus: boolean;
   editLabel: string;

@@ -9,5 +9,6 @@ export interface EnrollmentWizardProps {
   initialCourseOptionsPage?: number;
   initialCourseOptionsTotalPages?: number;
   readOnly?: boolean;
+  actingForOtherPerson?: boolean;
   returnTo?: string;
 }

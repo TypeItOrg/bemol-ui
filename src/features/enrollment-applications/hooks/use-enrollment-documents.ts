@@ -10,8 +10,13 @@ import { DOCUMENT_MESSAGES } from "@features/enrollment-applications/constants/d
 import type { DocumentRequirement } from "@features/enrollment-applications/types/document-requirement.types";
 import type { EnrollmentDocumentDialog } from "@features/enrollment-applications/types/enrollment-document-dialog.types";
 import type { EnrollmentDocumentsProps } from "@features/enrollment-applications/types/enrollment-documents-props.types";
+import { useOperatingPersonId } from "@features/guardian-workspace/components/guardian-workspace-provider";
+import { reloadForbiddenOperatingProfile } from "@features/guardian-workspace/utils/forbidden-operating-profile.util";
+import { getSelfServiceReadPath } from "@features/guardian-workspace/utils/self-service-read-path.util";
 
 export function useEnrollmentDocuments({ application, scope, disabled, onUploadBlockedChange }: EnrollmentDocumentsProps) {
+  const personId = useOperatingPersonId();
+
   const router = useRouter();
 
   const [snapshot, setSnapshot] = useState({ source: application.documents, documents: application.documents ?? [] });
@@ -72,7 +77,11 @@ export function useEnrollmentDocuments({ application, scope, disabled, onUploadB
   }
 
   async function refresh(): Promise<void> {
-    const response = await fetch(`/api/enrollment-applications/${application.applicationId}/documents?scope=${scope}`, { cache: "no-store" });
+    const path = `${getSelfServiceReadPath(application.applicationId, personId)}/documents?scope=${scope}`;
+
+    const response = await fetch(path, { cache: "no-store" });
+
+    reloadForbiddenOperatingProfile(response.status, path);
 
     const refreshed = await parseHttpResponse<DocumentRequirement[]>(response, DOCUMENT_MESSAGES.readFailed);
 

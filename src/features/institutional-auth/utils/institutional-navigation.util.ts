@@ -46,7 +46,12 @@ export const INSTITUTIONAL_PRIMARY_NAVIGATION_ITEM = {
   exact: true,
 } satisfies NavigationItem;
 
-export function getInstitutionalNavigationSections(user: InstitutionalUser): InstitutionalNavigationSection[] {
+export function getInstitutionalNavigationSections(
+  user: InstitutionalUser,
+  primaryItem: NavigationItem = INSTITUTIONAL_PRIMARY_NAVIGATION_ITEM,
+): InstitutionalNavigationSection[] {
+  const profileRoot = user.personId ? `/self-service/${user.personId}` : undefined;
+
   const canManagePeople = hasInstitutionalPermission(user, INSTITUTIONAL_PERMISSION.PERSON_READ_ANY);
 
   const canReadRoles = hasInstitutionalPermission(user, INSTITUTIONAL_PERMISSION.ROLE_READ);
@@ -98,8 +103,12 @@ export function getInstitutionalNavigationSections(user: InstitutionalUser): Ins
 
   const enrollmentItems: NavigationItem[] = [
     ...(canReadEnrollmentPeriods ? [{ title: "Períodos de inscripción", url: "/enrollment-periods", icon: CalendarRangeIcon }] : []),
-    ...(canStartEnrollmentApplication(user) ? [{ title: "Nueva inscripción", url: "/enrollment", icon: FilePenLineIcon }] : []),
-    ...(canViewOwnEnrollmentApplications(user) ? [{ title: "Mis inscripciones", url: "/my-enrollment-applications", icon: UserRoundCheckIcon }] : []),
+    ...(profileRoot && canStartEnrollmentApplication(user)
+      ? [{ title: "Nueva inscripción", url: `${profileRoot}/enrollment`, icon: FilePenLineIcon }]
+      : []),
+    ...(profileRoot && canViewOwnEnrollmentApplications(user)
+      ? [{ title: "Mis inscripciones", url: `${profileRoot}/enrollment-applications`, icon: UserRoundCheckIcon }]
+      : []),
     ...(hasInstitutionalPermission(user, INSTITUTIONAL_PERMISSION.ENROLLMENT_APPLICATION_READ)
       ? [{ title: "Solicitudes de inscripción", url: "/enrollment-applications", icon: ClipboardListIcon }]
       : []),
@@ -108,18 +117,18 @@ export function getInstitutionalNavigationSections(user: InstitutionalUser): Ins
 
   return [
     {
-      items: [INSTITUTIONAL_PRIMARY_NAVIGATION_ITEM],
+      items: [primaryItem],
     },
     ...(platformItems.length > 0 ? [{ label: "Institución", items: platformItems }] : []),
     ...(academicItems.length > 0 ? [{ label: "Académico", items: academicItems }] : []),
     ...(enrollmentItems.length > 0 ? [{ label: "Inscripciones", items: enrollmentItems }] : []),
-    ...(canViewOwnEnrollmentApplications(user)
+    ...(profileRoot && canViewOwnEnrollmentApplications(user)
       ? [
           {
             label: "Formación",
             items: [
-              { title: "Mis materias", url: "/my-course-enrollments", icon: BookOpenIcon },
-              { title: "Mis horarios", url: "/my-schedules", icon: CalendarRangeIcon },
+              { title: "Mis materias", url: `${profileRoot}/courses`, icon: BookOpenIcon },
+              { title: "Mis horarios", url: `${profileRoot}/schedules`, icon: CalendarRangeIcon },
             ],
           },
         ]

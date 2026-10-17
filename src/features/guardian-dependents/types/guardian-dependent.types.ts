@@ -15,4 +15,5 @@ export type GuardianDependent = {
   activeApplicationsCount: number;
   roles: readonly string[];
   createdAt: string;
+  ownAccessStatus: "NO_ACCOUNT" | "INVITATION_PENDING" | "ENABLED" | "DISABLED" | "INSTITUTION_BLOCKED" | "INSTITUTION_REQUIRED" | "UNAVAILABLE";
 };

@@ -15,6 +15,7 @@ import type { PaginationQuery } from "@common/types/pagination-query.types";
 import { PeoplePagination } from "@features/people/components/people-pagination";
 import { PeopleTableEmptyState } from "@features/people/components/people-table-empty-state";
 import { PeopleTableRow } from "@features/people/components/people-table-row";
+import { PersonAccessInvitationDialog } from "@features/people/components/person-access-invitation-dialog";
 import { PersonDeleteDialog } from "@features/people/components/person-delete-dialog";
 import { PersonStatusDialog } from "@features/people/components/person-status-dialog";
 import type { PersonSummary } from "@features/people/types/person-summary.types";
@@ -32,6 +33,7 @@ type PeopleTablePresentationProps = PaginationQuery & {
   canManageRoles?: boolean;
   canDelete?: boolean;
   canUpdateStatus?: boolean;
+  canInviteAccess?: boolean;
 };
 
 export function PeopleTablePresentation({
@@ -48,10 +50,13 @@ export function PeopleTablePresentation({
   canManageRoles = false,
   canDelete = true,
   canUpdateStatus = false,
+  canInviteAccess = false,
 }: PeopleTablePresentationProps): ReactElement {
   const router = useRouter();
 
   const { isPending: isNavigating, navigate } = useDataTableNavigation();
+
+  const [invitationDialog, setInvitationDialog] = useState<{ person: PersonSummary; cancel: boolean }>();
 
   const [personToDelete, setPersonToDelete] = useState<PersonSummary>();
 
@@ -122,7 +127,10 @@ export function PeopleTablePresentation({
                 canManageRoles={canManageRoles}
                 canUpdate={canUpdate}
                 canUpdateStatus={canUpdateStatus}
+                canInviteAccess={canInviteAccess}
                 institutionId={institutionId}
+                onInviteAccess={(person) => setInvitationDialog({ person, cancel: false })}
+                onCancelInvitation={(person) => setInvitationDialog({ person, cancel: true })}
                 onDelete={setPersonToDelete}
                 onUpdateStatus={setPersonToUpdateStatus}
                 person={person}
@@ -141,6 +149,17 @@ export function PeopleTablePresentation({
       </div>
 
       <PeoplePagination page={page} size={size} totalItems={data.totalItems} totalPages={data.totalPages} />
+
+      {invitationDialog ? (
+        <PersonAccessInvitationDialog
+          institutionId={institutionId}
+          {...invitationDialog}
+          onClose={() => setInvitationDialog(undefined)}
+          onSuccess={() => {
+            setInvitationDialog(undefined);
+          }}
+        />
+      ) : null}
 
       {personToDelete ? (
         <PersonDeleteDialog

@@ -18,7 +18,7 @@ import { enrollmentCourseGroupKey } from "@features/enrollment-applications/util
 
 type Props = Pick<
   EnrollmentWizardModel,
-  | "isMinor"
+  | "requiresRepresentative"
   | "selectedCourseIds"
   | "initialApplication"
   | "courseOptions"
@@ -41,7 +41,7 @@ type Props = Pick<
 >;
 
 export function EnrollmentCourseStep({
-  isMinor,
+  requiresRepresentative,
   selectedCourseIds,
   initialApplication,
   courseOptions,
@@ -67,7 +67,7 @@ export function EnrollmentCourseStep({
       <Card className="bg-muted/25 @container sm:[--card-spacing:--spacing(6)]">
         <EnrollmentStepCardHeader
           icon={LibraryBigIcon}
-          title={isMinor ? "5. Cursos" : "4. Cursos"}
+          title={requiresRepresentative ? "5. Cursos" : "4. Cursos"}
           description="Marcá los espacios que querés cursar y elegí el instrumento donde corresponda. Solo podés inscribirte si cumplís sus correlatividades."
         />
         <CardContent>
@@ -142,7 +142,7 @@ export function EnrollmentCourseStep({
             type="button"
             variant="outline"
             size="lg"
-            onClick={() => handleActiveTabChange(isMinor ? "responsible" : "health")}
+            onClick={() => handleActiveTabChange(requiresRepresentative ? "responsible" : "health")}
             className="gap-1.5"
           >
             Atrás

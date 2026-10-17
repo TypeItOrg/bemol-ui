@@ -6,8 +6,8 @@ import { INVALID_ACTION_ARGUMENTS, isValidUuid } from "@common/utils/action-argu
 import { getResponseErrorActionState, getValidationActionState } from "@common/utils/action-state.util";
 
 import {
-  GUARDIAN_DEPENDENT_MESSAGES,
   GUARDIAN_DEPENDENTS_PAGE_PATH,
+  GUARDIAN_DEPENDENT_MESSAGES,
   getGuardianDependentsApiPath,
 } from "@features/guardian-dependents/constants/guardian-dependent.constants";
 import { createGuardianDependentSchema } from "@features/guardian-dependents/schemas/create-guardian-dependent.schema";
@@ -26,6 +26,8 @@ export async function createGuardianDependentAction(
   }
 
   const parsed = createGuardianDependentSchema.safeParse({
+    email: formData.get("email") ?? "",
+    ownAccessRequested: formData.get("ownAccessRequested") ?? "",
     documentNumber: formData.get("documentNumber") ?? "",
     firstName: formData.get("firstName") ?? "",
     lastName: formData.get("lastName") ?? "",

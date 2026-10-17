@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 
 import { z } from "zod";
 
+import { isValidUuid } from "@common/utils/action-argument.util";
 import { getResponseErrorActionState } from "@common/utils/action-state.util";
 
 import { academicApiFetch } from "@features/academic/services/academic-api-fetch.service";
@@ -11,6 +12,7 @@ import { getAcademicApiBase } from "@features/academic/utils/academic-scope.util
 import { DOCUMENT_MESSAGES } from "@features/enrollment-applications/constants/documentation.constants";
 import { parseDocumentRequirementForm } from "@features/enrollment-applications/schemas/document-requirement.schema";
 import type { DocumentActionState } from "@features/enrollment-applications/types/document-action-state.types";
+import { getSelfServiceEnrollmentApiPath } from "@features/guardian-workspace/services/operating-profile.service";
 
 const context = z.object({
   scope: z.enum(["admin", "institutional"]),
@@ -24,6 +26,7 @@ export async function mutateDocument(
   targetId: string,
   _previous: DocumentActionState,
   form: FormData,
+  personId?: string,
 ): Promise<DocumentActionState> {
   const parsed = context
     .extend({ operation: z.enum(["upload", "withdraw", "review"]), targetId: z.string().uuid() })
@@ -35,7 +38,13 @@ export async function mutateDocument(
 
   const input = parsed.data;
 
-  let path = `/api/v1/enrollment-applications/${input.applicationId}/attachments`;
+  if (personId !== undefined && !isValidUuid(personId)) {
+    return { error: DOCUMENT_MESSAGES.invalid };
+  }
+
+  let path = personId
+    ? `${await getSelfServiceEnrollmentApiPath(personId)}/${input.applicationId}/attachments`
+    : `/api/v1/enrollment-applications/${input.applicationId}/attachments`;
 
   let options: RequestInit;
 
@@ -80,7 +89,15 @@ export async function mutateDocument(
     };
   }
 
-  const error = await getResponseErrorActionState(academicApiFetch(input.scope, path, options), [], DOCUMENT_MESSAGES.failed);
+  const response = academicApiFetch(input.scope, path, options).then((result) => {
+    if (personId && result.status === 403) {
+      revalidatePath(`/self-service/${personId}`, "layout");
+    }
+
+    return result;
+  });
+
+  const error = await getResponseErrorActionState(response, [], DOCUMENT_MESSAGES.failed);
 
   if (error) {
     return error;
