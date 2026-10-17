@@ -20,6 +20,7 @@ import {
 import { academicStatusSchema } from "@features/academic/schemas/academic-form.schema";
 import { academicApiFetch } from "@features/academic/services/academic-api-fetch.service";
 import type { AcademicActionState } from "@features/academic/types/academic-action-state.types";
+import { AcademicResource } from "@features/academic/types/academic-resource.types";
 import type { StatusResource } from "@features/academic/types/status-resource.types";
 import { authorizeAcademicAction } from "@features/academic/utils/academic-action-auth.util";
 import { getAcademicApiBase, getAcademicResourceRoute, type AcademicScope as AcademicScopeType } from "@features/academic/utils/academic-scope.util";
@@ -80,5 +81,20 @@ export async function updateAcademicStatusAction(
   const fallback = getAcademicResourceRoute(context.data.scope, context.data.institutionId, context.data.resource);
 
   revalidatePath(fallback);
+
+  if (closesEnrollmentGrades(parsed.data)) {
+    revalidatePath("/course-enrollments");
+    revalidatePath("/my-teaching");
+    revalidatePath("/my-course-enrollments");
+  }
+
   redirect(getSafeReturnTo(context.data.returnTo, fallback));
+}
+
+function closesEnrollmentGrades(data: z.infer<typeof academicStatusSchema>): boolean {
+  if (data.resource !== AcademicResource.COURSE && data.resource !== AcademicResource.ACADEMIC_YEAR) {
+    return false;
+  }
+
+  return data.status === "CLOSED";
 }
