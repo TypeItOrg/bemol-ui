@@ -2,6 +2,7 @@
 
 import type { ReactElement } from "react";
 
+import { MapPinIcon } from "lucide-react";
 import type { Control, FieldErrors, UseFormRegister } from "react-hook-form";
 import { Controller } from "react-hook-form";
 
@@ -77,7 +78,7 @@ export function InstitutionalInstitutionLocationFields({
   }>;
 }): ReactElement {
   return (
-    <FormCard title="Ubicación">
+    <FormCard icon={MapPinIcon} title="Ubicación" description="Datos de localización de la institución.">
       <div className="flex flex-col gap-4">
         <Controller
           control={control}

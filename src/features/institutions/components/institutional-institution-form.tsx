@@ -5,7 +5,7 @@ import { startTransition, useActionState, useMemo, useState, type ReactElement }
 import { useRouter } from "next/navigation";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { CircleAlertIcon } from "lucide-react";
+import { Building2Icon, CircleAlertIcon, PhoneIcon } from "lucide-react";
 import { useForm } from "react-hook-form";
 
 import { Alert, AlertDescription, AlertTitle } from "@common/components/ui/alert";
@@ -110,7 +110,7 @@ export function InstitutionalInstitutionForm({ institution, returnTo = "/institu
       )}
 
       <fieldset disabled={isPending} className="bg-background flex min-w-0 flex-col gap-6 rounded-xl shadow-xs">
-        <FormCard title="Información general">
+        <FormCard icon={Building2Icon} title="Información general" description="Nombre que identifica a la institución.">
           <Field data-invalid={!!errors.name}>
             <FieldContent>
               <FieldLabel htmlFor="institution-name">Nombre de la institución</FieldLabel>
@@ -148,7 +148,7 @@ export function InstitutionalInstitutionForm({ institution, returnTo = "/institu
           register={register}
         />
 
-        <FormCard title="Contacto">
+        <FormCard icon={PhoneIcon} title="Contacto" description="Canales principales para comunicarse con la institución.">
           <FieldGroup className="flex flex-row flex-wrap items-start gap-4">
             <Field data-invalid={!!errors.phoneNumber} className="flex-[1_0_min(200px,100%)]">
               <FieldContent>
