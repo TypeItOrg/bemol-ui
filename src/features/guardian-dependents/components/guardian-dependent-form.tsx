@@ -11,6 +11,7 @@ import { SectionHeader } from "@common/components/section-header";
 import { Alert, AlertDescription } from "@common/components/ui/alert";
 import { Button } from "@common/components/ui/button";
 import { rejectFileDragOutside } from "@common/components/ui/file-dropzone";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@common/components/ui/tabs";
 import { useActionFormErrorFocus } from "@common/hooks/use-action-form-error-focus";
 
 import { finishGuardianDependentRequestAction } from "@features/guardian-dependents/actions/finish-guardian-dependent-request.action";
@@ -48,14 +49,13 @@ export function GuardianDependentForm({ institutionId, returnTo }: { institution
   }, {});
 
   const [values, setValues] = useState({
+    requestMode: "EXISTING",
     firstName: "",
     lastName: "",
     documentNumber: "",
     birthDate: "",
     relationship: "",
     isPrimaryContact: "false",
-    email: "",
-    ownAccessRequested: "false",
   });
 
   const fieldsDisabled = isPending || Boolean(state.requestCreated);
@@ -114,14 +114,29 @@ export function GuardianDependentForm({ institutionId, returnTo }: { institution
             description="Solicitá la vinculación con una persona a tu cargo. Queda pendiente de validación institucional y no podrás gestionarla hasta que se apruebe."
           />
         </header>
-        <div className="mt-4 space-y-5 sm:mt-5">
-          <GuardianDependentFormFields
-            disabled={fieldsDisabled}
-            fieldErrors={state.fieldErrors}
-            onChange={(field, value) => setValues((previous) => ({ ...previous, [field]: value }))}
-            values={values}
-          />
-        </div>
+        <input name="requestMode" type="hidden" value={values.requestMode} />
+        <Tabs
+          className="mt-4 gap-5 sm:mt-5"
+          value={values.requestMode}
+          onValueChange={(requestMode) => setValues((previous) => ({ ...previous, requestMode }))}
+        >
+          <TabsList aria-label="Tipo de solicitud" className="h-auto! w-full flex-col sm:w-fit sm:flex-row">
+            <TabsTrigger className="w-full px-3 py-2 sm:w-auto" disabled={fieldsDisabled} value="EXISTING">
+              Vincular persona existente
+            </TabsTrigger>
+            <TabsTrigger className="w-full px-3 py-2 sm:w-auto" disabled={fieldsDisabled} value="NEW">
+              Registrar persona nueva
+            </TabsTrigger>
+          </TabsList>
+          <TabsContent value={values.requestMode}>
+            <GuardianDependentFormFields
+              disabled={fieldsDisabled}
+              fieldErrors={state.fieldErrors}
+              onChange={(field, value) => setValues((previous) => ({ ...previous, [field]: value }))}
+              values={values}
+            />
+          </TabsContent>
+        </Tabs>
       </section>
 
       <section className="bg-muted/25 rounded-xl border p-4 sm:p-5">

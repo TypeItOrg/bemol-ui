@@ -12,6 +12,7 @@ import { SectionHeader } from "@common/components/section-header";
 import { Badge } from "@common/components/ui/badge";
 import { Button } from "@common/components/ui/button";
 import { DETAIL_LABEL_CLASS_NAME } from "@common/constants/detail-label.constants";
+import { formatDisplayDate } from "@common/utils/date-input.util";
 
 import { calculateAge } from "@features/enrollment-applications/schemas/enrollment-application.schema";
 import { formatEnrollmentApplicationDateTime } from "@features/enrollment-applications/utils/enrollment-application-date.util";
@@ -118,6 +119,30 @@ export function GuardianLinkDetail({
               relationship={REPRESENTED_RELATIONSHIP_LABELS[request.relationship]}
             />
           </div>
+          {request.declaredFirstName || request.declaredLastName || request.declaredBirthDate ? (
+            <div className="space-y-3">
+              <h3 className="text-sm font-medium">Datos declarados en la solicitud</h3>
+              <p className="text-muted-foreground text-sm">Comparalos con los datos registrados antes de aceptar la vinculación.</p>
+              <dl className="grid gap-4 sm:grid-cols-3">
+                <div>
+                  <dt className={DETAIL_LABEL_CLASS_NAME}>Nombre</dt>
+                  <dd className="mt-1 text-sm">
+                    <OptionalValue value={request.declaredFirstName} fallback="No declarado" />
+                  </dd>
+                </div>
+                <div>
+                  <dt className={DETAIL_LABEL_CLASS_NAME}>Apellido</dt>
+                  <dd className="mt-1 text-sm">
+                    <OptionalValue value={request.declaredLastName} fallback="No declarado" />
+                  </dd>
+                </div>
+                <div>
+                  <dt className={DETAIL_LABEL_CLASS_NAME}>Fecha de nacimiento</dt>
+                  <dd className="mt-1 text-sm tabular-nums">{formatDisplayDate(request.declaredBirthDate, "No declarada")}</dd>
+                </div>
+              </dl>
+            </div>
+          ) : null}
         </section>
         {request.attachments.length > 0 ? (
           <section className="bg-muted/25 space-y-5 rounded-xl border p-4 sm:p-5" aria-label="Documentación de la vinculación">

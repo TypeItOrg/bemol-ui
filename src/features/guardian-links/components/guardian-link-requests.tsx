@@ -74,7 +74,7 @@ export function GuardianLinkRequests({
       <GuardianLinkFilters query={query} />
 
       <div
-        className={data.items.length === 0 ? "relative h-full" : "relative min-h-0 flex-1 overflow-hidden rounded-lg border"}
+        className={data.items.length === 0 ? "relative flex min-h-0 flex-1 flex-col" : "relative min-h-0 flex-1 overflow-hidden rounded-lg border"}
         aria-busy={isNavigating}
       >
         {data.items.length === 0 ? (

@@ -2,6 +2,7 @@ import { createGuardianDependentSchema } from "@features/guardian-dependents/sch
 
 function createValidInput(overrides: Record<string, string> = {}) {
   return {
+    requestMode: "NEW",
     documentNumber: "54123456",
     firstName: "Mateo",
     lastName: "González",
@@ -29,8 +30,7 @@ describe("createGuardianDependentSchema", () => {
       birthDate: "2018-09-10",
       relationship: "FATHER",
       isPrimaryContact: true,
-      ownAccessRequested: false,
-      email: undefined,
+      requestMode: "NEW",
     });
     expect(createGuardianDependentSchema.parse(createValidInput({ isPrimaryContact: "false" })).isPrimaryContact).toBe(false);
   });

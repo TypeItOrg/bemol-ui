@@ -5,8 +5,8 @@ import { CircleQuestionMarkIcon, EllipsisVerticalIcon } from "lucide-react";
 import { OptionalValue } from "@common/components/optional-value";
 import { Badge } from "@common/components/ui/badge";
 import { Button } from "@common/components/ui/button";
-import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuSeparator, ContextMenuTrigger } from "@common/components/ui/context-menu";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@common/components/ui/dropdown-menu";
+import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from "@common/components/ui/context-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@common/components/ui/dropdown-menu";
 import { Popover, PopoverContent, PopoverDescription, PopoverHeader, PopoverTitle, PopoverTrigger } from "@common/components/ui/popover";
 import { TableCell, TableRow } from "@common/components/ui/table";
 
@@ -71,9 +71,7 @@ export function GuardianDependentRow({
 
   const canUnlink = isActive || dependent.status === GUARDIAN_LINK_STATUS.PENDING;
 
-  const isDisablingOwnAccess = dependent.ownAccessStatus === "ENABLED" || dependent.ownAccessStatus === "INVITATION_PENDING";
-
-  const ownAccessActionLabel = isDisablingOwnAccess ? "Deshabilitar acceso propio" : "Habilitar acceso propio";
+  const canInviteOwnAccess = isActive && dependent.ownAccessStatus === "NO_ACCOUNT";
 
   const tableRow = (
     <TableRow className="h-12">
@@ -91,16 +89,11 @@ export function GuardianDependentRow({
                   <DropdownMenuItem className="px-2.5 py-1.5" disabled={isSelectingWorkspace} onSelect={onEnroll}>
                     Inscribir
                   </DropdownMenuItem>
-                  {isDisablingOwnAccess ? <DropdownMenuSeparator /> : null}
-                  <DropdownMenuItem
-                    className="px-2.5 py-1.5"
-                    disabled={["INSTITUTION_BLOCKED", "INSTITUTION_REQUIRED"].includes(dependent.ownAccessStatus)}
-                    onSelect={onManageAccess}
-                    variant={isDisablingOwnAccess ? "destructive" : "default"}
-                  >
-                    {ownAccessActionLabel}
-                  </DropdownMenuItem>
-                  {!isDisablingOwnAccess ? <DropdownMenuSeparator /> : null}
+                  {canInviteOwnAccess ? (
+                    <DropdownMenuItem className="px-2.5 py-1.5" onSelect={onManageAccess}>
+                      Invitar a activar su cuenta
+                    </DropdownMenuItem>
+                  ) : null}
                 </>
               ) : null}
               <DropdownMenuItem className="px-2.5 py-1.5" onSelect={onUnlink} variant="destructive">
@@ -113,14 +106,17 @@ export function GuardianDependentRow({
         )}
       </TableCell>
       <TableCell className="font-medium">
-        <OptionalValue value={dependent.firstName} fallback="Nombre no informado" />
+        <OptionalValue value={dependent.firstName} fallback={isActive ? "Nombre no informado" : "Disponible al aprobar"} />
       </TableCell>
       <TableCell className="font-medium">
-        <OptionalValue value={dependent.lastName} fallback="Apellido no informado" />
+        <OptionalValue value={dependent.lastName} fallback={isActive ? "Apellido no informado" : "Disponible al aprobar"} />
       </TableCell>
       <TableCell className="tabular-nums">{dependent.documentNumber}</TableCell>
       <TableCell className="tabular-nums">
-        <OptionalValue value={age === null ? null : `${age} ${age === 1 ? "año" : "años"}`} fallback="Edad no informada" />
+        <OptionalValue
+          value={age === null ? null : `${age} ${age === 1 ? "año" : "años"}`}
+          fallback={isActive ? "Edad no informada" : "Disponible al aprobar"}
+        />
       </TableCell>
       <TableCell>{GUARDIAN_RELATIONSHIP_LABELS[dependent.relationship]}</TableCell>
       <TableCell>{dependent.isPrimaryContact ? "Sí" : "No"}</TableCell>
@@ -147,9 +143,13 @@ export function GuardianDependentRow({
         </Popover>
       </TableCell>
       <TableCell>
-        <Badge size="lg" className="data-[variant=outline]:text-muted-foreground" variant={OWN_ACCESS_BADGE_VARIANT[dependent.ownAccessStatus]}>
-          {OWN_ACCESS_STATUS_LABELS[dependent.ownAccessStatus]}
-        </Badge>
+        {isActive ? (
+          <Badge size="lg" className="data-[variant=outline]:text-muted-foreground" variant={OWN_ACCESS_BADGE_VARIANT[dependent.ownAccessStatus]}>
+            {OWN_ACCESS_STATUS_LABELS[dependent.ownAccessStatus]}
+          </Badge>
+        ) : (
+          <OptionalValue value={null} fallback="Disponible al aprobar" />
+        )}
       </TableCell>
       <TableCell className="tabular-nums">
         <OptionalValue
@@ -158,7 +158,7 @@ export function GuardianDependentRow({
               ? `${dependent.activeApplicationsCount} ${dependent.activeApplicationsCount === 1 ? "inscripción activa" : "inscripciones activas"}`
               : null
           }
-          fallback="Sin inscripciones"
+          fallback={isActive ? "Sin inscripciones" : "Disponible al aprobar"}
         />
       </TableCell>
     </TableRow>
@@ -177,16 +177,11 @@ export function GuardianDependentRow({
             <ContextMenuItem className="px-2.5 py-1.5" disabled={isSelectingWorkspace} onSelect={onEnroll}>
               Inscribir
             </ContextMenuItem>
-            {isDisablingOwnAccess ? <ContextMenuSeparator /> : null}
-            <ContextMenuItem
-              className="px-2.5 py-1.5"
-              disabled={["INSTITUTION_BLOCKED", "INSTITUTION_REQUIRED"].includes(dependent.ownAccessStatus)}
-              onSelect={onManageAccess}
-              variant={isDisablingOwnAccess ? "destructive" : "default"}
-            >
-              {ownAccessActionLabel}
-            </ContextMenuItem>
-            {!isDisablingOwnAccess ? <ContextMenuSeparator /> : null}
+            {canInviteOwnAccess ? (
+              <ContextMenuItem className="px-2.5 py-1.5" onSelect={onManageAccess}>
+                Invitar a activar su cuenta
+              </ContextMenuItem>
+            ) : null}
           </>
         ) : null}
         <ContextMenuItem className="px-2.5 py-1.5" onSelect={onUnlink} variant="destructive">

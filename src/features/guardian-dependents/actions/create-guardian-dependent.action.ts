@@ -26,8 +26,7 @@ export async function createGuardianDependentAction(
   }
 
   const parsed = createGuardianDependentSchema.safeParse({
-    email: formData.get("email") ?? "",
-    ownAccessRequested: formData.get("ownAccessRequested") ?? "",
+    requestMode: formData.get("requestMode") ?? "",
     documentNumber: formData.get("documentNumber") ?? "",
     firstName: formData.get("firstName") ?? "",
     lastName: formData.get("lastName") ?? "",

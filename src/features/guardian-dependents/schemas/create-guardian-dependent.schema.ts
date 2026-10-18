@@ -4,14 +4,20 @@ import { GUARDIAN_DEPENDENT_MESSAGES } from "@features/guardian-dependents/const
 import { GUARDIAN_RELATIONSHIP } from "@features/guardian-dependents/types/guardian-relationship.types";
 import { hasMinimumPersonAge } from "@features/people/utils/person-birth-date.util";
 
-export const createGuardianDependentSchema = z
-  .object({
-    email: z.union([z.literal(""), z.string().trim().email("Ingresá un correo válido.").max(150)]).transform((value) => value || undefined),
-    ownAccessRequested: z.enum(["true", "false"]).transform((value) => value === "true"),
-    documentNumber: z
-      .string()
-      .min(1, { message: GUARDIAN_DEPENDENT_MESSAGES.REQUIRED_DOCUMENT, abort: true })
-      .regex(/^\d{8}$/, GUARDIAN_DEPENDENT_MESSAGES.INVALID_DOCUMENT),
+const guardianLinkFields = z.object({
+  documentNumber: z
+    .string()
+    .min(1, { message: GUARDIAN_DEPENDENT_MESSAGES.REQUIRED_DOCUMENT, abort: true })
+    .regex(/^\d{8}$/, GUARDIAN_DEPENDENT_MESSAGES.INVALID_DOCUMENT),
+  relationship: z.enum(Object.values(GUARDIAN_RELATIONSHIP) as [string, ...string[]], GUARDIAN_DEPENDENT_MESSAGES.INVALID_RELATIONSHIP),
+  // Raw form value: it must be explicit, a missing value is invalid rather than an implicit false.
+  isPrimaryContact: z.enum(["true", "false"], GUARDIAN_DEPENDENT_MESSAGES.INVALID_PRIMARY_CONTACT).transform((value) => value === "true"),
+});
+
+export const createGuardianDependentSchema = z.discriminatedUnion("requestMode", [
+  guardianLinkFields.extend({ requestMode: z.literal("EXISTING") }),
+  guardianLinkFields.extend({
+    requestMode: z.literal("NEW"),
     firstName: z
       .string()
       .trim()
@@ -30,11 +36,5 @@ export const createGuardianDependentSchema = z
       .string()
       .min(1, { message: GUARDIAN_DEPENDENT_MESSAGES.REQUIRED_BIRTH_DATE, abort: true })
       .refine(hasMinimumPersonAge, GUARDIAN_DEPENDENT_MESSAGES.INVALID_BIRTH_DATE),
-    relationship: z.enum(Object.values(GUARDIAN_RELATIONSHIP) as [string, ...string[]], GUARDIAN_DEPENDENT_MESSAGES.INVALID_RELATIONSHIP),
-    // Raw form value: it must be explicit, a missing value is invalid rather than an implicit false.
-    isPrimaryContact: z.enum(["true", "false"], GUARDIAN_DEPENDENT_MESSAGES.INVALID_PRIMARY_CONTACT).transform((value) => value === "true"),
-  })
-  .refine((value) => !value.ownAccessRequested || Boolean(value.email), {
-    path: ["email"],
-    message: "Indicá el correo de la persona para enviarle la invitación.",
-  });
+  }),
+]);

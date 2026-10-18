@@ -27,6 +27,7 @@ const LINK_ID = "019f9c3a-f891-7bc5-a98d-e65332998128";
 const BIRTH_YEAR = new Date().getFullYear() - 8;
 
 async function fillForm(user: ReturnType<typeof userEvent.setup>): Promise<void> {
+  await user.click(screen.getByRole("tab", { name: "Registrar persona nueva" }));
   await user.type(screen.getByLabelText(/^Nombre/), "Mateo");
   await user.type(screen.getByLabelText(/^Apellido/), "Gonzalez");
   await user.type(screen.getByLabelText(/^Documento/), "12345678");
@@ -70,8 +71,7 @@ describe("GuardianDependentForm", () => {
       birthDate: `${BIRTH_YEAR}-01-01`,
       relationship: "MOTHER",
       isPrimaryContact: "false",
-      email: "",
-      ownAccessRequested: "false",
+      requestMode: "NEW",
     });
   });
 

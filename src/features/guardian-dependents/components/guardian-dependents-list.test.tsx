@@ -90,7 +90,7 @@ describe("GuardianDependentsList", () => {
   it("shows pending details inside the status pill and permits cancellation only", async () => {
     const user = userEvent.setup();
     renderList([buildDependent({ status: "PENDING", activeApplicationsCount: 0, roles: [] })]);
-    expect(screen.getByText("Sin inscripciones")).toHaveClass("text-muted-foreground", "italic");
+    expect(screen.getAllByText("Disponible al aprobar")[0]).toHaveClass("text-muted-foreground", "italic");
     expect(screen.queryByText(/La institución todavía/)).not.toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: /Ver detalle del estado/ }));
     expect(screen.getByText(/La institución todavía/)).toBeInTheDocument();
@@ -108,8 +108,8 @@ describe("GuardianDependentsList", () => {
     expect(screen.getByRole("button", { name: /Ver detalle del estado: Rechazada/ })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /Abrir acciones/ })).not.toBeInTheDocument();
     const row = screen.getAllByRole("row")[1];
-    expect(within(row).getAllByRole("cell")[1]).toHaveTextContent("Nombre no informado");
-    expect(within(row).getAllByRole("cell")[2]).toHaveTextContent("Apellido no informado");
+    expect(within(row).getAllByRole("cell")[1]).toHaveTextContent("Disponible al aprobar");
+    expect(within(row).getAllByRole("cell")[2]).toHaveTextContent("Disponible al aprobar");
   });
 
   it("shows whether the guardian is the primary contact", () => {

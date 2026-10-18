@@ -14,6 +14,7 @@ const INSTITUTION_ID = "00000000-0000-4000-8000-000000000001";
 
 function createForm(overrides: Record<string, string> = {}): FormData {
   const data = {
+    requestMode: "NEW",
     documentNumber: "54123456",
     firstName: "Mateo",
     lastName: "González",
@@ -81,7 +82,7 @@ describe("createGuardianDependentAction", () => {
       birthDate: "2018-09-10",
       relationship: "FATHER",
       isPrimaryContact: true,
-      ownAccessRequested: false,
+      requestMode: "NEW",
     });
     expect(revalidatePath).toHaveBeenCalledWith(GUARDIAN_DEPENDENTS_PAGE_PATH);
   });
