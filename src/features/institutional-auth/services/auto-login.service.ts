@@ -14,9 +14,10 @@ import {
 import { institutionalAuthProxyPolicy } from "@features/institutional-auth/utils/institutional-auth-proxy-policy.util";
 import { PLATFORM_ACCESS_TOKEN_COOKIE, PLATFORM_REFRESH_TOKEN_COOKIE } from "@features/platform-auth/utils/platform-auth-cookies.util";
 
-export async function tryStagingAutoLogin(request: NextRequest): Promise<NextResponse | undefined> {
+export async function tryAutoLogin(request: NextRequest): Promise<NextResponse | undefined> {
   if (
-    process.env.DEPLOYMENT_ENV !== "staging" ||
+    !process.env.DEPLOYMENT_ENV ||
+    ["prod", "production"].includes(process.env.DEPLOYMENT_ENV) ||
     process.env.AUTO_LOGIN_ENABLED !== "true" ||
     request.method !== "GET" ||
     request.nextUrl.pathname !== "/" ||
@@ -39,7 +40,7 @@ export async function tryStagingAutoLogin(request: NextRequest): Promise<NextRes
     }
 
     const response = await publicApiFetch(
-      "/api/v1/auth/login/staging",
+      "/api/v1/auth/login/auto",
       { method: "POST", headers: createAuthRequestHeaders(request.headers) },
       request.headers,
     );
@@ -62,7 +63,7 @@ export async function tryStagingAutoLogin(request: NextRequest): Promise<NextRes
 
     return redirect;
   } catch {
-    // An unavailable or disabled demo falls back to the ordinary login, without a redirect loop.
+    // An unavailable or disabled auto-login falls back to the ordinary login, without a redirect loop.
     return undefined;
   }
 }

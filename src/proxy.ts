@@ -10,7 +10,7 @@ import {
   resolveRequestInstitution,
 } from "@common/services/institutional-host/institutional-host.service";
 
-import { tryStagingAutoLogin } from "@features/institutional-auth/services/staging-auto-login.service";
+import { tryAutoLogin } from "@features/institutional-auth/services/auto-login.service";
 import { institutionalAuthProxyPolicy } from "@features/institutional-auth/utils/institutional-auth-proxy-policy.util";
 import { platformAuthProxyPolicy } from "@features/platform-auth/utils/platform-auth-proxy-policy.util";
 
@@ -64,10 +64,10 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
     });
   }
 
-  const stagingLogin = await tryStagingAutoLogin(request);
+  const autoLogin = await tryAutoLogin(request);
 
-  if (stagingLogin) {
-    return stagingLogin;
+  if (autoLogin) {
+    return autoLogin;
   }
 
   switch (routeAccess) {
