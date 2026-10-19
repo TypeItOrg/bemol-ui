@@ -7,7 +7,8 @@
     height="725"
   /> -->
   
-  <img width="2164" height="727" alt="Gestioná procesos académicos fácilmente" src="https://github.com/user-attachments/assets/f1551c75-f023-44b0-988a-dff5be21bc88" />
+ <img width="2172" height="724" alt="Plataforma de gestión académica" src="https://github.com/user-attachments/assets/853b3689-61d4-48dc-8b75-b529dc0bd825" />
+
 </p>
 
 <!-- Tecnologías: Frontend & UI -->
