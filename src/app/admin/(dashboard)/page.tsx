@@ -2,6 +2,7 @@ import { Suspense, type ReactElement } from "react";
 
 import { Building2Icon } from "lucide-react";
 
+import { PlatformBreadcrumb } from "@features/platform-auth/components/platform-breadcrumb";
 import { PlatformPageIcon } from "@features/platform-auth/components/platform-page-icon";
 import { PlatformPageShell } from "@features/platform-auth/components/platform-page-shell";
 import { PlatformDashboardContent } from "@features/platform-dashboard/components/platform-dashboard-content";
@@ -17,6 +18,7 @@ export default function PlatformPage(): ReactElement {
   return (
     <PlatformPageShell
       title="Inicio"
+      breadcrumb={<PlatformBreadcrumb />}
       contentVariant="plain"
       headerClassName="flex-row items-center justify-between lg:items-center"
       actionsClassName="self-stretch"
