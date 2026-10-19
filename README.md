@@ -1,11 +1,13 @@
 <!-- Banner -->
 <p align="center">
-  <img
+  <!-- <img
     src="https://github.com/user-attachments/assets/4b9303aa-7c33-4866-a2c7-8e73fe7c1c80"
     alt="Boero - Plataforma de gestión académica"
     width="2170"
     height="725"
-  />
+  /> -->
+  
+  <img width="2164" height="727" alt="Gestioná procesos académicos fácilmente" src="https://github.com/user-attachments/assets/f1551c75-f023-44b0-988a-dff5be21bc88" />
 </p>
 
 <!-- Tecnologías: Frontend & UI -->
@@ -28,8 +30,6 @@
 </p>
 
 <!-- Presentación -->
-<h1 align="center">Boero</h1>
-
 <p align="center">
   Boero es una plataforma que centraliza inscripciones, cursadas, calificaciones y procesos administrativos <strong>en un solo lugar</strong>.
   Pensada para <strong>estudiantes, docentes y personal administrativo</strong>, ofrece un espacio donde gestionar actividades,
