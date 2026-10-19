@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 
 import { AuditEventDetail } from "@features/platform-audit/components/audit-event-detail";
 import type { AuditEntityChange } from "@features/platform-audit/types/audit-entity-change.types";
@@ -65,7 +65,7 @@ it("integra valores anteriores y nuevos, horarios de 24 horas y estados sin hist
   expect(screen.getByText("Qué ocurrió, cuándo y quién lo realizó.")).toBeInTheDocument();
   expect(screen.getByText("Campos modificados y sus valores anteriores y nuevos.")).toBeInTheDocument();
   const headers = [...container.querySelectorAll('[data-slot="section-header"]')];
-  expect(headers).toHaveLength(3);
+  expect(headers).toHaveLength(2);
   expect(headers.every((header) => header.querySelector("svg") && header.querySelector("h2") && header.querySelector("p")?.textContent)).toBe(true);
   const table = screen.getByRole("table", { name: "Cambios" });
   expect(screen.getAllByRole("table")).toHaveLength(1);
@@ -84,13 +84,9 @@ it("integra valores anteriores y nuevos, horarios de 24 horas y estados sin hist
   expect(within(table).getByText("2025")).toBeInTheDocument();
   expect(screen.queryByText("evento-tecnico")).not.toBeInTheDocument();
   expect(screen.queryByText("entidad-tecnica")).not.toBeInTheDocument();
-  const technicalDetails = screen.getByRole("button", { name: "Información técnica" });
-  expect(technicalDetails).toHaveAttribute("aria-expanded", "false");
-  fireEvent.click(technicalDetails);
-  expect(screen.queryByText("evento-tecnico")).not.toBeInTheDocument();
-  expect(screen.queryByText("entidad-tecnica")).not.toBeInTheDocument();
-  expect(screen.getByText("Tipo de actor")).toBeVisible();
-  fireEvent.click(technicalDetails);
+  expect(screen.queryByRole("heading", { name: "Información técnica" })).not.toBeInTheDocument();
+  expect(screen.queryByRole("button", { name: "Información técnica" })).not.toBeInTheDocument();
+  expect(screen.queryByText("Tipo de actor")).not.toBeInTheDocument();
 
   expect(screen.getByText("Mañana")).toBeInTheDocument();
   expect(screen.getByText("Matutino")).toBeInTheDocument();
@@ -191,12 +187,8 @@ it("mantiene roles, permisos, documentación y datos de alta en tablas sin publi
   expect(within(table).getByText("Coordinación actual")).toBeInTheDocument();
   expect(screen.queryByText("rol-anterior")).not.toBeInTheDocument();
   expect(screen.queryByText("trayecto-anterior")).not.toBeInTheDocument();
-  fireEvent.click(screen.getByRole("button", { name: "Información técnica" }));
-  expect(screen.queryByText("rol-anterior")).not.toBeInTheDocument();
-  expect(screen.queryByText("trayecto-anterior")).not.toBeInTheDocument();
-  expect(screen.getByText("peticion-tecnica")).toBeVisible();
+  expect(screen.queryByText("peticion-tecnica")).not.toBeInTheDocument();
   expect(container.textContent).not.toContain("VALOR_PRIVADO");
-  fireEvent.click(screen.getByRole("button", { name: "Información técnica" }));
 
   rerender(
     <AuditEventDetail
@@ -366,13 +358,11 @@ it("compara cupos y horarios sin confundir clases ni inventar estados ni volcar 
   expect(within(table).getByText("09:00:00–10:00:00")).toBeInTheDocument();
   expect(within(table).getByText("10:30:00–11:30:00")).toBeInTheDocument();
   expect(container.textContent).not.toMatch(/old-class|new-class|institucion-qa|Creación|Eliminación|No registrado/);
-  fireEvent.click(screen.getByRole("button", { name: "Información técnica" }));
   expect(screen.queryByRole("table", { name: "Historial técnico" })).not.toBeInTheDocument();
   expect(screen.getAllByRole("table")).toHaveLength(1);
-  expect(screen.getByText("peticion-qa")).toBeVisible();
+  expect(screen.queryByText("peticion-qa")).not.toBeInTheDocument();
   expect(container.textContent).not.toMatch(/old-class|new-class|institucion-qa|Creación|Eliminación/);
   expect(JSON.stringify(event.history)).toBe(preservedHistory);
-  fireEvent.click(screen.getByRole("button", { name: "Información técnica" }));
 
   rerender(
     <AuditEventDetail

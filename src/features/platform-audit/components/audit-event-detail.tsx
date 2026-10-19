@@ -9,7 +9,6 @@ import { Button } from "@common/components/ui/button";
 import { DETAIL_LABEL_CLASS_NAME } from "@common/constants/detail-label.constants";
 
 import { renderAuditEventChanges } from "@features/platform-audit/components/audit-event-changes";
-import { AuditTechnicalDetails } from "@features/platform-audit/components/audit-technical-details";
 import { AUDIT_ACTION_LABELS, AUDIT_ACTION_MODULES, AUDIT_ENTITY_LABELS } from "@features/platform-audit/constants/audit-labels.constants";
 import type { AuditEvent } from "@features/platform-audit/types/audit-event.types";
 import { auditActorName, auditInstitutionName, formatAuditDateTime } from "@features/platform-audit/utils/audit-display.util";
@@ -67,7 +66,6 @@ export function AuditEventDetail({
           {changes}
         </section>
       ) : null}
-      <AuditTechnicalDetails event={event} />
     </>
   );
 }
