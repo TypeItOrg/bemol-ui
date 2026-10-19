@@ -37,7 +37,7 @@ export function InstitutionalProfileMenu({ user, onNavigate }: { user: Instituti
 
   const name = activeProfile ? `${activeProfile.firstName} ${activeProfile.lastName}` : "Perfil no disponible";
 
-  const profileLabel = activeProfile?.self ? `Mi perfil: ${name}` : `Gestionando a ${name}`;
+  const profileLabel = activeProfile?.self ? `Mi perfil: ${name}` : `Identidad activa: ${name}`;
 
   return (
     <>
@@ -73,7 +73,7 @@ export function InstitutionalProfileMenu({ user, onNavigate }: { user: Instituti
               <DropdownMenuSeparator />
             </>
           )}
-          <DropdownMenuLabel>Tu cuenta</DropdownMenuLabel>
+          <DropdownMenuLabel>Cuenta de la identidad activa</DropdownMenuLabel>
           <DropdownMenuGroup>
             <DropdownMenuItem asChild className="px-2.5 py-1.5">
               <Link href="/account" onClick={() => onNavigate("/account")}>
@@ -124,7 +124,7 @@ function SelectedProfileIdentity(): ReactElement {
           <span className="text-muted-foreground truncate text-xs" title={activeProfile?.documentNumber}>
             {activeProfile?.documentNumber ?? "DNI no disponible"}
           </span>
-          {activeProfile && !activeProfile.self ? <Badge variant="secondary">Gestionando</Badge> : null}
+          {activeProfile && !activeProfile.self ? <Badge variant="secondary">Activa</Badge> : null}
         </span>
       </span>
     </span>

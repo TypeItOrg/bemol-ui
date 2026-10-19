@@ -99,10 +99,10 @@ describe("GuardianDependentForm", () => {
     });
   });
 
-  it("explains that the request stays pending until the institution validates it", () => {
+  it("explains that approval enables the selected identity's full roles and permissions", () => {
     render(<GuardianDependentForm institutionId={INSTITUTION_ID} returnTo={RETURN_TO} />);
 
-    expect(screen.getByText(/pendiente de validación/i)).toBeInTheDocument();
+    expect(screen.getByText(/al aprobarse, podrás activar su identidad y operar con todos sus roles y permisos/i)).toBeInTheDocument();
   });
 
   it("sends isPrimaryContact as true when Sí is selected", async () => {

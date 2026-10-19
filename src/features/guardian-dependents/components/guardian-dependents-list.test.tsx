@@ -6,10 +6,10 @@ import type { GuardianDependent } from "@features/guardian-dependents/types/guar
 import type { GuardianDependentsQuery } from "@features/guardian-dependents/types/guardian-dependents-query.types";
 
 const mockNavigate = jest.fn();
-const mockPush = jest.fn();
+const mockSelectIdentity = jest.fn();
 
 jest.mock("next/navigation", () => ({
-  useRouter: () => ({ push: mockPush, refresh: jest.fn() }),
+  useRouter: () => ({ push: jest.fn(), refresh: jest.fn() }),
   usePathname: () => "/my-dependents",
   useSearchParams: () => new URLSearchParams("sortField=lastName&sortDirection=asc"),
 }));
@@ -21,6 +21,10 @@ jest.mock("@features/guardian-dependents/actions/create-guardian-dependent.actio
 }));
 jest.mock("@features/guardian-dependents/actions/unlink-guardian-dependent.action", () => ({
   unlinkGuardianDependentAction: jest.fn(),
+}));
+
+jest.mock("@features/guardian-workspace/hooks/use-active-identity-switch", () => ({
+  useActiveIdentitySwitch: () => ({ state: {}, action: mockSelectIdentity, pending: false }),
 }));
 
 const INSTITUTION_ID = "019f9c3a-f891-7bc5-a98d-e65332998127";
@@ -65,7 +69,7 @@ function renderList(items: GuardianDependent[], overrides: Partial<GuardianDepen
 describe("GuardianDependentsList", () => {
   beforeEach(() => {
     mockNavigate.mockClear();
-    mockPush.mockClear();
+    mockSelectIdentity.mockClear();
   });
 
   it("renders separate names, document, relationship and active applications", () => {
@@ -173,7 +177,10 @@ describe("GuardianDependentsList", () => {
     renderList([buildDependent()]);
     await user.click(screen.getByRole("button", { name: "Abrir acciones de Mateo Gonzalez" }));
     await user.click(screen.getByRole("menuitem", { name: "Inscribir" }));
-    await waitFor(() => expect(mockPush).toHaveBeenCalledWith("/self-service/019f9c3a-f891-7bc5-a98d-e65332998002/enrollment"));
+    await waitFor(() => expect(mockSelectIdentity).toHaveBeenCalledWith(expect.any(FormData)));
+    const formData = mockSelectIdentity.mock.calls[0][0] as FormData;
+    expect(formData.get("personId")).toBe("019f9c3a-f891-7bc5-a98d-e65332998002");
+    expect(formData.get("returnTo")).toBe("/self-service/019f9c3a-f891-7bc5-a98d-e65332998002/enrollment");
   });
 
   it("opens the unlink confirmation for the chosen dependent and can dismiss it", async () => {

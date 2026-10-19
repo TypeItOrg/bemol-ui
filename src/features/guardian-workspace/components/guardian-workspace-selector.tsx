@@ -1,11 +1,10 @@
 "use client";
 
-import type { ReactElement } from "react";
+import { startTransition, useState, type ReactElement } from "react";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 
-import { UsersRoundIcon } from "lucide-react";
+import { Loader2Icon, UsersRoundIcon } from "lucide-react";
 
 import {
   DropdownMenuItem,
@@ -17,28 +16,41 @@ import {
 
 import { useGuardianWorkspace } from "@features/guardian-workspace/components/guardian-workspace-provider";
 import { PersonInitialsAvatar } from "@features/guardian-workspace/components/person-initials-avatar";
+import { useActiveIdentitySwitch } from "@features/guardian-workspace/hooks/use-active-identity-switch";
 
 export function GuardianWorkspaceMenuItems({ onNavigate }: { onNavigate: (url: string) => void }): ReactElement {
   const { profiles, personId } = useGuardianWorkspace();
 
-  const router = useRouter();
+  const { state, action, pending } = useActiveIdentitySwitch();
+
+  const [switchingPersonId, setSwitchingPersonId] = useState<string>();
+
+  const isSwitching = pending || state.success === true;
 
   return (
     <>
       <DropdownMenuLabel>Identidad activa</DropdownMenuLabel>
       <DropdownMenuRadioGroup
         value={personId ?? ""}
+        aria-busy={isSwitching}
         onValueChange={(id) => {
-          const url = `/self-service/${id}`;
+          if (isSwitching || id === personId) {
+            return;
+          }
 
-          // Selecting a profile updates the drawer; only section links schedule its close.
-          router.push(url);
+          const formData = new FormData();
+
+          formData.set("personId", id);
+          setSwitchingPersonId(id);
+          startTransition(() => action(formData));
         }}
       >
         {profiles.map((profile) => (
           <DropdownMenuRadioItem
             key={profile.personId}
             value={profile.personId}
+            disabled={isSwitching}
+            onSelect={(event) => event.preventDefault()}
             className="focus:text-popover-foreground data-[state=checked]:bg-accent gap-2.5 py-2 pr-8 pl-2.5 focus:**:text-inherit"
           >
             <PersonInitialsAvatar firstName={profile.firstName} lastName={profile.lastName} />
@@ -51,9 +63,21 @@ export function GuardianWorkspaceMenuItems({ onNavigate }: { onNavigate: (url: s
               </span>
               <span className="text-muted-foreground! block truncate text-xs">{profile.documentNumber}</span>
             </span>
+            {isSwitching && switchingPersonId === profile.personId ? (
+              <Loader2Icon
+                role="status"
+                aria-label="Cambiando identidad"
+                className="absolute right-2 size-4 animate-spin motion-reduce:animate-none"
+              />
+            ) : null}
           </DropdownMenuRadioItem>
         ))}
       </DropdownMenuRadioGroup>
+      {state.error ? (
+        <p role="alert" className="text-destructive px-2.5 py-2 text-xs">
+          {state.error}
+        </p>
+      ) : null}
       <DropdownMenuSeparator />
       <DropdownMenuItem asChild className="px-2.5 py-1.5">
         <Link href="/my-dependents" onClick={() => onNavigate("/my-dependents")}>

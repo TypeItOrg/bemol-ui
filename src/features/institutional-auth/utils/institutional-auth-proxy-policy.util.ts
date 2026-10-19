@@ -14,7 +14,7 @@ import {
 
 export const INSTITUTIONAL_LOGIN_PATH = "/auth/login";
 export const INSTITUTIONAL_REFRESH_PATH = "/api/v1/auth/refresh";
-export const INSTITUTIONAL_CURRENT_USER_PATH = "/api/v1/auth/me";
+export const INSTITUTIONAL_CURRENT_USER_PATH = "/api/v1/auth/session";
 
 export const institutionalAuthProxyPolicy: AuthProxyPolicy = {
   accessTokenCookie: INSTITUTIONAL_ACCESS_TOKEN_COOKIE,

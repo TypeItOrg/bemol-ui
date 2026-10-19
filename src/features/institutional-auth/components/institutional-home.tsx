@@ -27,27 +27,25 @@ export function InstitutionalHome({ personId }: { personId?: string }): ReactEle
 }
 
 async function InstitutionalHomeContent({ personId }: { personId?: string }): Promise<ReactElement> {
-  const [user, person, profile] = await Promise.all([
+  const [user, person] = await Promise.all([
     requireInstitutionalUser(),
     fetchInstitutionalPerson(),
     personId ? fetchOperatingProfile(personId) : null,
   ]);
 
-  const represented = Boolean(profile && !profile.self);
-
-  const links = represented ? [] : getInstitutionalHomeLinks(user);
+  const links = getInstitutionalHomeLinks(user);
 
   const managementLinks = links.filter((link) => link.href !== "/account");
 
   const personalLink = links.find((link) => link.href === "/account");
 
-  const academicOfferLink = represented ? undefined : getInstitutionalAcademicOfferLink(user);
+  const academicOfferLink = getInstitutionalAcademicOfferLink(user);
 
-  const academicResources = represented ? [] : getReadableAcademicResources(getAcademicAccess(user));
+  const academicResources = getReadableAcademicResources(getAcademicAccess(user));
 
-  const enrollmentLinks = getInstitutionalEnrollmentHomeLinks(user, profile);
+  const enrollmentLinks = getInstitutionalEnrollmentHomeLinks(user);
 
-  const formationLinks = getInstitutionalFormationHomeLinks(user, profile);
+  const formationLinks = getInstitutionalFormationHomeLinks(user);
 
   const hasInstitutionalAccess = managementLinks.length > 0;
 
@@ -59,18 +57,13 @@ async function InstitutionalHomeContent({ personId }: { personId?: string }): Pr
 
   const greeting = getGreeting(new Date());
 
-  const primaryRole = (represented ? profile?.roles[0] : user.roles[0]) ?? "Usuario institucional";
+  const primaryRole = user.roles[0] ?? "Usuario institucional";
 
-  const enrollmentSectionTitle = represented ? "Inscripciones" : "Inscripciones y vinculaciones";
+  const enrollmentSectionTitle = "Inscripciones y vinculaciones";
 
   return (
     <main className="flex min-h-full flex-1 flex-col gap-4">
-      <InstitutionalHomeHero
-        greeting={greeting}
-        name={represented && profile ? profile.firstName : user.name}
-        institutionName={person?.institutionName}
-        primaryRole={primaryRole}
-      />
+      <InstitutionalHomeHero greeting={greeting} name={user.name} institutionName={person?.institutionName} primaryRole={primaryRole} />
 
       <div className="flex flex-col gap-4 px-3 pb-3 md:px-4 md:pb-4">
         {academicOfferLink && academicResources.length === 0 ? (
@@ -136,9 +129,7 @@ async function InstitutionalHomeContent({ personId }: { personId?: string }): Pr
           <HomeSubsection
             id="enrollment-management-title"
             title={enrollmentSectionTitle}
-            description={
-              represented ? "Gestioná las inscripciones de esta persona." : "Gestioná tus inscripciones, cursadas y solicitudes de vinculación."
-            }
+            description="Gestioná tus inscripciones, cursadas y solicitudes de vinculación."
             icon={ClipboardListIcon}
             imageSrc={!hasInstitutionalAccess ? "/images/institutional-management.webp" : undefined}
           >

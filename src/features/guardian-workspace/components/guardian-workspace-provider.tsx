@@ -13,12 +13,11 @@ export function GuardianWorkspaceProvider({
   children,
   profiles,
   institutionId,
-}: { institutionId: string; profiles: readonly OperatingProfile[] } & PropsWithChildren): ReactElement {
-  const routePersonId = useOperatingPersonId();
+  activePersonId,
+}: { institutionId: string; profiles: readonly OperatingProfile[]; activePersonId?: string } & PropsWithChildren): ReactElement {
+  const activeProfile = profiles.find((profile) => (activePersonId ? profile.personId === activePersonId : profile.self)) ?? null;
 
-  const activeProfile = profiles.find((profile) => (routePersonId ? profile.personId === routePersonId : profile.self)) ?? null;
-
-  const personId = routePersonId ?? activeProfile?.personId;
+  const personId = activeProfile?.personId;
 
   return <GuardianWorkspaceContext value={{ profiles, activeProfile, personId, institutionId }}>{children}</GuardianWorkspaceContext>;
 }

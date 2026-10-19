@@ -17,7 +17,6 @@ import {
 
 import { GUARDIAN_DEPENDENTS_PAGE_PATH } from "@features/guardian-dependents/constants/guardian-dependent.constants";
 import { GUARDIAN_LINKS_PAGE_PATH } from "@features/guardian-links/constants/guardian-link.constants";
-import type { OperatingProfile } from "@features/guardian-workspace/types/operating-profile.types";
 import { INSTITUTIONAL_PERMISSION, type InstitutionalPermission } from "@features/institutional-auth/types/institutional-permission.types";
 import type { InstitutionalUser } from "@features/institutional-auth/types/institutional-user.types";
 import {
@@ -99,14 +98,12 @@ export function getInstitutionalHomeTasks(user: Pick<InstitutionalUser, "permiss
   return MANAGEMENT_TASKS.filter((link) => isHomeLinkVisible(user, link));
 }
 
-export function getInstitutionalEnrollmentHomeLinks(user: InstitutionalUser, profile?: OperatingProfile | null): InstitutionalHomeLink[] {
-  const represented = Boolean(profile && !profile.self);
-
-  const personId = profile?.personId ?? user.personId;
+export function getInstitutionalEnrollmentHomeLinks(user: InstitutionalUser): InstitutionalHomeLink[] {
+  const personId = user.personId;
 
   const links: InstitutionalHomeLink[] = [];
 
-  if (!represented && canManageDependents(user)) {
+  if (canManageDependents(user)) {
     links.push({
       href: GUARDIAN_DEPENDENTS_PAGE_PATH,
       title: "Personas a cargo",
@@ -115,7 +112,7 @@ export function getInstitutionalEnrollmentHomeLinks(user: InstitutionalUser, pro
     });
   }
 
-  if (!represented && hasInstitutionalPermission(user, INSTITUTIONAL_PERMISSION.COURSE_ENROLLMENT_READ)) {
+  if (hasInstitutionalPermission(user, INSTITUTIONAL_PERMISSION.COURSE_ENROLLMENT_READ)) {
     links.push({
       href: "/course-enrollments",
       title: "Cursadas",
@@ -124,7 +121,7 @@ export function getInstitutionalEnrollmentHomeLinks(user: InstitutionalUser, pro
     });
   }
 
-  if (!represented && user.roles.includes("Profesor")) {
+  if (user.roles.includes("Profesor")) {
     links.push({
       href: "/my-teaching",
       title: "Mis clases",
@@ -139,7 +136,7 @@ export function getInstitutionalEnrollmentHomeLinks(user: InstitutionalUser, pro
     });
   }
 
-  if (personId && (represented ? profile?.canEnroll : canStartEnrollmentApplication(user))) {
+  if (personId && canStartEnrollmentApplication(user)) {
     links.push({
       href: `/self-service/${personId}/enrollment`,
       title: "Nueva inscripción",
@@ -148,7 +145,7 @@ export function getInstitutionalEnrollmentHomeLinks(user: InstitutionalUser, pro
     });
   }
 
-  if (personId && (represented || canViewOwnEnrollmentApplications(user))) {
+  if (personId && canViewOwnEnrollmentApplications(user)) {
     links.push({
       href: `/self-service/${personId}/enrollment-applications`,
       title: "Mis inscripciones",
@@ -157,7 +154,7 @@ export function getInstitutionalEnrollmentHomeLinks(user: InstitutionalUser, pro
     });
   }
 
-  if (!represented && hasInstitutionalPermission(user, INSTITUTIONAL_PERMISSION.ENROLLMENT_APPLICATION_READ)) {
+  if (hasInstitutionalPermission(user, INSTITUTIONAL_PERMISSION.ENROLLMENT_APPLICATION_READ)) {
     links.push({
       href: "/enrollment-applications",
       title: "Solicitudes de inscripción",
@@ -166,7 +163,7 @@ export function getInstitutionalEnrollmentHomeLinks(user: InstitutionalUser, pro
     });
   }
 
-  if (!represented && hasInstitutionalPermission(user, INSTITUTIONAL_PERMISSION.GUARDIAN_LINK_REVIEW)) {
+  if (hasInstitutionalPermission(user, INSTITUTIONAL_PERMISSION.GUARDIAN_LINK_REVIEW)) {
     links.push({
       href: GUARDIAN_LINKS_PAGE_PATH,
       title: "Vinculaciones",
@@ -178,12 +175,10 @@ export function getInstitutionalEnrollmentHomeLinks(user: InstitutionalUser, pro
   return links;
 }
 
-export function getInstitutionalFormationHomeLinks(user: InstitutionalUser, profile?: OperatingProfile | null): InstitutionalHomeLink[] {
-  const represented = Boolean(profile && !profile.self);
+export function getInstitutionalFormationHomeLinks(user: InstitutionalUser): InstitutionalHomeLink[] {
+  const personId = user.personId;
 
-  const personId = profile?.personId ?? user.personId;
-
-  if (!personId || (!represented && !canViewOwnEnrollmentApplications(user))) {
+  if (!personId || !canViewOwnEnrollmentApplications(user)) {
     return [];
   }
 

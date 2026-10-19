@@ -10,26 +10,16 @@ import type { ContextualSearchShortcutPlatform } from "@features/contextual-sear
 import { useGuardianWorkspace } from "@features/guardian-workspace/components/guardian-workspace-provider";
 
 type InstitutionalTopbarProps = {
-  represented?: boolean;
   accessSections: readonly ContextualSearchAccessSection[];
   institutionId: string;
   institutionName?: string;
   shortcutPlatform: ContextualSearchShortcutPlatform;
 };
 
-export function InstitutionalTopbar({
-  accessSections,
-  institutionId,
-  institutionName,
-  shortcutPlatform,
-  represented = false,
-}: InstitutionalTopbarProps): ReactElement {
+export function InstitutionalTopbar({ accessSections, institutionId, institutionName, shortcutPlatform }: InstitutionalTopbarProps): ReactElement {
   const { activeProfile } = useGuardianWorkspace();
 
-  const searchContext =
-    represented && activeProfile
-      ? { scope: "self-service" as const, institutionId, personId: activeProfile.personId }
-      : { scope: "institutional" as const, institutionId, personId: activeProfile?.personId };
+  const searchContext = { scope: "institutional" as const, institutionId, personId: activeProfile?.personId };
 
   return (
     <header className="topbar-sticky sticky top-0 z-30 h-16 shrink-0">
@@ -44,7 +34,7 @@ export function InstitutionalTopbar({
           </span>
           <span className="text-muted-foreground block text-xs">Portal Institucional</span>
         </div>
-        {(!represented || activeProfile) && (
+        {activeProfile && (
           <div className="min-w-0 flex-1 md:max-w-lg">
             <ContextualSearch
               key={`${institutionId}:${activeProfile?.personId}:${searchContext.scope}`}

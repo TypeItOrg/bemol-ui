@@ -6,7 +6,7 @@
     width="2170"
     height="725"
   /> -->
-  
+
  <img width="2172" height="724" alt="Plataforma de gestión académica" src="https://github.com/user-attachments/assets/853b3689-61d4-48dc-8b75-b529dc0bd825" />
 
 </p>

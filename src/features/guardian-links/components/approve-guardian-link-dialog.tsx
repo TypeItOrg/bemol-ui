@@ -87,8 +87,9 @@ export function ApproveGuardianLinkDialog({ institutionId, onApproved, onClose, 
             <AlertDialogTitle>Aceptar vinculación</AlertDialogTitle>
             <AlertDialogDescription>
               ¿Estás seguro de aceptar la solicitud de vinculación de <span className="text-foreground font-semibold">{tutorName}</span> con{" "}
-              <span className="text-foreground font-semibold">{dependentName}</span>? A partir de este momento podrá gestionar sus trámites académicos
-              y habilitar o deshabilitar su acceso propio a la plataforma.
+              <span className="text-foreground font-semibold">{dependentName}</span>? A partir de este momento podrá activar su identidad y operar con
+              todos sus roles y permisos, incluidos los administrativos o docentes que tenga asignados. También podrá gestionar su acceso propio a la
+              plataforma.
             </AlertDialogDescription>
           </AlertDialogHeader>
           {state.error ? (

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition, type ReactElement } from "react";
+import { startTransition, useState, type ReactElement } from "react";
 
 import { useRouter } from "next/navigation";
 
@@ -25,6 +25,7 @@ import { UnlinkGuardianDependentDialog } from "@features/guardian-dependents/com
 import type { GuardianDependent } from "@features/guardian-dependents/types/guardian-dependent.types";
 import type { GuardianDependentsQuery } from "@features/guardian-dependents/types/guardian-dependents-query.types";
 import { getGuardianDependentName } from "@features/guardian-dependents/utils/guardian-dependent-display.util";
+import { useActiveIdentitySwitch } from "@features/guardian-workspace/hooks/use-active-identity-switch";
 import { PlatformCollectionActions } from "@features/platform-auth/components/platform-collection-actions";
 
 type GuardianDependentsListProps = {
@@ -42,12 +43,16 @@ export function GuardianDependentsList({ data, institutionId, query }: GuardianD
 
   const [dependentToUnlink, setDependentToUnlink] = useState<GuardianDependent | null>(null);
 
-  const [isSelectingWorkspace, startSelectingWorkspace] = useTransition();
+  const { state: identityState, action: selectIdentity, pending: isSelectingWorkspace } = useActiveIdentitySwitch();
 
   const isFiltered = Boolean(query.search || query.status || query.relationship || query.primaryContact !== undefined);
 
   function handleEnrollment(dependentPersonId: string): void {
-    startSelectingWorkspace(() => router.push(`/self-service/${dependentPersonId}/enrollment`));
+    const formData = new FormData();
+
+    formData.set("personId", dependentPersonId);
+    formData.set("returnTo", `/self-service/${dependentPersonId}/enrollment`);
+    startTransition(() => selectIdentity(formData));
   }
 
   return (
@@ -74,6 +79,11 @@ export function GuardianDependentsList({ data, institutionId, query }: GuardianD
         </PlatformCollectionActions>
 
         <GuardianDependentsFilters query={query} />
+        {identityState.error ? (
+          <p role="alert" className="text-destructive text-sm">
+            {identityState.error}
+          </p>
+        ) : null}
 
         <div
           className={data.items.length === 0 ? "relative h-full" : "relative min-h-0 flex-1 overflow-hidden rounded-lg border"}

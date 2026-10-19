@@ -4,7 +4,7 @@ import type { InstitutionalUser } from "@features/institutional-auth/types/insti
 
 const institutionalUserResponseSchema = z.object({
   user: z.object({
-    userId: z.string().min(1),
+    userId: z.string().min(1).nullable(),
     personId: z.string().nullable().optional(),
     name: z.string(),
     lastName: z.string(),

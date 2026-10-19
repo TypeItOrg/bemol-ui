@@ -1,7 +1,7 @@
 import type { PermissionAccess } from "@features/institutional-auth/types/permission-access.types";
 
 export type InstitutionalUser = {
-  userId: string;
+  userId: string | null;
   personId?: string | null;
   name: string;
   lastName: string;

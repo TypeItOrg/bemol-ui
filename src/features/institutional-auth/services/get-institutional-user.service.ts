@@ -24,6 +24,10 @@ async function fetchInstitutionalUser(): Promise<InstitutionalUser | null> {
     return null;
   }
 
+  if (response.status === 403) {
+    redirect("/auth/identity-unavailable");
+  }
+
   const payload = await parseHttpResponse<unknown>(response, "No se pudo validar la sesión institucional.");
 
   return parseInstitutionalUser(payload);

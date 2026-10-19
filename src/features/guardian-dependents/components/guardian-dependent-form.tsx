@@ -111,7 +111,7 @@ export function GuardianDependentForm({ institutionId, returnTo }: { institution
           <SectionHeader
             icon={UsersIcon}
             title="Persona a cargo"
-            description="Solicitá la vinculación con una persona a tu cargo. Queda pendiente de validación institucional y no podrás gestionarla hasta que se apruebe."
+            description="Solicitá la vinculación con una persona a tu cargo. Al aprobarse, podrás activar su identidad y operar con todos sus roles y permisos."
           />
         </header>
         <input name="requestMode" type="hidden" value={values.requestMode} />

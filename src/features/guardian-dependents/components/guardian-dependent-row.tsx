@@ -24,7 +24,7 @@ const STATUS_BADGE_VARIANT: Record<GuardianLinkStatus, "success" | "secondary" |
 };
 
 const STATUS_DETAILS: Record<GuardianLinkStatus, string> = {
-  ACTIVE: "La institución aprobó la vinculación. Ya podés gestionar las inscripciones de esta persona.",
+  ACTIVE: "La institución aprobó la vinculación. Podés activar esta identidad con todos sus roles y permisos.",
   PENDING: "La institución todavía tiene que validar la vinculación. Hasta entonces no podés gestionar a esta persona.",
   REJECTED: "La institución rechazó la vinculación. Contactá a la institución si necesitás revisar la solicitud.",
   ENDED: "La vinculación finalizó. Ya no podés gestionar a esta persona.",
