@@ -10,6 +10,7 @@ import {
   resolveRequestInstitution,
 } from "@common/services/institutional-host/institutional-host.service";
 
+import { tryStagingAutoLogin } from "@features/institutional-auth/services/staging-auto-login.service";
 import { institutionalAuthProxyPolicy } from "@features/institutional-auth/utils/institutional-auth-proxy-policy.util";
 import { platformAuthProxyPolicy } from "@features/platform-auth/utils/platform-auth-proxy-policy.util";
 
@@ -61,6 +62,12 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
       status,
       headers: { "Cache-Control": "no-store" },
     });
+  }
+
+  const stagingLogin = await tryStagingAutoLogin(request);
+
+  if (stagingLogin) {
+    return stagingLogin;
   }
 
   switch (routeAccess) {
