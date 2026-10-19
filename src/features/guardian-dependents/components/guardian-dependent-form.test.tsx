@@ -10,6 +10,9 @@ jest.mock("next/navigation", () => ({
   useRouter: () => ({ push: jest.fn() }),
   unstable_rethrow: jest.fn(),
 }));
+jest.mock("@features/enrollment-applications/components/document-file-preview", () => ({
+  DocumentFilePreview: () => null,
+}));
 jest.mock("@features/guardian-dependents/actions/finish-guardian-dependent-request.action", () => ({
   finishGuardianDependentRequestAction: jest.fn(),
 }));

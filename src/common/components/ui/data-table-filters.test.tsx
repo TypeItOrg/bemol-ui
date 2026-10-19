@@ -29,10 +29,14 @@ describe("DataTableFilters", () => {
 
     expect(mockNavigate).not.toHaveBeenCalled();
 
-    act(() => jest.advanceTimersByTime(349));
+    await act(async () => {
+      jest.advanceTimersByTime(349);
+    });
     expect(mockNavigate).not.toHaveBeenCalled();
 
-    act(() => jest.advanceTimersByTime(1));
+    await act(async () => {
+      jest.advanceTimersByTime(1);
+    });
     expect(mockNavigate).toHaveBeenCalledTimes(1);
     expect(mockNavigate).toHaveBeenCalledWith({ page: "0", startDate: "2035-01-01" }, { replace: true });
   });
@@ -73,7 +77,9 @@ describe("DataTableFilters", () => {
     const input = screen.getByRole("textbox");
     await user.type(input, "01012035");
     await user.type(input, "{Backspace}");
-    act(() => jest.advanceTimersByTime(350));
+    await act(async () => {
+      jest.advanceTimersByTime(350);
+    });
 
     expect(mockNavigate).not.toHaveBeenCalled();
   });
@@ -108,9 +114,13 @@ describe("DataTableFilters", () => {
 
     expect(screen.getByRole("textbox")).toBe(input);
     expect(input).toHaveValue("03/03/2036");
-    act(() => jest.advanceTimersByTime(350));
+    await act(async () => {
+      jest.advanceTimersByTime(350);
+    });
     expect(mockNavigate).not.toHaveBeenCalled();
-    rerender(<DataTableFilters dateFilters={[{ label: "Inicio", name: "startDate", value: "2035-01-01" }]} />);
+    await act(async () => {
+      rerender(<DataTableFilters dateFilters={[{ label: "Inicio", name: "startDate", value: "2035-01-01" }]} />);
+    });
     expect(input).toHaveValue("01/01/2035");
   });
 

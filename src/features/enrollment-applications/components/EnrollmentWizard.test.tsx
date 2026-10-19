@@ -125,7 +125,9 @@ function renderWizard(props: Partial<ComponentProps<typeof EnrollmentWizard>> = 
 async function confirmSubmission(): Promise<void> {
   fireEvent.click(screen.getByRole("button", { name: "Enviar inscripción" }));
   const dialog = await screen.findByRole("alertdialog");
-  fireEvent.click(within(dialog).getByRole("button", { name: "Enviar inscripción" }));
+  await act(async () => {
+    fireEvent.click(within(dialog).getByRole("button", { name: "Enviar inscripción" }));
+  });
 }
 
 describe("EnrollmentWizard", () => {
