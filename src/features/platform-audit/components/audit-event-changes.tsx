@@ -1,10 +1,11 @@
 import type { ReactElement } from "react";
 
-import { DETAIL_LABEL_CLASS_NAME } from "@common/constants/detail-label.constants";
-
+import { AuditComparisonTable } from "@features/platform-audit/components/audit-comparison-table";
+import { renderAuditHistoryChanges } from "@features/platform-audit/components/audit-history-changes";
 import { AuditMailChanges } from "@features/platform-audit/components/audit-mail-changes";
-import { AuditOperationChanges } from "@features/platform-audit/components/audit-operation-changes";
+import { auditOperationRows } from "@features/platform-audit/components/audit-operation-changes";
 import { AUDIT_ACTION_MODULES } from "@features/platform-audit/constants/audit-labels.constants";
+import type { AuditComparisonRow } from "@features/platform-audit/types/audit-comparison-row.types";
 import type { AuditEvent } from "@features/platform-audit/types/audit-event.types";
 
 export function renderAuditEventChanges({
@@ -18,48 +19,84 @@ export function renderAuditEventChanges({
 }): ReactElement | null {
   const details = event.details;
 
-  if (Object.keys(details).length === 0) {
-    return null;
-  }
-
   if (AUDIT_ACTION_MODULES[event.action] === "EMAILS") {
-    return <AuditMailChanges event={event} />;
+    return Object.keys(details).length > 0 ? <AuditMailChanges event={event} /> : null;
   }
 
-  if (event.action === "PERSON_ROLES_CHANGED") {
-    return (
-      <div className="grid gap-6 sm:grid-cols-2">
-        <RoleAssignments title="Antes" value={details.before} roleLabels={roleLabels} />
-        <RoleAssignments title="Después" value={details.after} roleLabels={roleLabels} />
-      </div>
-    );
+  const rows = auditEventRows({ event, roleLabels, permissionLabels });
+
+  // Role snapshots preserve readable names, permissions and scopes instead of duplicating their technical references.
+  const roleSnapshot =
+    ["PERSON_ROLES_CHANGED", "ROLE_CREATED", "ROLE_UPDATED", "ROLE_DELETED"].includes(event.action) &&
+    (details.before !== undefined || details.after !== undefined) &&
+    rows.length > 0;
+
+  if (event.history?.changes.some((change) => change.fields.length > 0) && !roleSnapshot) {
+    return renderAuditHistoryChanges({
+      history: event.history,
+      entityId: event.entityId,
+      supplementaryRows: rows,
+      course: event.entityType === "COURSE",
+    });
   }
 
-  if (["ROLE_CREATED", "ROLE_UPDATED", "ROLE_DELETED"].includes(event.action)) {
-    return (
-      <div className="grid gap-6 sm:grid-cols-2">
-        <RoleConfiguration title="Antes" value={details.before} permissionLabels={permissionLabels} />
-        <RoleConfiguration title="Después" value={details.after} permissionLabels={permissionLabels} />
-      </div>
-    );
+  return rows.length > 0 ? <AuditComparisonTable label="Cambios" rows={rows} /> : null;
+}
+
+function auditEventRows({
+  event,
+  roleLabels,
+  permissionLabels,
+}: {
+  event: AuditEvent;
+  roleLabels: Readonly<Record<string, string>>;
+  permissionLabels: Readonly<Record<string, string>>;
+}): AuditComparisonRow[] {
+  const details = event.details;
+
+  if (Object.keys(details).length === 0) {
+    return [];
   }
 
-  if (["INSTITUTIONS", "COURSES", "STUDY_PLANS", "DOCUMENTATION"].includes(AUDIT_ACTION_MODULES[event.action])) {
-    return <AuditOperationChanges details={details} />;
+  if (event.action === "PERSON_ROLES_CHANGED" && (details.before !== undefined || details.after !== undefined)) {
+    return [
+      {
+        key: "roles",
+        label: "Roles y alcances",
+        before: <RoleAssignments value={details.before} roleLabels={roleLabels} />,
+        after: <RoleAssignments value={details.after} roleLabels={roleLabels} />,
+      },
+    ];
   }
 
-  const fields: { label: string; value: string }[] = [];
+  if (["ROLE_CREATED", "ROLE_UPDATED", "ROLE_DELETED"].includes(event.action) && (details.before !== undefined || details.after !== undefined)) {
+    return [
+      {
+        key: "role",
+        label: "Configuración del rol",
+        before: <RoleConfiguration value={details.before} permissionLabels={permissionLabels} />,
+        after: <RoleConfiguration value={details.after} permissionLabels={permissionLabels} />,
+      },
+    ];
+  }
+
+  if (details.before !== undefined || details.after !== undefined || Array.isArray(details.changedFields)) {
+    return auditOperationRows(details);
+  }
+
+  const rows: AuditComparisonRow[] = [];
 
   if (typeof details.initialRole === "string") {
-    fields.push({
+    rows.push({
+      key: "initialRole",
       label: "Rol inicial",
-      value: roleLabels[details.initialRole] ?? (details.initialRole === "PLATFORM_ADMIN" ? "Administrador de plataforma" : details.initialRole),
+      before: "No registrado",
+      after: roleLabels[details.initialRole] ?? (details.initialRole === "PLATFORM_ADMIN" ? "Administrador de plataforma" : details.initialRole),
     });
   }
 
   for (const [key, label] of [
-    ["previousEnabled", "Acceso anterior"],
-    ["enabled", "Acceso posterior"],
+    ["enabled", "Acceso"],
     ["hasAccount", "Cuenta asociada"],
     ["personCreated", "Persona creada en esta operación"],
     ["emailVerificationRequired", "Requiere verificación de correo"],
@@ -67,72 +104,54 @@ export function renderAuditEventChanges({
     const value = details[key];
 
     if (typeof value === "boolean") {
-      const access = key === "previousEnabled" || key === "enabled";
+      const access = key === "enabled";
 
       let displayValue = value ? "Sí" : "No";
 
+      let previousValue = "No registrado";
+
       if (access) {
         displayValue = value ? "Habilitado" : "Deshabilitado";
+
+        if (typeof details.previousEnabled === "boolean") {
+          previousValue = details.previousEnabled ? "Habilitado" : "Deshabilitado";
+        }
       }
 
-      fields.push({ label, value: displayValue });
+      rows.push({
+        key,
+        label,
+        before: previousValue,
+        after: displayValue,
+      });
     }
   }
 
   if (details.emailVerificationStatus === "PENDING" || details.emailVerificationStatus === "NOT_REQUIRED") {
-    fields.push({
+    rows.push({
+      key: "emailVerificationStatus",
       label: "Verificación de correo al crear la cuenta",
-      value: details.emailVerificationStatus === "PENDING" ? "Pendiente" : "No requerida",
+      before: "No registrado",
+      after: details.emailVerificationStatus === "PENDING" ? "Pendiente" : "No requerida",
     });
   }
 
-  if (fields.length === 0) {
-    return null;
-  }
-
-  return (
-    <dl className="grid gap-5 sm:grid-cols-2">
-      {fields.map((field) => (
-        <div key={field.label}>
-          <dt className={DETAIL_LABEL_CLASS_NAME}>{field.label}</dt>
-          <dd className="mt-1 text-sm">{field.value}</dd>
-        </div>
-      ))}
-    </dl>
-  );
+  return rows;
 }
 
-function RoleAssignments({
-  title,
-  value,
-  roleLabels,
-}: {
-  title: string;
-  value: unknown;
-  roleLabels: Readonly<Record<string, string>>;
-}): ReactElement {
+function RoleAssignments({ value, roleLabels }: { value: unknown; roleLabels: Readonly<Record<string, string>> }): ReactElement {
   const roles = Array.isArray(value) ? value.filter(isRecord) : [];
 
   return (
     <div className="min-w-0 space-y-3">
-      <h3 className={DETAIL_LABEL_CLASS_NAME}>{title}</h3>
       {roles.length > 0 ? (
         <ul className="space-y-4">
           {roles.map((role, index) => (
             <li key={typeof role.roleId === "string" ? role.roleId : index} className="min-w-0 space-y-1 text-sm">
               <p className="font-medium">{roleAssignmentName(role, roleLabels)}</p>
-              {typeof role.roleId === "string" ? <p className="text-muted-foreground break-all">Identificador del rol: {role.roleId}</p> : null}
               <p>Alcance: {roleAssignmentScope(role.accessScope)}</p>
               {Array.isArray(role.trainingPathIds) && role.trainingPathIds.length > 0 ? (
-                <ul className="text-muted-foreground space-y-1">
-                  {role.trainingPathIds
-                    .filter((id): id is string => typeof id === "string")
-                    .map((id) => (
-                      <li key={id} className="break-all">
-                        Identificador del trayecto: {id}
-                      </li>
-                    ))}
-                </ul>
+                <p className="text-muted-foreground">Trayectos seleccionados: {role.trainingPathIds.filter((id) => typeof id === "string").length}</p>
               ) : null}
             </li>
           ))}
@@ -144,22 +163,13 @@ function RoleAssignments({
   );
 }
 
-function RoleConfiguration({
-  title,
-  value,
-  permissionLabels,
-}: {
-  title: string;
-  value: unknown;
-  permissionLabels: Readonly<Record<string, string>>;
-}): ReactElement {
+function RoleConfiguration({ value, permissionLabels }: { value: unknown; permissionLabels: Readonly<Record<string, string>> }): ReactElement {
   const role = isRecord(value) ? value : {};
 
   const permissions = Array.isArray(role.permissions) ? role.permissions.filter((code): code is string => typeof code === "string") : [];
 
   return (
     <div className="min-w-0 space-y-3">
-      <h3 className={DETAIL_LABEL_CLASS_NAME}>{title}</h3>
       {typeof role.name === "string" ? (
         <>
           <p className="text-sm font-medium">{role.name}</p>

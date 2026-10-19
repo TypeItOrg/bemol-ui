@@ -1,4 +1,5 @@
 import type { AuditActorKind } from "@features/platform-audit/types/audit-actor-kind.types";
+import type { AuditHistory } from "@features/platform-audit/types/audit-history.types";
 
 export type AuditEvent = {
   id: string;
@@ -17,4 +18,5 @@ export type AuditEvent = {
   origin: string | null;
   details: Record<string, unknown>;
   occurredAt: string;
+  history: AuditHistory | null;
 };

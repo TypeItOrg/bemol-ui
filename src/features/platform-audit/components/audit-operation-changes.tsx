@@ -1,9 +1,11 @@
 import type { ReactElement } from "react";
 
-import { DETAIL_LABEL_CLASS_NAME } from "@common/constants/detail-label.constants";
 import { formatDisplayDate } from "@common/utils/date-input.util";
 
 import {
+  academicYearStatusLabels,
+  academicSpaceTypeLabels,
+  academicSpaceFormatLabels,
   approvalModeLabels,
   courseStatusLabels,
   requiredConditionLabels,
@@ -11,8 +13,15 @@ import {
   requirementTypeLabels,
   studyPlanStatusLabels,
 } from "@features/academic/utils/academic-labels.util";
+import {
+  ACADEMIC_ENROLLMENT_STATUS_LABELS,
+  COURSE_ENROLLMENT_STATUS_LABELS,
+} from "@features/course-enrollments/constants/course-enrollment.constants";
 import { DOCUMENT_LEVEL_LABELS } from "@features/enrollment-applications/constants/documentation.constants";
+import { ENROLLMENT_APPLICATION_STATUS_LABELS } from "@features/enrollment-applications/constants/enrollment-application.constants";
 import { CHANGED_FIELD_LABELS, OPERATION_FIELD_LABELS } from "@features/platform-audit/constants/audit-operation-labels.constants";
+import type { AuditComparisonRow } from "@features/platform-audit/types/audit-comparison-row.types";
+import { formatAuditDateTime } from "@features/platform-audit/utils/audit-display.util";
 
 const OPERATION_VALUE_LABELS: Readonly<Record<string, string>> = {
   ...courseStatusLabels,
@@ -21,96 +30,98 @@ const OPERATION_VALUE_LABELS: Readonly<Record<string, string>> = {
   ...requirementTypeLabels,
   ...requirementStageLabels,
   ...requiredConditionLabels,
+  ...academicYearStatusLabels,
+  ...academicSpaceTypeLabels,
+  ...academicSpaceFormatLabels,
+  ...ENROLLMENT_APPLICATION_STATUS_LABELS,
+  ...COURSE_ENROLLMENT_STATUS_LABELS,
+  ...ACADEMIC_ENROLLMENT_STATUS_LABELS,
+  OPEN: "Abierto",
+  PENDING: "Pendiente",
+  PENDING_REVIEW: "Pendiente de revisión",
+  WAITLISTED: "En lista de espera",
+  CURRENT: "Vigente",
+  SUPERSEDED: "Reemplazado",
+  ACCEPTED: "Aceptado",
+  OBSERVED: "Observado",
 };
 
-export function AuditOperationChanges({ details }: { details: Record<string, unknown> }): ReactElement {
+export function auditOperationRows(details: Record<string, unknown>): AuditComparisonRow[] {
   const changedFields = Array.isArray(details.changedFields)
     ? [
         ...new Set(
-          details.changedFields
-            .filter((key): key is string => typeof key === "string")
-            .map((key) => CHANGED_FIELD_LABELS[key])
-            .filter(Boolean),
+          details.changedFields.filter((key): key is string => typeof key === "string").filter((key) => Object.hasOwn(CHANGED_FIELD_LABELS, key)),
         ),
       ]
     : [];
 
-  return (
-    <div className="space-y-6">
-      {typeof details.entityName === "string" ? <p className="text-sm font-medium break-words">{details.entityName}</p> : null}
-      {typeof details.studyPlanName === "string" ? <p className="text-muted-foreground text-sm">Plan de estudio: {details.studyPlanName}</p> : null}
-      {changedFields.length > 0 ? (
-        <div>
-          <h3 className={DETAIL_LABEL_CLASS_NAME}>Campos modificados</h3>
-          <p className="mt-1 text-sm">{changedFields.join(", ")}</p>
-        </div>
-      ) : null}
-      <div className="grid gap-6 sm:grid-cols-2">
-        <OperationSnapshot title="Antes" value={details.before} />
-        <OperationSnapshot title="Después" value={details.after} />
-      </div>
-    </div>
-  );
+  const before = isRecord(details.before) ? details.before : {};
+
+  const after = isRecord(details.after) ? details.after : {};
+
+  const rows: AuditComparisonRow[] = Object.entries(OPERATION_FIELD_LABELS).flatMap(([key, label]) => {
+    if (!(key in before) && !(key in after)) {
+      return [];
+    }
+
+    if (key in before && key in after && JSON.stringify(before[key]) === JSON.stringify(after[key])) {
+      return [];
+    }
+
+    const previous = key in before ? operationFieldValue(key, before[key]) : "Sin estado registrado";
+
+    const current = key in after ? operationFieldValue(key, after[key]) : "Sin estado registrado";
+
+    if (previous === undefined && current === undefined) {
+      return [];
+    }
+
+    return [{ key, label, before: previous ?? "No registrado", after: current ?? "No registrado" }];
+  });
+
+  if (
+    (Array.isArray(before.requirements) || Array.isArray(after.requirements)) &&
+    JSON.stringify(before.requirements) !== JSON.stringify(after.requirements)
+  ) {
+    rows.push({
+      key: "requirements",
+      label: "Asignaciones documentales",
+      before: <DocumentRequirements value={before.requirements} />,
+      after: <DocumentRequirements value={after.requirements} />,
+    });
+  }
+
+  for (const key of changedFields) {
+    if (!(key in before) && !(key in after) && !rows.some((row) => row.key === key)) {
+      rows.push({ key, label: CHANGED_FIELD_LABELS[key], before: "No registrado", after: "No registrado" });
+    }
+  }
+
+  return rows;
 }
 
-function OperationSnapshot({ title, value }: { title: string; value: unknown }): ReactElement {
-  const snapshot = isRecord(value) && Object.keys(value).length > 0 ? value : null;
+function DocumentRequirements({ value }: { value: unknown }): ReactElement {
+  const requirements = Array.isArray(value) ? value.filter(isRecord) : [];
 
-  const fields = snapshot
-    ? Object.entries(OPERATION_FIELD_LABELS).flatMap(([key, label]) => {
-        if (!(key in snapshot)) {
-          return [];
-        }
-
-        const displayValue = operationFieldValue(key, snapshot[key]);
-
-        return displayValue === undefined ? [] : [{ label, value: displayValue }];
-      })
-    : [];
-
-  const requirements = snapshot && Array.isArray(snapshot.requirements) ? snapshot.requirements.filter(isRecord) : [];
-
-  return (
-    <div className="min-w-0 space-y-3">
-      <h3 className={DETAIL_LABEL_CLASS_NAME}>{title}</h3>
-      {snapshot ? (
-        <>
-          <dl className="space-y-4">
-            {fields.map((field) => (
-              <div key={field.label}>
-                <dt className={DETAIL_LABEL_CLASS_NAME}>{field.label}</dt>
-                <dd className="mt-1 text-sm break-words">{field.value}</dd>
-              </div>
-            ))}
-          </dl>
-          {requirements.length > 0 ? (
-            <div className="space-y-2">
-              <h4 className={DETAIL_LABEL_CLASS_NAME}>Asignaciones documentales</h4>
-              <ul className="space-y-3 text-sm">
-                {requirements.map((requirement, index) => (
-                  <li key={index} className="space-y-1">
-                    {typeof requirement.trainingPathName === "string" ? (
-                      <p className="font-medium break-words">{requirement.trainingPathName}</p>
-                    ) : null}
-                    {typeof requirement.level === "string" ? (
-                      <p>{DOCUMENT_LEVEL_LABELS[requirement.level as keyof typeof DOCUMENT_LEVEL_LABELS] ?? "Nivel no catalogado"}</p>
-                    ) : null}
-                    {typeof requirement.displayOrder === "number" ? <p>Orden: {requirement.displayOrder}</p> : null}
-                    {typeof requirement.active === "boolean" ? <p>{requirement.active ? "Activo" : "Inactivo"}</p> : null}
-                  </li>
-                ))}
-              </ul>
-            </div>
+  return requirements.length > 0 ? (
+    <ul className="space-y-3">
+      {requirements.map((requirement, index) => (
+        <li key={index} className="space-y-1">
+          {typeof requirement.trainingPathName === "string" ? <p className="font-medium break-words">{requirement.trainingPathName}</p> : null}
+          {typeof requirement.level === "string" ? (
+            <p>{DOCUMENT_LEVEL_LABELS[requirement.level as keyof typeof DOCUMENT_LEVEL_LABELS] ?? "Nivel no catalogado"}</p>
           ) : null}
-        </>
-      ) : (
-        <p className="text-muted-foreground text-sm">Sin estado registrado.</p>
-      )}
-    </div>
+          {typeof requirement.displayOrder === "number" ? <p>Orden: {requirement.displayOrder}</p> : null}
+          {typeof requirement.active === "boolean" ? <p>{requirement.active ? "Activo" : "Inactivo"}</p> : null}
+        </li>
+      ))}
+    </ul>
+  ) : (
+    <span className="text-muted-foreground">Sin asignaciones.</span>
   );
 }
 
-function operationFieldValue(key: string, value: unknown): string | undefined {
+export function operationFieldValue(key: string, value: unknown): string | undefined {
   if (value === null) {
     return "Sin especificar";
   }
@@ -124,6 +135,10 @@ function operationFieldValue(key: string, value: unknown): string | undefined {
   }
 
   if (typeof value === "number") {
+    if (key === "year") {
+      return String(value);
+    }
+
     return key === "size" ? `${value.toLocaleString("es-AR")} bytes` : value.toLocaleString("es-AR");
   }
 
@@ -134,11 +149,30 @@ function operationFieldValue(key: string, value: unknown): string | undefined {
   }
 
   if (typeof value === "string") {
-    if (key === "effectiveFrom" || key === "effectiveTo") {
-      return formatDisplayDate(value);
+    if (["effectiveFrom", "effectiveTo", "startDate", "endDate"].includes(key)) {
+      return value.includes("T") ? formatAuditDateTime(value) : formatDisplayDate(value);
     }
 
-    if (["status", "approvalMode", "requirementType", "requirementStage", "requiredCondition"].includes(key)) {
+    if (key === "versionStatus") {
+      return (
+        ({ CURRENT: "Vigente", SUPERSEDED: "Reemplazado", WITHDRAWN: "Retirado" } as Record<string, string>)[value] ??
+        "Valor fuera del catálogo actual"
+      );
+    }
+
+    if (
+      [
+        "status",
+        "academicStatus",
+        "reviewStatus",
+        "type",
+        "format",
+        "approvalMode",
+        "requirementType",
+        "requirementStage",
+        "requiredCondition",
+      ].includes(key)
+    ) {
       return OPERATION_VALUE_LABELS[value] ?? "Valor fuera del catálogo actual";
     }
 
