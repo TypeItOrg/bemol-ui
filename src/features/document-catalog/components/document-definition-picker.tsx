@@ -73,10 +73,9 @@ export function DocumentDefinitionPicker({
         selectedLabel={
           selectedValues?.length
             ? `${selectedValues.length} ${selectedValues.length === 1 ? "documento seleccionado" : "documentos seleccionados"}`
-            : undefined
+            : value?.name
         }
         closeOnSelect={selectedValues === undefined}
-        defaultOption={value ? { value: value.id, label: value.name } : undefined}
         queryKey={["document-definitions", scope, institutionId, trainingPathId, applicationId, forTrainingPathCreation]}
         fetchPage={fetchPage}
         getItemValue={(item) => item.id}
