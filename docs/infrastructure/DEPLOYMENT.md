@@ -1,36 +1,30 @@
 # Despliegue
 
-Este repositorio construye, valida y publica la imagen de `boero-ui`. La topología de los ambientes, Nginx, Compose, variables operativas, despliegues y rollbacks viven en [`boero-infra`](https://github.com/TypeItOrg/boero-infra).
+Este repositorio construye, valida y publica la imagen de `boero-ui`. La topología, Compose, variables privadas y operación de staging viven en [`boero-infra`](https://github.com/TypeItOrg/boero-infra).
 
-## Flujo de staging
+## CI y despliegue a staging
 
-Staging conserva su configuración, pero actualmente no tiene una VPS provisionada. El job `deploy-staging` queda desactivado mediante `if: ${{ false }}`; no se intenta una conexión SSH.
+El workflow [`.github/workflows/ci-staging.yaml`](../../.github/workflows/ci-staging.yaml) aparece en GitHub Actions como **CI and staging deployment**.
 
-Un push a `staging`:
+- Los pull requests hacia `develop`, `staging` y `main` ejecutan formato, lint, tipos, tests y build.
+- Los pushes a esas ramas ejecutan las mismas validaciones. `develop` se ejecuta localmente: no publica imágenes ni despliega un ambiente remoto.
+- Sólo un push a `staging`, después de las validaciones, publica `ghcr.io/typeitorg/boero-ui:sha-<commit>` y `:staging`, y solicita el despliegue a Dokploy. `main` tampoco publica imágenes ni despliega.
 
-1. Ejecuta formato, lint, tipos, tests y build.
-2. Publica `ghcr.io/typeitorg/boero-ui:sha-<commit>`.
-3. Omite el job de despliegue mientras no haya infraestructura.
+El job `deploy-staging` usa el GitHub Environment `staging` y sus secrets `DOKPLOY_URL`, `DOKPLOY_API_KEY` y `DOKPLOY_STAGING_COMPOSE_ID`; no entra por SSH. Dokploy descarga las imágenes y ejecuta el Compose de staging, conservando los volúmenes existentes.
 
-Cuando exista una VPS y se complete la preparación de `boero-infra/docs/STAGING.md`, se podrá restaurar la condición `github.event_name == 'push' && github.ref_name == 'staging'` del job. Entonces usará el GitHub Environment `staging` y ejecutará `make deploy-ui ENV=staging VERSION=sha-<commit>` en `/opt/boero-infra`.
-
-Ese comando actualiza únicamente la UI, espera su healthcheck y restaura automáticamente la versión anterior si el contenedor nuevo no queda saludable. Desactivar el job no elimina los perfiles, Compose, variables de ejemplo ni ramas del ambiente.
-
-Los secretos SSH, la instalación inicial de la VPS y la operación manual están documentados en el README de `boero-infra`.
+Una solicitud exitosa no demuestra que el despliegue asíncrono haya terminado ni que los servicios estén saludables. No hay rollback automático de ese job. Consultar la [guía de staging con Dokploy](https://github.com/TypeItOrg/boero-infra/blob/main/docs/DOKPLOY-STAGING.md) para verificar las imágenes ejecutadas y volver a una versión anterior.
 
 ## Responsabilidades de este repositorio
 
 - `Dockerfile`: construcción y runtime de la imagen.
 - `compose.yaml`: desarrollo local.
 - `.env.example`: configuración local.
-- `.github/workflows/ci.yaml`: validación y publicación; el despliegue a staging queda preparado pero desactivado.
+- `.github/workflows/ci-staging.yaml`: validación, publicación y solicitud de despliegue a staging.
 
-No deben agregarse aquí configuraciones de Nginx ni Compose de ambientes compartidos.
+No deben agregarse aquí configuraciones del proxy ni Compose de ambientes compartidos.
 
 ## Producción
 
-Producción nunca tuvo una VPS provisionada y continúa preparada para uso futuro. No ejecutar el despliegue hasta disponer del servidor y completar su preparación.
+Todavía no existe un ambiente productivo. No se conserva un workflow de despliegue a producción: se definirá cuando se prepare ese ambiente. Un push a `main` sólo ejecuta CI, sin publicar imágenes ni desplegar producción.
 
-`.github/workflows/deploy-production.yaml` permite un despliegue manual futuro. Requiere un SHA completo perteneciente a `main` y el GitHub Environment protegido `production`; no se ejecuta por push.
-
-La preparación del servidor y el checklist previo al primer release viven en `docs/PRODUCTION.md` de `boero-infra`.
+La configuración futura de infraestructura permanece en `boero-infra`; retirarla no forma parte de esta limpieza de workflows.
