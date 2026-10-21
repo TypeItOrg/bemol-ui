@@ -4,8 +4,6 @@ import { useState, type ReactElement } from "react";
 
 import Image from "next/image";
 
-import { useTheme } from "next-themes";
-
 import { cn } from "@common/utils/cn.util";
 
 import { useInstitutionalBrand } from "@features/institutional-auth/components/institutional-brand-context";
@@ -26,9 +24,7 @@ export function InstitutionalBrandIdentity({
 }): ReactElement {
   const institution = useInstitutionalBrand();
 
-  const { resolvedTheme } = useTheme();
-
-  const productLogoUrl = darkBackground || resolvedTheme === "dark" ? "/brand/logo-dark.svg" : "/brand/logo.svg";
+  const productLogoUrl = darkBackground ? "/brand/logo-dark.svg" : "/brand/logo.svg";
 
   const logoUrl = institution ? getInstitutionLogoUrl(institution.id, institution.logoUrl) : productLogoUrl;
 
@@ -48,9 +44,22 @@ export function InstitutionalBrandIdentity({
             height={institution ? 240 : 32}
             src={logoUrl}
             alt={institution ? `Logo de ${institution.name}` : "Logo de Bemol"}
-            className={cn("h-full w-full object-contain", imageClassName)}
+            className={cn("h-full w-full object-contain", !institution && !darkBackground && "dark:hidden", imageClassName)}
             onError={() => setFailedUrl(logoUrl)}
           />
+          {/* CSS selects the product variant without changing image attributes during hydration. */}
+          {!institution && !darkBackground ? (
+            <Image
+              preload
+              sizes="(max-width: 768px) 80px, 224px"
+              width={32}
+              height={32}
+              src="/brand/logo-dark.svg"
+              alt="Logo de Bemol"
+              className={cn("hidden h-full w-full object-contain dark:block", imageClassName)}
+              onError={() => setFailedUrl(logoUrl)}
+            />
+          ) : null}
         </div>
       ) : null}
       {institution && (showInstitutionName || !hasLogo) ? (
