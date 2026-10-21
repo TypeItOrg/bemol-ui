@@ -65,6 +65,17 @@ it("continues sending valid reasons", async () => {
       body: JSON.stringify({ type: "VOLUNTARY", reason: "Baja solicitada", expectedVersion: 0 }),
     }),
   );
+  expect(revalidatePath).toHaveBeenCalledWith("/course-enrollments");
+  expect(revalidatePath).toHaveBeenCalledWith("/my-course-enrollments");
+  expect(revalidatePath).toHaveBeenCalledWith("/my-teaching");
+});
+
+it("refreshes the teacher views after an academic result change", async () => {
+  await expect(updateCourseAcademicStatusAction(ID, "PASSED", "Aprobado", 1)).resolves.toEqual({});
+
+  expect(revalidatePath).toHaveBeenCalledWith("/course-enrollments");
+  expect(revalidatePath).toHaveBeenCalledWith("/my-course-enrollments");
+  expect(revalidatePath).toHaveBeenCalledWith("/my-teaching");
 });
 
 function manualForm(returnTo: string): FormData {

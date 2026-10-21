@@ -168,6 +168,7 @@ export async function withdrawCourseEnrollmentAction(
   }
 
   revalidatePath("/course-enrollments");
+  revalidatePath("/my-teaching");
   revalidatePath("/my-course-enrollments");
 
   return {};
@@ -204,6 +205,7 @@ export async function updateCourseAcademicStatusAction(
   }
 
   revalidatePath("/course-enrollments");
+  revalidatePath("/my-teaching");
   revalidatePath("/my-course-enrollments");
 
   return {};

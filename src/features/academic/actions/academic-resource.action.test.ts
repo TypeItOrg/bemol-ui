@@ -1,3 +1,5 @@
+import { revalidatePath } from "next/cache";
+
 import { deleteAcademicResourceAction } from "@features/academic/actions/academic-resource-lifecycle.actions";
 import { saveAcademicResourceAction } from "@features/academic/actions/academic-resource.action";
 import { updateAcademicStatusAction } from "@features/academic/actions/update-academic-status.action";
@@ -319,6 +321,37 @@ describe("academic resource actions", () => {
 
     expect(result?.fieldErrors?.active).toBeDefined();
     expect(academicApiFetch).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    [AcademicResource.COURSE, INSTITUTIONAL_PERMISSION.COURSE_STATUS_UPDATE],
+    [AcademicResource.ACADEMIC_YEAR, INSTITUTIONAL_PERMISSION.ACADEMIC_YEAR_STATUS_UPDATE],
+  ] as const)("refreshes the enrollment grade views after %s closes", async (resource, permission) => {
+    mockInstitutionalUser(permission);
+    jest.mocked(academicApiFetch).mockResolvedValue(new Response(null, { status: 204 }));
+
+    const formData = new FormData();
+    formData.set("status", "CLOSED");
+
+    await updateAcademicStatusAction(AcademicScope.INSTITUTIONAL, INSTITUTION_ID, resource, RESOURCE_ID, `/${resource}`, {}, formData);
+
+    expect(revalidatePath).toHaveBeenCalledWith(`/${resource}`);
+    expect(revalidatePath).toHaveBeenCalledWith("/course-enrollments");
+    expect(revalidatePath).toHaveBeenCalledWith("/my-teaching");
+    expect(revalidatePath).toHaveBeenCalledWith("/my-course-enrollments");
+  });
+
+  it("keeps non-closing course status changes scoped to the academic views", async () => {
+    mockInstitutionalUser(INSTITUTIONAL_PERMISSION.COURSE_STATUS_UPDATE);
+    jest.mocked(academicApiFetch).mockResolvedValue(new Response(null, { status: 204 }));
+
+    const formData = new FormData();
+    formData.set("status", "ACTIVE");
+
+    await updateAcademicStatusAction(AcademicScope.INSTITUTIONAL, INSTITUTION_ID, AcademicResource.COURSE, RESOURCE_ID, "/courses", {}, formData);
+
+    expect(revalidatePath).toHaveBeenCalledWith("/courses");
+    expect(revalidatePath).not.toHaveBeenCalledWith("/course-enrollments");
   });
 
   it("returns a dialog-safe error when deletion fails before an HTTP response", async () => {
