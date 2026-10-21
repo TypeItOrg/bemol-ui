@@ -11,7 +11,7 @@ La aplicación maneja dos tipos de usuarios totalmente separados, cada uno con s
 | Contexto | Destinado a | Rutas de la UI | Rutas de API Proxy |
 | :--- | :--- | :--- | :--- |
 | **Institucional** | Docentes, estudiantes y personal administrativo de una institución específica. | `/(institutional)/*` | `/api/institutional/*` |
-| **Administrador de Plataforma** | Administradores globales del sistema Boero. | `/admin/*` | `/api/admin/*` |
+| **Administrador de Plataforma** | Administradores globales del sistema Bemol. | `/admin/*` | `/api/admin/*` |
 
 ---
 

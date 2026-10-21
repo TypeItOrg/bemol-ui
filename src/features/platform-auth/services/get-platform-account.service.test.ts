@@ -1,7 +1,7 @@
 describe("getPlatformAccount", () => {
   type GetPlatformAccountModule = typeof import("@features/platform-auth/services/get-platform-account.service");
 
-  const originalApiUrl = process.env.BOERO_API_URL;
+  const originalApiUrl = process.env.BEMOL_API_URL;
   const originalBaseDomain = process.env.INSTITUTIONAL_BASE_DOMAIN;
   const fetchMock = jest.fn<ReturnType<typeof fetch>, Parameters<typeof fetch>>();
 
@@ -16,7 +16,7 @@ describe("getPlatformAccount", () => {
   }
 
   beforeEach(() => {
-    process.env.BOERO_API_URL = "https://api.example.test";
+    process.env.BEMOL_API_URL = "https://api.example.test";
     jest.resetModules();
     process.env.INSTITUTIONAL_BASE_DOMAIN = "";
     jest.doMock("next/headers", () => ({
@@ -30,7 +30,7 @@ describe("getPlatformAccount", () => {
   });
 
   afterAll(() => {
-    process.env.BOERO_API_URL = originalApiUrl;
+    process.env.BEMOL_API_URL = originalApiUrl;
 
     if (originalBaseDomain === undefined) {
       delete process.env.INSTITUTIONAL_BASE_DOMAIN;

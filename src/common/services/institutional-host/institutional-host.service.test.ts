@@ -17,12 +17,12 @@ const institution = {
 };
 const fetchMock = jest.fn();
 const original = {
-  api: process.env.BOERO_API_URL,
+  api: process.env.BEMOL_API_URL,
   public: process.env.FRONTEND_PUBLIC_URL,
   domain: process.env.INSTITUTIONAL_BASE_DOMAIN,
 };
 beforeEach(() => {
-  process.env.BOERO_API_URL = "http://backend.test";
+  process.env.BEMOL_API_URL = "http://backend.test";
   process.env.FRONTEND_PUBLIC_URL = "https://testing.typeit.com.ar";
   process.env.INSTITUTIONAL_BASE_DOMAIN = "testing.typeit.com.ar";
   global.fetch = fetchMock;
@@ -30,7 +30,7 @@ beforeEach(() => {
   jest.mocked(headers).mockResolvedValue(new Headers({ host: "cboero.testing.typeit.com.ar" }));
 });
 afterAll(() => {
-  process.env.BOERO_API_URL = original.api;
+  process.env.BEMOL_API_URL = original.api;
   process.env.FRONTEND_PUBLIC_URL = original.public;
   process.env.INSTITUTIONAL_BASE_DOMAIN = original.domain;
 });

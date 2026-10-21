@@ -25,7 +25,7 @@ const otherInstitution = {
 
 const fetchMock = jest.fn();
 const originalEnvironment = {
-  BOERO_API_URL: process.env.BOERO_API_URL,
+  BEMOL_API_URL: process.env.BEMOL_API_URL,
   FRONTEND_PUBLIC_URL: process.env.FRONTEND_PUBLIC_URL,
   INSTITUTIONAL_BASE_DOMAIN: process.env.INSTITUTIONAL_BASE_DOMAIN,
 };
@@ -49,7 +49,7 @@ function createRequest(
 }
 
 beforeEach(() => {
-  process.env.BOERO_API_URL = "http://backend.test";
+  process.env.BEMOL_API_URL = "http://backend.test";
   process.env.FRONTEND_PUBLIC_URL = "https://testing.typeit.com.ar";
   process.env.INSTITUTIONAL_BASE_DOMAIN = "testing.typeit.com.ar";
 

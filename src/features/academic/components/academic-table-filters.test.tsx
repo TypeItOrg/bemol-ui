@@ -77,7 +77,7 @@ describe("AcademicTableFilters with a shared options cache", () => {
         expect(screen.queryByRole("option", { name: previous.name })).not.toBeInTheDocument();
       }
 
-      const requestUrl = new URL(String(fetchMock.mock.calls[index][0]), "https://boero.test");
+      const requestUrl = new URL(String(fetchMock.mock.calls[index][0]), "https://bemol.test");
       expect(requestUrl.pathname).toBe("/api/" + context.scope + "/academic/options/training-paths");
       expect(Object.fromEntries(requestUrl.searchParams)).toEqual({
         institutionId: context.institutionId,

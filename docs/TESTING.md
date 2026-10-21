@@ -1,6 +1,6 @@
 # Guía de Testing en el Frontend
 
-Esta guía describe las herramientas, patrones y buenas prácticas para escribir pruebas automatizadas en Boero UI.
+Esta guía describe las herramientas, patrones y buenas prácticas para escribir pruebas automatizadas en Bemol UI.
 
 ---
 

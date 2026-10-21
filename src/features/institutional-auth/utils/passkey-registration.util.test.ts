@@ -8,7 +8,7 @@ const EXCLUDE_ID = bytesToBase64Url(new Uint8Array([4, 5, 6]));
 function validOptions(): Record<string, unknown> {
   return {
     challenge: CHALLENGE,
-    rp: { id: "localhost", name: "Boero" },
+    rp: { id: "localhost", name: "Bemol" },
     user: { id: USER_ID, name: "12345678", displayName: "Ana Garcia" },
     pubKeyCredParams: [
       { type: "public-key", alg: -8 },
@@ -35,7 +35,7 @@ describe("passkey-registration", () => {
     const options = toPublicKeyCreationOptions(validOptions());
 
     expect(options.challenge).toBeInstanceOf(Uint8Array);
-    expect(options.rp).toEqual({ id: "localhost", name: "Boero" });
+    expect(options.rp).toEqual({ id: "localhost", name: "Bemol" });
     expect(options.user.name).toBe("12345678");
     expect(options.user.displayName).toBe("Ana Garcia");
     expect(options.pubKeyCredParams).toEqual([

@@ -2,7 +2,7 @@
 
 Configuration is read from `components.json`.
 
-> Use the project's package manager and installed CLI first. In Boero UI this is `pnpm exec shadcn`. Consult local help when a flag differs from this reference; use a newer CLI only when the authorized task needs it.
+> Use the project's package manager and installed CLI first. In Bemol UI this is `pnpm exec shadcn`. Consult local help when a flag differs from this reference; use a newer CLI only when the authorized task needs it.
 
 > This is a reference snapshot, not a complete specification of every CLI version. Verify uncertain flags with the installed command's help. Package manager selection belongs to the project configuration.
 

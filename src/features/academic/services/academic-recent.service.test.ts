@@ -59,7 +59,7 @@ it("requests only readable sections through the real academic services and retur
     .mocked(academicApiFetch)
     .mockReset()
     .mockImplementation(async (_scope, path) => {
-      const resource = new URL(path, "https://boero.test").pathname.split("/").at(-1);
+      const resource = new URL(path, "https://bemol.test").pathname.split("/").at(-1);
       const items = resource === "academic-years" ? [year] : resource === "instruments" ? [instrument] : [];
 
       return Response.json({ items, page: 0, size: 1, totalItems: items.length, totalPages: items.length });
@@ -71,7 +71,7 @@ it("requests only readable sections through the real academic services and retur
   expect(
     jest.mocked(academicApiFetch).mock.calls.map(([scope, path]) => {
       expect(scope).toBe("institutional");
-      const url = new URL(path, "https://boero.test");
+      const url = new URL(path, "https://bemol.test");
       expect(Object.fromEntries(url.searchParams)).toEqual({ page: "0", size: "1", sort: "createdAt,desc" });
 
       return url.pathname;

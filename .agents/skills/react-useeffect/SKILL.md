@@ -9,7 +9,7 @@ For a reported effect problem, identify the external system being synchronized a
 
 Keep subscriptions and asynchronous results tied to their lifecycle. Cleanup should unsubscribe, cancel or ignore obsolete results as appropriate. A Strict Mode replay should remain correct; a run-once flag must not hide missing cleanup.
 
-In Boero UI, browser catalog reads use the existing Query-backed components and bounded Route Handlers. Server Action forms use `useActionState`. Do not replace either flow with a manual fetching effect.
+In Bemol UI, browser catalog reads use the existing Query-backed components and bounded Route Handlers. Server Action forms use `useActionState`. Do not replace either flow with a manual fetching effect.
 
 For an effect-specific issue, consult only the relevant official explanation:
 - [Unnecessary effects and derived state](https://react.dev/learn/you-might-not-need-an-effect).

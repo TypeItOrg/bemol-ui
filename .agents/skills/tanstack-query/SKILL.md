@@ -1,9 +1,9 @@
 ---
 name: tanstack-query
-description: Implement or debug React Query v5 caching, cancellation, pagination or client-owned mutations in Boero UI.
+description: Implement or debug React Query v5 caching, cancellation, pagination or client-owned mutations in Bemol UI.
 ---
 
-# React Query in Boero UI
+# React Query in Bemol UI
 
 Use the existing `src/app/providers.tsx` QueryClient and shared AsyncDropdown components. Follow the repository AGENTS.md: browser backend reads use explicit Route Handlers; Server Action forms use `useActionState`; Query mutations are for client-owned cached data and must reject unsuccessful responses.
 

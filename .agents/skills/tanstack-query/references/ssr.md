@@ -1,6 +1,6 @@
 # Server rendering and hydration
 
-Boero uses Next.js App Router. Do not introduce Pages Router loaders or TanStack Router examples into this application.
+Bemol uses Next.js App Router. Do not introduce Pages Router loaders or TanStack Router examples into this application.
 
 The existing browser provider owns its QueryClient. Server prefetching needs a client scoped to the request/render workflow; never put user- or tenant-specific cached data into a module-level shared QueryClient.
 

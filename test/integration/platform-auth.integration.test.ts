@@ -7,7 +7,7 @@ import type { PlatformAccount } from "@features/platform-auth/types/platform-acc
 
 const API_URL = "https://api.example.test";
 const originalEnvironment = {
-  BOERO_API_URL: process.env.BOERO_API_URL,
+  BEMOL_API_URL: process.env.BEMOL_API_URL,
   FRONTEND_PUBLIC_URL: process.env.FRONTEND_PUBLIC_URL,
   INSTITUTIONAL_BASE_DOMAIN: process.env.INSTITUTIONAL_BASE_DOMAIN,
 };
@@ -174,7 +174,7 @@ afterAll(() => {
 });
 
 beforeEach(() => {
-  process.env.BOERO_API_URL = API_URL;
+  process.env.BEMOL_API_URL = API_URL;
   process.env.FRONTEND_PUBLIC_URL = "https://app.example.test";
   process.env.INSTITUTIONAL_BASE_DOMAIN = "example.test";
   cookieJar = new PlatformCookieJar();

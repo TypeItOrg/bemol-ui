@@ -82,7 +82,7 @@ export function PlatformAccountFields({
           type="email"
           maxLength={150}
           autoComplete="email"
-          placeholder="administracion@boero.edu.ar"
+          placeholder="administracion@example.edu.ar"
           aria-invalid={!!errors.email}
           {...register("email")}
         />

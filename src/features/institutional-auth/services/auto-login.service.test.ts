@@ -24,7 +24,7 @@ describe("automatic login", () => {
     process.env.AUTO_LOGIN_ENABLED = "true";
     process.env.FRONTEND_PUBLIC_URL = "https://staging.example.test";
     process.env.INSTITUTIONAL_BASE_DOMAIN = "staging.example.test";
-    process.env.BOERO_API_URL = "http://api:8080";
+    process.env.BEMOL_API_URL = "http://api:8080";
     process.env.AUTH_COOKIE_SECURE = "true";
     global.fetch = fetchMock;
     fetchMock.mockReset();

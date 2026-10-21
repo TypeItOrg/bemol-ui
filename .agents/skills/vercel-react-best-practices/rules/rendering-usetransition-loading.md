@@ -7,7 +7,7 @@ tags: rendering, transitions, useActionState, loading, state
 
 ## Match Pending State to the Operation Owner
 
-In Boero UI, Server Action forms and confirmation dialogs use `useActionState`. Client-owned cached mutations use the existing Query mutation state. Do not introduce another loading flag or migrate either workflow merely to use `useTransition`.
+In Bemol UI, Server Action forms and confirmation dialogs use `useActionState`. Client-owned cached mutations use the existing Query mutation state. Do not introduce another loading flag or migrate either workflow merely to use `useTransition`.
 
 Use transitions for non-urgent rendering work when the component owns that work and no existing action/query state already represents it. Keep controlled input updates urgent.
 

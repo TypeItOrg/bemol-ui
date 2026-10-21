@@ -22,7 +22,7 @@ export function InstitutionalBrandIdentity({
 }): ReactElement {
   const institution = useInstitutionalBrand();
 
-  const logoUrl = institution ? getInstitutionLogoUrl(institution.id, institution.logoUrl) : "/brand/boero-logo.webp";
+  const logoUrl = institution ? getInstitutionLogoUrl(institution.id, institution.logoUrl) : "/brand/logo.svg";
 
   const [failedUrl, setFailedUrl] = useState<string>();
 
@@ -36,10 +36,10 @@ export function InstitutionalBrandIdentity({
             preload
             unoptimized={Boolean(institution)}
             sizes="(max-width: 768px) 80px, 224px"
-            width={institution ? 240 : 875}
-            height={institution ? 240 : 1202}
+            width={institution ? 240 : 32}
+            height={institution ? 240 : 32}
             src={logoUrl}
-            alt={institution ? `Logo de ${institution.name}` : "Logo de Boero"}
+            alt={institution ? `Logo de ${institution.name}` : "Logo de Bemol"}
             className={cn("h-full w-full object-contain", imageClassName)}
             onError={() => setFailedUrl(logoUrl)}
           />

@@ -22,7 +22,7 @@ Use only the appropriate rule category in `rules/`:
 
 The [reference index](REFERENCE.md) maps individual rules. Read the rule needed, not every category.
 
-Boero-specific boundaries take precedence over generic examples:
+Bemol-specific boundaries take precedence over generic examples:
 - Retain TanStack Query and existing shared components; an SWR example is not a reason to add another data library.
 - Server Action forms use `useActionState`; Query mutations own cached client data. Do not migrate forms to `useTransition` solely for loading state.
 - Preserve authenticated no-store reads and refresh/replay guarantees. Cross-request caches require correct tenant/authorization keys and invalidation; never cache tokens or request-local data by copying an example.

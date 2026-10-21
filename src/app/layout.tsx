@@ -36,7 +36,7 @@ export async function generateMetadata(): Promise<Metadata> {
     institution = undefined;
   }
 
-  const brandName = institution?.name ?? "Boero";
+  const brandName = institution?.name ?? "Bemol";
 
   return {
     title: {

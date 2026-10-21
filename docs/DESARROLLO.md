@@ -1,6 +1,6 @@
 # Entorno de Desarrollo
 
-Esta guía detalla los requisitos, pasos y buenas prácticas para levantar y trabajar en el frontend de Boero UI en tu entorno local.
+Esta guía detalla los requisitos, pasos y buenas prácticas para levantar y trabajar en el frontend de Bemol UI en tu entorno local.
 
 ---
 
@@ -38,21 +38,21 @@ cp .env.example .env.local
 | Variable | Descripción | Valor típico local |
 | :--- | :--- | :--- |
 | `NEXT_PUBLIC_API_URL` | URL pública accesible desde el **navegador del cliente**. Se utiliza para peticiones del lado cliente hacia la capa proxy `/api/*` de Next.js. | `http://localhost:3000` |
-| `BOERO_API_URL` | URL de la API del **backend (Spring Boot)** a la que se conecta el servidor Next.js internamente (Server Components, Server Actions y Proxy). | Ver tabla abajo |
+| `BEMOL_API_URL` | URL de la API del **backend (Spring Boot)** a la que se conecta el servidor Next.js internamente (Server Components, Server Actions y Proxy). | Ver tabla abajo |
 
-#### Configuración de `BOERO_API_URL` según tu entorno:
+#### Configuración de `BEMOL_API_URL` según tu entorno:
 
 - **Ejecución Nativa (`pnpm dev` en Linux / Mac / Windows)**:
   ```env
-  BOERO_API_URL=http://localhost:8080
+  BEMOL_API_URL=http://localhost:8080
   ```
 - **Ejecución con Docker en Linux** (requiere la IP del gateway del host):
   ```env
-  BOERO_API_URL=http://172.17.0.1:8080
+  BEMOL_API_URL=http://172.17.0.1:8080
   ```
 - **Ejecución con Docker en macOS / Windows**:
   ```env
-  BOERO_API_URL=http://host.docker.internal:8080
+  BEMOL_API_URL=http://host.docker.internal:8080
   ```
 
 ---
@@ -88,7 +88,7 @@ make down   # Detener los contenedores
 
 Si preferís correr Next.js directamente sobre tu sistema operativo:
 
-1. Asegurate de tener configurado `.env.local` con `BOERO_API_URL=http://localhost:8080`.
+1. Asegurate de tener configurado `.env.local` con `BEMOL_API_URL=http://localhost:8080`.
 2. Instalá las dependencias del proyecto:
    ```bash
    pnpm install
@@ -133,7 +133,7 @@ Si existe algún error de linting que no pueda corregirse de forma automática, 
 ## 6. Solución de Problemas Frecuentes
 
 ### 1. El frontend no responde o da errores 500 al llamar a `/api/*`
-- **Causa**: El servidor de Next.js no puede alcanzar la URL del backend configurada en `BOERO_API_URL`.
+- **Causa**: El servidor de Next.js no puede alcanzar la URL del backend configurada en `BEMOL_API_URL`.
 - **Solución**:
   - Verificá que el backend esté levantado y respondiendo en el puerto correspondiente (ej. 8080).
   - Si estás en Linux corriendo con Docker, recordá usar la IP del bridge `http://172.17.0.1:8080` y no `localhost:8080`.
@@ -154,3 +154,9 @@ Si existe algún error de linting que no pueda corregirse de forma automática, 
   ```bash
   docker compose down -v
   ```
+
+## Nombre de la aplicación
+
+La aplicación se llama **Bemol**. Los identificadores operativos anteriores se
+conservan cuando son necesarios para acceder a recursos existentes. Consultar
+la guía `boero-infra/docs/RENOMBRE-BEMOL.md` antes de renombrar recursos persistentes.

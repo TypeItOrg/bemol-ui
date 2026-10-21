@@ -3,7 +3,7 @@ name: shadcn
 description: Add or update shadcn registry components, inspect presets, or resolve component API questions not answered by installed source.
 ---
 
-# shadcn in Boero UI
+# shadcn in Bemol UI
 
 Use `components.json`, installed component source and `package.json` to resolve the aliases, primitive family and version relevant to the task.
 

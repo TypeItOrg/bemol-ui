@@ -6,19 +6,19 @@ import { publicApiFetch } from "@common/services/public-api-fetch.service";
 jest.mock("next/headers", () => ({ headers: jest.fn() }));
 const fetchMock = jest.fn();
 const original = {
-  api: process.env.BOERO_API_URL,
+  api: process.env.BEMOL_API_URL,
   public: process.env.FRONTEND_PUBLIC_URL,
   domain: process.env.INSTITUTIONAL_BASE_DOMAIN,
 };
 beforeEach(() => {
-  process.env.BOERO_API_URL = "http://backend.test";
+  process.env.BEMOL_API_URL = "http://backend.test";
   process.env.FRONTEND_PUBLIC_URL = "https://testing.typeit.com.ar";
   process.env.INSTITUTIONAL_BASE_DOMAIN = "testing.typeit.com.ar";
   global.fetch = fetchMock;
   fetchMock.mockResolvedValue(new Response(null, { status: 204 }));
 });
 afterAll(() => {
-  process.env.BOERO_API_URL = original.api;
+  process.env.BEMOL_API_URL = original.api;
   process.env.FRONTEND_PUBLIC_URL = original.public;
   process.env.INSTITUTIONAL_BASE_DOMAIN = original.domain;
 });

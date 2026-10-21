@@ -1,6 +1,6 @@
 # Arquitectura del Frontend
 
-Esta guía describe el stack tecnológico, la organización del código fuente y las convenciones esenciales de arquitectura en el frontend de Boero UI.
+Esta guía describe el stack tecnológico, la organización del código fuente y las convenciones esenciales de arquitectura en el frontend de Bemol UI.
 
 ---
 

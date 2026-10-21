@@ -28,7 +28,7 @@ const renameMock = jest.mocked(renamePasskeyAction);
 const createMock = jest.fn();
 
 const validOptions = {
-  rp: { id: "localhost", name: "Boero" },
+  rp: { id: "localhost", name: "Bemol" },
   user: { id: "dGVzdA", name: "user", displayName: "User" },
   challenge: "dGVzdC1jaGFsbGVuZ2U",
   pubKeyCredParams: [],

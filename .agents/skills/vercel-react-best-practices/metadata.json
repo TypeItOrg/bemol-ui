@@ -2,7 +2,7 @@
   "version": "1.0.0",
   "organization": "Vercel Engineering",
   "date": "January 2026",
-  "abstract": "Locally adapted React/Next.js performance references for Boero UI. SKILL.md scopes application; REFERENCE.md indexes individual rules. Examples are not automatic dependency changes or measured Boero speedups.",
+  "abstract": "Locally adapted React/Next.js performance references for Bemol UI. SKILL.md scopes application; REFERENCE.md indexes individual rules. Examples are not automatic dependency changes or measured Bemol speedups.",
   "references": [
     "https://react.dev",
     "https://nextjs.org",

@@ -1,6 +1,6 @@
 # Pautas de UI, Componentes y Navegación
 
-Esta guía detalla las reglas de diseño, patrones de tablas y convenciones de navegación que garantizan una experiencia de usuario consistente y accesible en Boero UI.
+Esta guía detalla las reglas de diseño, patrones de tablas y convenciones de navegación que garantizan una experiencia de usuario consistente y accesible en Bemol UI.
 
 ---
 

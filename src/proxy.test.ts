@@ -13,7 +13,7 @@ import { config, proxy } from "@/proxy";
 
 describe("proxy", () => {
   const fetchMock = jest.fn<ReturnType<typeof fetch>, Parameters<typeof fetch>>();
-  const originalApiUrl = process.env.BOERO_API_URL;
+  const originalApiUrl = process.env.BEMOL_API_URL;
   const originalPublicUrl = process.env.FRONTEND_PUBLIC_URL;
   const originalDomain = process.env.INSTITUTIONAL_BASE_DOMAIN;
 
@@ -31,7 +31,7 @@ describe("proxy", () => {
   }
 
   beforeEach(() => {
-    process.env.BOERO_API_URL = "https://api.example.test";
+    process.env.BEMOL_API_URL = "https://api.example.test";
     process.env.FRONTEND_PUBLIC_URL = "https://app.example.test";
     process.env.INSTITUTIONAL_BASE_DOMAIN = "";
     global.fetch = fetchMock;
@@ -42,7 +42,7 @@ describe("proxy", () => {
   });
 
   afterAll(() => {
-    process.env.BOERO_API_URL = originalApiUrl;
+    process.env.BEMOL_API_URL = originalApiUrl;
     process.env.FRONTEND_PUBLIC_URL = originalPublicUrl;
     process.env.INSTITUTIONAL_BASE_DOMAIN = originalDomain;
   });

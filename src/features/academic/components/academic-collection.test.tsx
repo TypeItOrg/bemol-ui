@@ -187,7 +187,7 @@ describe("AcademicCollectionView with its real table and filters", () => {
     await user.click(within(dialog).getByRole("button", { name: "Limpiar filtros" }));
 
     expect(mockReplace).toHaveBeenCalledTimes(1);
-    const destination = new URL(mockReplace.mock.calls[0][0], "https://boero.test");
+    const destination = new URL(mockReplace.mock.calls[0][0], "https://bemol.test");
     expect(destination.pathname).toBe("/admin/courses");
     expect(Object.fromEntries(destination.searchParams)).toEqual({
       page: "0",

@@ -1,7 +1,7 @@
 describe("logoutPlatformAccount", () => {
   type LogoutPlatformAccountModule = typeof import("@features/platform-auth/services/logout-platform-account.service");
 
-  const originalApiUrl = process.env.BOERO_API_URL;
+  const originalApiUrl = process.env.BEMOL_API_URL;
   const fetchMock = jest.fn<ReturnType<typeof fetch>, Parameters<typeof fetch>>();
 
   function mockAccessToken(accessToken: string | undefined): void {
@@ -25,7 +25,7 @@ describe("logoutPlatformAccount", () => {
   }
 
   beforeEach(() => {
-    process.env.BOERO_API_URL = "https://api.example.test";
+    process.env.BEMOL_API_URL = "https://api.example.test";
     jest.resetModules();
     global.fetch = fetchMock;
   });
@@ -35,7 +35,7 @@ describe("logoutPlatformAccount", () => {
   });
 
   afterAll(() => {
-    process.env.BOERO_API_URL = originalApiUrl;
+    process.env.BEMOL_API_URL = originalApiUrl;
   });
 
   it("does nothing when there is no access token", async () => {

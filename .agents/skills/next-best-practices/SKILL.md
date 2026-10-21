@@ -16,4 +16,4 @@ Read only the reference matching the unresolved question:
 - Runtime/deployment: [runtime](runtime-selection.md), [bundling](bundling.md), [self-hosting](self-hosting.md).
 - Requested runtime diagnosis: [debugging](debug-tricks.md).
 
-Preserve the Boero transport, authorization, returnTo and action-state contracts in AGENTS.md. Generic examples do not authorize a catch-all proxy, cache-policy change, package installation or deployment.
+Preserve the Bemol transport, authorization, returnTo and action-state contracts in AGENTS.md. Generic examples do not authorize a catch-all proxy, cache-policy change, package installation or deployment.

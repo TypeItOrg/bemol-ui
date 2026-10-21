@@ -2,10 +2,10 @@ import { loginPlatformAccount } from "@features/platform-auth/services/login-pla
 
 describe("loginPlatformAccount", () => {
   const fetchMock = jest.fn<ReturnType<typeof fetch>, Parameters<typeof fetch>>();
-  const originalApiUrl = process.env.BOERO_API_URL;
+  const originalApiUrl = process.env.BEMOL_API_URL;
 
   beforeEach(() => {
-    process.env.BOERO_API_URL = "https://api.example.test";
+    process.env.BEMOL_API_URL = "https://api.example.test";
     global.fetch = fetchMock;
   });
 
@@ -14,7 +14,7 @@ describe("loginPlatformAccount", () => {
   });
 
   afterAll(() => {
-    process.env.BOERO_API_URL = originalApiUrl;
+    process.env.BEMOL_API_URL = originalApiUrl;
   });
 
   it("posts login credentials and returns success payload", async () => {

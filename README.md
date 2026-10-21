@@ -2,7 +2,7 @@
 <p align="center">
   <!-- <img
     src="https://github.com/user-attachments/assets/4b9303aa-7c33-4866-a2c7-8e73fe7c1c80"
-    alt="Boero - Plataforma de gestión académica"
+    alt="Bemol - Plataforma de gestión académica"
     width="2170"
     height="725"
   /> -->
@@ -32,7 +32,7 @@
 
 <!-- Presentación -->
 <p align="center">
-  Boero es una plataforma que centraliza inscripciones, cursadas, calificaciones y procesos administrativos <strong>en un solo lugar</strong>.
+  Bemol es una plataforma que centraliza inscripciones, cursadas, calificaciones y procesos administrativos <strong>en un solo lugar</strong>.
   Pensada para <strong>estudiantes, docentes y personal administrativo</strong>, ofrece un espacio donde gestionar actividades,
   consultar información académica y dar seguimiento a los distintos procesos institucionales,
   mejorando la organización y facilitando la gestión cotidiana.
