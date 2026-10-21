@@ -83,6 +83,7 @@ describe("createGuardianDependentAction", () => {
       relationship: "FATHER",
       isPrimaryContact: true,
       requestMode: "NEW",
+      ownAccessRequested: false,
     });
     expect(revalidatePath).toHaveBeenCalledWith(GUARDIAN_DEPENDENTS_PAGE_PATH);
   });

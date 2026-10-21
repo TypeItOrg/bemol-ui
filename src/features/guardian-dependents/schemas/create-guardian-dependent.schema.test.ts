@@ -31,6 +31,8 @@ describe("createGuardianDependentSchema", () => {
       relationship: "FATHER",
       isPrimaryContact: true,
       requestMode: "NEW",
+      ownAccessRequested: false,
+      email: undefined,
     });
     expect(createGuardianDependentSchema.parse(createValidInput({ isPrimaryContact: "false" })).isPrimaryContact).toBe(false);
   });

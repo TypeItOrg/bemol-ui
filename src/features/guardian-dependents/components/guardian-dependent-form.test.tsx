@@ -75,6 +75,7 @@ describe("GuardianDependentForm", () => {
       relationship: "MOTHER",
       isPrimaryContact: "false",
       requestMode: "NEW",
+      ownAccessRequested: "false",
     });
   });
 
@@ -102,10 +103,10 @@ describe("GuardianDependentForm", () => {
     });
   });
 
-  it("explains that approval enables the selected identity's full roles and permissions", () => {
+  it("explains that approval allows acting on the dependent's behalf", () => {
     render(<GuardianDependentForm institutionId={INSTITUTION_ID} returnTo={RETURN_TO} />);
 
-    expect(screen.getByText(/al aprobarse, podrás activar su identidad y operar con todos sus roles y permisos/i)).toBeInTheDocument();
+    expect(screen.getByText(/al aprobarse, podrás operar en su nombre/i)).toBeInTheDocument();
   });
 
   it("sends isPrimaryContact as true when Sí is selected", async () => {

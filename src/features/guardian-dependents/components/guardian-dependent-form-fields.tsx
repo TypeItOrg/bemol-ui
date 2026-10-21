@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectVa
 
 import { FormSelect } from "@features/academic/components/academic-form-controls";
 import { calculateAge } from "@features/enrollment-applications/schemas/enrollment-application.schema";
+import { GuardianDependentOwnAccessFields } from "@features/guardian-dependents/components/guardian-dependent-own-access-fields";
 import { GUARDIAN_RELATIONSHIP_LABELS } from "@features/guardian-dependents/constants/guardian-dependent.constants";
 import type { GuardianDependentActionState } from "@features/guardian-dependents/types/guardian-dependent-action-state.types";
 import type { GuardianDependentFieldName } from "@features/guardian-dependents/types/guardian-dependent-field-name.types";
@@ -36,6 +37,8 @@ export function GuardianDependentFormFields({
     birthDate: string;
     relationship: string;
     isPrimaryContact: string;
+    ownAccessRequested: string;
+    email: string;
   };
 }): ReactElement {
   const birthDate = parseBirthDateInput(values.birthDate);
@@ -50,7 +53,7 @@ export function GuardianDependentFormFields({
 
   return (
     <div className="@container/dependent-fields">
-      <div className="grid items-start gap-4 @xl/dependent-fields:grid-cols-2 @4xl/dependent-fields:grid-cols-3">
+      <div className="flex flex-wrap items-start gap-4 *:min-w-0 *:grow *:basis-full @xl/dependent-fields:*:basis-[calc(50%-0.5rem)] @3xl/dependent-fields:*:basis-[calc(25%-0.75rem)] @3xl/dependent-fields:[&>:nth-child(-n+3)]:basis-[calc(23%-0.75rem)] @3xl/dependent-fields:[&>:nth-child(4)]:basis-[calc(31%-0.75rem)]">
         {values.requestMode === "NEW" ? (
           <>
             <Field data-invalid={!!fieldErrors?.firstName}>
@@ -161,6 +164,8 @@ export function GuardianDependentFormFields({
           />
           <FieldError errors={getErrors("isPrimaryContact")} />
         </Field>
+
+        <GuardianDependentOwnAccessFields disabled={disabled} fieldErrors={fieldErrors} onChange={onChange} values={values} />
       </div>
     </div>
   );

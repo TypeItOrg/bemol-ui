@@ -33,6 +33,8 @@ export async function createGuardianDependentAction(
     birthDate: formData.get("birthDate") ?? "",
     relationship: formData.get("relationship") ?? "",
     isPrimaryContact: formData.get("isPrimaryContact") ?? "",
+    ownAccessRequested: formData.get("ownAccessRequested") ?? "",
+    email: formData.get("email") ?? "",
   });
 
   if (!parsed.success) {

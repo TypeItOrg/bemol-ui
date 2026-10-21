@@ -48,5 +48,7 @@ export const GUARDIAN_DEPENDENT_MESSAGES = {
   INVALID_BIRTH_DATE: "La persona debe tener al menos 3 años.",
   INVALID_RELATIONSHIP: "Seleccioná el vínculo.",
   INVALID_PRIMARY_CONTACT: "Indicá si es tu contacto principal.",
+  INVALID_OWN_ACCESS: "Indicá si querés habilitar el acceso propio.",
+  REQUIRED_OWN_ACCESS_EMAIL: "Indicá el correo de la persona para enviarle la invitación.",
   INVALID_FORM: "No se pudo registrar la vinculación. Revisá los campos marcados.",
 } as const;

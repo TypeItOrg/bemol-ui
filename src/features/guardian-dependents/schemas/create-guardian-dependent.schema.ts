@@ -12,29 +12,36 @@ const guardianLinkFields = z.object({
   relationship: z.enum(Object.values(GUARDIAN_RELATIONSHIP) as [string, ...string[]], GUARDIAN_DEPENDENT_MESSAGES.INVALID_RELATIONSHIP),
   // Raw form value: it must be explicit, a missing value is invalid rather than an implicit false.
   isPrimaryContact: z.enum(["true", "false"], GUARDIAN_DEPENDENT_MESSAGES.INVALID_PRIMARY_CONTACT).transform((value) => value === "true"),
+  ownAccessRequested: z.enum(["true", "false"], GUARDIAN_DEPENDENT_MESSAGES.INVALID_OWN_ACCESS).transform((value) => value === "true"),
+  email: z.union([z.literal(""), z.string().trim().email("Ingresá un correo válido.").max(150)]).transform((value) => value || undefined),
 });
 
-export const createGuardianDependentSchema = z.discriminatedUnion("requestMode", [
-  guardianLinkFields.extend({ requestMode: z.literal("EXISTING") }),
-  guardianLinkFields.extend({
-    requestMode: z.literal("NEW"),
-    firstName: z
-      .string()
-      .trim()
-      .min(1, { message: GUARDIAN_DEPENDENT_MESSAGES.REQUIRED_NAME, abort: true })
-      .min(3, GUARDIAN_DEPENDENT_MESSAGES.INVALID_NAME)
-      .max(255, GUARDIAN_DEPENDENT_MESSAGES.INVALID_NAME)
-      .regex(/^[\p{L} ]+$/u, GUARDIAN_DEPENDENT_MESSAGES.INVALID_NAME),
-    lastName: z
-      .string()
-      .trim()
-      .min(1, { message: GUARDIAN_DEPENDENT_MESSAGES.REQUIRED_LAST_NAME, abort: true })
-      .min(3, GUARDIAN_DEPENDENT_MESSAGES.INVALID_LAST_NAME)
-      .max(255, GUARDIAN_DEPENDENT_MESSAGES.INVALID_LAST_NAME)
-      .regex(/^[\p{L} ]+$/u, GUARDIAN_DEPENDENT_MESSAGES.INVALID_LAST_NAME),
-    birthDate: z
-      .string()
-      .min(1, { message: GUARDIAN_DEPENDENT_MESSAGES.REQUIRED_BIRTH_DATE, abort: true })
-      .refine(hasMinimumPersonAge, GUARDIAN_DEPENDENT_MESSAGES.INVALID_BIRTH_DATE),
-  }),
-]);
+export const createGuardianDependentSchema = z
+  .discriminatedUnion("requestMode", [
+    guardianLinkFields.extend({ requestMode: z.literal("EXISTING") }),
+    guardianLinkFields.extend({
+      requestMode: z.literal("NEW"),
+      firstName: z
+        .string()
+        .trim()
+        .min(1, { message: GUARDIAN_DEPENDENT_MESSAGES.REQUIRED_NAME, abort: true })
+        .min(3, GUARDIAN_DEPENDENT_MESSAGES.INVALID_NAME)
+        .max(255, GUARDIAN_DEPENDENT_MESSAGES.INVALID_NAME)
+        .regex(/^[\p{L} ]+$/u, GUARDIAN_DEPENDENT_MESSAGES.INVALID_NAME),
+      lastName: z
+        .string()
+        .trim()
+        .min(1, { message: GUARDIAN_DEPENDENT_MESSAGES.REQUIRED_LAST_NAME, abort: true })
+        .min(3, GUARDIAN_DEPENDENT_MESSAGES.INVALID_LAST_NAME)
+        .max(255, GUARDIAN_DEPENDENT_MESSAGES.INVALID_LAST_NAME)
+        .regex(/^[\p{L} ]+$/u, GUARDIAN_DEPENDENT_MESSAGES.INVALID_LAST_NAME),
+      birthDate: z
+        .string()
+        .min(1, { message: GUARDIAN_DEPENDENT_MESSAGES.REQUIRED_BIRTH_DATE, abort: true })
+        .refine(hasMinimumPersonAge, GUARDIAN_DEPENDENT_MESSAGES.INVALID_BIRTH_DATE),
+    }),
+  ])
+  .refine((value) => !value.ownAccessRequested || Boolean(value.email), {
+    path: ["email"],
+    message: GUARDIAN_DEPENDENT_MESSAGES.REQUIRED_OWN_ACCESS_EMAIL,
+  });

@@ -56,6 +56,8 @@ export function GuardianDependentForm({ institutionId, returnTo }: { institution
     birthDate: "",
     relationship: "",
     isPrimaryContact: "false",
+    ownAccessRequested: "false",
+    email: "",
   });
 
   const fieldsDisabled = isPending || Boolean(state.requestCreated);
@@ -111,7 +113,7 @@ export function GuardianDependentForm({ institutionId, returnTo }: { institution
           <SectionHeader
             icon={UsersIcon}
             title="Persona a cargo"
-            description="Solicitá la vinculación con una persona a tu cargo. Al aprobarse, podrás activar su identidad y operar con todos sus roles y permisos."
+            description="Solicitá la vinculación con una persona a tu cargo. Al aprobarse, podrás operar en su nombre."
           />
         </header>
         <input name="requestMode" type="hidden" value={values.requestMode} />
