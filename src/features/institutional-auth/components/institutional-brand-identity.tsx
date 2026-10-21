@@ -4,6 +4,8 @@ import { useState, type ReactElement } from "react";
 
 import Image from "next/image";
 
+import { useTheme } from "next-themes";
+
 import { cn } from "@common/utils/cn.util";
 
 import { useInstitutionalBrand } from "@features/institutional-auth/components/institutional-brand-context";
@@ -14,15 +16,21 @@ export function InstitutionalBrandIdentity({
   imageClassName,
   imageContainerClassName = "h-56 w-full",
   showInstitutionName = false,
+  darkBackground = false,
 }: {
   className?: string;
   imageClassName?: string;
   imageContainerClassName?: string;
   showInstitutionName?: boolean;
+  darkBackground?: boolean;
 }): ReactElement {
   const institution = useInstitutionalBrand();
 
-  const logoUrl = institution ? getInstitutionLogoUrl(institution.id, institution.logoUrl) : "/brand/logo.svg";
+  const { resolvedTheme } = useTheme();
+
+  const productLogoUrl = darkBackground || resolvedTheme === "dark" ? "/brand/logo-dark.svg" : "/brand/logo.svg";
+
+  const logoUrl = institution ? getInstitutionLogoUrl(institution.id, institution.logoUrl) : productLogoUrl;
 
   const [failedUrl, setFailedUrl] = useState<string>();
 
@@ -55,7 +63,12 @@ export function InstitutionalBrandIdentity({
 export function InstitutionalBrandPanel({ showInstitutionName = false }: { showInstitutionName?: boolean }): ReactElement {
   return (
     <section className="from-primary to-primary/80 text-primary-foreground relative hidden bg-linear-to-l p-8 md:flex md:items-center md:justify-center lg:p-12">
-      <InstitutionalBrandIdentity className="w-full max-w-56" imageContainerClassName="h-56 w-full" showInstitutionName={showInstitutionName} />
+      <InstitutionalBrandIdentity
+        className="w-full max-w-56"
+        imageContainerClassName="h-56 w-full"
+        showInstitutionName={showInstitutionName}
+        darkBackground
+      />
     </section>
   );
 }

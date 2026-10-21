@@ -1,6 +1,9 @@
+name: bemol-ui
+
 services:
   dev:
     container_name: bemol-ui-dev
+    image: bemol-ui:dev
     build:
       context: .
       target: dev

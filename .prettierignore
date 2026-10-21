@@ -4,4 +4,3 @@ coverage
 pnpm-lock.yaml
 .agents/
 docs/
-deploy/nginx/boero.conf.example

@@ -157,6 +157,8 @@ Si existe algún error de linting que no pueda corregirse de forma automática, 
 
 ## Nombre de la aplicación
 
-La aplicación se llama **Bemol**. Los identificadores operativos anteriores se
-conservan cuando son necesarios para acceder a recursos existentes. Consultar
-la guía `boero-infra/docs/RENOMBRE-BEMOL.md` antes de renombrar recursos persistentes.
+La aplicación y sus identificadores técnicos se llaman **Bemol**. Antes de usar
+los nuevos nombres en un entorno existente, migrar sus recursos persistentes con
+backup y rollback según la guía `bemol-infra/docs/RENOMBRE-BEMOL.md`.
+No alcanza con cambiar las variables o ejecutar un nuevo Compose: eso puede
+conectar el servicio a recursos vacíos en lugar de los datos actuales.

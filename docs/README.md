@@ -16,7 +16,7 @@ docs/
 │   ├── ARQUITECTURA.md                # Stack (Next.js 16, React 19, Tailwind v4), estructura y tipado
 │   ├── AUTENTICACION.md               # Proxy, cookies HttpOnly, rotación de tokens y manejo de 401
 │   └── MUTACIONES-Y-ESTADO-ASINCRONO.md # Server Actions vs React Query, ActionForm y diálogos
-└── infrastructure/                    # (Apartado: CI y despliegues coordinados con boero-infra)
+└── infrastructure/                    # (Apartado: CI y despliegues coordinados con bemol-infra)
     ├── CI.md
     └── DEPLOYMENT.md
 ```

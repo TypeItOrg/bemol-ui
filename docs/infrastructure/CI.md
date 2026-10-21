@@ -9,7 +9,7 @@ graph LR
     C --> D[📝 Typecheck]
     D --> E[🧪 Tests]
     E --> F[🏗️ Build]
-    F --> G{¿Staging o Main?}
+    F --> G{¿Staging?}
     G -->|Sí| H[🐳 Publish to GHCR]
     G -->|No| I[✅ Done]
     H --> I
@@ -17,12 +17,17 @@ graph LR
 
 ## Publicación de imágenes
 
-Los pushes a `staging` y `main` publican dos imágenes en **GitHub Container Registry**:
+Los pushes a `staging` publican dos etiquetas de la imagen en **GitHub Container Registry**:
 
 ```
-ghcr.io/typeitorg/boero-ui:sha-<sha-del-commit>   # Inmutable
-ghcr.io/typeitorg/boero-ui:<rama>                  # Puntero a la última imagen exitosa
+ghcr.io/typeitorg/bemol-ui:sha-<sha-del-commit>   # Inmutable
+ghcr.io/typeitorg/bemol-ui:<rama>                  # Puntero a la última imagen exitosa
 ```
+
+> [!WARNING]
+> Los repositorios remotos ya fueron renombrados a Bemol. La publicación de la
+> nueva imagen y la migración de permisos y referencias externas siguen pendientes;
+> ver [Despliegue](DEPLOYMENT.md) antes de desplegar.
 
 > [!IMPORTANT]
 > Los despliegues **deben usar la etiqueta inmutable** `sha-<sha-del-commit>`. La etiqueta de rama es solamente un puntero conveniente.

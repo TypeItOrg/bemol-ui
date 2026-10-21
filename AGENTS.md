@@ -18,7 +18,7 @@ Finish the requested outcome, including authorized verification and fixes caused
 
 ## Environment availability
 
-Local development belongs here; shared staging/production configuration and operations docs belong to `boero-infra`. For deployment work, consult those docs and this checkout's `.github/workflows/`; verify the target host before claiming a live environment. Retain environment configuration, but do not treat it or old provisioning notes as runtime evidence. Do not deploy or change deployment policy unless requested.
+Local development belongs here; shared staging/production configuration and operations docs belong to `bemol-infra`. For deployment work, consult those docs and this checkout's `.github/workflows/`; verify the target host before claiming a live environment. Retain environment configuration, but do not treat it or old provisioning notes as runtime evidence. Do not deploy or change deployment policy unless requested.
 
 ## Authentication refresh invariants
 
