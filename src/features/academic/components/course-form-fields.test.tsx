@@ -1,5 +1,7 @@
 import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { http, HttpResponse } from "msw";
+import { setupServer } from "msw/node";
 
 import { CourseFields } from "@features/academic/components/course-form-fields";
 import { AcademicScope } from "@features/academic/utils/academic-scope.util";
@@ -10,18 +12,27 @@ jest.mock("@tanstack/react-virtual", () => ({
   useVirtualizer: jest.requireActual("@/../test/utils/mock-virtualizer").mockVirtualizer,
 }));
 
-describe("course form dependencies", () => {
-  afterEach(() => jest.restoreAllMocks());
+const server = setupServer();
+beforeAll(() => server.listen({ onUnhandledRequest: "error" }));
+afterEach(() => server.resetHandlers());
+afterAll(() => server.close());
 
+describe("course form dependencies", () => {
   it("clears dependent payload values when changing plan and derives them from the newly chosen space", async () => {
     const user = userEvent.setup();
-    jest.spyOn(global, "fetch").mockImplementation(async (input) =>
-      Response.json({
-        items: String(input).includes("options/study-plans")
-          ? [{ id: "plan-b", name: "Plan nuevo" }]
-          : [{ id: "space-b", studyPlanSpaceId: "plan-space-b", name: "Ensamble", type: "SUBJECT", format: "GRUPAL", instrumental: false }],
-        page: 0,
-        totalPages: 1,
+    const requests: URL[] = [];
+    server.use(
+      http.get("http://localhost/api/institutional/academic/:catalog/:resource", ({ params, request }) => {
+        requests.push(new URL(request.url));
+
+        return HttpResponse.json({
+          items:
+            params.resource === "study-plans"
+              ? [{ id: "plan-b", name: "Plan nuevo" }]
+              : [{ id: "space-b", studyPlanSpaceId: "plan-space-b", name: "Ensamble", type: "SUBJECT", format: "GRUPAL", instrumental: false }],
+          page: 0,
+          totalPages: 1,
+        });
       }),
     );
     renderWithQueryClient(
@@ -65,6 +76,8 @@ describe("course form dependencies", () => {
     expect(selected.get("academicSpaceId")).toBe("space-b");
     expect(selected.get("format")).toBe("GRUPAL");
     expect(selected.get("instrumentId")).toBe("");
+    expect(requests.every((url) => url.searchParams.get("institutionId") === "institution-a")).toBe(true);
+    expect(requests.at(-1)?.searchParams.get("studyPlanId")).toBe("plan-b");
     expect(screen.getByRole("combobox", { name: "Espacio académico" })).toHaveTextContent("Ensamble");
   });
 

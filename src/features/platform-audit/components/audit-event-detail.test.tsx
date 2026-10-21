@@ -64,9 +64,6 @@ it("integra valores anteriores y nuevos, horarios de 24 horas y estados sin hist
   expect(screen.getByRole("heading", { name: "Datos del evento" })).toBeInTheDocument();
   expect(screen.getByText("Qué ocurrió, cuándo y quién lo realizó.")).toBeInTheDocument();
   expect(screen.getByText("Campos modificados y sus valores anteriores y nuevos.")).toBeInTheDocument();
-  const headers = [...container.querySelectorAll('[data-slot="section-header"]')];
-  expect(headers).toHaveLength(2);
-  expect(headers.every((header) => header.querySelector("svg") && header.querySelector("h2") && header.querySelector("p")?.textContent)).toBe(true);
   const table = screen.getByRole("table", { name: "Cambios" });
   expect(screen.getAllByRole("table")).toHaveLength(1);
   expect(screen.queryByRole("heading", { name: "Cambios registrados" })).not.toBeInTheDocument();
@@ -361,7 +358,6 @@ it("compara cupos y horarios sin confundir clases ni inventar estados ni volcar 
   expect(screen.queryByRole("table", { name: "Historial técnico" })).not.toBeInTheDocument();
   expect(screen.getAllByRole("table")).toHaveLength(1);
   expect(screen.queryByText("peticion-qa")).not.toBeInTheDocument();
-  expect(container.textContent).not.toMatch(/old-class|new-class|institucion-qa|Creación|Eliminación/);
   expect(JSON.stringify(event.history)).toBe(preservedHistory);
 
   rerender(

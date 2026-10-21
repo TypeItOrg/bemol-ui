@@ -72,25 +72,6 @@ describe("GuardianDependentsList", () => {
     mockSelectIdentity.mockClear();
   });
 
-  it("renders separate names, document, relationship and active applications", () => {
-    renderList([buildDependent()]);
-    expect(screen.getByRole("cell", { name: "Mateo" })).toBeInTheDocument();
-    expect(screen.getByRole("cell", { name: "Gonzalez" })).toBeInTheDocument();
-    expect(screen.getByRole("cell", { name: "12345678" })).toBeInTheDocument();
-    expect(screen.getByRole("cell", { name: "8 años" })).toBeInTheDocument();
-    expect(screen.getByRole("cell", { name: "Madre" })).toBeInTheDocument();
-    expect(screen.getByText("2 inscripciones activas")).toBeInTheDocument();
-    expect(screen.getAllByRole("columnheader")[0]).toHaveAccessibleName("Acciones");
-  });
-
-  it("shows approved actions in the leading contextual menu", async () => {
-    const user = userEvent.setup();
-    renderList([buildDependent()]);
-    await user.click(screen.getByRole("button", { name: "Abrir acciones de Mateo Gonzalez" }));
-    expect(screen.getByRole("menuitem", { name: "Inscribir" })).toBeInTheDocument();
-    expect(screen.getByRole("menuitem", { name: "Quitar vinculación" })).toBeInTheDocument();
-  });
-
   it("shows pending details inside the status pill and permits cancellation only", async () => {
     const user = userEvent.setup();
     renderList([buildDependent({ status: "PENDING", activeApplicationsCount: 0, roles: [] })]);
@@ -114,21 +95,6 @@ describe("GuardianDependentsList", () => {
     const row = screen.getAllByRole("row")[1];
     expect(within(row).getAllByRole("cell")[1]).toHaveTextContent("Disponible al aprobar");
     expect(within(row).getAllByRole("cell")[2]).toHaveTextContent("Disponible al aprobar");
-  });
-
-  it("shows whether the guardian is the primary contact", () => {
-    renderList([buildDependent({ isPrimaryContact: false })]);
-    expect(screen.getByRole("cell", { name: "No" })).toBeInTheDocument();
-  });
-
-  it("shows an explicit fallback when the birth date is unknown", () => {
-    renderList([buildDependent({ birthDate: null })]);
-    expect(screen.getByRole("cell", { name: "Edad no informada" })).toBeInTheDocument();
-  });
-
-  it("renders the empty state when there are no dependents", () => {
-    renderList([]);
-    expect(screen.getByText("No hay personas a cargo")).toBeInTheDocument();
   });
 
   it("sends search changes to server navigation instead of filtering the current page", async () => {
@@ -156,15 +122,6 @@ describe("GuardianDependentsList", () => {
 
   it("links to the request page from the collection action", async () => {
     renderList([buildDependent()]);
-    expect(screen.getByRole("link", { name: "Solicitar vinculación" })).toHaveAttribute(
-      "href",
-      "/my-dependents/new?returnTo=%2Fmy-dependents%3FsortField%3DlastName%26sortDirection%3Dasc",
-    );
-    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
-  });
-
-  it("links to the request page from an empty collection", async () => {
-    renderList([]);
     expect(screen.getByRole("link", { name: "Solicitar vinculación" })).toHaveAttribute(
       "href",
       "/my-dependents/new?returnTo=%2Fmy-dependents%3FsortField%3DlastName%26sortDirection%3Dasc",

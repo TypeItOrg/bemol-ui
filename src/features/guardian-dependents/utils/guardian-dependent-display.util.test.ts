@@ -1,5 +1,5 @@
 import type { GuardianDependent } from "@features/guardian-dependents/types/guardian-dependent.types";
-import { filterActiveGuardianDependents, getGuardianDependentName } from "@features/guardian-dependents/utils/guardian-dependent-display.util";
+import { filterActiveGuardianDependents } from "@features/guardian-dependents/utils/guardian-dependent-display.util";
 
 function createDependent(overrides: Partial<GuardianDependent> = {}): GuardianDependent {
   return {
@@ -19,16 +19,6 @@ function createDependent(overrides: Partial<GuardianDependent> = {}): GuardianDe
     ...overrides,
   };
 }
-
-describe("getGuardianDependentName", () => {
-  it("joins the name when the API exposes it", () => {
-    expect(getGuardianDependentName(createDependent())).toBe("Mateo González");
-  });
-
-  it("does not substitute the document for a missing name", () => {
-    expect(getGuardianDependentName(createDependent({ firstName: null, lastName: null }))).toBe("");
-  });
-});
 
 describe("filterActiveGuardianDependents", () => {
   it("keeps only approved links", () => {

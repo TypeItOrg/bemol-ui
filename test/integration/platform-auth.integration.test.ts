@@ -1,4 +1,4 @@
-import { NextRequest, type NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 
 import { http, HttpResponse } from "msw";
 import { setupServer } from "msw/node";
@@ -11,156 +11,65 @@ const originalEnvironment = {
   FRONTEND_PUBLIC_URL: process.env.FRONTEND_PUBLIC_URL,
   INSTITUTIONAL_BASE_DOMAIN: process.env.INSTITUTIONAL_BASE_DOMAIN,
 };
-const PLATFORM_ACCESS_TOKEN_COOKIE = "platform_access_token";
-const PLATFORM_REFRESH_TOKEN_COOKIE = "platform_refresh_token";
-const AUTH_COOKIE_NAMES = [PLATFORM_ACCESS_TOKEN_COOKIE, PLATFORM_REFRESH_TOKEN_COOKIE] as const;
-const LOGIN_CREDENTIALS = {
-  email: "admin@example.com",
-  password: "secret",
-};
-
-type CookieJarStore = {
-  [Symbol.iterator]: () => Generator<never, void, unknown>;
-  delete: jest.Mock;
-  get: jest.Mock;
-  getAll: jest.Mock;
-  has: jest.Mock;
-  set: jest.Mock;
-  size: number;
-};
-
-class RedirectError extends Error {
-  constructor(readonly url: string) {
-    super("NEXT_REDIRECT");
-  }
-}
-
-class PlatformCookieJar {
-  private readonly cookies = new Map<string, string>();
-
-  asCookieStore(): CookieJarStore {
-    const cookies = this.cookies;
-
-    return {
-      [Symbol.iterator]: function* iterator() {},
-      delete: jest.fn((name: string) => {
-        cookies.delete(name);
-      }),
-      get: jest.fn((name: string) => getCookieValue(cookies, name)),
-      getAll: jest.fn(() => Array.from(cookies, ([name, value]) => ({ name, value }))),
-      has: jest.fn((name: string) => cookies.has(name)),
-      set: jest.fn((name: string, value: string) => {
-        cookies.set(name, value);
-      }),
-      size: cookies.size,
-    };
-  }
-
-  set(name: string, value: string): void {
-    this.cookies.set(name, value);
-  }
-
-  get(name: string): string | undefined {
-    return this.cookies.get(name);
-  }
-
-  has(name: string): boolean {
-    return this.cookies.has(name);
-  }
-
-  toRequestCookieHeader(): string {
-    return Array.from(this.cookies, ([name, value]) => `${name}=${value}`).join("; ");
-  }
-
-  applyResponseCookies(response: NextResponse): void {
-    for (const name of AUTH_COOKIE_NAMES) {
-      const cookie = response.cookies.get(name);
-
-      if (!cookie) {
-        continue;
-      }
-
-      if (cookie.value === "") {
-        this.cookies.delete(name);
-        continue;
-      }
-
-      this.cookies.set(name, cookie.value);
-    }
-  }
-}
-
-function getCookieValue(cookies: Map<string, string>, name: string): { value: string } | undefined {
-  const value = cookies.get(name);
-
-  return value ? { value } : undefined;
-}
-
+const ACCESS_COOKIE = "platform_access_token";
+const REFRESH_COOKIE = "platform_refresh_token";
+const credentials = { email: "admin@example.com", password: "secret" };
 const account: PlatformAccount = {
   platformAccountId: "platform-account-1",
-  email: "admin@example.com",
+  email: credentials.email,
   name: "Ada",
   lastName: "Lovelace",
 };
-
-const loginTokens = {
-  accessToken: "login-access-token",
-  refreshToken: "login-refresh-token",
-};
-
-const refreshedTokens = {
-  accessToken: "refreshed-access-token",
-  refreshToken: "refreshed-refresh-token",
-};
-
-let cookieJar: PlatformCookieJar;
-let redirectMock: jest.Mock;
-let lastAccountAuthorization: string | null = null;
+const loginTokens = { accessToken: "login-access", refreshToken: "login-refresh" };
+const refreshedTokens = { accessToken: "refreshed-access", refreshToken: "refreshed-refresh" };
+const cookieValues = new Map<string, string>();
+let loginRequests: Request[];
+let accountAuthorizations: (string | null)[];
+let logoutRequests: Request[];
 
 const server = setupServer(
   http.post(`${API_URL}/api/v1/admin/auth/login`, async ({ request }) => {
-    const body = (await request.json()) as { email?: string; password?: string };
+    loginRequests.push(request.clone());
+    const body = await request.json();
 
-    if (body.email !== LOGIN_CREDENTIALS.email || body.password !== LOGIN_CREDENTIALS.password) {
-      return HttpResponse.json({ status: 401, message: "Credenciales invalidas" }, { status: 401 });
+    if (JSON.stringify(body) !== JSON.stringify(credentials)) {
+      return HttpResponse.json({ status: 401, message: "Credenciales inválidas" }, { status: 401 });
     }
 
-    return HttpResponse.json({
-      account,
-      tokens: loginTokens,
-    });
+    return HttpResponse.json({ account, tokens: loginTokens });
   }),
   http.post(`${API_URL}/api/v1/admin/auth/refresh`, async ({ request }) => {
     const body = (await request.json()) as { refreshToken?: string };
 
     if (body.refreshToken !== loginTokens.refreshToken) {
-      return HttpResponse.json({ status: 401, message: "Refresh token invalido" }, { status: 401 });
+      return HttpResponse.json({ status: 401, message: "Refresh inválido" }, { status: 401 });
     }
 
-    return HttpResponse.json({
-      tokens: refreshedTokens,
-    });
+    return HttpResponse.json({ tokens: refreshedTokens });
   }),
   http.get(`${API_URL}/api/v1/admin/auth/me`, ({ request }) => {
-    lastAccountAuthorization = request.headers.get("authorization");
+    const authorization = request.headers.get("authorization");
+    accountAuthorizations.push(authorization);
+    expect(request.cache).toBe("no-store");
 
-    if (lastAccountAuthorization !== `Bearer ${loginTokens.accessToken}` && lastAccountAuthorization !== `Bearer ${refreshedTokens.accessToken}`) {
-      return HttpResponse.json({ status: 401, message: "Unauthorized" }, { status: 401 });
+    if (![loginTokens.accessToken, refreshedTokens.accessToken].some((token) => authorization === `Bearer ${token}`)) {
+      return HttpResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
     return HttpResponse.json({ account });
   }),
+  http.post(`${API_URL}/api/v1/admin/auth/logout`, ({ request }) => {
+    logoutRequests.push(request.clone());
+
+    return new HttpResponse(null, { status: 204 });
+  }),
 );
 
-beforeAll(() => {
-  server.listen({ onUnhandledRequest: "error" });
-});
-
+beforeAll(() => server.listen({ onUnhandledRequest: "error" }));
 afterEach(() => {
   server.resetHandlers();
   jest.resetModules();
 });
-
 afterAll(() => {
   server.close();
 
@@ -172,108 +81,183 @@ afterAll(() => {
     }
   }
 });
-
 beforeEach(() => {
   process.env.BEMOL_API_URL = API_URL;
   process.env.FRONTEND_PUBLIC_URL = "https://app.example.test";
   process.env.INSTITUTIONAL_BASE_DOMAIN = "example.test";
-  cookieJar = new PlatformCookieJar();
-  lastAccountAuthorization = null;
-  redirectMock = jest.fn((url: string) => {
-    throw new RedirectError(url);
-  });
+  cookieValues.clear();
+  loginRequests = [];
+  accountAuthorizations = [];
+  logoutRequests = [];
 
   jest.doMock("next/headers", () => ({
-    cookies: jest.fn(async () => cookieJar.asCookieStore()),
-    headers: jest.fn(
-      async () =>
-        new Headers({
-          host: "app.example.test",
-          "user-agent": "Mozilla/5.0",
-          "x-real-ip": "203.0.113.20",
-        }),
-    ),
+    cookies: async () => ({
+      get: (name: string) => (cookieValues.has(name) ? { name, value: cookieValues.get(name) } : undefined),
+      set: (name: string, value: string) => cookieValues.set(name, value),
+      delete: (name: string) => cookieValues.delete(name),
+    }),
+    headers: async () => new Headers({ host: "app.example.test", "user-agent": "Mozilla/5.0", "x-real-ip": "203.0.113.20" }),
   }));
-
   jest.doMock("next/navigation", () => ({
-    redirect: redirectMock,
+    redirect: (url: string) => {
+      throw Object.assign(new Error("NEXT_REDIRECT"), { url });
+    },
   }));
 });
 
-async function login(next = "/admin"): Promise<void> {
-  const { loginPlatform } = await import("@features/platform-auth/actions/platform-login.action");
+function loginForm(overrides: Record<string, string> = {}): FormData {
+  const form = new FormData();
 
-  await expect(loginPlatform({}, createLoginFormData(next))).rejects.toMatchObject({
-    url: next,
+  for (const [key, value] of Object.entries({ ...credentials, next: "/admin/accounts?page=2", ...overrides })) {
+    form.set(key, value);
+  }
+
+  return form;
+}
+
+function platformRequest(): NextRequest {
+  return new NextRequest("https://app.example.test/admin", {
+    headers: { host: "app.example.test", cookie: Array.from(cookieValues, ([name, value]) => `${name}=${value}`).join("; ") },
   });
 }
 
-function createLoginFormData(next: string): FormData {
-  const formData = new FormData();
-
-  formData.set("email", LOGIN_CREDENTIALS.email);
-  formData.set("password", LOGIN_CREDENTIALS.password);
-  formData.set("next", next);
-
-  return formData;
-}
-
-function createPlatformRequest(path = "/admin"): NextRequest {
-  return new NextRequest(`https://app.example.test${path}`, {
-    headers: {
-      host: "app.example.test",
-      cookie: cookieJar.toRequestCookieHeader(),
-    },
-  });
-}
-
-describe("platform auth integration", () => {
-  it("logs in through the real action, stores auth cookies, and redirects", async () => {
-    await login("/admin");
-
-    expect(cookieJar.get(PLATFORM_ACCESS_TOKEN_COOKIE)).toBe(loginTokens.accessToken);
-    expect(cookieJar.get(PLATFORM_REFRESH_TOKEN_COOKIE)).toBe(loginTokens.refreshToken);
-    expect(redirectMock).toHaveBeenCalledWith("/admin");
-  });
-
-  it("loads the platform account using the access token stored by login", async () => {
-    await login("/admin");
+describe("platform authentication over HTTP", () => {
+  it("logs in, loads the account, rotates credentials for the current request and logs out without touching institutional cookies", async () => {
+    cookieValues.set("institutional_access_token", "institutional-access");
+    const { loginPlatform } = await import("@features/platform-auth/actions/platform-login.action");
+    await expect(loginPlatform({}, loginForm())).rejects.toMatchObject({ url: "/admin/accounts?page=2" });
+    expect(cookieValues.get(ACCESS_COOKIE)).toBe(loginTokens.accessToken);
+    expect(cookieValues.get(REFRESH_COOKIE)).toBe(loginTokens.refreshToken);
+    expect(loginRequests).toHaveLength(1);
+    expect(await loginRequests[0].json()).toEqual(credentials);
+    expect(loginRequests[0].cache).toBe("no-store");
+    expect(loginRequests[0].headers.get("user-agent")).toBe("Mozilla/5.0");
+    expect(loginRequests[0].headers.get("x-forwarded-for")).toBe("203.0.113.20");
+    expect(loginRequests[0].headers.get("x-real-ip")).toBe("203.0.113.20");
 
     const { getPlatformAccount } = await import("@features/platform-auth/services/get-platform-account.service");
-
     await expect(getPlatformAccount()).resolves.toEqual(account);
-    expect(lastAccountAuthorization).toBe(`Bearer ${loginTokens.accessToken}`);
-  });
+    expect(accountAuthorizations).toEqual([`Bearer ${loginTokens.accessToken}`]);
 
-  it("refreshes missing access tokens in proxy and uses the refreshed token for account loading", async () => {
-    cookieJar.set(PLATFORM_REFRESH_TOKEN_COOKIE, loginTokens.refreshToken);
-
+    cookieValues.delete(ACCESS_COOKIE);
     const { proxy } = await import("../../src/proxy");
-    const response = await proxy(createPlatformRequest());
-
-    cookieJar.applyResponseCookies(response);
-
+    const response = await proxy(platformRequest());
     expect(response.headers.get("x-middleware-next")).toBe("1");
-    expect(cookieJar.get(PLATFORM_ACCESS_TOKEN_COOKIE)).toBe(refreshedTokens.accessToken);
-    expect(cookieJar.get(PLATFORM_REFRESH_TOKEN_COOKIE)).toBe(refreshedTokens.refreshToken);
+    expect(response.headers.get("x-middleware-request-cookie")).toContain(`${ACCESS_COOKIE}=${refreshedTokens.accessToken}`);
+    expect(response.headers.get("x-middleware-request-cookie")).toContain(`${REFRESH_COOKIE}=${refreshedTokens.refreshToken}`);
 
-    const { getPlatformAccount } = await import("@features/platform-auth/services/get-platform-account.service");
+    for (const name of [ACCESS_COOKIE, REFRESH_COOKIE]) {
+      cookieValues.set(name, response.cookies.get(name)!.value);
+    }
 
+    expect(cookieValues.get(ACCESS_COOKIE)).toBe(refreshedTokens.accessToken);
+    expect(cookieValues.get(REFRESH_COOKIE)).toBe(refreshedTokens.refreshToken);
     await expect(getPlatformAccount()).resolves.toEqual(account);
-    expect(lastAccountAuthorization).toBe(`Bearer ${refreshedTokens.accessToken}`);
+    expect(accountAuthorizations.at(-1)).toBe(`Bearer ${refreshedTokens.accessToken}`);
+
+    const { logoutPlatform } = await import("@features/platform-auth/actions/platform-logout.action");
+    await expect(logoutPlatform()).rejects.toMatchObject({ url: "/admin/auth/login" });
+    expect(logoutRequests).toHaveLength(1);
+    expect(logoutRequests[0].method).toBe("POST");
+    expect(logoutRequests[0].headers.get("authorization")).toBe(`Bearer ${refreshedTokens.accessToken}`);
+    expect(logoutRequests[0].cache).toBe("no-store");
+    expect(cookieValues.has(ACCESS_COOKIE)).toBe(false);
+    expect(cookieValues.has(REFRESH_COOKIE)).toBe(false);
+    expect(cookieValues.get("institutional_access_token")).toBe("institutional-access");
   });
 
-  it("redirects to login and clears auth cookies when refresh fails", async () => {
-    cookieJar.set(PLATFORM_REFRESH_TOKEN_COOKIE, "invalid-refresh-token");
+  it("rejects invalid fields before HTTP and never installs credentials after backend validation or authentication errors", async () => {
+    const { loginPlatform } = await import("@features/platform-auth/actions/platform-login.action");
+    expect(await loginPlatform({}, new FormData())).toMatchObject({ fieldErrors: { email: expect.any(String), password: expect.any(String) } });
+    expect(loginRequests).toHaveLength(0);
 
+    server.use(
+      http.post(`${API_URL}/api/v1/admin/auth/login`, () =>
+        HttpResponse.json(
+          {
+            status: 400,
+            message: "Validation error",
+            fieldErrors: { email: "Correo inválido", password: "Contraseña inválida", ignored: "ignored" },
+          },
+          { status: 400 },
+        ),
+      ),
+    );
+    await expect(loginPlatform({}, loginForm())).resolves.toEqual({ fieldErrors: { email: "Correo inválido", password: "Contraseña inválida" } });
+
+    server.resetHandlers();
+    await expect(loginPlatform({}, loginForm({ password: "wrong" }))).resolves.toEqual({ error: "Credenciales inválidas" });
+    expect(cookieValues.has(ACCESS_COOKIE)).toBe(false);
+    expect(cookieValues.has(REFRESH_COOKIE)).toBe(false);
+  });
+
+  it.each([false, true])(
+    "does not borrow an institutional access token when platform credentials are missing (institutional=%s)",
+    async (hasInstitutional) => {
+      if (hasInstitutional) {
+        cookieValues.set("institutional_access_token", "institutional-access");
+      }
+
+      const { getPlatformAccount } = await import("@features/platform-auth/services/get-platform-account.service");
+      await expect(getPlatformAccount()).resolves.toBeNull();
+      expect(accountAuthorizations).toHaveLength(0);
+    },
+  );
+
+  it.each(["unauthorized", "unavailable", "malformed", "network"] as const)(
+    "distinguishes %s account responses from a valid session",
+    async (failure) => {
+      cookieValues.set(ACCESS_COOKIE, loginTokens.accessToken);
+      server.use(
+        http.get(`${API_URL}/api/v1/admin/auth/me`, () => {
+          if (failure === "network") {
+            return HttpResponse.error();
+          }
+
+          if (failure === "malformed") {
+            return HttpResponse.json({ account: { platformAccountId: "incomplete" } });
+          }
+
+          return HttpResponse.json({ message: failure }, { status: failure === "unauthorized" ? 401 : 503 });
+        }),
+      );
+      const { getPlatformAccount } = await import("@features/platform-auth/services/get-platform-account.service");
+
+      if (failure === "unauthorized") {
+        await expect(getPlatformAccount()).resolves.toBeNull();
+      } else {
+        await expect(getPlatformAccount()).rejects.toThrow();
+      }
+
+      expect(cookieValues.get(ACCESS_COOKIE)).toBe(loginTokens.accessToken);
+    },
+  );
+
+  it("clears the response credentials only after a definitive refresh rejection", async () => {
+    cookieValues.set(REFRESH_COOKIE, "invalid-refresh");
     const { proxy } = await import("../../src/proxy");
-    const response = await proxy(createPlatformRequest());
-
-    cookieJar.applyResponseCookies(response);
-
+    const response = await proxy(platformRequest());
     expect(response.status).toBe(307);
     expect(response.headers.get("location")).toBe("https://app.example.test/admin/auth/login?next=%2Fadmin");
-    expect(cookieJar.has(PLATFORM_ACCESS_TOKEN_COOKIE)).toBe(false);
-    expect(cookieJar.has(PLATFORM_REFRESH_TOKEN_COOKIE)).toBe(false);
+    expect(response.cookies.get(ACCESS_COOKIE)?.value).toBe("");
+    expect(response.cookies.get(REFRESH_COOKIE)?.value).toBe("");
+  });
+
+  it("does not send remote logout without a platform token", async () => {
+    cookieValues.set("institutional_access_token", "institutional-access");
+    const { logoutPlatformAccount } = await import("@features/platform-auth/services/logout-platform-account.service");
+    await expect(logoutPlatformAccount()).resolves.toBeUndefined();
+    expect(logoutRequests).toHaveLength(0);
+    expect(cookieValues.get("institutional_access_token")).toBe("institutional-access");
+  });
+
+  it("clears local credentials when remote logout is unavailable", async () => {
+    cookieValues.set(ACCESS_COOKIE, loginTokens.accessToken);
+    cookieValues.set(REFRESH_COOKIE, loginTokens.refreshToken);
+    server.use(http.post(`${API_URL}/api/v1/admin/auth/logout`, () => HttpResponse.error()));
+    const { logoutPlatformAccount } = await import("@features/platform-auth/services/logout-platform-account.service");
+    await expect(logoutPlatformAccount()).resolves.toBeUndefined();
+    expect(cookieValues.has(ACCESS_COOKIE)).toBe(false);
+    expect(cookieValues.has(REFRESH_COOKIE)).toBe(false);
   });
 });

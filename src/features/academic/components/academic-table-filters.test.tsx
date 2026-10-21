@@ -1,6 +1,8 @@
 import { QueryClientProvider } from "@tanstack/react-query";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { http, HttpResponse } from "msw";
+import { setupServer } from "msw/node";
 
 import { DataTableNavigationProvider } from "@common/components/ui/data-table-navigation";
 
@@ -18,18 +20,12 @@ jest.mock("@tanstack/react-virtual", () => ({
   useVirtualizer: jest.requireActual("@/../test/utils/mock-virtualizer").mockVirtualizer,
 }));
 
+const server = setupServer();
+beforeAll(() => server.listen({ onUnhandledRequest: "error" }));
+afterEach(() => server.resetHandlers());
+afterAll(() => server.close());
+
 describe("AcademicTableFilters with a shared options cache", () => {
-  const originalFetch = global.fetch;
-  const fetchMock = jest.fn<ReturnType<typeof fetch>, Parameters<typeof fetch>>();
-
-  beforeEach(() => {
-    global.fetch = fetchMock;
-  });
-  afterEach(() => {
-    global.fetch = originalFetch;
-    fetchMock.mockReset();
-  });
-
   it("never displays cached options from another institution or authentication scope", async () => {
     const user = userEvent.setup();
     const queryClient = createTestQueryClient({ queries: { staleTime: 5 * 60 * 1000 } });
@@ -39,11 +35,15 @@ describe("AcademicTableFilters with a shared options cache", () => {
       { institutionId: "institution-b", scope: AcademicScope.ADMIN, name: "Administración B" },
     ];
     let finishRequest: ((response: Response) => void) | undefined;
-    fetchMock.mockImplementation(
-      () =>
-        new Promise<Response>((resolve) => {
+    const requests: URL[] = [];
+    server.use(
+      http.get("http://localhost/api/:scope/academic/options/training-paths", ({ request }) => {
+        requests.push(new URL(request.url));
+
+        return new Promise<Response>((resolve) => {
           finishRequest = resolve;
-        }),
+        });
+      }),
     );
     const filters = (context: (typeof contexts)[number]) => (
       <AcademicTableFilters
@@ -71,13 +71,13 @@ describe("AcademicTableFilters with a shared options cache", () => {
         rerender(filters(context));
       }
 
-      await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(index + 1));
+      await waitFor(() => expect(requests).toHaveLength(index + 1));
 
       for (const previous of contexts.slice(0, index)) {
         expect(screen.queryByRole("option", { name: previous.name })).not.toBeInTheDocument();
       }
 
-      const requestUrl = new URL(String(fetchMock.mock.calls[index][0]), "https://bemol.test");
+      const requestUrl = requests[index];
       expect(requestUrl.pathname).toBe("/api/" + context.scope + "/academic/options/training-paths");
       expect(Object.fromEntries(requestUrl.searchParams)).toEqual({
         institutionId: context.institutionId,
@@ -92,7 +92,7 @@ describe("AcademicTableFilters with a shared options cache", () => {
       }
 
       finishRequest(
-        Response.json({
+        HttpResponse.json({
           items: [{ id: "path-" + index, name: context.name, active: true }],
           page: 0,
           totalPages: 1,

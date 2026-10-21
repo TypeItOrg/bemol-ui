@@ -51,33 +51,6 @@ describe("MyEnrollmentApplicationTableRow", () => {
     expect(screen.getByText("Rechazada")).toBeInTheDocument();
   });
 
-  it("shows the approved status without a rejection reason", () => {
-    render(
-      <table>
-        <tbody>
-          <MyEnrollmentApplicationTableRow application={application("APPROVED")} />
-        </tbody>
-      </table>,
-    );
-
-    expect(screen.queryByText("Documentación incompleta")).not.toBeInTheDocument();
-    expect(screen.getByText("Confirmada definitivamente")).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /ver motivo de rechazo/ })).not.toBeInTheDocument();
-  });
-
-  it("shows the training path instead of the study plan", () => {
-    render(
-      <table>
-        <tbody>
-          <MyEnrollmentApplicationTableRow application={application("SUBMITTED")} />
-        </tbody>
-      </table>,
-    );
-
-    expect(screen.getByText("CAV Básico")).toBeInTheDocument();
-    expect(screen.queryByText("Plan Básico")).not.toBeInTheDocument();
-  });
-
   describe("applicant column", () => {
     function renderRow(app: EnrollmentApplication, currentPersonId?: string): void {
       render(

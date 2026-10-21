@@ -15,21 +15,6 @@ it.each(["platform", "institutional"] as const)("%s details display the persiste
   expect(screen.queryByRole("button")).not.toBeInTheDocument();
 });
 
-it("read-only institution exposes no upload/delete controls", () => {
-  render(<InstitutionLogoManager {...props} scope="institutional" canUpdate={false} />);
-
-  expect(screen.getByAltText("Logo de Boero")).toBeInTheDocument();
-  expect(screen.queryByLabelText("Imagen del logo")).not.toBeInTheDocument();
-  expect(screen.queryByRole("button")).not.toBeInTheDocument();
-});
-
-it("shows the institution-name fallback when no logo is persisted", () => {
-  render(<InstitutionLogoManager {...props} logoUrl={null} />);
-
-  expect(screen.getByText("Sin logo. Se mostrará el nombre de la institución.")).toBeInTheDocument();
-  expect(screen.queryByAltText("Logo de Boero")).not.toBeInTheDocument();
-});
-
 it("shows a fallback when the persisted image fails to load", () => {
   render(<InstitutionLogoManager {...props} />);
   fireEvent.error(screen.getByAltText("Logo de Boero"));

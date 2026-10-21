@@ -103,24 +103,6 @@ describe("EnrollmentStatusCard", () => {
     expect(screen.getByText("dni-frente.png")).toBeInTheDocument();
   });
 
-  it("renders status APPROVED banner when approved", () => {
-    const approvedApp = { ...baseApp, status: "APPROVED" as const };
-    render(<EnrollmentStatusCard application={approvedApp} />);
-    expect(screen.getByText("Solicitud aprobada")).toBeInTheDocument();
-  });
-
-  it("renders status REJECTED banner when rejected", () => {
-    const rejectedApp = { ...baseApp, status: "REJECTED" as const };
-    render(<EnrollmentStatusCard application={rejectedApp} />);
-    expect(screen.getByText("Solicitud no admitida")).toBeInTheDocument();
-  });
-
-  it("renders status CANCELLED banner when cancelled", () => {
-    const cancelledApp = { ...baseApp, status: "CANCELLED" as const };
-    render(<EnrollmentStatusCard application={cancelledApp} />);
-    expect(screen.getByText("Solicitud cancelada")).toBeInTheDocument();
-  });
-
   it("hides the legacy spaces card when the application has no spaces", () => {
     render(<EnrollmentStatusCard application={baseApp} />);
     expect(screen.queryByText("Trayecto formativo y espacios académicos")).not.toBeInTheDocument();

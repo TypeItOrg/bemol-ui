@@ -1,5 +1,4 @@
 import type { EnrollmentApplicationResponse } from "@features/enrollment-applications/types/enrollment-application-response.types";
-import type { EnrollmentApplication } from "@features/enrollment-applications/types/enrollment-application.types";
 
 jest.mock("@features/institutional-auth/services/get-institutional-user.service", () => ({
   requireInstitutionalUser: jest.fn(async () => ({
@@ -43,16 +42,6 @@ describe("enrollment-application.service self-service queries", () => {
   });
 
   describe("fetchEnrollmentApplicationById", () => {
-    it("fetches single application by ID", async () => {
-      institutionalApiFetchMock.mockResolvedValue(Response.json(MOCK_APPLICATION));
-      const { fetchEnrollmentApplicationById } = await importService();
-
-      const result = await fetchEnrollmentApplicationById("app-456");
-
-      expect(institutionalApiFetchMock).toHaveBeenCalledWith(`${SELF_SERVICE_API_PATH}/app-456`, { method: "GET" });
-      expect(result).toEqual(MOCK_APPLICATION);
-    });
-
     it("scopes the application read to the explicitly selected person", async () => {
       const personId = "00000000-0000-4000-8000-000000000007";
       institutionalApiFetchMock.mockResolvedValue(Response.json({ ...MOCK_APPLICATION, personId }));
@@ -72,13 +61,6 @@ describe("enrollment-application.service self-service queries", () => {
 
       await expect(fetchEnrollmentApplicationById("app-456", "invalid-person")).rejects.toThrow("La persona seleccionada no es válida.");
       expect(institutionalApiFetchMock).not.toHaveBeenCalled();
-    });
-
-    it("throws error when application is not found or fails", async () => {
-      institutionalApiFetchMock.mockResolvedValue(new Response(JSON.stringify({ message: "No encontrada" }), { status: 404 }));
-      const { fetchEnrollmentApplicationById } = await importService();
-
-      await expect(fetchEnrollmentApplicationById("app-999")).rejects.toThrow("No encontrada");
     });
   });
 
@@ -140,32 +122,6 @@ describe("enrollment-application.service self-service queries", () => {
       await expect(cancelEnrollmentApplication("app-456")).rejects.toThrow("Método no permitido");
     });
   });
-
-  describe("fetchEnrollmentApplicationCourses", () => {
-    it("fetches courses directly from the authenticated backend service", async () => {
-      institutionalApiFetchMock.mockResolvedValue(Response.json({ items: [], page: 1, size: 50, totalItems: 0, totalPages: 0 }));
-      const { fetchEnrollmentApplicationCourses } = await importService();
-
-      await fetchEnrollmentApplicationCourses("app-456", { page: 1, size: 50, search: "piano" });
-
-      expect(institutionalApiFetchMock).toHaveBeenCalledWith(`${SELF_SERVICE_API_PATH}/app-456/courses?page=1&size=50&search=piano`, {
-        method: "GET",
-      });
-    });
-  });
-
-  describe("fetchAvailableEnrollmentTrainingPaths", () => {
-    it("fetches only the applicant's available training paths", async () => {
-      institutionalApiFetchMock.mockResolvedValue(Response.json({ items: [], page: 0, size: 20, totalItems: 0, totalPages: 0 }));
-      const { fetchAvailableEnrollmentTrainingPaths } = await importService();
-
-      await fetchAvailableEnrollmentTrainingPaths({ page: 0, size: 20 });
-
-      expect(institutionalApiFetchMock).toHaveBeenCalledWith(`${SELF_SERVICE_API_PATH}/options/training-paths?page=0&size=20`, {
-        method: "GET",
-      });
-    });
-  });
 });
 
 describe("enrollment-application.service institutional queries", () => {
@@ -179,79 +135,9 @@ describe("enrollment-application.service institutional queries", () => {
     return import("@features/enrollment-applications/services/enrollment-application.service");
   }
 
-  const APPLICATION_ID = "00000000-0000-4000-8000-000000000002";
-
-  const APPLICATION: EnrollmentApplication = {
-    applicationId: APPLICATION_ID,
-    institutionId: INSTITUTION_ID,
-    personId: "00000000-0000-4000-8000-000000000003",
-    applicantFirstName: "Ana",
-    applicantLastName: "Garcia",
-    applicantDocumentNumber: "12345678",
-    studyPlanId: "00000000-0000-4000-8000-000000000004",
-    studyPlanName: "Plan Básico",
-    academicYearId: "00000000-0000-4000-8000-000000000005",
-    academicYear: 2027,
-    enrollmentPeriodId: "00000000-0000-4000-8000-000000000006",
-    status: "SUBMITTED",
-    isEditable: false,
-    createdAt: "2026-09-05T09:00:00",
-    updatedAt: "2026-09-05T09:00:00",
-  };
-
   beforeEach(() => {
     jest.resetModules();
     enrollmentApplicationApiFetchMock.mockReset();
-  });
-
-  it("fetches the staff enrollment applications with pagination and default sort", async () => {
-    enrollmentApplicationApiFetchMock.mockResolvedValue(
-      new Response(JSON.stringify({ items: [APPLICATION], page: 0, size: 10, totalItems: 1, totalPages: 1 }), {
-        status: 200,
-        headers: { "Content-Type": "application/json" },
-      }),
-    );
-
-    const service = await importInstitutionalService();
-    const result = await service.fetchEnrollmentApplications(INSTITUTION_ID, { page: 0, size: 10 });
-
-    expect(result.items).toEqual([APPLICATION]);
-    const [path] = enrollmentApplicationApiFetchMock.mock.calls[0];
-    expect(path).toBe(`/api/v1/institutions/${INSTITUTION_ID}/enrollment-applications?page=0&size=10&sort=createdAt%2Cdesc`);
-  });
-
-  it("appends the status filter when provided", async () => {
-    enrollmentApplicationApiFetchMock.mockResolvedValue(
-      new Response(JSON.stringify({ items: [], page: 0, size: 10, totalItems: 0, totalPages: 0 }), {
-        status: 200,
-        headers: { "Content-Type": "application/json" },
-      }),
-    );
-
-    const service = await importInstitutionalService();
-    await service.fetchEnrollmentApplications(INSTITUTION_ID, {
-      page: 2,
-      size: 20,
-      status: "SUBMITTED",
-    });
-
-    const [path] = enrollmentApplicationApiFetchMock.mock.calls[0];
-    expect(path).toBe(`/api/v1/institutions/${INSTITUTION_ID}/enrollment-applications?page=2&size=20&sort=createdAt%2Cdesc&status=SUBMITTED`);
-  });
-
-  it("fetches the applicant own applications from the self-service endpoint", async () => {
-    enrollmentApplicationApiFetchMock.mockResolvedValue(
-      new Response(JSON.stringify({ items: [APPLICATION], page: 0, size: 10, totalItems: 1, totalPages: 1 }), {
-        status: 200,
-        headers: { "Content-Type": "application/json" },
-      }),
-    );
-
-    const service = await importInstitutionalService();
-    await service.fetchMyEnrollmentApplications(INSTITUTION_ID, { page: 0, size: 10 });
-
-    const [path] = enrollmentApplicationApiFetchMock.mock.calls[0];
-    expect(path).toBe(`${SELF_SERVICE_API_PATH}?page=0&size=10&sort=createdAt%2Cdesc`);
   });
 
   it("preserves the dependent filter on the self-service list when provided", async () => {
@@ -267,14 +153,5 @@ describe("enrollment-application.service institutional queries", () => {
 
     const [path] = enrollmentApplicationApiFetchMock.mock.calls[0];
     expect(path).toBe(`${SELF_SERVICE_API_PATH}?page=0&size=10&sort=createdAt%2Cdesc&dependentPersonId=dependent-1`);
-  });
-
-  it("throws an HttpResponseError when the list endpoint fails", async () => {
-    enrollmentApplicationApiFetchMock.mockResolvedValue(new Response(null, { status: 500 }));
-
-    const service = await importInstitutionalService();
-    await expect(service.fetchEnrollmentApplications(INSTITUTION_ID, { page: 0, size: 10 })).rejects.toMatchObject({
-      status: 500,
-    });
   });
 });

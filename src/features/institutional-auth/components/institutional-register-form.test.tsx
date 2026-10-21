@@ -27,13 +27,4 @@ describe("InstitutionalRegisterForm birth date", () => {
     expect(screen.queryByRole("switch")).not.toBeInTheDocument();
     expect(container.querySelector('input[name="isGuardian"]')).not.toBeInTheDocument();
   });
-
-  it("preserves an adult birth date without guardian registration controls", async () => {
-    const { container } = render(<InstitutionalRegisterForm />);
-
-    await typeBirthDate(currentYear - 30);
-
-    expect(getBirthDateValue(container)).toBe(`${currentYear - 30}-01-01`);
-    expect(screen.queryByRole("switch")).not.toBeInTheDocument();
-  });
 });

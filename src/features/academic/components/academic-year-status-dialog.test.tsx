@@ -1,5 +1,7 @@
 import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { http, HttpResponse } from "msw";
+import { setupServer } from "msw/node";
 
 import { updateAcademicStatusAction } from "@features/academic/actions/update-academic-status.action";
 import { AcademicYearStatusDialog } from "@features/academic/components/academic-year-status-dialog";
@@ -16,9 +18,12 @@ jest.mock("@features/academic/actions/update-academic-status.action", () => ({
 const YEAR_ID = "019f9c3a-f891-7bc5-a98d-e65332998126";
 const INSTITUTION_ID = "019f9c3a-f891-7bc5-a98d-e65332998127";
 
-describe("AcademicYearStatusDialog", () => {
-  afterEach(() => jest.restoreAllMocks());
+const server = setupServer();
+beforeAll(() => server.listen({ onUnhandledRequest: "error" }));
+afterEach(() => server.resetHandlers());
+afterAll(() => server.close());
 
+describe("AcademicYearStatusDialog", () => {
   it("locks finalization while pending and preserves the dialog after a rejected change", async () => {
     const user = userEvent.setup();
     const onOpenChange = jest.fn();
@@ -27,7 +32,14 @@ describe("AcademicYearStatusDialog", () => {
       finishUpdate = resolve;
     });
     jest.mocked(updateAcademicStatusAction).mockReturnValue(updateResult);
-    const fetchMock = jest.spyOn(global, "fetch").mockResolvedValue(Response.json({ count: 2 }));
+    const requests: URL[] = [];
+    server.use(
+      http.get("http://localhost/api/institutional/academic/academic-years/:id/courses/count", ({ request }) => {
+        requests.push(new URL(request.url));
+
+        return HttpResponse.json({ count: 2 });
+      }),
+    );
 
     render(
       <AcademicYearStatusDialog
@@ -43,10 +55,9 @@ describe("AcademicYearStatusDialog", () => {
     );
 
     expect(await screen.findByText(/cursos asociados \(2 cursos\)/)).toBeInTheDocument();
-    expect(fetchMock).toHaveBeenCalledWith(
-      "/api/institutional/academic/academic-years/" + YEAR_ID + "/courses/count?institutionId=" + INSTITUTION_ID,
-      { cache: "no-store", signal: expect.any(AbortSignal) },
-    );
+    expect(requests).toHaveLength(1);
+    expect(requests[0].pathname).toBe("/api/institutional/academic/academic-years/" + YEAR_ID + "/courses/count");
+    expect(requests[0].searchParams.get("institutionId")).toBe(INSTITUTION_ID);
 
     await user.click(screen.getByRole("button", { name: "Finalizar ciclo lectivo" }));
 

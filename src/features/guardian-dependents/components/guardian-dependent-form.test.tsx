@@ -1,14 +1,27 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { http, HttpResponse } from "msw";
+import { setupServer } from "msw/node";
 
-import { createGuardianDependentAction } from "@features/guardian-dependents/actions/create-guardian-dependent.action";
 import { finishGuardianDependentRequestAction } from "@features/guardian-dependents/actions/finish-guardian-dependent-request.action";
 import { uploadGuardianDependentDocumentAction } from "@features/guardian-dependents/actions/upload-guardian-dependent-document.action";
 import { GuardianDependentForm } from "@features/guardian-dependents/components/guardian-dependent-form";
+import { GUARDIAN_DEPENDENT_MESSAGES } from "@features/guardian-dependents/constants/guardian-dependent.constants";
+import { getInstitutionalAccessToken } from "@features/institutional-auth/services/get-institutional-access-token.service";
+import { requireInstitutionalUser } from "@features/institutional-auth/services/get-institutional-user.service";
 
+const mockPush = jest.fn();
+
+jest.mock("next/cache", () => ({ revalidatePath: jest.fn() }));
 jest.mock("next/navigation", () => ({
-  useRouter: () => ({ push: jest.fn() }),
+  useRouter: () => ({ push: mockPush }),
   unstable_rethrow: jest.fn(),
+}));
+jest.mock("@features/institutional-auth/services/get-institutional-access-token.service", () => ({
+  getInstitutionalAccessToken: jest.fn(),
+}));
+jest.mock("@features/institutional-auth/services/get-institutional-user.service", () => ({
+  requireInstitutionalUser: jest.fn(),
 }));
 jest.mock("@features/enrollment-applications/components/document-file-preview", () => ({
   DocumentFilePreview: () => null,
@@ -16,18 +29,30 @@ jest.mock("@features/enrollment-applications/components/document-file-preview", 
 jest.mock("@features/guardian-dependents/actions/finish-guardian-dependent-request.action", () => ({
   finishGuardianDependentRequestAction: jest.fn(),
 }));
-
-jest.mock("@features/guardian-dependents/actions/create-guardian-dependent.action", () => ({
-  createGuardianDependentAction: jest.fn(),
-}));
+// Multipart encoding belongs to the server runtime; this jsdom integration keeps that action boundary explicit.
 jest.mock("@features/guardian-dependents/actions/upload-guardian-dependent-document.action", () => ({
   uploadGuardianDependentDocumentAction: jest.fn(),
 }));
 
+const API_URL = "https://guardian-api.example.test";
 const INSTITUTION_ID = "019f9c3a-f891-7bc5-a98d-e65332998127";
 const RETURN_TO = "/my-dependents?page=2&size=20";
 const LINK_ID = "019f9c3a-f891-7bc5-a98d-e65332998128";
 const BIRTH_YEAR = new Date().getFullYear() - 8;
+const CREATE_URL = `${API_URL}/api/v1/institutions/${INSTITUTION_ID}/representations`;
+const originalEnvironment = {
+  BEMOL_API_URL: process.env.BEMOL_API_URL,
+  INSTITUTIONAL_BASE_DOMAIN: process.env.INSTITUTIONAL_BASE_DOMAIN,
+};
+const requests: { body: unknown; authorization: string | null }[] = [];
+
+const server = setupServer(
+  http.post(CREATE_URL, async ({ request }) => {
+    requests.push({ body: await request.json(), authorization: request.headers.get("authorization") });
+
+    return HttpResponse.json({ personGuardianId: LINK_ID }, { status: 201 });
+  }),
+);
 
 async function fillForm(user: ReturnType<typeof userEvent.setup>): Promise<void> {
   await user.click(screen.getByRole("tab", { name: "Registrar persona nueva" }));
@@ -39,141 +64,180 @@ async function fillForm(user: ReturnType<typeof userEvent.setup>): Promise<void>
   await user.click(await screen.findByRole("option", { name: "Madre" }));
 }
 
-describe("GuardianDependentForm", () => {
-  beforeEach(() => {
-    jest.mocked(finishGuardianDependentRequestAction).mockReset().mockResolvedValue({});
-    jest.mocked(createGuardianDependentAction).mockReset().mockResolvedValue({});
-    jest.mocked(uploadGuardianDependentDocumentAction).mockReset().mockResolvedValue({ success: true });
-    URL.createObjectURL = jest.fn(() => "blob:preview");
-    URL.revokeObjectURL = jest.fn();
-  });
+beforeAll(() => {
+  process.env.BEMOL_API_URL = API_URL;
+  delete process.env.INSTITUTIONAL_BASE_DOMAIN;
+  server.listen({ onUnhandledRequest: "error" });
+});
 
-  afterEach(() => {
-    jest.restoreAllMocks();
+beforeEach(() => {
+  requests.length = 0;
+  mockPush.mockReset();
+  jest.mocked(requireInstitutionalUser).mockResolvedValue({
+    userId: "guardian-user",
+    personId: "guardian-person",
+    name: "Ana",
+    lastName: "Gonzalez",
+    documentNumber: "35123456",
+    institutionId: INSTITUTION_ID,
+    roles: ["Estudiante"],
+    permissions: [],
   });
+  jest.mocked(getInstitutionalAccessToken).mockResolvedValue("guardian-access");
+  jest.mocked(finishGuardianDependentRequestAction).mockReset().mockResolvedValue({});
+  jest.mocked(uploadGuardianDependentDocumentAction).mockReset().mockResolvedValue({ success: true });
+  URL.createObjectURL = jest.fn(() => "blob:preview");
+  URL.revokeObjectURL = jest.fn();
+});
 
-  it("submits every field with an explicit primary contact boolean", async () => {
+afterEach(() => {
+  server.resetHandlers();
+});
+
+afterAll(() => {
+  server.close();
+
+  for (const [key, value] of Object.entries(originalEnvironment)) {
+    if (value === undefined) {
+      delete process.env[key];
+    } else {
+      process.env[key] = value;
+    }
+  }
+});
+
+describe("GuardianDependentForm with the real create action and HTTP transport", () => {
+  it("validates the form before sending an authenticated request with explicit false booleans", async () => {
     const user = userEvent.setup();
     render(<GuardianDependentForm institutionId={INSTITUTION_ID} returnTo={RETURN_TO} />);
 
+    const submit = screen.getByRole("button", { name: "Solicitar" });
+    expect(submit).toBeDisabled();
+    await user.click(submit);
+    expect(requests).toHaveLength(0);
+    await fillForm(user);
+    await user.click(submit);
+
+    await waitFor(() => expect(finishGuardianDependentRequestAction).toHaveBeenCalledWith(INSTITUTION_ID, RETURN_TO));
+    expect(requests).toEqual([
+      {
+        authorization: "Bearer guardian-access",
+        body: {
+          firstName: "Mateo",
+          lastName: "Gonzalez",
+          documentNumber: "12345678",
+          birthDate: `${BIRTH_YEAR}-01-01`,
+          relationship: "MOTHER",
+          isPrimaryContact: false,
+          requestMode: "NEW",
+          ownAccessRequested: false,
+        },
+      },
+    ]);
+    expect(uploadGuardianDependentDocumentAction).not.toHaveBeenCalled();
+  });
+
+  it("requires an invitation email for own access and sends each supporting file separately after creation", async () => {
+    const user = userEvent.setup();
+    render(<GuardianDependentForm institutionId={INSTITUTION_ID} returnTo={RETURN_TO} />);
+    await fillForm(user);
+    await user.click(screen.getByRole("combobox", { name: /Contacto principal/ }));
+    await user.click(await screen.findByRole("option", { name: "Sí" }));
+    await user.click(screen.getByRole("combobox", { name: /Acceso propio/ }));
+    await user.click(await screen.findByRole("option", { name: "Sí" }));
     expect(screen.getByRole("button", { name: "Solicitar" })).toBeDisabled();
-    await fillForm(user);
-    expect(screen.getByRole("button", { name: "Solicitar" })).toBeEnabled();
-    expect(screen.getByText(`${new Date().getFullYear() - BIRTH_YEAR} años`)).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "Solicitar" }));
+    await user.type(screen.getByLabelText(/Correo de la persona/), "mateo@example.test");
 
-    await waitFor(() => expect(createGuardianDependentAction).toHaveBeenCalledTimes(1));
-    const [institutionId, , formData] = jest.mocked(createGuardianDependentAction).mock.calls[0];
-
-    expect(institutionId).toBe(INSTITUTION_ID);
-    expect(formData.has("documents")).toBe(false);
-    expect(Object.fromEntries(formData.entries())).toEqual({
-      firstName: "Mateo",
-      lastName: "Gonzalez",
-      documentNumber: "12345678",
-      birthDate: `${BIRTH_YEAR}-01-01`,
-      relationship: "MOTHER",
-      isPrimaryContact: "false",
-      requestMode: "NEW",
-      ownAccessRequested: "false",
-    });
-  });
-
-  it("uploads allowed documents in separate requests", async () => {
-    const user = userEvent.setup();
-    jest.mocked(createGuardianDependentAction).mockResolvedValueOnce({ success: true, personGuardianId: LINK_ID });
-    render(<GuardianDependentForm institutionId={INSTITUTION_ID} returnTo={RETURN_TO} />);
-
-    await fillForm(user);
-    const input = screen.getByLabelText("Documentación respaldatoria", { selector: "input" }) as HTMLInputElement;
     const files = ["partida.pdf", "constancia.pdf"].map((name) => new File([new Uint8Array(7 * 1024 * 1024)], name, { type: "application/pdf" }));
-    await user.upload(input, files);
-    expect(screen.getByText("partida.pdf")).toBeInTheDocument();
-    expect(screen.getByText("constancia.pdf")).toBeInTheDocument();
-
+    await user.upload(screen.getByLabelText("Documentación respaldatoria", { selector: "input" }), files);
     await user.click(screen.getByRole("button", { name: "Solicitar" }));
 
-    await waitFor(() => expect(uploadGuardianDependentDocumentAction).toHaveBeenCalledTimes(2));
-    expect(jest.mocked(createGuardianDependentAction).mock.calls[0][2].has("documents")).toBe(false);
+    await waitFor(() => expect(finishGuardianDependentRequestAction).toHaveBeenCalledTimes(1));
+    expect(requests).toHaveLength(1);
+    expect(requests[0].body).toMatchObject({ isPrimaryContact: true, ownAccessRequested: true, email: "mateo@example.test" });
+    expect(requests[0].body).not.toHaveProperty("documents");
+    expect(uploadGuardianDependentDocumentAction).toHaveBeenCalledTimes(2);
+
     jest.mocked(uploadGuardianDependentDocumentAction).mock.calls.forEach(([institutionId, linkId, body], index) => {
       expect(institutionId).toBe(INSTITUTION_ID);
       expect(linkId).toBe(LINK_ID);
       expect(body.getAll("file")).toHaveLength(1);
-      expect(body.get("file")).toMatchObject({ name: files[index].name, size: 7 * 1024 * 1024, type: "application/pdf" });
+      expect(body.get("file")).toMatchObject({ name: files[index].name, size: files[index].size, type: files[index].type });
     });
   });
 
-  it("explains that approval allows acting on the dependent's behalf", () => {
-    render(<GuardianDependentForm institutionId={INSTITUTION_ID} returnTo={RETURN_TO} />);
-
-    expect(screen.getByText(/al aprobarse, podrás operar en su nombre/i)).toBeInTheDocument();
-  });
-
-  it("sends isPrimaryContact as true when Sí is selected", async () => {
+  it("surfaces real backend field errors and preserves the entered data without finishing navigation", async () => {
+    server.use(
+      http.post(CREATE_URL, () =>
+        HttpResponse.json({ message: "Datos inválidos", fieldErrors: { documentNumber: "El documento ya está registrado." } }, { status: 400 }),
+      ),
+    );
     const user = userEvent.setup();
     render(<GuardianDependentForm institutionId={INSTITUTION_ID} returnTo={RETURN_TO} />);
-
-    await fillForm(user);
-    await user.click(screen.getByRole("combobox", { name: /Contacto principal/ }));
-    await user.click(await screen.findByRole("option", { name: "Sí" }));
-    await user.click(screen.getByRole("button", { name: "Solicitar" }));
-
-    await waitFor(() => expect(createGuardianDependentAction).toHaveBeenCalled());
-    expect(jest.mocked(createGuardianDependentAction).mock.calls[0][2].get("isPrimaryContact")).toBe("true");
-  });
-
-  it("shows field and general errors and stays open", async () => {
-    const user = userEvent.setup();
-    jest.mocked(createGuardianDependentAction).mockResolvedValueOnce({
-      error: "El número de documento debe tener exactamente 8 dígitos.",
-      fieldErrors: { documentNumber: "El número de documento debe tener exactamente 8 dígitos." },
-    });
-    render(<GuardianDependentForm institutionId={INSTITUTION_ID} returnTo={RETURN_TO} />);
-
     await fillForm(user);
     await user.click(screen.getByRole("button", { name: "Solicitar" }));
 
-    expect(await screen.findByText("El número de documento debe tener exactamente 8 dígitos.")).toBeInTheDocument();
-    expect(screen.getByText("No se pudo registrar la vinculación. Revisá los campos marcados.")).toBeInTheDocument();
-    expect(screen.getByRole("form", { name: "Solicitar vinculación" })).toBeInTheDocument();
+    expect(await screen.findByText("El documento ya está registrado.")).toBeVisible();
+    expect(screen.getByText(GUARDIAN_DEPENDENT_MESSAGES.INVALID_FORM)).toBeVisible();
+    expect(screen.getByLabelText(/^Documento/)).toHaveValue("12345678");
+    expect(screen.getByLabelText(/^Nombre/)).toHaveValue("Mateo");
     expect(finishGuardianDependentRequestAction).not.toHaveBeenCalled();
+    expect(screen.getByRole("button", { name: "Solicitar" })).toBeEnabled();
   });
 
-  it("finishes navigation to the validated origin when the dependent is created", async () => {
-    const user = userEvent.setup();
-    jest.mocked(createGuardianDependentAction).mockResolvedValueOnce({ success: true });
-    render(<GuardianDependentForm institutionId={INSTITUTION_ID} returnTo={RETURN_TO} />);
+  it("locks the form while HTTP is pending and preserves inputs after a network failure", async () => {
+    let finish!: (response: Response) => void;
+    const pending = new Promise<Response>((resolve) => {
+      finish = resolve;
+    });
+    let received = false;
+    server.use(
+      http.post(CREATE_URL, () => {
+        received = true;
 
+        return pending;
+      }),
+    );
+    const user = userEvent.setup();
+    render(<GuardianDependentForm institutionId={INSTITUTION_ID} returnTo={RETURN_TO} />);
     await fillForm(user);
     await user.click(screen.getByRole("button", { name: "Solicitar" }));
 
-    await waitFor(() => expect(finishGuardianDependentRequestAction).toHaveBeenCalledWith(INSTITUTION_ID, RETURN_TO));
+    await waitFor(() => expect(received).toBe(true));
+    expect(screen.getByLabelText(/^Nombre/)).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Cancelar" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Enviando…" })).toBeDisabled();
+    expect(finishGuardianDependentRequestAction).not.toHaveBeenCalled();
+    finish(HttpResponse.error());
+
+    expect(await screen.findByText(GUARDIAN_DEPENDENT_MESSAGES.CREATE)).toBeVisible();
+    expect(screen.getByLabelText(/^Nombre/)).toHaveValue("Mateo");
+    expect(screen.getByRole("button", { name: "Cancelar" })).toBeEnabled();
+    expect(screen.getByRole("button", { name: "Solicitar" })).toBeEnabled();
   });
 
-  it("disables its controls while the action is pending", async () => {
+  it("retains documents and blocks duplicate creation after the link succeeds but an upload fails", async () => {
+    jest.mocked(uploadGuardianDependentDocumentAction).mockResolvedValueOnce({ error: "No se pudo subir el archivo" });
     const user = userEvent.setup();
-    let resolveAction: (state: object) => void = () => undefined;
-    jest.mocked(createGuardianDependentAction).mockImplementationOnce(() => new Promise((resolve) => (resolveAction = resolve)));
     render(<GuardianDependentForm institutionId={INSTITUTION_ID} returnTo={RETURN_TO} />);
-
     await fillForm(user);
+    await user.upload(
+      screen.getByLabelText("Documentación respaldatoria", { selector: "input" }),
+      new File(["partida"], "partida.pdf", { type: "application/pdf" }),
+    );
     await user.click(screen.getByRole("button", { name: "Solicitar" }));
 
-    await waitFor(() => expect(screen.getByRole("button", { name: "Cancelar" })).toBeDisabled());
-    expect(screen.getByRole("button", { name: /Enviando/ })).toBeDisabled();
-
-    resolveAction({});
-    await waitFor(() => expect(screen.getByRole("button", { name: "Cancelar" })).not.toBeDisabled());
-  });
-
-  it("falls back to a generic error when the action throws", async () => {
-    const user = userEvent.setup();
-    jest.mocked(createGuardianDependentAction).mockRejectedValueOnce(new Error("network"));
-    render(<GuardianDependentForm institutionId={INSTITUTION_ID} returnTo={RETURN_TO} />);
-
-    await fillForm(user);
-    await user.click(screen.getByRole("button", { name: "Solicitar" }));
-
-    expect(await screen.findByText("No se pudo registrar a la persona a cargo.")).toBeInTheDocument();
+    expect(await screen.findByText(GUARDIAN_DEPENDENT_MESSAGES.ATTACHMENTS_FAILED)).toBeVisible();
+    expect(requests).toHaveLength(1);
+    expect(uploadGuardianDependentDocumentAction).toHaveBeenCalledWith(INSTITUTION_ID, LINK_ID, expect.any(FormData));
+    expect(screen.getByText("partida.pdf")).toBeVisible();
+    expect(screen.getByLabelText(/^Nombre/)).toBeDisabled();
+    const submit = screen.getByRole("button", { name: "Solicitar" });
+    expect(submit).toBeDisabled();
+    await user.click(submit);
+    expect(requests).toHaveLength(1);
+    expect(finishGuardianDependentRequestAction).not.toHaveBeenCalled();
+    await user.click(screen.getByRole("button", { name: "Volver al listado" }));
+    expect(mockPush).toHaveBeenCalledWith(RETURN_TO);
   });
 });

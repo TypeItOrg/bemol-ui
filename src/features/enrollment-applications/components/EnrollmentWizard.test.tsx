@@ -24,12 +24,6 @@ jest.mock("next/navigation", () => ({
   useSearchParams: () => new URLSearchParams(),
 }));
 
-jest.mock("@features/enrollment-applications/components/EnrollmentStatusCard", () => ({
-  EnrollmentStatusCard: ({ application }: { application: EnrollmentApplicationResponse }) => (
-    <div data-testid="status-card">status:{application.status}</div>
-  ),
-}));
-
 jest.mock("@features/enrollment-applications/actions/enrollment-application.actions", () => ({
   updateEnrollmentDraftAction: jest.fn(),
   submitEnrollmentApplicationAction: jest.fn(),
@@ -140,13 +134,6 @@ describe("EnrollmentWizard", () => {
     jest.useRealTimers();
   });
 
-  it("populates the personal data step from the initial application", async () => {
-    renderWizard({ initialApplication: COMPLETE_DRAFT });
-
-    expect(await screen.findByDisplayValue("Lucas")).toBeInTheDocument();
-    expect(screen.getByDisplayValue("Mendoza")).toBeInTheDocument();
-  });
-
   it("autosaves the draft after the applicant edits a field", async () => {
     jest.useFakeTimers({ doNotFake: ["queueMicrotask", "nextTick"] });
     const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
@@ -206,7 +193,9 @@ describe("EnrollmentWizard", () => {
     await confirmSubmission();
 
     await waitFor(() => expect(submitAction).toHaveBeenCalledWith("app-1", "person-1"));
-    expect(await screen.findByTestId("status-card")).toHaveTextContent("status:SUBMITTED");
+    expect(await screen.findByText("Solicitud en revisión")).toBeVisible();
+    expect(screen.getByText("Lucas Mendoza")).toBeVisible();
+    expect(screen.queryByRole("tab", { name: /datos personales/i })).not.toBeInTheDocument();
   });
 
   it("cancels the draft after the applicant confirms the dialog", async () => {
@@ -220,7 +209,8 @@ describe("EnrollmentWizard", () => {
     fireEvent.click(within(dialog).getByRole("button", { name: "Cancelar inscripción" }));
 
     await waitFor(() => expect(cancelAction).toHaveBeenCalledWith("app-1", "person-1"));
-    expect(await screen.findByTestId("status-card")).toHaveTextContent("status:CANCELLED");
+    expect(await screen.findByText("Solicitud cancelada")).toBeVisible();
+    expect(screen.queryByRole("tab", { name: /datos personales/i })).not.toBeInTheDocument();
   });
 
   it("does not render responsible tab for adult applicant", async () => {
@@ -346,5 +336,43 @@ describe("EnrollmentWizard", () => {
     });
 
     expect(updateAction).not.toHaveBeenCalled();
+  });
+  it("requires cancellation confirmation, locks the pending dialog and preserves the draft after failure until an explicit retry", async () => {
+    let finish!: (result: Awaited<ReturnType<typeof cancelEnrollmentApplicationAction>>) => void;
+    const pending = new Promise<Awaited<ReturnType<typeof cancelEnrollmentApplicationAction>>>((resolve) => {
+      finish = resolve;
+    });
+    cancelAction
+      .mockReset()
+      .mockReturnValueOnce(pending)
+      .mockResolvedValueOnce({ application: { ...COMPLETE_DRAFT, status: "CANCELLED" } });
+    const user = userEvent.setup();
+    renderWizard({ initialApplication: COMPLETE_DRAFT });
+
+    await user.click(screen.getByRole("button", { name: "Cancelar" }));
+    expect(cancelAction).not.toHaveBeenCalled();
+    await user.click(within(screen.getByRole("alertdialog")).getByRole("button", { name: "Cancelar inscripción" }));
+
+    await waitFor(() => expect(cancelAction).toHaveBeenCalledTimes(1));
+    expect(screen.getByRole("button", { name: "Cancelando…" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Conservar borrador" })).toBeDisabled();
+    await user.click(screen.getByRole("button", { name: "Conservar borrador" }));
+    expect(screen.getByRole("alertdialog")).toBeVisible();
+    await act(async () => {
+      finish({ error: "No se pudo cancelar todavía." });
+    });
+
+    expect(await screen.findByText("No se pudo cancelar todavía.")).toBeVisible();
+    expect(screen.getByRole("alertdialog")).toBeVisible();
+    await user.click(screen.getByRole("button", { name: "Conservar borrador" }));
+    expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
+    expect(screen.getByLabelText(/^nombre/i)).toHaveValue("Lucas");
+    expect(cancelAction).toHaveBeenCalledTimes(1);
+
+    await user.click(screen.getByRole("button", { name: "Cancelar" }));
+    await user.click(within(screen.getByRole("alertdialog")).getByRole("button", { name: "Cancelar inscripción" }));
+
+    expect(await screen.findByText("Solicitud cancelada")).toBeVisible();
+    expect(cancelAction).toHaveBeenCalledTimes(2);
   });
 });

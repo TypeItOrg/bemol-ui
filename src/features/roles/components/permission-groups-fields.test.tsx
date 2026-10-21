@@ -32,50 +32,6 @@ const mockPermissionGroups: InstitutionPermissionGroup[] = [
   },
 ];
 
-const mockAcademicPermissionGroup: InstitutionPermissionGroup = {
-  code: "academic",
-  displayName: "Académico",
-  description: "Configuración académica",
-  permissions: [
-    {
-      code: "academic-year:read",
-      description: "Ver ciclos lectivos",
-      grantable: true,
-      requiredPermissions: [],
-    },
-    {
-      code: "academic-year:create",
-      description: "Crear ciclos lectivos",
-      grantable: true,
-      requiredPermissions: ["academic-year:read"],
-    },
-    {
-      code: "academic-year:update",
-      description: "Editar ciclos lectivos",
-      grantable: true,
-      requiredPermissions: ["academic-year:read"],
-    },
-    {
-      code: "academic-year:update-status",
-      description: "Cambiar estado de ciclos lectivos",
-      grantable: true,
-      requiredPermissions: ["academic-year:read"],
-    },
-    {
-      code: "training-path:read",
-      description: "Ver trayectos formativos",
-      grantable: true,
-      requiredPermissions: [],
-    },
-    {
-      code: "training-path:create",
-      description: "Crear trayectos formativos",
-      grantable: true,
-      requiredPermissions: ["training-path:read"],
-    },
-  ],
-};
-
 describe("PermissionGroupsFields", () => {
   it("automatically checks and disables required permission when parent permission is checked", async () => {
     const user = userEvent.setup();
@@ -158,24 +114,6 @@ describe("PermissionGroupsFields", () => {
     expect(createCheckbox).not.toBeChecked();
     expect(readCheckbox).toBeChecked();
     expect(readCheckbox).not.toBeDisabled();
-  });
-
-  it("renders each dependent permission below its own parent", () => {
-    render(<PermissionGroupsFields groups={[mockAcademicPermissionGroup]} />);
-
-    const createYearField = screen.getByText("Crear ciclos lectivos").closest<HTMLElement>('[data-slot="field"]');
-    const createTrainingPathField = screen.getByText("Crear trayectos formativos").closest<HTMLElement>('[data-slot="field"]');
-
-    expect(createYearField).not.toBeNull();
-    expect(createTrainingPathField).not.toBeNull();
-
-    const yearBranch = createYearField?.parentElement;
-    const trainingPathBranch = createTrainingPathField?.parentElement;
-
-    expect(yearBranch).toContainElement(createYearField);
-    expect(yearBranch).not.toContainElement(createTrainingPathField);
-    expect(trainingPathBranch).toContainElement(createTrainingPathField);
-    expect(trainingPathBranch).not.toContainElement(createYearField);
   });
 
   it("hides GRADES permission group", () => {

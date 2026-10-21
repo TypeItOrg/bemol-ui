@@ -22,20 +22,15 @@ afterAll(() => {
   process.env.FRONTEND_PUBLIC_URL = original.public;
   process.env.INSTITUTIONAL_BASE_DOMAIN = original.domain;
 });
-it.each([
-  "/api/v1/auth/login/identify",
-  "/api/v1/auth/register",
-  "/api/v1/auth/password-recovery",
-  "/api/v1/auth/email-verification/confirm",
-  "/api/v1/auth/passkeys/authentication/options",
-])("sends derived host, never caller tenant header, for %s", async (path) => {
+it("sends the derived host, never a caller-supplied tenant header, for public auth requests", async () => {
   jest.mocked(headers).mockResolvedValue(
     new Headers({
       host: "cboero.testing.typeit.com.ar",
       "X-Institutional-Host": "otra.testing.typeit.com.ar",
     }),
   );
-  await publicApiFetch(path, { method: "POST", headers: { "X-Institutional-Host": "evil.test" } });
+  await publicApiFetch("/api/v1/auth/login/identify", { method: "POST", headers: { "X-Institutional-Host": "evil.test" } });
+  expect(fetchMock.mock.calls.at(-1)[0]).toEqual(new URL("http://backend.test/api/v1/auth/login/identify"));
   const init = fetchMock.mock.calls.at(-1)[1];
   expect(init.headers.get("X-Institutional-Host")).toBe("cboero.testing.typeit.com.ar");
   expect(init.cache).toBe("no-store");

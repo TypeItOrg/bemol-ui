@@ -1,9 +1,10 @@
 import { fireEvent, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { BuildingIcon, HouseIcon, UserRoundIcon, UsersIcon } from "lucide-react";
+import { http, HttpResponse } from "msw";
+import { setupServer } from "msw/node";
 
 import { ContextualSearch } from "@features/contextual-search/components/contextual-search";
-import { fetchContextualSearch } from "@features/contextual-search/services/fetch-contextual-search.service";
 import type { ContextualSearchAccessSection } from "@features/contextual-search/types/contextual-search-access-section.types";
 import type { ContextualSearchSummary } from "@features/contextual-search/types/contextual-search-summary.types";
 
@@ -15,11 +16,6 @@ jest.mock("next/navigation", () => ({
   useRouter: () => mockRouter,
 }));
 
-jest.mock("@features/contextual-search/services/fetch-contextual-search.service", () => ({
-  fetchContextualSearch: jest.fn(),
-}));
-
-const mockedFetchContextualSearch = jest.mocked(fetchContextualSearch);
 const institutionId = "019848b9-2e20-7a11-992a-87e71b86ce6b";
 const institutionalAccessSections = [
   {
@@ -74,22 +70,23 @@ const userSearchSummary: ContextualSearchSummary = {
 
 const emptySearchSummary: ContextualSearchSummary = { groups: [] };
 
+const searchRequests: URL[] = [];
+const server = setupServer(
+  http.get("http://localhost/api/:scope/search", ({ request }) => {
+    searchRequests.push(new URL(request.url));
+
+    return HttpResponse.json(userSearchSummary);
+  }),
+);
+
+beforeAll(() => server.listen({ onUnhandledRequest: "error" }));
+afterEach(() => server.resetHandlers());
+afterAll(() => server.close());
+
 describe("ContextualSearch", () => {
   beforeEach(() => {
     mockRouter.push.mockReset();
-    mockedFetchContextualSearch.mockReset();
-  });
-
-  it("shows the command shortcut on Mac", async () => {
-    renderWithQueryClient(<ContextualSearch accessSections={platformAccessSections} scope="platform" shortcutPlatform="mac" />);
-
-    expect(await screen.findByText("\u2318 K")).toBeInTheDocument();
-  });
-
-  it("shows the control shortcut on Windows", async () => {
-    renderWithQueryClient(<ContextualSearch accessSections={platformAccessSections} scope="platform" shortcutPlatform="windows" />);
-
-    expect(await screen.findByText("Ctrl K")).toBeInTheDocument();
+    searchRequests.length = 0;
   });
 
   it("opens search from the expanded mobile trigger", async () => {
@@ -139,7 +136,7 @@ describe("ContextualSearch", () => {
     expect(screen.getByText("Instituciones")).toBeInTheDocument();
     expect(screen.queryByText("Inicio")).not.toBeInTheDocument();
     expect(screen.queryByText("Usuarios")).not.toBeInTheDocument();
-    expect(mockedFetchContextualSearch).not.toHaveBeenCalled();
+    expect(searchRequests).toHaveLength(0);
   });
 
   it("does not open the modal from focus alone", async () => {
@@ -164,7 +161,6 @@ describe("ContextualSearch", () => {
 
   it("searches remotely and groups results by entity", async () => {
     const user = userEvent.setup();
-    mockedFetchContextualSearch.mockResolvedValue(userSearchSummary);
 
     renderWithQueryClient(<ContextualSearch accessSections={institutionalAccessSections} scope="institutional" institutionId={institutionId} />);
 
@@ -175,15 +171,21 @@ describe("ContextualSearch", () => {
     expect(await screen.findByText("Matías Delgado")).toBeInTheDocument();
     expect(screen.getByText("44741306")).toBeInTheDocument();
     expect(screen.getByText("Habilitado")).toBeInTheDocument();
-    expect(mockedFetchContextualSearch).toHaveBeenCalledWith({ scope: "institutional", institutionId, search: "ma" }, expect.any(AbortSignal));
+    expect(searchRequests).toHaveLength(1);
+    expect(searchRequests[0].pathname).toBe("/api/institutional/search");
+    expect(Object.fromEntries(searchRequests[0].searchParams)).toEqual({ search: "ma", limit: "5", institutionId });
   });
 
   it("refreshes results after each reopening for deletion and restoration changes", async () => {
     const user = userEvent.setup();
-    mockedFetchContextualSearch
-      .mockResolvedValueOnce(userSearchSummary)
-      .mockResolvedValueOnce(emptySearchSummary)
-      .mockResolvedValueOnce(userSearchSummary);
+    const responses = [userSearchSummary, emptySearchSummary, userSearchSummary];
+    server.use(
+      http.get("http://localhost/api/institutional/search", ({ request }) => {
+        searchRequests.push(new URL(request.url));
+
+        return HttpResponse.json(responses[searchRequests.length - 1]);
+      }),
+    );
 
     renderWithQueryClient(<ContextualSearch accessSections={institutionalAccessSections} scope="institutional" institutionId={institutionId} />);
 
@@ -206,7 +208,7 @@ describe("ContextualSearch", () => {
     await user.click(trigger);
     await user.type(screen.getByRole("combobox", { name: "Buscar en la institución" }), "ma");
     expect(await screen.findByText("Matías Delgado")).toBeInTheDocument();
-    expect(mockedFetchContextualSearch).toHaveBeenCalledTimes(3);
+    expect(searchRequests).toHaveLength(3);
   });
 
   it("clears only the active scope and institution search cache when opening", async () => {
@@ -231,7 +233,16 @@ describe("ContextualSearch", () => {
 
   it("announces a pending search while results are unavailable", async () => {
     const user = userEvent.setup();
-    mockedFetchContextualSearch.mockImplementation(() => new Promise<ContextualSearchSummary>(() => {}));
+    let finishSearch!: (response: Response) => void;
+    server.use(
+      http.get(
+        "http://localhost/api/institutional/search",
+        () =>
+          new Promise<Response>((resolve) => {
+            finishSearch = resolve;
+          }),
+      ),
+    );
 
     renderWithQueryClient(<ContextualSearch accessSections={institutionalAccessSections} scope="institutional" institutionId={institutionId} />);
 
@@ -240,11 +251,28 @@ describe("ContextualSearch", () => {
 
     const skeleton = await screen.findByLabelText("Buscando resultados");
     expect(skeleton).toHaveAttribute("role", "status");
+    await waitFor(() => expect(finishSearch).toBeDefined());
+    finishSearch(HttpResponse.json(userSearchSummary));
+    expect(await screen.findByText("Matías Delgado")).toBeInTheDocument();
+  });
+
+  it("reports HTTP failure and retries the same scoped search successfully", async () => {
+    const user = userEvent.setup();
+    server.use(http.get("http://localhost/api/institutional/search", () => new HttpResponse(null, { status: 503 }), { once: true }));
+    renderWithQueryClient(<ContextualSearch accessSections={institutionalAccessSections} scope="institutional" institutionId={institutionId} />);
+
+    await user.click(screen.getByRole("button", { name: "Buscar en la institución" }));
+    await user.type(screen.getByRole("combobox", { name: "Buscar en la institución" }), "ma");
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("No pudimos completar la búsqueda");
+    await user.click(screen.getByRole("button", { name: "Reintentar" }));
+    expect(await screen.findByText("Matías Delgado")).toBeInTheDocument();
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(Object.fromEntries(searchRequests[0].searchParams)).toEqual({ search: "ma", limit: "5", institutionId });
   });
 
   it("navigates after selecting a result and clears the next search", async () => {
     const user = userEvent.setup();
-    mockedFetchContextualSearch.mockResolvedValue(userSearchSummary);
 
     renderWithQueryClient(<ContextualSearch accessSections={institutionalAccessSections} scope="institutional" institutionId={institutionId} />);
 

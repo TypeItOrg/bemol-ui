@@ -1,4 +1,5 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 
 import { CourseEnrollmentAssignmentFields } from "@features/course-enrollments/components/course-enrollment-assignment-fields";
 import type { CourseEnrollmentAssignmentOptions } from "@features/course-enrollments/types/course-enrollment-assignment-options.types";
@@ -51,33 +52,68 @@ const OPTIONS: CourseEnrollmentAssignmentOptions = {
 };
 
 describe("CourseEnrollmentAssignmentFields", () => {
-  it("shows the teachers of the selected class and updates them when the class changes", () => {
-    render(<CourseEnrollmentAssignmentFields options={OPTIONS} />);
+  it("serializes an individual assignment and clears stale choices when a day or class changes", async () => {
+    const user = userEvent.setup();
+    const { container } = render(
+      <form>
+        <CourseEnrollmentAssignmentFields options={OPTIONS} />
+      </form>,
+    );
+    const form = container.querySelector("form")!;
+    const [courseClass] = OPTIONS.classes;
+    const [day] = courseClass.days;
+    const [schedule] = day.schedules;
+    const [slot] = schedule.individualSlots;
+    const assignments = () => JSON.parse(String(new FormData(form).get("assignments")));
 
-    expect(screen.getByText(/Docentes: Ana Garcia, Luis Perez/)).toBeInTheDocument();
+    expect(assignments()).toEqual([]);
+    await user.click(screen.getByRole("checkbox", { name: /lunes/i }));
+    expect(screen.getByRole("combobox", { name: /período individual/i })).toBeDisabled();
+    await user.click(screen.getByRole("combobox", { name: /horario/i }));
+    await user.click(screen.getByRole("option", { name: "10:00 - 11:00" }));
+    await user.click(screen.getByRole("combobox", { name: /período individual/i }));
+    await user.click(screen.getByRole("option", { name: "10:00 - 11:00" }));
 
-    fireEvent.click(screen.getByRole("combobox", { name: /clase/i }));
-    fireEvent.click(screen.getByRole("option", { name: /Clase 2/ }));
+    expect(new FormData(form).get("courseClassId")).toBe(courseClass.id);
+    expect(assignments()).toEqual([{ dayId: day.id, classScheduleId: schedule.id, individualSlotId: slot.id }]);
+    await user.click(screen.getByRole("checkbox", { name: /lunes/i }));
+    expect(assignments()).toEqual([]);
+    expect(screen.queryByRole("combobox", { name: /horario/i })).not.toBeInTheDocument();
+    await user.click(screen.getByRole("checkbox", { name: /lunes/i }));
+    expect(assignments()).toEqual([{ dayId: day.id, classScheduleId: "", individualSlotId: null }]);
+    expect(screen.getByRole("combobox", { name: /período individual/i })).toBeDisabled();
 
+    await user.click(screen.getByRole("combobox", { name: /clase/i }));
+    await user.click(screen.getByRole("option", { name: /Clase 2/ }));
+
+    expect(new FormData(form).get("courseClassId")).toBe(OPTIONS.classes[1].id);
+    expect(assignments()).toEqual([]);
+    expect(screen.queryByRole("checkbox", { name: /lunes/i })).not.toBeInTheDocument();
     expect(screen.getByText(/Docentes: Maria Lopez/)).toBeInTheDocument();
   });
 
-  it("reveals schedule and period selects only for checked days", () => {
-    render(<CourseEnrollmentAssignmentFields options={OPTIONS} />);
+  it("marks an incomplete selected day accessibly and prevents selecting a day without capacity", async () => {
+    const user = userEvent.setup();
+    const day = OPTIONS.classes[0].days[0];
+    const { rerender } = render(<CourseEnrollmentAssignmentFields options={OPTIONS} invalidDayIds={[day.id]} />);
 
-    expect(screen.queryByRole("combobox", { name: /horario/i })).not.toBeInTheDocument();
-
-    fireEvent.click(screen.getByRole("checkbox", { name: /lunes/i }));
-
-    expect(screen.getByRole("combobox", { name: /horario/i })).toBeInTheDocument();
-  });
-
-  it("marks incomplete days with an error style", () => {
-    const dayId = "00000000-0000-4000-8000-000000000002";
-    render(<CourseEnrollmentAssignmentFields options={OPTIONS} invalidDayIds={[dayId]} />);
-
-    fireEvent.click(screen.getByRole("checkbox", { name: /lunes/i }));
+    await user.click(screen.getByRole("checkbox", { name: /lunes/i }));
 
     expect(screen.getByRole("combobox", { name: /horario/i })).toHaveAttribute("aria-invalid", "true");
+    expect(screen.getByText("Completá el horario de este día.")).toBeInTheDocument();
+    expect(screen.getByRole("combobox", { name: /período individual/i })).toHaveAttribute("aria-invalid", "true");
+    rerender(
+      <CourseEnrollmentAssignmentFields
+        key="without-capacity"
+        options={{
+          ...OPTIONS,
+          classes: [{ ...OPTIONS.classes[0], days: [{ ...day, availableCapacity: 0 }] }],
+        }}
+      />,
+    );
+
+    expect(screen.getByRole("checkbox", { name: /lunes/i })).toBeDisabled();
+    await user.click(screen.getByRole("checkbox", { name: /lunes/i }));
+    expect(screen.queryByRole("combobox", { name: /horario/i })).not.toBeInTheDocument();
   });
 });

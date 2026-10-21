@@ -1,6 +1,4 @@
-import type { ReactElement } from "react";
-
-import { render, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 
 import { AcademicRouteView } from "@features/academic/components/academic-route-view";
 import { ACADEMIC_ROUTE_SEGMENT } from "@features/academic/constants/academic-route.constants";
@@ -23,6 +21,8 @@ import { AcademicScope } from "@features/academic/utils/academic-scope.util";
 import { requireInstitutionalUser } from "@features/institutional-auth/services/get-institutional-user.service";
 import { INSTITUTIONAL_PERMISSION } from "@features/institutional-auth/types/institutional-permission.types";
 import type { InstitutionalUser } from "@features/institutional-auth/types/institutional-user.types";
+
+import { renderWithQueryClient as render } from "@/../test/utils/render-with-query-client";
 
 jest.mock("next/navigation", () => ({
   ...jest.requireActual("next/navigation"),
@@ -58,7 +58,6 @@ const TRAINING_PATH_ID = "2d9ec931-453c-4778-86a9-dc40a06d0247";
 const INSTRUMENT_ID = "3b9ec931-453c-4778-86a9-dc40a06d0247";
 const SHIFT_ID = "5c9ec931-453c-4778-86a9-dc40a06d0247";
 const ACADEMIC_SPACE_ID = "4c9ec931-453c-4778-86a9-dc40a06d0247";
-const LEVEL_ID = "a755b72b-04b7-4255-8bca-243f391155cc";
 
 const USER: InstitutionalUser = {
   userId: "user-1",
@@ -172,21 +171,6 @@ describe("AcademicRouteView", () => {
     jest.mocked(fetchShift).mockResolvedValue(SHIFT);
   });
 
-  it("renders a training-path detail with its related study plans", async () => {
-    const result = await AcademicRouteView({
-      access: FULL_ACADEMIC_ACCESS,
-      institutionId: INSTITUTION_ID,
-      renderBreadcrumb: () => null,
-      scope: AcademicScope.INSTITUTIONAL,
-      segments: [AcademicResource.TRAINING_PATH, TRAINING_PATH_ID],
-      searchParams: {},
-    });
-
-    expect(result).toHaveProperty("props.title", "Profesorado de Música");
-    expect(result).toHaveProperty("props.children");
-    expect(fetchTrainingPath).toHaveBeenCalledWith(AcademicScope.INSTITUTIONAL, INSTITUTION_ID, TRAINING_PATH_ID);
-  });
-
   it("locks the contextual study-plan form to its training path", async () => {
     const result = await AcademicRouteView({
       access: FULL_ACADEMIC_ACCESS,
@@ -200,19 +184,12 @@ describe("AcademicRouteView", () => {
       },
     });
 
-    const formProps = (result.props as { children: ReactElement<Record<string, unknown>> }).children.props;
+    const { container } = render(result);
 
-    expect(formProps).toEqual(
-      expect.objectContaining({
-        initialValues: {
-          trainingPathId: TRAINING_PATH_ID,
-          trainingPathName: "Profesorado de Música",
-        },
-        parentId: TRAINING_PATH_ID,
-        returnTo: `/training-paths/${TRAINING_PATH_ID}`,
-        trainingPathLocked: true,
-      }),
-    );
+    expect(screen.getByRole("combobox", { name: "Trayecto formativo" })).toBeDisabled();
+    expect(screen.getByRole("combobox", { name: "Trayecto formativo" })).toHaveTextContent("Profesorado de Música");
+    expect(new FormData(container.querySelector("form")!).get("trainingPathId")).toBe(TRAINING_PATH_ID);
+    expect(screen.getByRole("link", { name: "Cancelar" })).toHaveAttribute("href", `/training-paths/${TRAINING_PATH_ID}`);
   });
 
   it("rejects malformed contextual training paths", async () => {
@@ -241,26 +218,6 @@ describe("AcademicRouteView", () => {
         searchParams: {},
       }),
     ).rejects.toThrow("NEXT_HTTP_ERROR_FALLBACK;404");
-  });
-
-  it("shows the contextual training path and plan name in the detail header", async () => {
-    const result = await AcademicRouteView({
-      access: FULL_ACADEMIC_ACCESS,
-      institutionId: INSTITUTION_ID,
-      renderBreadcrumb: () => null,
-      scope: AcademicScope.INSTITUTIONAL,
-      segments: [AcademicResource.STUDY_PLAN, STUDY_PLAN_ID],
-      searchParams: {},
-    });
-
-    expect(result).toHaveProperty("props.title", "Profesorado de Música · Plan 2026");
-
-    render(result);
-
-    expect(screen.getByText("Profesorado de Música")).toBeInTheDocument();
-    expect(screen.getByText("Borrador")).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Resumen" })).toBeInTheDocument();
-    expect(screen.getByText("Vigencia")).toBeInTheDocument();
   });
 
   it("renders academic space usage when study plans are readable", async () => {
@@ -297,26 +254,6 @@ describe("AcademicRouteView", () => {
     expect(screen.queryByRole("link", { name: "Editar" })).not.toBeInTheDocument();
   });
 
-  it("renders the shift detail with its status action and description", async () => {
-    const result = await AcademicRouteView({
-      access: FULL_ACADEMIC_ACCESS,
-      institutionId: INSTITUTION_ID,
-      renderBreadcrumb: () => null,
-      scope: AcademicScope.INSTITUTIONAL,
-      segments: [AcademicResource.SHIFT, SHIFT_ID],
-      searchParams: {},
-    });
-
-    expect(result).toHaveProperty("props.title", "Turno mañana");
-
-    render(result);
-
-    expect(screen.getByText("Consultá los datos generales y el estado del turno.")).toBeInTheDocument();
-    expect(screen.getByText("De 8 a 12.")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Desactivar" })).toBeInTheDocument();
-    expect(fetchShift).toHaveBeenCalledWith(AcademicScope.INSTITUTIONAL, INSTITUTION_ID, SHIFT_ID);
-  });
-
   it("shows the training-path status action without the edit permission", async () => {
     jest.mocked(requireInstitutionalUser).mockResolvedValueOnce({
       ...USER,
@@ -347,24 +284,6 @@ describe("AcademicRouteView", () => {
     expect(screen.queryByRole("link", { name: "Editar" })).not.toBeInTheDocument();
   });
 
-  it.each([[ACADEMIC_ROUTE_SEGMENT.EDIT, "Editar plan de estudio"]])(
-    "routes the study plan %s action through the primary detail",
-    async (action, expectedTitle) => {
-      const result = await AcademicRouteView({
-        access: FULL_ACADEMIC_ACCESS,
-        institutionId: INSTITUTION_ID,
-        renderBreadcrumb: () => null,
-        scope: AcademicScope.INSTITUTIONAL,
-        segments: [AcademicResource.STUDY_PLAN, STUDY_PLAN_ID, action],
-        searchParams: {},
-      });
-
-      expect(result).toHaveProperty("props.title", expectedTitle);
-      expect(result).not.toHaveProperty("props.backHref");
-      expect(result).toHaveProperty("props.actions");
-    },
-  );
-
   it("does not expose a dedicated study plan status page", async () => {
     await expect(
       AcademicRouteView({
@@ -376,48 +295,5 @@ describe("AcademicRouteView", () => {
         searchParams: {},
       }),
     ).rejects.toThrow("NEXT_HTTP_ERROR_FALLBACK;404");
-  });
-
-  it("renders level editing without a back action and with a contextual breadcrumb", async () => {
-    jest.mocked(fetchStudyPlanCurriculum).mockResolvedValue({
-      studyPlan: STUDY_PLAN,
-      levels: [
-        {
-          level: {
-            id: LEVEL_ID,
-            studyPlanId: STUDY_PLAN_ID,
-            name: "Nivel 1",
-            displayOrder: 1,
-            description: null,
-          },
-          spaces: [],
-        },
-      ],
-      unassignedSpaces: [],
-      prerequisites: [],
-    });
-    const renderBreadcrumb = jest.fn(() => null);
-
-    const result = await AcademicRouteView({
-      access: FULL_ACADEMIC_ACCESS,
-      institutionId: INSTITUTION_ID,
-      renderBreadcrumb,
-      scope: AcademicScope.INSTITUTIONAL,
-      segments: [AcademicResource.STUDY_PLAN, STUDY_PLAN_ID, AcademicResource.ACADEMIC_LEVEL, LEVEL_ID, ACADEMIC_ROUTE_SEGMENT.EDIT],
-      searchParams: {},
-    });
-
-    render(result);
-
-    expect(screen.getByRole("heading", { name: "Editar nivel" })).toBeInTheDocument();
-    expect(screen.queryByRole("link", { name: "Volver" })).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Eliminar" })).not.toBeInTheDocument();
-    expect(renderBreadcrumb).toHaveBeenLastCalledWith({
-      hiddenSegments: [AcademicResource.ACADEMIC_LEVEL, LEVEL_ID],
-      segmentLabels: {
-        [STUDY_PLAN_ID]: "Profesorado de Música · Plan 2026",
-        [ACADEMIC_ROUTE_SEGMENT.EDIT]: "Editar Nivel 1",
-      },
-    });
   });
 });

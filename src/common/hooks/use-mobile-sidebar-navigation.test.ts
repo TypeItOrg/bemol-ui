@@ -3,6 +3,7 @@ import { usePathname } from "next/navigation";
 import { act, renderHook } from "@testing-library/react";
 
 import { useSidebar } from "@common/components/ui/sidebar";
+import { MOBILE_SIDEBAR_CLOSE_DELAY_MS } from "@common/constants/sidebar.constants";
 import { useMobileSidebarNavigation } from "@common/hooks/use-mobile-sidebar-navigation";
 
 jest.mock("next/navigation", () => ({
@@ -97,13 +98,23 @@ describe("useMobileSidebarNavigation", () => {
 
     expect(result.current.isActive("/roles")).toBe(true);
 
+    act(() => {
+      jest.advanceTimersByTime(500);
+    });
+    expect(mockSetOpenMobile).not.toHaveBeenCalled();
+
     mockUsePathname.mockReturnValue("/roles");
     rerender();
 
     expect(mockSetOpenMobile).not.toHaveBeenCalled();
 
     act(() => {
-      jest.advanceTimersByTime(200);
+      jest.advanceTimersByTime(MOBILE_SIDEBAR_CLOSE_DELAY_MS - 1);
+    });
+    expect(mockSetOpenMobile).not.toHaveBeenCalled();
+
+    act(() => {
+      jest.advanceTimersByTime(1);
     });
 
     expect(mockSetOpenMobile).toHaveBeenCalledWith(false);

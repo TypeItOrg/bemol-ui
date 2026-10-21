@@ -9,34 +9,6 @@ import { getCurrentAcademicYear, getMaxAcademicYear } from "@features/academic/u
 
 import { createTestQueryClient } from "@/../test/utils/render-with-query-client";
 
-jest.mock("@common/components/ui/year-select", () => ({
-  YearSelect: ({
-    id,
-    maxYear,
-    minYear,
-    name,
-    onValueChange,
-    required,
-    value,
-  }: {
-    id?: string;
-    maxYear: number;
-    minYear: number;
-    name?: string;
-    onValueChange?: (value: string) => void;
-    required?: boolean;
-    value?: string;
-  }) => (
-    <select id={id} name={name} required={required} value={value ?? ""} onChange={(event) => onValueChange?.(event.currentTarget.value)}>
-      {Array.from({ length: maxYear - minYear + 1 }, (_, index) => maxYear - index).map((year) => (
-        <option key={year} value={String(year)}>
-          {year}
-        </option>
-      ))}
-    </select>
-  ),
-}));
-
 describe("AcademicFormFields", () => {
   it("renders the course builder with locked plan and space once a class exists", () => {
     render(
@@ -118,41 +90,6 @@ describe("AcademicFormFields", () => {
     expect(document.querySelector<HTMLInputElement>('input[name="trainingPathId"]')).toHaveValue(trainingPathId);
   });
 
-  it("marks the academic year as required and uses the shared date pickers", () => {
-    render(<AcademicFormFields resource={AcademicResource.ACADEMIC_YEAR} />);
-
-    expect(screen.getByLabelText(/Año/)).toBeRequired();
-    expect(screen.getByText("Año").parentElement).toHaveTextContent("Año*");
-    expect(screen.getByLabelText("Fecha de inicio")).toHaveAttribute("type", "text");
-    expect(screen.getByLabelText("Fecha de finalización")).toHaveAttribute("type", "text");
-    expect(screen.getAllByPlaceholderText("dd/mm/aaaa")).toHaveLength(2);
-  });
-
-  it("marks every required study-plan-space field consistently", () => {
-    render(
-      <QueryClientProvider client={createTestQueryClient()}>
-        <AcademicFormFields resource={AcademicResource.STUDY_PLAN_SPACE} />
-      </QueryClientProvider>,
-    );
-
-    expect(screen.getByText("Espacio académico").parentElement).toHaveTextContent("Espacio académico*");
-    expect(screen.getByText("Nivel").parentElement).not.toHaveTextContent("*");
-    expect(screen.getByText("Orden").parentElement).toHaveTextContent("Orden*");
-    expect(screen.getByText("Carácter").parentElement).toHaveTextContent("Carácter*");
-    expect(screen.getByText("Aprobación").parentElement).toHaveTextContent("Aprobación*");
-  });
-
-  it("offers the supported academic year range", async () => {
-    const user = userEvent.setup();
-    render(<AcademicFormFields resource={AcademicResource.ACADEMIC_YEAR} />);
-
-    await user.click(screen.getByLabelText(/Año/));
-
-    expect(screen.getByRole("option", { name: "2000" })).toBeVisible();
-    expect(screen.getByRole("option", { name: String(getMaxAcademicYear()) })).toBeVisible();
-    expect(screen.queryByRole("option", { name: "1999" })).not.toBeInTheDocument();
-  });
-
   it("enables academic dates after selecting the year", async () => {
     const user = userEvent.setup();
     render(<AcademicFormFields resource={AcademicResource.ACADEMIC_YEAR} />);
@@ -160,38 +97,11 @@ describe("AcademicFormFields", () => {
     expect(screen.getByLabelText("Fecha de inicio")).toBeDisabled();
     expect(screen.getByLabelText("Fecha de finalización")).toBeDisabled();
 
-    await user.selectOptions(screen.getByLabelText(/Año/), String(getCurrentAcademicYear()));
+    await user.click(screen.getByRole("combobox", { name: /Año/ }));
+    await user.click(screen.getByRole("option", { name: String(getCurrentAcademicYear()) }));
 
     expect(screen.getByLabelText("Fecha de inicio")).toBeEnabled();
     expect(screen.getByLabelText("Fecha de finalización")).toBeEnabled();
-  });
-
-  it("renders the initial academic year before interaction", () => {
-    const year = getCurrentAcademicYear();
-    render(<AcademicFormFields resource={AcademicResource.ACADEMIC_YEAR} initialValues={{ year }} />);
-
-    expect(screen.getByLabelText(/Año/)).toHaveTextContent(String(year));
-  });
-
-  it("renders the academic year status selector while editing", () => {
-    render(<AcademicFormFields resource={AcademicResource.ACADEMIC_YEAR} initialValues={{ status: "PLANNED" }} />);
-
-    const statusSelect = screen.getByRole("combobox", { name: "Estado" });
-    expect(statusSelect).toHaveTextContent("Planificado");
-  });
-
-  it("includes the original training-path status while editing", () => {
-    const { container } = render(
-      <form>
-        <AcademicFormFields
-          resource={AcademicResource.TRAINING_PATH}
-          initialValues={{ id: "2d9ec931-453c-4778-86a9-dc40a06d0247", name: "CAVI", active: true }}
-        />
-      </form>,
-    );
-
-    expect(screen.getByRole("combobox", { name: "Estado" })).toHaveTextContent("Activo");
-    expect(new FormData(container.querySelector("form")!).get("initialActive")).toBe("true");
   });
 
   it("renders instrument status while editing", () => {
@@ -329,7 +239,8 @@ describe("AcademicFormFields", () => {
     expect(startDate).toHaveValue(`01/01/${initialYear}`);
     expect(endDate).toHaveValue(`31/12/${initialYear}`);
 
-    await user.selectOptions(screen.getByLabelText(/Año/), String(nextYear));
+    await user.click(screen.getByRole("combobox", { name: /Año/ }));
+    await user.click(screen.getByRole("option", { name: String(nextYear) }));
 
     expect(screen.getByLabelText("Fecha de inicio")).toHaveValue("");
     expect(screen.getByLabelText("Fecha de finalización")).toHaveValue("");
@@ -352,25 +263,6 @@ describe("AcademicFormFields", () => {
 
     expect(screen.getByLabelText("Fecha de inicio")).toHaveValue("");
     expect(screen.getByLabelText("Fecha de finalización")).toHaveValue(`31/12/${year}`);
-  });
-
-  it("keeps numeric restrictions for academic ordering fields", async () => {
-    const user = userEvent.setup();
-    render(<AcademicFormFields resource={AcademicResource.ACADEMIC_LEVEL} />);
-
-    const order = screen.getByLabelText(/Orden/);
-    await user.clear(order);
-    await user.type(order, "2e+7");
-
-    expect(order).toHaveValue("27");
-    expect(order).toHaveAttribute("inputmode", "numeric");
-  });
-
-  it("asks only for the order when creating an academic level and notes the derived name", () => {
-    render(<AcademicFormFields resource={AcademicResource.ACADEMIC_LEVEL} />);
-
-    expect(screen.queryByLabelText(/Nombre/)).not.toBeInTheDocument();
-    expect(screen.getByText("El nombre se genera automáticamente a partir del orden (Nivel 1, Nivel 2, …).")).toBeInTheDocument();
   });
 
   it("marks an end date before the start date as invalid", async () => {

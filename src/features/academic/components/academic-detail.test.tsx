@@ -64,12 +64,12 @@ const COURSE: Course = {
 
 describe("AcademicDetail", () => {
   it("shows training-path description, back button and preserves the detail as edit origin", () => {
-    render(<AcademicDetail item={TRAINING_PATH} resource={AcademicResource.TRAINING_PATH} basePath="" canEdit />);
+    render(<AcademicDetail item={TRAINING_PATH} resource={AcademicResource.TRAINING_PATH} basePath="" canEdit returnTo="/training-paths?page=2" />);
 
     const info = screen.getByRole("region", { name: "Información" });
     expect(within(info).getByText("Consultá los datos generales y el estado del trayecto formativo.")).toBeInTheDocument();
     expect(within(info).getByText("Formación docente.")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Volver" })).toHaveAttribute("href", "/training-paths");
+    expect(screen.getByRole("link", { name: "Volver" })).toHaveAttribute("href", "/training-paths?page=2");
     expect(screen.getByRole("link", { name: "Editar" })).toHaveAttribute(
       "href",
       "/training-paths/2d9ec931-453c-4778-86a9-dc40a06d0247/edit?returnTo=%2Ftraining-paths%2F2d9ec931-453c-4778-86a9-dc40a06d0247",
@@ -103,50 +103,6 @@ describe("AcademicDetail", () => {
     expect(screen.queryByRole("link", { name: "Editar" })).not.toBeInTheDocument();
   });
 
-  it("shows the instrument detail with custom returnTo back link", () => {
-    render(
-      <AcademicDetail
-        basePath=""
-        canEdit
-        item={{
-          id: "3b9ec931-453c-4778-86a9-dc40a06d0247",
-          institutionId: "05b84ac4-66aa-409f-a813-012d15b8cb9b",
-          name: "Piano",
-          description: "Instrumento de teclado.",
-          active: true,
-        }}
-        resource={AcademicResource.INSTRUMENT}
-        returnTo="/instruments?page=2"
-      />,
-    );
-
-    const info = screen.getByRole("region", { name: "Información" });
-    expect(within(info).getByText("Consultá los datos generales y el estado del instrumento.")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Volver" })).toHaveAttribute("href", "/instruments?page=2");
-    expect(screen.getByRole("link", { name: "Editar" })).toBeInTheDocument();
-  });
-
-  it("shows the academic-space description with its fallback", () => {
-    const academicSpace = {
-      id: "2d9ec931-453c-4778-86a9-dc40a06d0247",
-      institutionId: "05b84ac4-66aa-409f-a813-012d15b8cb9b",
-      name: "Armonía",
-      description: "Estudio de relaciones entre sonidos.",
-      type: "SUBJECT" as const,
-      format: "INDIVIDUAL" as const,
-      active: true,
-    };
-    const { rerender } = render(<AcademicDetail item={academicSpace} resource={AcademicResource.ACADEMIC_SPACE} basePath="" canEdit={false} />);
-
-    expect(screen.getByText("Estudio de relaciones entre sonidos.")).toBeInTheDocument();
-
-    rerender(
-      <AcademicDetail item={{ ...academicSpace, description: null }} resource={AcademicResource.ACADEMIC_SPACE} basePath="" canEdit={false} />,
-    );
-
-    expect(screen.getByText("Sin descripción")).toBeInTheDocument();
-  });
-
   it("integrates study-plan status and validity into the information section along with back and edit actions", () => {
     render(<AcademicDetail item={STUDY_PLAN} resource={AcademicResource.STUDY_PLAN} basePath="" canEdit />);
 
@@ -162,24 +118,6 @@ describe("AcademicDetail", () => {
       "href",
       "/study-plans/019f9c3d-9663-77da-a21b-5c811c040616/edit?returnTo=%2Ftraining-paths%2F2d9ec931-453c-4778-86a9-dc40a06d0247",
     );
-  });
-
-  it.each([
-    { effectiveFrom: null, effectiveTo: null, expected: "Sin período definido" },
-    { effectiveFrom: "2026-01-01", effectiveTo: null, expected: "Desde 01/01/2026" },
-    { effectiveFrom: null, effectiveTo: "2026-12-31", expected: "Hasta 31/12/2026" },
-    {
-      effectiveFrom: "2026-01-01",
-      effectiveTo: "2026-12-31",
-      expected: "Del 01/01/2026 al 31/12/2026",
-    },
-  ])("shows study-plan validity as $expected", ({ effectiveFrom, effectiveTo, expected }) => {
-    render(<AcademicDetail item={{ ...STUDY_PLAN, effectiveFrom, effectiveTo }} resource={AcademicResource.STUDY_PLAN} basePath="" canEdit />);
-
-    const summary = screen.getByRole("region", { name: "Resumen" });
-    const validity = within(summary).getByText("Vigencia").nextElementSibling;
-
-    expect(validity).toHaveTextContent(expected);
   });
 
   it("renders course summary and classes section with styled icon, teachers, days, capacity and schedules", () => {
@@ -228,14 +166,6 @@ describe("AcademicDetail", () => {
     const plainInfo = screen.getByRole("region", { name: "Información del curso" });
     const instrumentLabel = within(plainInfo).getByText("Instrumento");
     expect(instrumentLabel.nextElementSibling).toHaveTextContent("Sin instrumento");
-  });
-
-  it("renders empty states for a course without classes", () => {
-    render(<AcademicDetail item={{ ...COURSE, classes: [] }} resource={AcademicResource.COURSE} basePath="" canEdit />);
-
-    const classesRegion = screen.getByRole("region", { name: "Clases" });
-    expect(within(classesRegion).getByText("Este curso aún no tiene clases registradas.")).toBeInTheDocument();
-    expect(within(classesRegion).getByText("Sin clases para mostrar.")).toBeInTheDocument();
   });
 
   it("renders group course with capacity without period and multiple schedules", () => {

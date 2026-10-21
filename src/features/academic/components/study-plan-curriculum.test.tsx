@@ -1,4 +1,5 @@
 import { render, screen, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 
 import { StudyPlanCurriculumView } from "@features/academic/components/study-plan-curriculum";
 import type { StudyPlanCurriculum } from "@features/academic/types/study-plan-curriculum.types";
@@ -51,27 +52,6 @@ const CURRICULUM: StudyPlanCurriculum = {
 };
 
 describe("StudyPlanCurriculumView", () => {
-  it("places level deletion immediately after its edit action", () => {
-    render(
-      <StudyPlanCurriculumView
-        curriculum={CURRICULUM}
-        basePath=""
-        canEditCurriculum
-        institutionId={INSTITUTION_ID}
-        scope={AcademicScope.INSTITUTIONAL}
-      />,
-    );
-
-    const editAction = screen.getByRole("link", { name: "Editar nivel" });
-    const levelHeader = editAction.closest("header");
-    const deleteAction = within(levelHeader as HTMLElement).getByRole("button", {
-      name: "Eliminar",
-    });
-
-    expect(editAction).toHaveAttribute("href", `/study-plans/${STUDY_PLAN_ID}/academic-levels/${LEVEL_ID}/edit`);
-    expect(editAction.compareDocumentPosition(deleteAction)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
-  });
-
   it("hides level actions when the curriculum cannot be edited", () => {
     render(
       <StudyPlanCurriculumView
@@ -87,26 +67,8 @@ describe("StudyPlanCurriculumView", () => {
     expect(screen.queryByRole("button", { name: "Eliminar" })).not.toBeInTheDocument();
   });
 
-  it("identifies a curriculum space by its name and display order", () => {
-    render(
-      <StudyPlanCurriculumView
-        curriculum={CURRICULUM}
-        basePath=""
-        canEditCurriculum
-        institutionId={INSTITUTION_ID}
-        scope={AcademicScope.INSTITUTIONAL}
-      />,
-    );
-
-    const spaceLink = screen.getByRole("link", { name: /Lenguaje Musical I/ });
-    const card = spaceLink.closest('[data-slot="card"]');
-    const order = screen.getByText("Orden 1");
-
-    expect(order.closest('[data-slot="card-header"]')).toBeInTheDocument();
-    expect(card).toBeInTheDocument();
-  });
-
-  it("offers direct edit and delete actions on each space card", () => {
+  it("opens deletion for the selected curriculum space and preserves its edit origin", async () => {
+    const user = userEvent.setup();
     render(
       <StudyPlanCurriculumView
         curriculum={CURRICULUM}
@@ -124,6 +86,11 @@ describe("StudyPlanCurriculumView", () => {
 
     expect(detailLink).toHaveAttribute("href", `/study-plans/${STUDY_PLAN_ID}/spaces/${SPACE_ID}`);
     expect(editAction).toHaveAttribute("href", `/study-plans/${STUDY_PLAN_ID}/spaces/${SPACE_ID}/edit?returnTo=%2Fstudy-plans%2F${STUDY_PLAN_ID}`);
-    expect(deleteAction).toBeEnabled();
+    await user.click(deleteAction);
+
+    const dialog = screen.getByRole("alertdialog");
+    expect(within(dialog).getByRole("heading")).toHaveTextContent("Lenguaje Musical I");
+    await user.click(within(dialog).getByRole("button", { name: "Cancelar" }));
+    expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
   });
 });

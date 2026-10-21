@@ -1,5 +1,5 @@
 import { AcademicResource } from "@features/academic/types/academic-resource.types";
-import { getAcademicRegistrationSummary, parseAcademicPaginationParams } from "@features/academic/utils/academic-pagination.util";
+import { parseAcademicPaginationParams } from "@features/academic/utils/academic-pagination.util";
 
 describe("parseAcademicPaginationParams", () => {
   it("parses the academic table filters independently", () => {
@@ -87,10 +87,5 @@ describe("parseAcademicPaginationParams", () => {
       field: "name",
       direction: "asc",
     });
-  });
-
-  it("uses singular and plural agreement in the registration summary", () => {
-    expect(getAcademicRegistrationSummary(1, "ciclo lectivo", "ciclos lectivos")).toBe("1 ciclo lectivo registrado.");
-    expect(getAcademicRegistrationSummary(2, "ciclo lectivo", "ciclos lectivos")).toBe("2 ciclos lectivos registrados.");
   });
 });

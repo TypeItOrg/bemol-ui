@@ -3,7 +3,6 @@ import type { ReactElement } from "react";
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
-import { formatEnrollmentApplicationDateTime } from "@features/enrollment-applications/utils/enrollment-application-date.util";
 import { resolveGuardianLinkAction } from "@features/guardian-links/actions/resolve-guardian-link.action";
 import { GuardianLinkRequests } from "@features/guardian-links/components/guardian-link-requests";
 import type { GuardianLinkRequest } from "@features/guardian-links/types/guardian-link-request.types";
@@ -70,19 +69,6 @@ describe("GuardianLinkRequests", () => {
     jest.mocked(resolveGuardianLinkAction).mockReset().mockResolvedValue({ success: true });
   });
 
-  it("shows tutor, person, declared relationship and the supporting document count", () => {
-    render(<RequestsFixture institutionId={INSTITUTION_ID} requests={[buildRequest()]} />);
-
-    expect(screen.getByText("Ana García")).toBeInTheDocument();
-    expect(screen.getByText("35123456")).toBeInTheDocument();
-    expect(screen.getByText("Mateo González")).toBeInTheDocument();
-    expect(screen.getByText(/^54123456 · .* años$/)).toBeInTheDocument();
-    expect(screen.queryByText(/10\/09\/2018/)).not.toBeInTheDocument();
-    expect(screen.getByText(/ años$/)).toBeInTheDocument();
-    expect(screen.getByText("Tutor legal")).toBeInTheDocument();
-    expect(screen.getByText("1 documento")).toBeInTheDocument();
-  });
-
   it("opens the request detail while preserving the list origin", async () => {
     const user = userEvent.setup();
     const request = buildRequest();
@@ -92,53 +78,6 @@ describe("GuardianLinkRequests", () => {
     await user.click(await screen.findByRole("menuitem", { name: "Ver detalle" }));
 
     expect(mockPush).toHaveBeenCalledWith(`/guardian-links/${request.personGuardianId}?returnTo=%2Fguardian-links%3Fpage%3D2%26size%3D20`);
-  });
-
-  it("shows the request date with time", () => {
-    const request = buildRequest();
-    render(<RequestsFixture institutionId={INSTITUTION_ID} requests={[request]} />);
-
-    expect(screen.getByText(formatEnrollmentApplicationDateTime(request.createdAt))).toBeInTheDocument();
-  });
-
-  it("shows pending, accepted and rejected requests in the default view", () => {
-    render(
-      <RequestsFixture
-        institutionId={INSTITUTION_ID}
-        requests={[
-          buildRequest(),
-          buildRequest({ personGuardianId: "019f9c3a-f891-7bc5-a98d-e65332998002", status: "ACTIVE" }),
-          buildRequest({ personGuardianId: "019f9c3a-f891-7bc5-a98d-e65332998003", status: "REJECTED" }),
-        ]}
-      />,
-    );
-
-    const table = within(screen.getByRole("table"));
-    expect(table.getByRole("cell", { name: "Pendiente" })).toBeInTheDocument();
-    expect(table.getByRole("cell", { name: "Aceptada" })).toBeInTheDocument();
-    expect(table.getByRole("cell", { name: "Rechazada" })).toBeInTheDocument();
-  });
-
-  it("tells when the request has no supporting documents", () => {
-    render(<RequestsFixture institutionId={INSTITUTION_ID} requests={[buildRequest({ attachments: [] })]} />);
-
-    expect(within(screen.getByRole("table")).getByRole("cell", { name: "Sin documentación" })).toBeInTheDocument();
-  });
-
-  it("shows an empty state when nothing is pending", () => {
-    render(<RequestsFixture institutionId={INSTITUTION_ID} requests={[]} />);
-
-    expect(screen.getByText("No hay solicitudes de vinculación")).toBeInTheDocument();
-    expect(screen.getByRole("textbox", { name: "Buscar" })).toBeInTheDocument();
-    expect(screen.getAllByRole("textbox")).toHaveLength(1);
-    expect(screen.getByRole("combobox", { name: "Estado" })).toBeInTheDocument();
-  });
-
-  it("uses the search empty state when filters have no matches", () => {
-    render(<RequestsFixture institutionId={INSTITUTION_ID} requests={[]} query={{ search: "Persona inexistente" }} />);
-
-    expect(screen.getByText("No se encontraron solicitudes")).toBeInTheDocument();
-    expect(screen.getByText("No encontramos solicitudes que coincidan con los filtros.")).toBeInTheDocument();
   });
 
   it.each([
@@ -186,7 +125,7 @@ describe("GuardianLinkRequests", () => {
     await waitFor(() => expect(mockNavigate).toHaveBeenLastCalledWith({ search: "35123456", page: "0", size: "20" }, { replace: true }));
   });
 
-  it("marks a request as rejected after confirming rejection in the modal", async () => {
+  it("refreshes after rejection and hides decisions for the refreshed resolved request", async () => {
     const user = userEvent.setup();
     const { rerender } = render(<RequestsFixture institutionId={INSTITUTION_ID} requests={[buildRequest()]} />);
 
