@@ -15,6 +15,7 @@ export function VirtualizedDropdownItems<TItem>({
   getItemLabel,
   getItemDisplayLabel,
   getItemDescription,
+  getItemDisabled,
   getItemGroup,
   getItemValue,
   groupOrder,
@@ -146,6 +147,7 @@ export function VirtualizedDropdownItems<TItem>({
               style={rowStyle}
             >
               <AsyncDropdownItem
+                disabled={getItemDisabled?.(row.item)}
                 getItemLabel={getItemLabel}
                 getItemDisplayLabel={getItemDisplayLabel}
                 getItemDescription={getItemDescription}

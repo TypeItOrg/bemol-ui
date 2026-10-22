@@ -22,6 +22,7 @@ export function useAsyncDropdown<TItem>({
   getItemValue,
   value,
   selectedLabel,
+  selectedValues,
   placeholder = "Seleccionar",
   resetSearchOnClose = true,
   onOpenChange,
@@ -41,6 +42,7 @@ export function useAsyncDropdown<TItem>({
   | "getItemValue"
   | "value"
   | "selectedLabel"
+  | "selectedValues"
   | "placeholder"
   | "resetSearchOnClose"
   | "onOpenChange"
@@ -74,20 +76,29 @@ export function useAsyncDropdown<TItem>({
 
   const { data } = query;
 
-  const items = useMemo(() => data?.pages.flatMap((page) => page.items) ?? [], [data]);
+  const items = useMemo(() => {
+    const allItems = data?.pages.flatMap((page) => page.items) ?? [];
+
+    return [...new Map(allItems.map((item) => [getItemValue(item), item])).values()];
+  }, [data, getItemValue]);
 
   const selectedItem = items.find((item) => getItemValue(item) === value);
 
-  const selectedText = getSelectedText({
-    defaultOption,
-    getItemLabel,
-    placeholder,
-    selectedItem,
-    selectedLabel,
-    value,
-  });
+  const hasMultiSelectionLabel = selectedValues !== undefined && selectedValues.length > 0 && selectedLabel !== undefined;
+
+  const selectedText = hasMultiSelectionLabel
+    ? selectedLabel
+    : getSelectedText({
+        defaultOption,
+        getItemLabel,
+        placeholder,
+        selectedItem,
+        selectedLabel,
+        value,
+      });
 
   const isSelected =
+    hasMultiSelectionLabel ||
     selectedItem !== undefined ||
     (value !== undefined && selectedLabel !== undefined) ||
     (defaultOption !== undefined && value === defaultOption.value);

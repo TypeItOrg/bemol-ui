@@ -8,6 +8,7 @@ import { DropdownOptionContent } from "@common/components/ui/dropdown-option-con
 import type { AsyncDropdownRenderItemState } from "@common/types/async-dropdown-render-item-state.types";
 
 export function AsyncDropdownItem<TItem>({
+  disabled = false,
   getItemLabel,
   getItemDisplayLabel,
   getItemDescription,
@@ -34,7 +35,12 @@ export function AsyncDropdownItem<TItem>({
       aria-label={getItemLabel(item)}
       className={getItemDisplayLabel || getItemDescription ? "min-h-9" : "h-full"}
       data-checked={selected}
-      onSelect={() => onSelect(item)}
+      disabled={disabled}
+      onSelect={() => {
+        if (!disabled) {
+          onSelect(item);
+        }
+      }}
       value={getItemValue(item)}
     >
       {renderContent()}
@@ -43,6 +49,7 @@ export function AsyncDropdownItem<TItem>({
 }
 
 export type AsyncDropdownItemProps<TItem> = {
+  disabled?: boolean;
   getItemDisplayLabel?: (item: TItem) => string;
   getItemDescription?: (item: TItem) => string | undefined;
   getItemLabel: (item: TItem) => string;

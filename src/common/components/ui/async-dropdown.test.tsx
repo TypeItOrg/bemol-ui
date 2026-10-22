@@ -139,6 +139,44 @@ describe("AsyncDropdown", () => {
     expect(screen.queryByPlaceholderText("Buscar...")).not.toBeInTheDocument();
   });
 
+  it("blocks disabled options and skips them during keyboard selection", async () => {
+    const user = userEvent.setup();
+    const { onValueChange } = renderDropdown({ getItemDisabled: (item) => item.id === "ar" });
+
+    await user.click(getTrigger());
+
+    const disabledOption = await screen.findByRole("option", { name: "Argentina" });
+    expect(disabledOption).toHaveAttribute("aria-disabled", "true");
+    await user.click(disabledOption);
+    expect(onValueChange).not.toHaveBeenCalled();
+
+    await user.click(screen.getByPlaceholderText("Buscar..."));
+    await user.keyboard("{ArrowDown}{Enter}");
+
+    expect(onValueChange).toHaveBeenCalledTimes(1);
+    expect(onValueChange).toHaveBeenCalledWith("uy", baseItems[1]);
+  });
+
+  it("shows the multiselect summary without a single value and keeps options open", async () => {
+    const user = userEvent.setup();
+    const { onValueChange } = renderDropdown({
+      closeOnSelect: false,
+      selectedValues: ["ar"],
+      selectedLabel: "1 rol seleccionado",
+    });
+
+    expect(getTrigger()).toHaveTextContent("1 rol seleccionado");
+    await user.click(getTrigger());
+
+    expect(await screen.findByRole("option", { name: "Argentina" })).toHaveAttribute("data-checked", "true");
+    expect(screen.getByRole("listbox")).toHaveAttribute("aria-multiselectable", "true");
+    await user.click(screen.getByRole("option", { name: "Uruguay" }));
+
+    expect(onValueChange).toHaveBeenCalledWith("uy", baseItems[1]);
+    expect(screen.getByRole("option", { name: "Uruguay" })).toBeVisible();
+    expect(getTrigger()).toHaveAttribute("aria-expanded", "true");
+  });
+
   it("clears the value and its fallback label when the parent accepts deselection", async () => {
     const user = userEvent.setup();
     const { onValueChange, fetchPage, rerender } = renderDropdown({
@@ -353,6 +391,24 @@ describe("AsyncDropdown", () => {
     expect(screen.getByRole("option", { name: "Argentina" })).toBeVisible();
     expect(screen.getAllByRole("option")).toHaveLength(2);
     expect(fetchPage).toHaveBeenCalledTimes(2);
+  });
+
+  it("deduplicates repeated IDs across pages and uses their latest metadata", async () => {
+    const user = userEvent.setup();
+    const { fetchPage, onValueChange } = renderDropdown();
+    const updatedItem = { id: "ar", name: "Argentina actualizada" };
+    fetchPage
+      .mockResolvedValueOnce({ items: [baseItems[0]], nextPage: 1 })
+      .mockResolvedValueOnce({ items: [baseItems[1], updatedItem], nextPage: null });
+
+    await user.click(getTrigger());
+
+    const option = await screen.findByRole("option", { name: updatedItem.name });
+    expect(screen.getAllByRole("option")).toHaveLength(2);
+    expect(screen.queryByRole("option", { name: "Argentina" })).not.toBeInTheDocument();
+    await user.click(option);
+
+    expect(onValueChange).toHaveBeenCalledWith("ar", updatedItem);
   });
 
   it("allows selecting the default option when there are no fetched results", async () => {

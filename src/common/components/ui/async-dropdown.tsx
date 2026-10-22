@@ -44,6 +44,7 @@ export function AsyncDropdown<TItem>({
   getItemLabel,
   getItemDisplayLabel,
   getItemDescription,
+  getItemDisabled,
   getItemGroup,
   getItemValue,
   groupOrder,
@@ -91,6 +92,7 @@ export function AsyncDropdown<TItem>({
     getItemValue,
     value,
     selectedLabel,
+    selectedValues,
     placeholder,
     resetSearchOnClose,
     onOpenChange,
@@ -150,6 +152,7 @@ export function AsyncDropdown<TItem>({
                 getItemLabel={getItemLabel}
                 getItemDisplayLabel={getItemDisplayLabel}
                 getItemDescription={getItemDescription}
+                getItemDisabled={getItemDisabled}
                 getItemValue={getItemValue}
                 groupOrder={groupOrder}
                 compareGroups={compareGroups}

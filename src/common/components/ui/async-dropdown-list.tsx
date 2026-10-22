@@ -22,6 +22,7 @@ export function AsyncDropdownList<TItem>({
   getItemLabel,
   getItemDisplayLabel,
   getItemDescription,
+  getItemDisabled,
   getItemValue,
   groupOrder,
   compareGroups,
@@ -47,6 +48,7 @@ export function AsyncDropdownList<TItem>({
     | "getItemLabel"
     | "getItemDisplayLabel"
     | "getItemDescription"
+    | "getItemDisabled"
     | "getItemValue"
     | "groupOrder"
     | "compareGroups"
@@ -106,6 +108,7 @@ export function AsyncDropdownList<TItem>({
             getItemLabel={getItemLabel}
             getItemDisplayLabel={getItemDisplayLabel}
             getItemDescription={getItemDescription}
+            getItemDisabled={getItemDisabled}
             getItemGroup={getItemGroup}
             getItemValue={getItemValue}
             groupOrder={groupOrder}

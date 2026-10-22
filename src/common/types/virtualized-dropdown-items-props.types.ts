@@ -9,6 +9,7 @@ export type VirtualizedDropdownItemsProps<TItem> = {
   getItemLabel: (item: TItem) => string;
   getItemDisplayLabel?: (item: TItem) => string;
   getItemDescription?: (item: TItem) => string | undefined;
+  getItemDisabled?: (item: TItem) => boolean;
   getItemGroup?: (item: TItem) => string | undefined;
   getItemValue: (item: TItem) => string;
   groupOrder?: readonly string[];
