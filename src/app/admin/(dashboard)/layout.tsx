@@ -1,9 +1,11 @@
 import { Suspense, type ReactElement, type ReactNode } from "react";
 
+import type { Metadata } from "next";
 import { cookies, headers } from "next/headers";
 
 import { SidebarNavigationStateProvider } from "@common/components/navigation/sidebar-navigation-state-provider";
 import { SIDEBAR_NAVIGATION_GROUPS_COOKIE_NAMES } from "@common/constants/sidebar-navigation.constants";
+import { BEMOL_FAVICON_ICONS } from "@common/utils/brand-favicon.util";
 import { parseSidebarNavigationGroupStates } from "@common/utils/sidebar-navigation-cookie.util";
 
 import { getContextualSearchShortcutPlatform } from "@features/contextual-search/utils/contextual-search-shortcut-platform.util";
@@ -11,6 +13,10 @@ import { PlatformAccountProvider } from "@features/platform-auth/components/plat
 import { PlatformRouteSkeleton } from "@features/platform-auth/components/platform-route-skeleton";
 import { PlatformShell } from "@features/platform-auth/components/platform-shell";
 import { requirePlatformAccount } from "@features/platform-auth/services/get-platform-account.service";
+
+export const metadata: Metadata = {
+  icons: BEMOL_FAVICON_ICONS,
+};
 
 export default async function PlatformLayout({ children }: { children: ReactNode }): Promise<ReactElement> {
   const [account, cookieStore, requestHeaders] = await Promise.all([requirePlatformAccount(), cookies(), headers()]);

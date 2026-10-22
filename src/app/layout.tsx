@@ -9,6 +9,7 @@ import NextTopLoader from "nextjs-toploader";
 
 import { TooltipProvider } from "@common/components/ui/tooltip";
 import { getRequestInstitution } from "@common/services/institutional-host/institutional-host.service";
+import { getBrandFaviconIcons } from "@common/utils/brand-favicon.util";
 import { cn } from "@common/utils/cn.util";
 
 import type { PublicInstitution } from "@features/institutions/types/public-institution.types";
@@ -44,18 +45,7 @@ export async function generateMetadata(): Promise<Metadata> {
       default: brandName,
     },
     description: "Plataforma de gestión para instituciones educativas",
-    icons: {
-      icon: [
-        {
-          url: "/brand/logo.svg",
-          media: "(prefers-color-scheme: light)",
-        },
-        {
-          url: "/brand/logo-dark.svg",
-          media: "(prefers-color-scheme: dark)",
-        },
-      ],
-    },
+    icons: getBrandFaviconIcons(institution),
   };
 }
 
