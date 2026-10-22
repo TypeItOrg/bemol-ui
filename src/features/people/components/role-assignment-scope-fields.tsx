@@ -11,6 +11,7 @@ import type { AsyncDropdownFetchPageInput } from "@common/types/async-dropdown-f
 import { parseHttpResponse } from "@common/utils/http-response-error.util";
 
 import { FormSelect } from "@features/academic/components/academic-form-controls";
+import { RoleScopeDetails } from "@features/people/components/role-scope-details";
 import { ROLE_SCOPE_MESSAGES as M } from "@features/people/constants/role-scope.constants";
 import type { RoleAssignment } from "@features/people/types/role-assignment.types";
 import type { TrainingPathScopeOption } from "@features/people/types/training-path-scope-option.types";
@@ -73,8 +74,8 @@ export function RoleAssignmentScopeFields({
   );
 
   return (
-    <fieldset className="-mx-3 grid min-w-0 gap-3 border-t px-3 pt-3" disabled={disabled}>
-      <div className="grid gap-1.5 text-sm">
+    <div className="grid min-w-0 gap-3">
+      <div className="grid min-w-0 gap-2 text-sm">
         <label htmlFor={scopeId} className="font-medium">
           {M.LABEL}
         </label>
@@ -92,77 +93,72 @@ export function RoleAssignmentScopeFields({
             }
           }}
         />
+        {value.accessScope === "TRAINING_PATHS" ? <RoleScopeDetails permissions={inactivePermissions} /> : null}
       </div>
       {value.accessScope === "TRAINING_PATHS" ? (
-        <>
-          {inactivePermissions.length > 0 ? (
-            <p className="text-muted-foreground text-xs">
-              {M.INACTIVE}: {inactivePermissions.join(", ")}
-            </p>
-          ) : null}
-          <div className="grid min-w-0 gap-3">
-            <label htmlFor={pathsId} className="text-sm font-medium">
-              {M.PATHS}
-            </label>
-            <div className="bg-muted/20 flex min-h-12 min-w-0 flex-wrap items-center gap-2 rounded-xl border px-3 py-2.5">
-              {value.trainingPathIds.length === 0 ? <p className="text-muted-foreground text-sm">{M.EMPTY_SELECTION}</p> : null}
-              {value.trainingPathIds.map((id) => {
-                const name = selectedNames[id] ?? names[id] ?? id;
+        <div className="grid min-w-0 gap-3">
+          <label htmlFor={pathsId} className="text-sm font-medium">
+            {M.PATHS}
+          </label>
+          <div className="bg-muted/20 flex min-h-12 min-w-0 flex-wrap items-center gap-2 rounded-xl border px-3 py-2.5">
+            {value.trainingPathIds.length === 0 ? <p className="text-muted-foreground text-sm">{M.EMPTY_SELECTION}</p> : null}
+            {value.trainingPathIds.map((id) => {
+              const name = selectedNames[id] ?? names[id] ?? id;
 
-                return (
-                  <Badge key={id} className="h-auto min-h-7 max-w-full gap-2 px-3" size="lg" variant="secondary">
-                    <span className="min-w-0 wrap-anywhere whitespace-normal">{name}</span>
-                    <Button
-                      aria-label={`${M.REMOVE} ${name}`}
-                      className="text-muted-foreground hover:text-foreground -mr-1 shrink-0"
-                      type="button"
-                      size="icon-xs"
-                      variant="ghost"
-                      disabled={disabled}
-                      onClick={() =>
-                        onChange({
-                          ...value,
-                          trainingPathIds: value.trainingPathIds.filter((path) => path !== id),
-                        })
-                      }
-                    >
-                      <XIcon />
-                    </Button>
-                  </Badge>
-                );
-              })}
-            </div>
-            <AsyncDropdown<TrainingPathScopeOption>
-              id={pathsId}
-              fetchPage={fetchPaths}
-              queryKey={["role-scope-paths", institutionId, scope]}
-              getItemValue={(path) => path.id}
-              getItemLabel={(path) => path.name}
-              placeholder={M.SEARCH}
-              searchPlaceholder={M.SEARCH_PLACEHOLDER}
-              emptyMessage={M.NO_RESULTS}
-              errorMessage={M.LOAD_ERROR}
-              disabled={disabled}
-              closeOnSelect={false}
-              selectedValues={value.trainingPathIds}
-              onValueChange={(_id, path) => {
-                if (!path) {
-                  return;
-                }
-
-                setSelectedNames((current) => ({ ...current, [path.id]: path.name }));
-
-                const isSelected = value.trainingPathIds.includes(path.id);
-
-                onChange({
-                  ...value,
-                  trainingPathIds: isSelected ? value.trainingPathIds.filter((id) => id !== path.id) : [...value.trainingPathIds, path.id],
-                });
-              }}
-            />
+              return (
+                <Badge key={id} className="h-auto min-h-7 max-w-full gap-2 px-3" size="lg" variant="secondary">
+                  <span className="min-w-0 wrap-anywhere whitespace-normal">{name}</span>
+                  <Button
+                    aria-label={`${M.REMOVE} ${name}`}
+                    className="text-muted-foreground hover:text-foreground -mr-1 shrink-0"
+                    type="button"
+                    size="icon-xs"
+                    variant="ghost"
+                    disabled={disabled}
+                    onClick={() =>
+                      onChange({
+                        ...value,
+                        trainingPathIds: value.trainingPathIds.filter((path) => path !== id),
+                      })
+                    }
+                  >
+                    <XIcon />
+                  </Button>
+                </Badge>
+              );
+            })}
           </div>
-        </>
+          <AsyncDropdown<TrainingPathScopeOption>
+            id={pathsId}
+            fetchPage={fetchPaths}
+            queryKey={["role-scope-paths", institutionId, scope]}
+            getItemValue={(path) => path.id}
+            getItemLabel={(path) => path.name}
+            placeholder={M.SEARCH}
+            searchPlaceholder={M.SEARCH_PLACEHOLDER}
+            emptyMessage={M.NO_RESULTS}
+            errorMessage={M.LOAD_ERROR}
+            disabled={disabled}
+            aria-required
+            closeOnSelect={false}
+            selectedValues={value.trainingPathIds}
+            onValueChange={(_id, path) => {
+              if (!path) {
+                return;
+              }
+
+              setSelectedNames((current) => ({ ...current, [path.id]: path.name }));
+
+              const isSelected = value.trainingPathIds.includes(path.id);
+
+              onChange({
+                ...value,
+                trainingPathIds: isSelected ? value.trainingPathIds.filter((id) => id !== path.id) : [...value.trainingPathIds, path.id],
+              });
+            }}
+          />
+        </div>
       ) : null}
-    </fieldset>
+    </div>
   );
 }

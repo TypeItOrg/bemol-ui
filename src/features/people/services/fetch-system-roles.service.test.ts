@@ -29,11 +29,31 @@ describe("fetchSystemRoles", () => {
     expect(peopleApiFetchMock).toHaveBeenCalledWith(PeopleScope.INSTITUTIONAL, "/api/v1/institutions/institution-1/roles?size=50");
   });
 
-  it("preserves the platform role-array response", async () => {
-    peopleApiFetchMock.mockResolvedValue(Response.json(ASSIGNABLE_ROLES));
+  it("uses paginated platform options instead of loading every role", async () => {
+    peopleApiFetchMock.mockResolvedValue(Response.json({ items: ASSIGNABLE_ROLES, page: 0, size: 50, totalItems: 51, totalPages: 2 }));
     const { fetchSystemRoles } = await importService();
 
     await expect(fetchSystemRoles("institution-1", PeopleScope.ADMIN)).resolves.toEqual(ASSIGNABLE_ROLES);
-    expect(peopleApiFetchMock).toHaveBeenCalledWith(PeopleScope.ADMIN, "/api/v1/admin/institutions/institution-1/roles");
+    expect(peopleApiFetchMock).toHaveBeenCalledWith(PeopleScope.ADMIN, "/api/v1/admin/institutions/institution-1/role-options?size=50");
+    expect(peopleApiFetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it.each([PeopleScope.INSTITUTIONAL, PeopleScope.ADMIN])("retains metadata for assigned roles outside the first page in %s", async (scope) => {
+    const missing: AssignableRole = {
+      id: "role-51",
+      name: "Rol fuera de la primera página",
+      technicalCode: null,
+      supportsTrainingPathScope: true,
+      inactivePermissionDescriptionsWhenScoped: ["Ver usuarios"],
+    };
+    peopleApiFetchMock
+      .mockResolvedValueOnce(Response.json({ items: ASSIGNABLE_ROLES, page: 0, size: 50, totalItems: 51, totalPages: 2 }))
+      .mockResolvedValueOnce(Response.json(missing));
+    const { fetchSystemRoles } = await importService();
+
+    await expect(fetchSystemRoles("institution-1", scope, ["role-1", "role-51", "role-51"])).resolves.toEqual([...ASSIGNABLE_ROLES, missing]);
+    const prefix = scope === PeopleScope.ADMIN ? "/admin" : "";
+    expect(peopleApiFetchMock).toHaveBeenLastCalledWith(scope, `/api/v1${prefix}/institutions/institution-1/role-options/role-51`);
+    expect(peopleApiFetchMock).toHaveBeenCalledTimes(2);
   });
 });

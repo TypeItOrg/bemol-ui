@@ -40,7 +40,7 @@ export default async function PeoplePage({ searchParams }: { searchParams: Promi
 
   const { page, size, search, sort, roleId } = parsePeoplePaginationParams(resolvedSearchParams);
 
-  const rolesPromise = fetchSystemRoles(user.institutionId, PeopleScope.INSTITUTIONAL);
+  const rolesPromise = fetchSystemRoles(user.institutionId, PeopleScope.INSTITUTIONAL, roleId ? [roleId] : []);
 
   const peoplePromise = fetchPeople(user.institutionId, { page, size, search, sort, roleId }, PeopleScope.INSTITUTIONAL);
 
@@ -64,7 +64,14 @@ export default async function PeoplePage({ searchParams }: { searchParams: Promi
         ) : undefined}
       </PlatformCollectionActions>
       <DataTableNavigationProvider>
-        <PeopleSearchForm search={search} size={size} roleId={roleId} roles={roles} />
+        <PeopleSearchForm
+          search={search}
+          size={size}
+          roleId={roleId}
+          roles={roles}
+          institutionId={user.institutionId}
+          scope={PeopleScope.INSTITUTIONAL}
+        />
         <Suspense fallback={<PeopleTableSkeleton />}>
           <PeopleTableContainer
             institutionId={user.institutionId}

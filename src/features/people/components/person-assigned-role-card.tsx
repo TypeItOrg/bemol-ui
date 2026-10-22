@@ -52,17 +52,18 @@ export function PersonAssignedRoleCard({
   isInstitutionalAuthority: boolean;
 }): ReactElement {
   return (
-    <div key={role.roleId} className="grid gap-3 rounded-lg border p-3">
-      <div className="flex items-center justify-between gap-3">
+    <div key={role.roleId} className="grid min-w-0 gap-4 py-5 first:pt-0 last:pb-0">
+      <div className="flex items-start justify-between gap-3">
         <div className="flex min-w-0 flex-col gap-1">
-          <span className="font-medium">{role.displayName}</span>
+          <h3 className="font-medium wrap-anywhere">{role.displayName}</h3>
           <span className="text-muted-foreground text-xs">
             {isPendingAssignment ? "Se asignará al guardar." : `Asignado: ${formatAssignedAt(role.assignedAt)}`}
           </span>
         </div>
         <Button
           type="button"
-          variant={isPendingAssignment ? "outline" : "destructive"}
+          variant="ghost"
+          className="text-muted-foreground hover:bg-destructive/10 hover:text-destructive -mr-2 shrink-0"
           size="sm"
           onClick={() => removeRole(role.roleId)}
           disabled={disabled || selectedRoleCodes.length <= 1 || !canApplyRoleCodes(nextRoleCodes) || !isRevokable}

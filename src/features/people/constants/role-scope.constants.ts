@@ -1,5 +1,9 @@
 export const ROLE_SCOPE_MESSAGES = {
-  INACTIVE: "Permisos que quedarán inactivos",
+  INACTIVE: "Permisos no incluidos en este alcance",
+  EXPLANATION: "Estos permisos requieren alcance «Toda la institución».",
+  OTHER_ROLES: "Otros roles de esta persona pueden otorgarlos.",
+  NOT_INCLUDED: "permiso no incluido",
+  NOT_INCLUDED_PLURAL: "permisos no incluidos",
   REMOVE: "Quitar",
   LABEL: "Alcance del rol",
   INSTITUTION: "Toda la institución",

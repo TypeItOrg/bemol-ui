@@ -80,10 +80,15 @@ export default async function PersonPage({
       return [[], []];
     }
 
-    return Promise.all([
-      fetchPersonRoles(user.institutionId, personId, PeopleScope.INSTITUTIONAL),
-      canAssignRoles ? fetchSystemRoles(user.institutionId, PeopleScope.INSTITUTIONAL) : Promise.resolve([]),
-    ]);
+    const assigned = await fetchPersonRoles(user.institutionId, personId, PeopleScope.INSTITUTIONAL);
+
+    const catalog = await fetchSystemRoles(
+      user.institutionId,
+      PeopleScope.INSTITUTIONAL,
+      assigned.map((role) => role.roleId),
+    );
+
+    return [assigned, catalog];
   }
 
   const [person, [assignedRoles, systemRoles]] = await Promise.all([personPromise, loadRoles()]);

@@ -36,7 +36,7 @@ export default async function InstitutionPeoplePage({ params, searchParams }: Pe
 
   const { page, size, search, sort, roleId } = parsePeoplePaginationParams(resolvedSearchParams);
 
-  const rolesPromise = fetchSystemRoles(id, PeopleScope.ADMIN);
+  const rolesPromise = fetchSystemRoles(id, PeopleScope.ADMIN, roleId ? [roleId] : []);
 
   const peoplePromise = fetchPeople(id, { page, size, search, sort, roleId });
 
@@ -61,7 +61,7 @@ export default async function InstitutionPeoplePage({ params, searchParams }: Pe
         </Button>
       </PlatformCollectionActions>
       <DataTableNavigationProvider>
-        <PeopleSearchForm search={search} size={size} roleId={roleId} roles={roles} />
+        <PeopleSearchForm search={search} size={size} roleId={roleId} roles={roles} institutionId={id} scope={PeopleScope.ADMIN} />
 
         <Suspense fallback={<PeopleTableSkeleton />}>
           <PeopleTableContainer institutionId={id} page={page} size={size} search={search} sort={sort} roleId={roleId} dataPromise={peoplePromise} />

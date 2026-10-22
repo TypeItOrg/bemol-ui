@@ -16,6 +16,7 @@ import { PersonEditForm } from "@features/people/components/person-edit-form";
 import { fetchPersonRoles } from "@features/people/services/fetch-person-roles.service";
 import { fetchPerson } from "@features/people/services/fetch-person.service";
 import { fetchSystemRoles } from "@features/people/services/fetch-system-roles.service";
+import { PeopleScope } from "@features/people/utils/people-scope.util";
 import { PlatformBreadcrumb } from "@features/platform-auth/components/platform-breadcrumb";
 import { PlatformPageIcon } from "@features/platform-auth/components/platform-page-icon";
 import { PlatformPageShell } from "@features/platform-auth/components/platform-page-shell";
@@ -40,11 +41,15 @@ export default async function EditPersonPage({ params, searchParams }: EditPerso
 
   const destination = getSafeReturnTo(returnTo, `/admin/institutions/${id}/people`);
 
-  const [person, assignedRoles, systemRoles] = await Promise.all([
-    fetchPerson(id, personId),
-    fetchPersonRoles(id, personId),
-    isDetailView ? Promise.resolve([]) : fetchSystemRoles(id),
-  ]);
+  const [person, assignedRoles] = await Promise.all([fetchPerson(id, personId), fetchPersonRoles(id, personId)]);
+
+  const systemRoles = isDetailView
+    ? []
+    : await fetchSystemRoles(
+        id,
+        PeopleScope.ADMIN,
+        assignedRoles.map((role) => role.roleId),
+      );
 
   if (!person) {
     notFound();
