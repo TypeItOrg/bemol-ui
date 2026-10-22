@@ -2,10 +2,6 @@
 
 import type { ReactElement } from "react";
 
-import { XIcon } from "lucide-react";
-
-import { Button } from "@common/components/ui/button";
-
 import { RoleAssignmentScopeFields } from "@features/people/components/role-assignment-scope-fields";
 import type { AssignableRole } from "@features/people/types/assignable-role.types";
 import type { PersonRole } from "@features/people/types/person-role.types";
@@ -17,12 +13,7 @@ import { formatAssignedAt } from "@features/people/utils/person-role-assigned-at
 export function PersonAssignedRoleCard({
   role,
   isPendingAssignment,
-  removeRole,
   disabled,
-  selectedRoleCodes,
-  canApplyRoleCodes,
-  nextRoleCodes,
-  isRevokable,
   institutionId,
   onAssignmentChange,
   assignments,
@@ -35,12 +26,7 @@ export function PersonAssignedRoleCard({
 }: {
   role: SelectedRole;
   isPendingAssignment: boolean;
-  removeRole: (roleCode: string) => void;
   disabled: boolean;
-  selectedRoleCodes: readonly string[];
-  canApplyRoleCodes: (nextRoleCodes: readonly string[]) => boolean;
-  nextRoleCodes: string[];
-  isRevokable: boolean;
   institutionId: string | undefined;
   onAssignmentChange: ((assignment: RoleAssignment) => void) | undefined;
   assignments: readonly RoleAssignment[] | undefined;
@@ -52,26 +38,13 @@ export function PersonAssignedRoleCard({
   isInstitutionalAuthority: boolean;
 }): ReactElement {
   return (
-    <div key={role.roleId} className="grid min-w-0 gap-4 py-5 first:pt-0 last:pb-0">
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex min-w-0 flex-col gap-1">
-          <h3 className="font-medium wrap-anywhere">{role.displayName}</h3>
-          <span className="text-muted-foreground text-xs">
-            {isPendingAssignment ? "Se asignará al guardar." : `Asignado: ${formatAssignedAt(role.assignedAt)}`}
-          </span>
-        </div>
-        <Button
-          type="button"
-          variant="ghost"
-          className="text-muted-foreground hover:bg-destructive/10 hover:text-destructive -mr-2 shrink-0"
-          size="sm"
-          onClick={() => removeRole(role.roleId)}
-          disabled={disabled || selectedRoleCodes.length <= 1 || !canApplyRoleCodes(nextRoleCodes) || !isRevokable}
-        >
-          <XIcon data-icon="inline-start" />
-          {isPendingAssignment ? "Quitar" : "Revocar"}
-        </Button>
-      </div>
+    <section aria-label={role.displayName} className="bg-background grid min-w-0 gap-4 rounded-xl border p-4 sm:p-5">
+      <header className="flex min-w-0 flex-col gap-1">
+        <h4 className="font-medium wrap-anywhere">{role.displayName}</h4>
+        <span className="text-muted-foreground text-xs">
+          {isPendingAssignment ? "Se asignará al guardar." : `Asignado: ${formatAssignedAt(role.assignedAt)}`}
+        </span>
+      </header>
       {institutionId && onAssignmentChange && assignments ? (
         <RoleAssignmentScopeFields
           supportsTrainingPathScope={rolesByCode.get(role.roleId)?.supportsTrainingPathScope === true}
@@ -103,6 +76,6 @@ export function PersonAssignedRoleCard({
           disabled={disabled || isInstitutionalAuthority || (!canAssignRoles && !canRevokeRoles)}
         />
       ) : null}
-    </div>
+    </section>
   );
 }

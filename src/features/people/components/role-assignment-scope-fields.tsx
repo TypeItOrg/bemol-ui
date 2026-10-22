@@ -76,9 +76,12 @@ export function RoleAssignmentScopeFields({
   return (
     <div className="grid min-w-0 gap-3">
       <div className="grid min-w-0 gap-2 text-sm">
-        <label htmlFor={scopeId} className="font-medium">
-          {M.LABEL}
-        </label>
+        <div className="flex items-center gap-1">
+          <label htmlFor={scopeId} className="font-medium">
+            {M.LABEL}
+          </label>
+          {value.accessScope === "TRAINING_PATHS" ? <RoleScopeDetails permissions={inactivePermissions} /> : null}
+        </div>
         <FormSelect
           name={scopeId}
           options={[
@@ -93,7 +96,6 @@ export function RoleAssignmentScopeFields({
             }
           }}
         />
-        {value.accessScope === "TRAINING_PATHS" ? <RoleScopeDetails permissions={inactivePermissions} /> : null}
       </div>
       {value.accessScope === "TRAINING_PATHS" ? (
         <div className="grid min-w-0 gap-3">

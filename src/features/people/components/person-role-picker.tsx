@@ -1,14 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback } from "react";
 
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { AsyncDropdown } from "@common/components/ui/async-dropdown";
+import type { AsyncDropdownFetchPageInput } from "@common/types/async-dropdown-fetch-page-input.types";
+import type { AsyncDropdownPage } from "@common/types/async-dropdown-page.types";
 
-import { Button } from "@common/components/ui/button";
-import { Input } from "@common/components/ui/input";
-import { useDebouncedValue } from "@common/hooks/use-debounced-value";
-
-import { PersonAvailableRoles } from "@features/people/components/person-available-roles";
 import { ROLE_OPTIONS_MESSAGES as M } from "@features/people/constants/role-options.constants";
 import { fetchRoleOptions } from "@features/people/services/fetch-role-options.service";
 import type { AssignableRole } from "@features/people/types/assignable-role.types";
@@ -16,82 +13,110 @@ import { SystemRoleCode } from "@features/people/types/system-role-code.types";
 import { PeopleScope, type PeopleScope as PeopleScopeType } from "@features/people/utils/people-scope.util";
 
 type Props = {
-  institutionId: string;
+  id?: string;
+  institutionId?: string;
   scope: PeopleScopeType;
+  roles?: readonly AssignableRole[];
+  selectedRoles?: readonly AssignableRole[];
   selectedRoleIds: readonly string[];
   initialRoleIds: ReadonlySet<string>;
   disabled: boolean;
   canSelect: (role: AssignableRole) => boolean;
+  getRestriction?: (role: AssignableRole) => string | undefined;
   onSelect: (role: AssignableRole) => void;
 };
 
-export function PersonRolePicker({ institutionId, scope, selectedRoleIds, initialRoleIds, disabled, canSelect, onSelect }: Props) {
-  const [search, setSearch] = useState("");
+export function PersonRolePicker({
+  id,
+  institutionId,
+  scope,
+  roles = [],
+  selectedRoles = [],
+  selectedRoleIds,
+  initialRoleIds,
+  disabled,
+  canSelect,
+  getRestriction,
+  onSelect,
+}: Props) {
+  const fetchPage = useCallback(
+    async (input: AsyncDropdownFetchPageInput) => {
+      const matchesSearch = (role: AssignableRole) => role.name.toLocaleLowerCase().includes(input.search.trim().toLocaleLowerCase());
 
-  const debouncedSearch = useDebouncedValue(search, 250);
+      const isVisible = (role: AssignableRole) =>
+        PeopleScope.isAdmin(scope) || role.technicalCode !== SystemRoleCode.INSTITUTIONAL_AUTHORITY || selectedRoleIds.includes(role.id);
 
-  const query = useInfiniteQuery({
-    queryKey: ["assignable-role-list", institutionId, scope, debouncedSearch],
-    initialPageParam: 0,
-    queryFn: ({ pageParam, signal }) => fetchRoleOptions(institutionId, scope, { page: pageParam, size: 50, search: debouncedSearch, signal }),
-    getNextPageParam: (page) => page.nextPage ?? undefined,
-  });
+      let catalog: AsyncDropdownPage<AssignableRole>;
 
-  const catalogRoles =
-    query.data?.pages
-      .flatMap((page) => page.items)
-      .filter((role) => PeopleScope.isAdmin(scope) || role.technicalCode !== SystemRoleCode.INSTITUTIONAL_AUTHORITY) ?? [];
+      if (institutionId) {
+        catalog = await fetchRoleOptions(institutionId, scope, input);
+      } else {
+        const filtered = roles.filter(isVisible).filter(matchesSearch);
 
-  const roles = catalogRoles.filter((role) => !selectedRoleIds.includes(role.id));
+        const start = input.page * input.size;
 
-  const showSearch = search.length > 0 || query.hasNextPage || (query.data?.pages.length ?? 0) > 1;
+        catalog = { items: filtered.slice(start, start + input.size), nextPage: start + input.size < filtered.length ? input.page + 1 : null };
+      }
+
+      const pinned = input.page === 0 ? selectedRoles.filter(matchesSearch) : [];
+
+      const items = Array.from(new Map([...pinned, ...catalog.items].filter(isVisible).map((role) => [role.id, role])).values());
+
+      return { items, nextPage: catalog.nextPage };
+    },
+    [institutionId, roles, scope, selectedRoleIds, selectedRoles],
+  );
+
+  function describeRole(role: AssignableRole): string | undefined {
+    const restriction = getRestriction?.(role);
+
+    if (restriction) {
+      return restriction;
+    }
+
+    if (role.technicalCode === SystemRoleCode.APPLICANT) {
+      return "No se combina con otros roles; al seleccionarlo reemplaza los demás.";
+    }
+
+    if (selectedRoleIds.includes(role.id) && !initialRoleIds.has(role.id)) {
+      return "Se agregará al guardar.";
+    }
+
+    if (!selectedRoleIds.includes(role.id) && initialRoleIds.has(role.id)) {
+      return "Se guardará sin este rol.";
+    }
+
+    return undefined;
+  }
 
   return (
-    <div className="grid gap-3" aria-busy={query.isFetching}>
-      {showSearch ? (
-        <Input aria-label={M.SEARCH_LABEL} placeholder={M.SEARCH} value={search} onChange={(event) => setSearch(event.target.value)} />
-      ) : null}
-      {query.isPending ? (
-        <p className="text-muted-foreground text-sm" role="status">
-          {M.LOADING}
-        </p>
-      ) : null}
-      {query.data ? (
-        <PersonAvailableRoles
-          roles={roles}
-          initialRoleIds={initialRoleIds}
-          disabled={disabled || search !== debouncedSearch}
-          canSelect={canSelect}
-          onSelect={(role) => {
-            if (!disabled && !selectedRoleIds.includes(role.id) && canSelect(role)) {
-              onSelect(role);
-            }
-          }}
-          emptyMessage={catalogRoles.length > 0 ? M.ALL_ASSIGNED : M.EMPTY}
-        />
-      ) : null}
-      {query.isError ? (
-        <div className="flex flex-wrap items-center gap-3">
-          <p role="alert" className="text-destructive text-sm">
-            {M.LOAD_ERROR}
-          </p>
-          <Button type="button" variant="outline" size="sm" onClick={() => (query.isFetchNextPageError ? query.fetchNextPage() : query.refetch())}>
-            {M.RETRY}
-          </Button>
-        </div>
-      ) : null}
-      {query.hasNextPage && !query.isError ? (
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          className="justify-self-start"
-          disabled={query.isFetchingNextPage}
-          onClick={() => query.fetchNextPage()}
-        >
-          {query.isFetchingNextPage ? M.LOADING : M.MORE}
-        </Button>
-      ) : null}
-    </div>
+    <AsyncDropdown<AssignableRole>
+      id={id}
+      fetchPage={fetchPage}
+      queryKey={["assignable-role-picker", institutionId ?? "local", scope, Array.from(initialRoleIds).sort(), institutionId ? null : roles]}
+      getItemValue={(role) => role.id}
+      getItemLabel={(role) => role.name}
+      getItemDescription={describeRole}
+      getItemDisabled={(role) => !canSelect(role)}
+      selectedValues={selectedRoleIds}
+      selectedLabel={
+        selectedRoleIds.length > 0
+          ? `${selectedRoleIds.length} ${selectedRoleIds.length === 1 ? "rol seleccionado" : "roles seleccionados"}`
+          : undefined
+      }
+      placeholder="Seleccionar roles"
+      searchPlaceholder={M.SEARCH}
+      emptyMessage={M.EMPTY}
+      errorMessage={M.LOAD_ERROR}
+      disabled={disabled}
+      closeOnSelect={false}
+      estimateSize={56}
+      aria-required
+      onValueChange={(_id, role) => {
+        if (role && !disabled && canSelect(role)) {
+          onSelect(role);
+        }
+      }}
+    />
   );
 }

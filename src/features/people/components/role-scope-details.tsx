@@ -19,9 +19,15 @@ export function RoleScopeDetails({ permissions }: { permissions: readonly string
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button type="button" variant="link" className="text-muted-foreground h-auto min-h-6 justify-start self-start p-0 text-xs font-normal">
-          <InfoIcon className="size-3.5" />
-          {permissions.length} {permissions.length === 1 ? M.NOT_INCLUDED : M.NOT_INCLUDED_PLURAL}
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon-sm"
+          className="text-muted-foreground"
+          aria-label={M.DETAILS_TRIGGER}
+          title={M.DETAILS_TRIGGER}
+        >
+          <InfoIcon className="size-3.5" aria-hidden="true" />
         </Button>
       </PopoverTrigger>
       <PopoverContent align="start" aria-labelledby={titleId} className="w-80 max-w-[calc(100vw-2rem)] gap-3 p-4" collisionPadding={16}>

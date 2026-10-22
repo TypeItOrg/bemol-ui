@@ -29,7 +29,10 @@ describe("role scope details", () => {
 
   it("shows the permission detail on request and closes it with Escape", async () => {
     renderFields();
-    const trigger = screen.getByRole("button", { name: "1 permiso no incluido" });
+    const trigger = screen.getByRole("button", { name: M.DETAILS_TRIGGER });
+    expect(trigger.textContent).toBe("");
+    expect(screen.getByText(M.LABEL).nextElementSibling).toBe(trigger);
+    expect(screen.queryByText(/permiso.*no incluido/)).not.toBeInTheDocument();
     expect(screen.queryByText(M.EXPLANATION)).not.toBeInTheDocument();
     await userEvent.click(trigger);
     expect(screen.getByRole("dialog", { name: M.INACTIVE })).toHaveTextContent(M.EXPLANATION);
@@ -43,7 +46,7 @@ describe("role scope details", () => {
 
   it("omits the help control when every permission supports the scope", () => {
     renderFields([]);
-    expect(screen.queryByRole("button", { name: /permiso.*no incluido/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: M.DETAILS_TRIGGER })).not.toBeInTheDocument();
   });
 
   it("keeps permission details readable when assignment changes are disabled", async () => {
@@ -51,7 +54,7 @@ describe("role scope details", () => {
     expect(screen.getByRole("combobox", { name: M.LABEL })).toBeDisabled();
     expect(screen.getByRole("combobox", { name: M.PATHS })).toBeDisabled();
     expect(screen.getByRole("button", { name: "Quitar Profesorado" })).toBeDisabled();
-    await userEvent.click(screen.getByRole("button", { name: "2 permisos no incluidos" }));
+    await userEvent.click(screen.getByRole("button", { name: M.DETAILS_TRIGGER }));
     expect(screen.getByText("Ver roles")).toBeVisible();
   });
 
