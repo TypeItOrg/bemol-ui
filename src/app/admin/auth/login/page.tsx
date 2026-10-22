@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 
 import { Card, CardContent } from "@common/components/ui/card";
 
+import { InstitutionalBrandPanel } from "@features/institutional-auth/components/institutional-brand-identity";
 import { PlatformLoginForm } from "@features/platform-auth/components/platform-login-form";
 import { getSafeNextPath } from "@features/platform-auth/utils/platform-auth-paths.util";
 
@@ -24,7 +25,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Search
       <CardContent className="grid-cols-2 p-0 md:grid">
         <PlatformLoginForm next={safeNext} />
 
-        <section className="from-primary to-primary/80 relative hidden bg-linear-to-l md:block"></section>
+        <InstitutionalBrandPanel />
       </CardContent>
     </Card>
   );

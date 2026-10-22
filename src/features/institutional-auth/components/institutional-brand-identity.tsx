@@ -39,7 +39,7 @@ export function InstitutionalBrandIdentity({
           <Image
             preload
             unoptimized={Boolean(institution)}
-            sizes="(max-width: 768px) 80px, 224px"
+            sizes="(max-width: 640px) 80px, (max-width: 768px) 96px, (max-width: 1024px) 256px, 288px"
             width={institution ? 240 : 32}
             height={institution ? 240 : 32}
             src={logoUrl}
@@ -51,7 +51,7 @@ export function InstitutionalBrandIdentity({
           {!institution && !darkBackground ? (
             <Image
               preload
-              sizes="(max-width: 768px) 80px, 224px"
+              sizes="(max-width: 640px) 80px, (max-width: 768px) 96px, (max-width: 1024px) 256px, 288px"
               width={32}
               height={32}
               src="/brand/logo-dark.svg"
@@ -73,8 +73,8 @@ export function InstitutionalBrandPanel({ showInstitutionName = false }: { showI
   return (
     <section className="from-primary to-primary/80 text-primary-foreground relative hidden bg-linear-to-l p-8 md:flex md:items-center md:justify-center lg:p-12">
       <InstitutionalBrandIdentity
-        className="w-full max-w-56"
-        imageContainerClassName="h-56 w-full"
+        className="w-full max-w-64 lg:max-w-72"
+        imageContainerClassName="h-64 w-full lg:h-72"
         showInstitutionName={showInstitutionName}
         darkBackground
       />

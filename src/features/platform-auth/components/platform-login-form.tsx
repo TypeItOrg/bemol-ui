@@ -11,6 +11,7 @@ import { Input } from "@common/components/ui/input";
 import { PasswordInput } from "@common/components/ui/password-input";
 import { cn } from "@common/utils/cn.util";
 
+import { InstitutionalBrandIdentity } from "@features/institutional-auth/components/institutional-brand-identity";
 import { loginPlatform } from "@features/platform-auth/actions/platform-login.action";
 import type { PlatformLoginActionState } from "@features/platform-auth/types/platform-login-action-state.types";
 
@@ -30,9 +31,14 @@ export function PlatformLoginForm({ next }: { next?: string }): ReactElement {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="p-6 md:p-8">
+    <form onSubmit={handleSubmit} className="flex flex-col justify-center p-6 md:p-8">
       {next ? <input type="hidden" name="next" value={next} /> : null}
       <header className="space-y-1 text-center">
+        <InstitutionalBrandIdentity
+          className="mb-3 w-full md:hidden"
+          imageContainerClassName="h-20 sm:h-24 w-full"
+          imageClassName="max-h-20 max-w-56 sm:max-h-24 sm:max-w-64"
+        />
         <h1 className="text-2xl font-bold">Iniciar sesión</h1>
         <p className="text-muted-foreground text-sm">
           <span className="hidden md:block">Ingresá tus credenciales para acceder a tu cuenta.</span>

@@ -13,8 +13,8 @@ export function InstitutionalAuthStepHeader({ title, description, showInstitutio
     <header className="flex flex-col items-center space-y-1 text-center">
       <InstitutionalBrandIdentity
         className="mb-3 w-full md:hidden"
-        imageContainerClassName="h-16 sm:h-20 w-full"
-        imageClassName="max-h-16 max-w-48 sm:max-h-20 sm:max-w-56"
+        imageContainerClassName="h-20 sm:h-24 w-full"
+        imageClassName="max-h-20 max-w-56 sm:max-h-24 sm:max-w-64"
         showInstitutionName={showInstitutionName}
       />
       <h1 className="text-xl font-bold text-balance break-words sm:text-2xl">{title}</h1>
