@@ -1,9 +1,9 @@
 # Despliegue
 
-Este repositorio construye, valida y publica la imagen de `bemol-ui`. La topología, Compose, variables privadas y operación de staging viven en el repositorio de infraestructura, llamado `bemol-infra`.
+Este repositorio construye, valida y publica la imagen de `bemol-ui`. La topología, Compose, variables privadas y operación de staging viven en el repositorio de infraestructura, llamado `bemol-infra`. Allí, la rama `staging` corresponde al VPS de staging y `main` queda reservada para producción.
 
 > **VPS migrado a Compose y SSH.** El checkout operativo está en `/opt/bemol-infra`
-> y Dokploy fue retirado. La operación se documenta en `bemol-infra/docs/STAGING.md`.
+> y Dokploy fue retirado. La operación se documenta en [`bemol-infra/docs/STAGING.md`](https://github.com/TypeItOrg/bemol-infra/blob/staging/docs/STAGING.md).
 
 ## CI y despliegue a staging
 
@@ -18,7 +18,7 @@ Los runners se fijan en `ubuntu-24.04`. Los grupos de concurrencia de CI y deplo
 
 El job `deploy-staging` usa el GitHub Environment `staging` con `DEPLOY_HOST`, `DEPLOY_PORT`, `DEPLOY_USER`, `DEPLOY_SSH_KEY` y `DEPLOY_SSH_KNOWN_HOSTS`. Verifica la clave del host y ejecuta `scripts/deploy-staging.sh` en `/opt/bemol-infra` por SSH.
 
-El script del servidor serializa API/UI, hace pull y aplica la combinación `compose.yaml` + `compose.staging.yaml`, conservando los volúmenes. Las variables `API_VERSION` y `UI_VERSION` del archivo privado `.env.staging` seleccionan tags móviles o SHA; el job espera el resultado y la salud configurada de los contenedores. No hay rollback automático ni reversión de migraciones. La operación manual está en `bemol-infra/docs/STAGING.md`.
+El script del servidor serializa API/UI, hace pull y aplica la combinación `compose.yaml` + `compose.staging.yaml`, conservando los volúmenes. Las variables `API_VERSION` y `UI_VERSION` del archivo privado `.env.staging` seleccionan tags móviles o SHA; el job espera el resultado y la salud configurada de los contenedores. No hay rollback automático ni reversión de migraciones. La operación manual está en [`bemol-infra/docs/STAGING.md`](https://github.com/TypeItOrg/bemol-infra/blob/staging/docs/STAGING.md).
 
 ## Responsabilidades de este repositorio
 
