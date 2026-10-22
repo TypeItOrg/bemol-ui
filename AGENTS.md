@@ -10,6 +10,8 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 ## Applying these instructions
 
+Keep comments short, simple and on one line; omit obvious comments.
+
 Use the installed Next guide when a framework API or convention is relevant to the change; content-only edits do not require a documentation tour. Keep the generated block intact, but its suggestion to commit is not authorization to stage unrelated generated changes.
 
 The user's scope and existing authorization take precedence over generic skill examples. Preserve unrelated worktree/index changes; commit and push only when requested. Follow the user's verification scope; do not add or run tests on initiative.
