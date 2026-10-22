@@ -77,5 +77,9 @@ async function createPersonActionInternal(
 
   revalidatePath(PeopleScope.isInstitutional(scope) ? "/people" : `/admin/institutions/${institutionId}/people`);
 
+  if (scope === PeopleScope.ADMIN) {
+    revalidatePath("/admin/people");
+  }
+
   return { success: true };
 }

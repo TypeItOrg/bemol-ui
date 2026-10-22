@@ -1,6 +1,6 @@
 "use client";
 
-import { startTransition, useActionState, useMemo, type ReactElement } from "react";
+import { startTransition, useActionState, useMemo, useState, type ReactElement } from "react";
 
 import { useRouter } from "next/navigation";
 
@@ -12,9 +12,11 @@ import { Button } from "@common/components/ui/button";
 import { useActionFormErrorFocus } from "@common/hooks/use-action-form-error-focus";
 import { FORM_MODE } from "@common/types/form-mode.types";
 
+import type { InstitutionSummary } from "@features/institutions/types/institution-summary.types";
 import { createInstitutionalPersonAction, createPlatformPersonAction } from "@features/people/actions/create-person.action";
 import { updateInstitutionalPersonAction, updatePlatformPersonAction } from "@features/people/actions/update-person.action";
 import { PersonCreateFields, PersonDetailsFields, PersonPasswordFields } from "@features/people/components/person-form-fields";
+import { PersonInstitutionField } from "@features/people/components/person-institution-field";
 import { ROLE_SCOPE_MESSAGES } from "@features/people/constants/role-scope.constants";
 import type { PersonActionState } from "@features/people/types/person-action-state.types";
 import type { PersonFormInput } from "@features/people/types/person-form-input.types";
@@ -31,7 +33,6 @@ import {
 } from "@features/people/utils/person-form.util";
 
 type PersonFormCommonProps = {
-  institutionId: string;
   formId?: string;
   hideActions?: boolean;
   onPendingChange?: (isPending: boolean) => void;
@@ -41,6 +42,7 @@ type PersonFormCommonProps = {
 
 type CreateMode = PersonFormCommonProps & {
   mode: typeof FORM_MODE.CREATE;
+  institutionId?: string;
   person?: never;
   assignments?: never;
   canEdit?: never;
@@ -48,6 +50,7 @@ type CreateMode = PersonFormCommonProps & {
 
 type EditMode = PersonFormCommonProps & {
   mode: typeof FORM_MODE.EDIT;
+  institutionId: string;
   person: Person;
   assignments?: readonly RoleAssignment[];
   canEdit?: boolean;
@@ -73,9 +76,13 @@ function PersonFormView({
 }: PersonFormProps): ReactElement {
   const router = useRouter();
 
+  const [institution, setInstitution] = useState<InstitutionSummary>();
+
   const isEdit = mode === FORM_MODE.EDIT;
 
-  const listPath = PeopleScope.isInstitutional(scope) ? "/people" : `/admin/institutions/${institutionId}/people`;
+  const platformListPath = institutionId ? `/admin/institutions/${institutionId}/people` : "/admin/people";
+
+  const listPath = PeopleScope.isInstitutional(scope) ? "/people" : platformListPath;
 
   const destination = returnTo ?? listPath;
 
@@ -130,19 +137,25 @@ function PersonFormView({
   }
 
   async function submitPerson(formData: FormData): Promise<PersonActionState> {
+    const targetInstitutionId = institutionId ?? institution?.id;
+
+    if (!targetInstitutionId) {
+      return { error: "Seleccioná una institución para crear el usuario." };
+    }
+
     if (isEdit && person) {
       if (PeopleScope.isInstitutional(scope)) {
-        return updateInstitutionalPersonAction(institutionId, person.personId, formData);
+        return updateInstitutionalPersonAction(targetInstitutionId, person.personId, formData);
       }
 
-      return updatePlatformPersonAction(institutionId, person.personId, formData);
+      return updatePlatformPersonAction(targetInstitutionId, person.personId, formData);
     }
 
     if (PeopleScope.isInstitutional(scope)) {
-      return createInstitutionalPersonAction(institutionId, formData);
+      return createInstitutionalPersonAction(targetInstitutionId, formData);
     }
 
-    return createPlatformPersonAction(institutionId, formData);
+    return createPlatformPersonAction(targetInstitutionId, formData);
   }
 
   function handleCancel(): void {
@@ -157,6 +170,15 @@ function PersonFormView({
           <AlertTitle>{getErrorTitle(isEdit)}</AlertTitle>
           <AlertDescription>{formError}</AlertDescription>
         </Alert>
+      )}
+
+      {!isEdit && scope === PeopleScope.ADMIN && !institutionId && (
+        <PersonInstitutionField
+          institution={institution}
+          onChange={setInstitution}
+          disabled={isPending}
+          invalid={Boolean(formError) && !institution}
+        />
       )}
 
       <fieldset disabled={isEdit && !canEdit} className="contents">

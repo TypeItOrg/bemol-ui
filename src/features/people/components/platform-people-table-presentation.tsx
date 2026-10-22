@@ -72,7 +72,7 @@ export function PlatformPeopleTablePresentation({
               <DataTableSortableHead<PlatformPeopleSortField> field="documentNumber" label="Documento" sort={sort} onSortChange={updateSort} />
               <DataTableSortableHead<PlatformPeopleSortField> field="institutionName" label="Institución" sort={sort} onSortChange={updateSort} />
               <TableHead>Teléfono</TableHead>
-              <TableHead>Email</TableHead>
+              <TableHead>Correo</TableHead>
               <TableHead>Roles</TableHead>
             </TableRow>
           </TableHeader>

@@ -1,8 +1,12 @@
 import { Suspense, type ReactElement } from "react";
 
-import { UsersIcon } from "lucide-react";
+import { PlusIcon, UsersIcon } from "lucide-react";
 
+import { ReturnToLink } from "@common/components/navigation/return-to-link";
+import { Button } from "@common/components/ui/button";
+import { DataTableAdvancedFiltersTrigger } from "@common/components/ui/data-table-advanced-filters-trigger";
 import { DataTableNavigationProvider } from "@common/components/ui/data-table-navigation";
+import { Sheet } from "@common/components/ui/sheet";
 
 import { fetchInstitution } from "@features/institutions/services/fetch-institution.service";
 import { PlatformPeopleTableContainer } from "@features/people/components/platform-people-table-container";
@@ -12,6 +16,7 @@ import { fetchPlatformPeople } from "@features/people/services/fetch-platform-pe
 import { fetchSystemRolesCatalog } from "@features/people/services/fetch-system-roles.service";
 import { parsePlatformPeoplePaginationParams, type PlatformPeopleSearchParams } from "@features/people/utils/platform-people-pagination.util";
 import { PlatformBreadcrumb } from "@features/platform-auth/components/platform-breadcrumb";
+import { PlatformCollectionActions } from "@features/platform-auth/components/platform-collection-actions";
 import { PlatformPageIcon } from "@features/platform-auth/components/platform-page-icon";
 import { PlatformPageShell } from "@features/platform-auth/components/platform-page-shell";
 
@@ -34,18 +39,29 @@ export default async function PlatformPeoplePage({ searchParams }: PlatformPeopl
   return (
     <PlatformPageShell title="Usuarios" breadcrumb={<PlatformBreadcrumb />} actions={<PlatformPageIcon icon={UsersIcon} />}>
       <DataTableNavigationProvider>
-        <PlatformPeopleTableFilters
-          institutionId={params.institutionId}
-          institutionName={selectedInstitutionName}
-          roleCode={params.roleCode}
-          roles={roleList.roles}
-          search={params.search}
-          size={params.size}
-        />
+        <Sheet>
+          <PlatformCollectionActions className="sm:justify-between">
+            <Button asChild size="lg" className="w-full">
+              <ReturnToLink href="/admin/people/new">
+                <PlusIcon data-icon="inline-start" />
+                Nuevo usuario
+              </ReturnToLink>
+            </Button>
+            <DataTableAdvancedFiltersTrigger count={params.institutionId !== undefined ? 1 : 0} label="Filtros avanzados" />
+          </PlatformCollectionActions>
+          <PlatformPeopleTableFilters
+            institutionId={params.institutionId}
+            institutionName={selectedInstitutionName}
+            roleCode={params.roleCode}
+            roles={roleList.roles}
+            search={params.search}
+            size={params.size}
+          />
 
-        <Suspense fallback={<PlatformPeopleTableSkeleton />}>
-          <PlatformPeopleTableContainer {...params} dataPromise={peoplePromise} />
-        </Suspense>
+          <Suspense fallback={<PlatformPeopleTableSkeleton />}>
+            <PlatformPeopleTableContainer {...params} dataPromise={peoplePromise} />
+          </Suspense>
+        </Sheet>
       </DataTableNavigationProvider>
     </PlatformPageShell>
   );
