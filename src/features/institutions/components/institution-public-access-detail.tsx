@@ -22,7 +22,9 @@ export function InstitutionPublicAccessDetail({ publicSubdomain, baseDomain }: {
             {publicSubdomain && baseDomain ? <span className="text-muted-foreground font-normal">.{baseDomain}</span> : null}
           </dd>
         </dl>
-        <Badge variant={enabled ? "success" : "secondary"}>{enabled ? "Habilitado" : "Deshabilitado"}</Badge>
+        <Badge variant={enabled ? "success" : "secondary"} size="lg">
+          {enabled ? "Habilitado" : "Deshabilitado"}
+        </Badge>
       </div>
     </section>
   );

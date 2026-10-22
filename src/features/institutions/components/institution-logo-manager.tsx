@@ -7,10 +7,13 @@ import Image from "next/image";
 import { ImageIcon } from "lucide-react";
 
 import { SectionHeader } from "@common/components/section-header";
+import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@common/components/ui/empty";
 import { cn } from "@common/utils/cn.util";
 
 import { INSTITUTION_ERROR_MESSAGES } from "@features/institutions/constants/error-messages.constants";
 import { getInstitutionLogoUrl } from "@features/institutions/utils/institution-logo-url.util";
+
+const LOGO_FALLBACK_DESCRIPTION = "Se mostrará el nombre de la institución en el acceso público.";
 
 type InstitutionLogoManagerProps = {
   institutionId: string;
@@ -32,7 +35,7 @@ export function InstitutionLogoManager({ institutionId, institutionName, logoUrl
         {currentUrl ? (
           <InstitutionLogoImage src={currentUrl} alt={`Logo de ${institutionName}`} className="h-auto max-h-40 w-auto max-w-full object-contain" />
         ) : (
-          <p className="text-muted-foreground text-sm">Sin logo. Se mostrará el nombre de la institución.</p>
+          <InstitutionLogoPlaceholder />
         )}
       </div>
     </section>
@@ -57,13 +60,30 @@ export function InstitutionLogoImage({
       <div
         role="img"
         aria-label={INSTITUTION_ERROR_MESSAGES.PREVIEW_UNAVAILABLE}
-        className={cn("text-muted-foreground flex items-center justify-center gap-2", className)}
+        aria-description={compact ? undefined : LOGO_FALLBACK_DESCRIPTION}
+        className={cn("text-muted-foreground flex items-center justify-center", compact ? className : "w-full")}
       >
-        <ImageIcon aria-hidden="true" className="size-5 shrink-0" />
-        {!compact ? <span className="text-sm">{INSTITUTION_ERROR_MESSAGES.PREVIEW_UNAVAILABLE}</span> : null}
+        {compact ? <ImageIcon aria-hidden="true" className="size-5 shrink-0" /> : <InstitutionLogoPlaceholder unavailable />}
       </div>
     );
   }
 
   return <Image unoptimized src={src} alt={alt} width={240} height={160} className={className} onError={() => setFailedUrl(src)} />;
+}
+
+function InstitutionLogoPlaceholder({ unavailable = false }: { unavailable?: boolean }): ReactElement {
+  return (
+    <Empty className="border-0 px-0 py-6">
+      <EmptyHeader>
+        <EmptyMedia variant="icon">
+          <ImageIcon aria-hidden="true" className="size-5" />
+        </EmptyMedia>
+        <EmptyTitle className="text-base">{unavailable ? "Logo no disponible" : "Sin logo institucional"}</EmptyTitle>
+        <EmptyDescription>
+          {unavailable ? `${INSTITUTION_ERROR_MESSAGES.PREVIEW_UNAVAILABLE} ` : null}
+          {LOGO_FALLBACK_DESCRIPTION}
+        </EmptyDescription>
+      </EmptyHeader>
+    </Empty>
+  );
 }

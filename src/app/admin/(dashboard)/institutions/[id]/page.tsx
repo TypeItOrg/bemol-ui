@@ -7,9 +7,10 @@ import { notFound } from "next/navigation";
 import { Building2Icon } from "lucide-react";
 
 import { ReturnToLink } from "@common/components/navigation/return-to-link";
+import { SectionHeader } from "@common/components/section-header";
 import { Badge } from "@common/components/ui/badge";
 import { Button } from "@common/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@common/components/ui/card";
+import { Card, CardContent, CardHeader } from "@common/components/ui/card";
 import { DETAIL_LABEL_CLASS_NAME } from "@common/constants/detail-label.constants";
 import type { QueryParamValue } from "@common/types/query-param.types";
 import { getSafeReturnTo } from "@common/utils/return-to.util";
@@ -22,6 +23,7 @@ import { InstitutionReactivateButton } from "@features/institutions/components/i
 import { fetchInstitution } from "@features/institutions/services/fetch-institution.service";
 import { PlatformBreadcrumb } from "@features/platform-auth/components/platform-breadcrumb";
 import { PlatformPageIcon } from "@features/platform-auth/components/platform-page-icon";
+import { PlatformPageShell } from "@features/platform-auth/components/platform-page-shell";
 
 type InstitutionDetailPageProps = {
   params: Promise<{ id: string }>;
@@ -46,93 +48,76 @@ export default async function InstitutionDetailPage({ params, searchParams }: In
   const userCount = Number.isFinite(institution.userCount) ? institution.userCount : 0;
 
   return (
-    <section className="@container/page-shell flex max-w-full min-w-0 flex-1 flex-col gap-4 p-3 md:p-4">
-      <header className="bg-background flex min-w-0 flex-col gap-4 rounded-xl p-4 shadow-xs @md/page-shell:p-6 @2xl/page-shell:flex-row @2xl/page-shell:items-center @2xl/page-shell:justify-between">
-        <div className="min-w-0">
-          <PlatformBreadcrumb segmentLabels={{ [id]: institution.name }} />
-          <h1 className="text-foreground max-w-4xl text-2xl font-bold tracking-tight @2xl/page-shell:text-3xl @4xl/page-shell:text-4xl">
-            {institution.name}
-          </h1>
-        </div>
-        <PlatformPageIcon icon={Building2Icon} />
-      </header>
-
-      <div className="bg-background flex min-w-0 flex-1 flex-col gap-4 rounded-xl p-4 shadow-xs sm:p-6">
-        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-          <Button asChild variant="outline" size="lg" className="self-start">
-            <Link href={destination}>Volver</Link>
-          </Button>
-          {institution.active ? (
-            <div className="flex w-full flex-wrap justify-start gap-3 md:w-auto md:flex-nowrap md:justify-end">
-              <Button asChild variant="outline" size="lg" className="flex-1 md:flex-none">
-                <Link href={`/admin/institutions/${id}/people`}>Administrar usuarios</Link>
-              </Button>
-              <Button asChild size="lg" className="w-full sm:w-auto sm:flex-1 md:flex-none">
-                <ReturnToLink href={`/admin/institutions/${id}/edit`} returnTo={destination}>
-                  Editar institución
-                </ReturnToLink>
-              </Button>
-            </div>
-          ) : (
-            <InstitutionReactivateButton institutionId={id} institutionName={institution.name} />
-          )}
-        </div>
-
-        <Card className="bg-muted/25 gap-0 p-5 sm:p-6">
-          <CardHeader className="-mx-5 border-b px-5 pb-5 sm:-mx-6 sm:px-6">
-            <div className="flex items-stretch gap-3.5">
-              <div className="bg-primary/10 text-primary flex aspect-square min-h-11 min-w-11 shrink-0 items-center justify-center self-stretch rounded-xl">
-                <Building2Icon className="size-5" aria-hidden="true" />
-              </div>
-              <div className="flex min-w-0 flex-col justify-center">
-                <CardTitle>Información institucional</CardTitle>
-                <CardDescription>Datos principales de identificación y actividad.</CardDescription>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent className="mt-5 p-0">
-            <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              <div>
-                <dt className={DETAIL_LABEL_CLASS_NAME}>Estado</dt>
-                <dd className="mt-1.5">
-                  <Badge variant={institution.active ? "success" : "destructive"}>{institution.active ? "Activa" : "Inactiva"}</Badge>
-                </dd>
-              </div>
-              <div>
-                <dt className={DETAIL_LABEL_CLASS_NAME}>Slug</dt>
-                <dd className="text-foreground mt-1.5 font-mono text-sm">@{institution.slug}</dd>
-              </div>
-              <div>
-                <dt className={DETAIL_LABEL_CLASS_NAME}>Ubicación</dt>
-                <dd className="text-foreground mt-1.5 text-sm font-medium">
-                  {institution.city.name}, {institution.province.name}
-                </dd>
-              </div>
-              <div>
-                <dt className={DETAIL_LABEL_CLASS_NAME}>Usuarios</dt>
-                <dd className="text-foreground mt-1.5 text-sm font-medium">{userCount}</dd>
-              </div>
-            </dl>
-          </CardContent>
-        </Card>
-
-        <InstitutionPublicAccessDetail publicSubdomain={institution.publicSubdomain} baseDomain={process.env.INSTITUTIONAL_BASE_DOMAIN ?? ""} />
-        <InstitutionLogoManager institutionId={id} institutionName={institution.name} logoUrl={institution.logoUrl} scope="platform" canUpdate />
-
-        <div
-          className={institution.active ? "grid flex-1 items-start gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(22rem,28rem)]" : "flex flex-1 flex-col"}
-        >
-          <InstitutionDetail institution={institution} />
-
-          {institution.active && (
-            <div className="self-start">
-              <Suspense fallback={<InstitutionPeoplePreviewSkeleton />}>
-                <InstitutionPeoplePreview institutionId={id} />
-              </Suspense>
-            </div>
-          )}
-        </div>
+    <PlatformPageShell
+      title={institution.name}
+      breadcrumb={<PlatformBreadcrumb segmentLabels={{ [id]: institution.name }} />}
+      actions={<PlatformPageIcon icon={Building2Icon} />}
+      minViewportHeight
+    >
+      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        <Button asChild variant="outline" size="lg" className="self-start">
+          <Link href={destination}>Volver</Link>
+        </Button>
+        {institution.active ? (
+          <div className="flex w-full flex-wrap justify-start gap-3 md:w-auto md:flex-nowrap md:justify-end">
+            <Button asChild variant="outline" size="lg" className="flex-1 md:flex-none">
+              <Link href={`/admin/institutions/${id}/people`}>Administrar usuarios</Link>
+            </Button>
+            <Button asChild size="lg" className="w-full sm:w-auto sm:flex-1 md:flex-none">
+              <ReturnToLink href={`/admin/institutions/${id}/edit`} returnTo={destination}>
+                Editar institución
+              </ReturnToLink>
+            </Button>
+          </div>
+        ) : (
+          <InstitutionReactivateButton institutionId={id} institutionName={institution.name} />
+        )}
       </div>
-    </section>
+
+      <Card className="bg-muted/25 gap-0 p-5 sm:p-6">
+        <CardHeader className="-mx-5 border-b px-5 pb-5 sm:-mx-6 sm:px-6">
+          <SectionHeader icon={Building2Icon} title="Información institucional" description="Datos principales de identificación y actividad." />
+        </CardHeader>
+        <CardContent className="mt-5 p-0">
+          <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div>
+              <dt className={DETAIL_LABEL_CLASS_NAME}>Estado</dt>
+              <dd className="mt-1.5">
+                <Badge variant={institution.active ? "success" : "destructive"}>{institution.active ? "Activa" : "Inactiva"}</Badge>
+              </dd>
+            </div>
+            <div>
+              <dt className={DETAIL_LABEL_CLASS_NAME}>Slug</dt>
+              <dd className="text-foreground mt-1.5 font-mono text-sm">@{institution.slug}</dd>
+            </div>
+            <div>
+              <dt className={DETAIL_LABEL_CLASS_NAME}>Ubicación</dt>
+              <dd className="text-foreground mt-1.5 text-sm font-medium">
+                {institution.city.name}, {institution.province.name}
+              </dd>
+            </div>
+            <div>
+              <dt className={DETAIL_LABEL_CLASS_NAME}>Usuarios</dt>
+              <dd className="text-foreground mt-1.5 text-sm font-medium">{userCount}</dd>
+            </div>
+          </dl>
+        </CardContent>
+      </Card>
+
+      <InstitutionPublicAccessDetail publicSubdomain={institution.publicSubdomain} baseDomain={process.env.INSTITUTIONAL_BASE_DOMAIN ?? ""} />
+      <InstitutionLogoManager institutionId={id} institutionName={institution.name} logoUrl={institution.logoUrl} scope="platform" canUpdate />
+
+      <div className={institution.active ? "grid flex-1 items-start gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(22rem,28rem)]" : "flex flex-1 flex-col"}>
+        <InstitutionDetail institution={institution} />
+
+        {institution.active && (
+          <div className="self-start">
+            <Suspense fallback={<InstitutionPeoplePreviewSkeleton />}>
+              <InstitutionPeoplePreview institutionId={id} />
+            </Suspense>
+          </div>
+        )}
+      </div>
+    </PlatformPageShell>
   );
 }
