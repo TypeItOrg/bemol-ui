@@ -13,6 +13,7 @@ import { Field, FieldGroup, FieldLabel } from "@common/components/ui/field";
 import { PasswordInput } from "@common/components/ui/password-input";
 
 import { activateOwnAccess } from "@features/institutional-auth/actions/activate-own-access.action";
+import { InstitutionalAuthDescription } from "@features/institutional-auth/components/institutional-auth-description";
 import { InstitutionalAuthStepHeader } from "@features/institutional-auth/components/institutional-auth-step-header";
 
 export function OwnAccessActivationForm({ token }: { token: string }): ReactElement {
@@ -23,7 +24,13 @@ export function OwnAccessActivationForm({ token }: { token: string }): ReactElem
       <div className="flex flex-col justify-center gap-6 p-5 sm:p-8">
         <InstitutionalAuthStepHeader
           title="Cuenta activada"
-          description="Tu cuenta está activa. Ya podés ingresar con tu documento y tu contraseña."
+          description={
+            <InstitutionalAuthDescription
+              generic="Tu cuenta está activa. Ya podés ingresar con tu documento y tu contraseña."
+              before="Tu cuenta de "
+              after=" está activa. Ya podés ingresar con tu documento y tu contraseña."
+            />
+          }
         />
         <Button asChild className="w-full" size="lg">
           <Link href="/auth/login">Iniciar sesión</Link>
@@ -37,7 +44,13 @@ export function OwnAccessActivationForm({ token }: { token: string }): ReactElem
       <input type="hidden" name="token" value={token} />
       <InstitutionalAuthStepHeader
         title="Activá tu cuenta"
-        description="Configurá tu contraseña para acceder a tu perfil. El enlace vence en 24 horas."
+        description={
+          <InstitutionalAuthDescription
+            generic="Configurá tu contraseña para acceder a tu perfil. El enlace vence en 24 horas."
+            before="Configurá tu contraseña para acceder a tu perfil de "
+            after=". El enlace vence en 24 horas."
+          />
+        }
       />
       <div className="mt-6 space-y-6">
         {state.error ? (

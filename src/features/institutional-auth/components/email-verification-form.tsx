@@ -4,6 +4,7 @@ import { useState, type ReactElement } from "react";
 
 import Link from "next/link";
 
+import { InstitutionalAuthDescription } from "@features/institutional-auth/components/institutional-auth-description";
 import { InstitutionalAuthStepHeader } from "@features/institutional-auth/components/institutional-auth-step-header";
 import { useInstitutionalBrand } from "@features/institutional-auth/components/institutional-brand-context";
 import { VerificationRequestForm } from "@features/institutional-auth/components/verification-request-form";
@@ -24,9 +25,19 @@ export function EmailVerificationForm({ context }: { context?: EmailVerification
           showInstitutionName={false}
           title={mode === "resend" ? "Verificá tu correo electrónico" : "Cambiá tu correo electrónico"}
           description={
-            mode === "resend"
-              ? "Ingresá tus datos para recibir un nuevo enlace de verificación."
-              : "Confirmá tu identidad e indicá el correo electrónico correcto para recibir un nuevo enlace."
+            <InstitutionalAuthDescription
+              generic={
+                mode === "resend"
+                  ? "Ingresá tus datos para recibir un nuevo enlace de verificación."
+                  : "Confirmá tu identidad e indicá el correo electrónico correcto para recibir un nuevo enlace."
+              }
+              before={
+                mode === "resend"
+                  ? "Ingresá tus datos para verificar tu cuenta de "
+                  : "Confirmá tu identidad e indicá el correo electrónico correcto para "
+              }
+              after="."
+            />
           }
         />
         <VerificationRequestForm key={mode} mode={mode} identity={identity} onIdentityChange={setIdentity} onModeChange={setMode} />

@@ -26,11 +26,17 @@ export function InstitutionalBrandIdentity({
 
   const productLogoUrl = darkBackground ? "/brand/logo-dark.svg" : "/brand/logo.svg";
 
-  const logoUrl = institution ? getInstitutionLogoUrl(institution.id, institution.logoUrl) : productLogoUrl;
+  const institutionLogoUrl = institution ? getInstitutionLogoUrl(institution.id, institution.logoUrl) : null;
 
   const [failedUrl, setFailedUrl] = useState<string>();
 
+  const hasInstitutionLogo = Boolean(institutionLogoUrl && failedUrl !== institutionLogoUrl);
+
+  const logoUrl = hasInstitutionLogo ? institutionLogoUrl : productLogoUrl;
+
   const hasLogo = Boolean(logoUrl && failedUrl !== logoUrl);
+
+  const showProductLogoVariant = !hasInstitutionLogo && !darkBackground;
 
   return (
     <div className={cn("flex min-w-0 flex-col items-center gap-3 text-center", className)}>
@@ -43,12 +49,12 @@ export function InstitutionalBrandIdentity({
             width={institution ? 240 : 32}
             height={institution ? 240 : 32}
             src={logoUrl}
-            alt={institution ? `Logo de ${institution.name}` : "Logo de Bemol"}
-            className={cn("h-full w-full object-contain", !institution && !darkBackground && "dark:hidden", imageClassName)}
+            alt={hasInstitutionLogo && institution ? `Logo de ${institution.name}` : "Logo de Bemol"}
+            className={cn("h-full w-full object-contain", showProductLogoVariant && "dark:hidden", imageClassName)}
             onError={() => setFailedUrl(logoUrl)}
           />
           {/* CSS selects the product variant without changing image attributes during hydration. */}
-          {!institution && !darkBackground ? (
+          {showProductLogoVariant ? (
             <Image
               preload
               sizes="(max-width: 640px) 80px, (max-width: 768px) 96px, (max-width: 1024px) 256px, 288px"
@@ -62,9 +68,7 @@ export function InstitutionalBrandIdentity({
           ) : null}
         </div>
       ) : null}
-      {institution && (showInstitutionName || !hasLogo) ? (
-        <p className="w-full text-lg leading-snug font-semibold break-words">{institution.name}</p>
-      ) : null}
+      {institution && showInstitutionName ? <p className="w-full text-lg leading-snug font-semibold break-words">{institution.name}</p> : null}
     </div>
   );
 }

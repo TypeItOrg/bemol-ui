@@ -14,6 +14,7 @@ import { PasswordInput } from "@common/components/ui/password-input";
 import { cn } from "@common/utils/cn.util";
 
 import { resetPassword } from "@features/institutional-auth/actions/reset-institutional-password.action";
+import { InstitutionalAuthDescription } from "@features/institutional-auth/components/institutional-auth-description";
 import { InstitutionalAuthStepHeader } from "@features/institutional-auth/components/institutional-auth-step-header";
 import type { ResetPasswordActionState } from "@features/institutional-auth/types/reset-password-action-state.types";
 
@@ -28,7 +29,13 @@ export function ResetInstitutionalPasswordForm({ token }: { token: string }): Re
       <InstitutionalAuthStepHeader
         title="Restablecer contraseña"
         showInstitutionName={false}
-        description="Ingresá una clave de al menos 8 caracteres."
+        description={
+          <InstitutionalAuthDescription
+            generic="Ingresá una clave de al menos 8 caracteres."
+            before="Ingresá una clave de al menos 8 caracteres para tu cuenta de "
+            after="."
+          />
+        }
       />
 
       <div className="mt-6 space-y-6">

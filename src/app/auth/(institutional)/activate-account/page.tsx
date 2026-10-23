@@ -5,6 +5,7 @@ import Link from "next/link";
 
 import { Card, CardContent } from "@common/components/ui/card";
 
+import { InstitutionalAuthDescription } from "@features/institutional-auth/components/institutional-auth-description";
 import { InstitutionalBrandIdentity, InstitutionalBrandPanel } from "@features/institutional-auth/components/institutional-brand-identity";
 import { OwnAccessActivationForm } from "@features/institutional-auth/components/own-access-activation-form";
 
@@ -38,7 +39,13 @@ export default async function ActivateAccount({ searchParams }: { searchParams: 
         />
         <div className="space-y-1">
           <h1 className="text-2xl font-bold">Enlace inválido</h1>
-          <p className="text-muted-foreground text-sm">Solicitá una nueva invitación para activar tu cuenta.</p>
+          <p className="text-muted-foreground text-sm">
+            <InstitutionalAuthDescription
+              generic="Solicitá una nueva invitación para activar tu cuenta."
+              before="Solicitá una nueva invitación para activar tu cuenta en "
+              after="."
+            />
+          </p>
         </div>
         <Link className="text-primary font-medium underline underline-offset-4" href="/auth/login">
           Iniciar sesión

@@ -6,6 +6,7 @@ import { ActionForm } from "@common/components/action-form";
 
 import { registerInstitutional } from "@features/institutional-auth/actions/institutional-register.action";
 import { type InstitutionalInstitution } from "@features/institutional-auth/components/institution-picker";
+import { InstitutionalAuthDescription } from "@features/institutional-auth/components/institutional-auth-description";
 import { InstitutionalAuthStepHeader } from "@features/institutional-auth/components/institutional-auth-step-header";
 import { InstitutionalRegistrationFields } from "@features/institutional-auth/components/institutional-registration-fields";
 import type { InstitutionalRegisterActionState } from "@features/institutional-auth/types/institutional-register-state.types";
@@ -23,7 +24,13 @@ export function InstitutionalRegisterForm(): ReactElement {
     <ActionForm action={formAction} className="flex flex-col justify-center p-5 sm:p-8">
       <InstitutionalAuthStepHeader
         title="Crear cuenta"
-        description="Completá tus datos para registrarte en una institución."
+        description={
+          <InstitutionalAuthDescription
+            generic="Completá tus datos para registrarte en una institución."
+            before="Completá tus datos para registrarte en "
+            after="."
+          />
+        }
         showInstitutionName={false}
       />
 

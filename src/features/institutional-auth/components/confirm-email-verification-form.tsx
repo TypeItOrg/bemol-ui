@@ -10,6 +10,7 @@ import { Button } from "@common/components/ui/button";
 
 import { confirmEmailVerification } from "@features/institutional-auth/actions/email-verification.actions";
 import { EmailVerificationFeedback } from "@features/institutional-auth/components/email-verification-feedback";
+import { InstitutionalAuthDescription } from "@features/institutional-auth/components/institutional-auth-description";
 import { InstitutionalAuthStepHeader } from "@features/institutional-auth/components/institutional-auth-step-header";
 import type { EmailVerificationState } from "@features/institutional-auth/types/email-verification-state.types";
 
@@ -23,9 +24,19 @@ export function ConfirmEmailVerificationForm({ token }: { token?: string }): Rea
           showInstitutionName={false}
           title={token ? "Confirmá tu correo electrónico" : "Enlace inválido"}
           description={
-            token
-              ? "Confirmá que esta dirección de correo electrónico te pertenece para completar el registro. Una vez verificada, tu cuenta quedará habilitada y vas a poder iniciar sesión."
-              : "Este enlace no se puede usar. Solicitá uno nuevo para continuar."
+            token ? (
+              <InstitutionalAuthDescription
+                generic="Confirmá que esta dirección de correo electrónico te pertenece para completar el registro. Una vez verificada, tu cuenta quedará habilitada y vas a poder iniciar sesión."
+                before="Confirmá que esta dirección de correo electrónico te pertenece para completar tu registro en "
+                after=". Una vez verificada, tu cuenta quedará habilitada y vas a poder iniciar sesión."
+              />
+            ) : (
+              <InstitutionalAuthDescription
+                generic="Este enlace no se puede usar. Solicitá uno nuevo para continuar."
+                before="Este enlace de "
+                after=" no se puede usar. Solicitá uno nuevo para continuar."
+              />
+            )
           }
         />
 

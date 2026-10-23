@@ -15,6 +15,7 @@ import { cn } from "@common/utils/cn.util";
 
 import { requestPasswordRecovery } from "@features/institutional-auth/actions/request-institutional-password-recovery.action";
 import { type InstitutionalInstitution } from "@features/institutional-auth/components/institution-picker";
+import { InstitutionalAuthDescription } from "@features/institutional-auth/components/institutional-auth-description";
 import { InstitutionalAuthInstitutionField } from "@features/institutional-auth/components/institutional-auth-institution-field";
 import { InstitutionalAuthStepHeader } from "@features/institutional-auth/components/institutional-auth-step-header";
 import { INSTITUTIONAL_AUTH_ERROR_MESSAGES } from "@features/institutional-auth/constants/error-messages.constants";
@@ -32,7 +33,13 @@ export function InstitutionalPasswordRecoveryForm(): ReactElement {
       <InstitutionalAuthStepHeader
         title="Recuperar contraseña"
         showInstitutionName={false}
-        description="Ingresá tu documento para recibir un enlace."
+        description={
+          <InstitutionalAuthDescription
+            generic="Ingresá tu documento para recibir un enlace."
+            before="Ingresá tu documento para recuperar tu contraseña de "
+            after="."
+          />
+        }
       />
 
       <div className="mt-6 space-y-6">

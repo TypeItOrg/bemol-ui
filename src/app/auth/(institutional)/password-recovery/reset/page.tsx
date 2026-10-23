@@ -5,6 +5,7 @@ import Link from "next/link";
 
 import { Card, CardContent } from "@common/components/ui/card";
 
+import { InstitutionalAuthDescription } from "@features/institutional-auth/components/institutional-auth-description";
 import { InstitutionalBrandIdentity, InstitutionalBrandPanel } from "@features/institutional-auth/components/institutional-brand-identity";
 import { ResetInstitutionalPasswordForm } from "@features/institutional-auth/components/reset-institutional-password-form";
 
@@ -38,7 +39,13 @@ export default async function ResetPasswordPage({ searchParams }: { searchParams
         />
         <div className="space-y-1">
           <h1 className="text-2xl font-bold">Enlace inválido</h1>
-          <p className="text-muted-foreground text-sm">Solicitá un nuevo enlace de recuperación para continuar.</p>
+          <p className="text-muted-foreground text-sm">
+            <InstitutionalAuthDescription
+              generic="Solicitá un nuevo enlace de recuperación para continuar."
+              before="Solicitá un nuevo enlace para restablecer tu contraseña de "
+              after="."
+            />
+          </p>
         </div>
         <Link className="text-primary font-medium underline underline-offset-4" href="/auth/password-recovery">
           Recuperar contraseña

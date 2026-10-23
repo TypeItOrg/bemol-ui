@@ -7,6 +7,7 @@ import Link from "next/link";
 import { Field, FieldError, FieldLabel } from "@common/components/ui/field";
 import { NumericInput } from "@common/components/ui/restricted-input";
 
+import { InstitutionalAuthDescription } from "@features/institutional-auth/components/institutional-auth-description";
 import { InstitutionalAuthInstitutionField } from "@features/institutional-auth/components/institutional-auth-institution-field";
 import { InstitutionalAuthStepHeader } from "@features/institutional-auth/components/institutional-auth-step-header";
 import { InstitutionalLoginFeedback } from "@features/institutional-auth/components/institutional-login-feedback";
@@ -44,7 +45,13 @@ export function InstitutionalLoginForm(props: InstitutionalLoginFormProps): Reac
       <InstitutionalAuthStepHeader
         title="Iniciar sesión"
         showInstitutionName={false}
-        description="Ingresá con tu contraseña o una llave de acceso."
+        description={
+          <InstitutionalAuthDescription
+            generic="Ingresá con tu contraseña o una llave de acceso."
+            before="Ingresá a "
+            after=" con tu contraseña o una llave de acceso."
+          />
+        }
       />
       <form className="mt-6 space-y-6" onSubmit={submitPassword} noValidate>
         <InstitutionalLoginFeedback

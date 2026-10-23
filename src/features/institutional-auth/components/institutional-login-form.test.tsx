@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 
 import { beginInstitutionalPasskeyLogin } from "@features/institutional-auth/actions/begin-passkey-login.action";
 import { institutionalCredentialsLogin } from "@features/institutional-auth/actions/institutional-credentials-login.action";
+import { InstitutionalBrandProvider } from "@features/institutional-auth/components/institutional-brand-context";
 import { InstitutionalLoginForm } from "@features/institutional-auth/components/institutional-login-form";
 
 jest.mock("@features/institutional-auth/components/institution-picker", () => ({
@@ -23,11 +24,30 @@ jest.mock("@features/institutional-auth/actions/consume-institutional-login-flas
 
 const credentialsMock = jest.mocked(institutionalCredentialsLogin);
 const beginMock = jest.mocked(beginInstitutionalPasskeyLogin);
+const institution = {
+  id: "22222222-2222-4222-8222-222222222222",
+  name: "Conservatorio Boero",
+  publicSubdomain: "cboero",
+  logoUrl: `/api/v1/institutions/22222222-2222-4222-8222-222222222222/logo?v=opaque`,
+};
 
 describe("InstitutionalLoginForm", () => {
   beforeEach(() => {
     credentialsMock.mockReset().mockResolvedValue({});
     beginMock.mockReset();
+  });
+
+  it("mentions the fixed institution in bold when the login is scoped to a subdomain", () => {
+    render(
+      <InstitutionalBrandProvider institution={institution}>
+        <InstitutionalLoginForm />
+      </InstitutionalBrandProvider>,
+    );
+
+    const institutionName = screen.getByText(institution.name);
+
+    expect(institutionName.tagName).toBe("STRONG");
+    expect(institutionName.closest("p")).toHaveTextContent("Ingresá a Conservatorio Boero con tu contraseña o una llave de acceso.");
   });
 
   it("shows credentials and an explicit passkey option on the initial step", () => {
