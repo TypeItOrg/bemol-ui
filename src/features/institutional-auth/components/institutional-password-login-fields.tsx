@@ -16,14 +16,18 @@ export function InstitutionalPasswordLoginFields({
   status,
   rememberMe,
   onRememberMeChange,
-  changeMethod,
+  passkey,
+  onPasskeyLogin,
 }: {
   fieldErrors: Partial<Record<"institutionId" | "documentNumber" | "password", string>> | undefined;
   status: { pending: boolean; error: string | null };
   rememberMe: boolean;
   onRememberMeChange: (value: boolean) => void;
-  changeMethod: (value: "PASSWORD" | "PASSKEY") => void;
+  passkey: { pending: boolean; verifying: boolean; cancel: () => void };
+  onPasskeyLogin: () => void;
 }): ReactElement {
+  const passwordPending = status.pending && !passkey.pending;
+
   return (
     <>
       <Field data-invalid={Boolean(fieldErrors?.password)}>
@@ -39,7 +43,7 @@ export function InstitutionalPasswordLoginFields({
           id="password"
           name="password"
           autoComplete="current-password"
-          disabled={status.pending}
+          disabled={status.pending || passkey.pending}
           aria-invalid={Boolean(fieldErrors?.password)}
         />
         <FieldError errors={fieldErrors?.password ? [{ message: fieldErrors.password }] : undefined} />
@@ -50,7 +54,7 @@ export function InstitutionalPasswordLoginFields({
           name="rememberMe"
           className="mt-px"
           checked={rememberMe}
-          disabled={status.pending}
+          disabled={status.pending || passkey.pending}
           onCheckedChange={(checked) => onRememberMeChange(checked === true)}
         />
         <FieldLabel htmlFor="remember-me" className="font-normal">
@@ -58,9 +62,9 @@ export function InstitutionalPasswordLoginFields({
         </FieldLabel>
       </Field>
       <footer className="flex w-full flex-col gap-2">
-        <Button aria-busy={status.pending} className="relative w-full" disabled={status.pending} size="lg" type="submit">
-          <span className={status.pending ? "opacity-0" : undefined}>Iniciar sesión</span>
-          {status.pending ? (
+        <Button aria-busy={passwordPending} className="relative w-full" disabled={status.pending || passkey.pending} size="lg" type="submit">
+          <span className={passwordPending ? "opacity-0" : undefined}>Iniciar sesión</span>
+          {passwordPending ? (
             <span className="absolute inset-0 flex items-center justify-center">
               <Loader2Icon aria-hidden="true" className="size-4 animate-spin" />
               <span className="sr-only" role="status">
@@ -69,9 +73,23 @@ export function InstitutionalPasswordLoginFields({
             </span>
           ) : null}
         </Button>
-        <Button className="w-full" disabled={status.pending} size="lg" type="button" variant="outline" onClick={() => changeMethod("PASSKEY")}>
+        <Button
+          aria-busy={passkey.pending}
+          className="w-full"
+          disabled={status.pending || passkey.pending}
+          size="lg"
+          type="button"
+          variant="outline"
+          onClick={onPasskeyLogin}
+        >
+          {passkey.pending ? <Loader2Icon aria-hidden="true" className="size-4 animate-spin" /> : null}
           Usar una llave de acceso
         </Button>
+        {passkey.pending ? (
+          <Button disabled={passkey.verifying} onClick={passkey.cancel} type="button" variant="ghost">
+            Cancelar
+          </Button>
+        ) : null}
       </footer>
     </>
   );

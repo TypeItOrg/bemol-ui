@@ -1,60 +1,38 @@
 "use client";
 
-import { useEffect, useRef, useState, type ReactElement } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { isRedirectError } from "next/dist/client/components/redirect-error";
 
-import { FingerprintIcon } from "lucide-react";
-
-import { Alert, AlertDescription, AlertTitle } from "@common/components/ui/alert";
-import { Checkbox } from "@common/components/ui/checkbox";
-import { Field, FieldLabel } from "@common/components/ui/field";
-
 import { beginInstitutionalPasskeyLogin } from "@features/institutional-auth/actions/begin-passkey-login.action";
 import { finishPasskeyLogin } from "@features/institutional-auth/actions/finish-passkey-login.action";
-import { identifyInstitutionalUser } from "@features/institutional-auth/actions/identify-institutional-user.action";
-import { InstitutionalPasskeyPrompt } from "@features/institutional-auth/components/institutional-passkey-prompt";
 import { INSTITUTIONAL_AUTH_ERROR_MESSAGES } from "@features/institutional-auth/constants/error-messages.constants";
-import { useWebAuthnSupport } from "@features/institutional-auth/hooks/use-webauthn-support.hook";
 import type { BeginPasskeyLoginState } from "@features/institutional-auth/types/begin-passkey-login-state.types";
 import type { InstitutionalPasskeyLoginInput } from "@features/institutional-auth/types/institutional-passkey-login-input.types";
 import { getPasskeyAssertion, isUserCancelled, toPublicKeyRequestOptions } from "@features/institutional-auth/utils/passkey-authentication.util";
+import { isWebAuthnSupported } from "@features/institutional-auth/utils/webauthn-capability.util";
 
 type PasskeyCeremonyState = { phase: "idle" | "requesting" | "verifying" };
-type InstitutionalPasskeyStepProps = {
+type InstitutionalPasskeyLoginProps = {
   input: InstitutionalPasskeyLoginInput;
   onFieldErrors: (errors: BeginPasskeyLoginState["fieldErrors"]) => void;
-  isCurrentIdentity: () => boolean;
   rememberMe: boolean;
-  onRememberMeChange: (value: boolean) => void;
   onPendingChange: (pending: boolean) => void;
   onError: (message: string | null) => void;
-  onUsePassword: () => void;
 };
 
-export function InstitutionalPasskeyStep({
-  input,
-  onFieldErrors,
-  isCurrentIdentity,
-  rememberMe,
-  onRememberMeChange,
-  onPendingChange,
-  onError,
-  onUsePassword,
-}: InstitutionalPasskeyStepProps): ReactElement {
+export function useInstitutionalPasskeyLogin({ input, onFieldErrors, rememberMe, onPendingChange, onError }: InstitutionalPasskeyLoginProps) {
   const [ceremony, setCeremony] = useState<PasskeyCeremonyState>({ phase: "idle" });
 
   const ceremonyRef = useRef<AbortController | null>(null);
 
   const verifyingRef = useRef(false);
 
-  const webauthnSupported = useWebAuthnSupport();
-
   const passkeyPending = ceremony.phase !== "idle";
 
   const passkeyVerifying = ceremony.phase === "verifying";
 
-  // Cancel the external browser prompt when navigating away from this step.
+  // Cancel the browser prompt when the form unmounts.
   useEffect(() => {
     return () => {
       ceremonyRef.current?.abort();
@@ -68,7 +46,7 @@ export function InstitutionalPasskeyStep({
   }
 
   function isCurrentCeremony(controller: AbortController): boolean {
-    return ceremonyRef.current === controller && isCurrentIdentity();
+    return ceremonyRef.current === controller;
   }
 
   function handleCancelCeremony(): void {
@@ -80,18 +58,14 @@ export function InstitutionalPasskeyStep({
     setCeremony({ phase: "idle" });
   }
 
-  function handleUsePassword(): void {
-    if (verifyingRef.current) {
+  async function handlePasskeyLogin(): Promise<void> {
+    if (ceremonyRef.current) {
       return;
     }
 
-    abortCeremony();
-    setCeremony({ phase: "idle" });
-    onUsePassword();
-  }
+    if (!isWebAuthnSupported()) {
+      onError(INSTITUTIONAL_AUTH_ERROR_MESSAGES.PASSKEY_UNSUPPORTED);
 
-  async function handlePasskeyLogin(): Promise<void> {
-    if (ceremonyRef.current || !isCurrentIdentity()) {
       return;
     }
 
@@ -117,27 +91,6 @@ export function InstitutionalPasskeyStep({
         return;
       }
 
-      if (begin.emailVerificationRequired) {
-        // Lock the identity before allowing the existing action to set context and redirect.
-        verifyingRef.current = true;
-        setCeremony({ phase: "verifying" });
-        onPendingChange(true);
-
-        const formData = new FormData();
-
-        formData.set("institutionId", input.institutionId);
-        formData.set("institutionName", input.institutionName ?? "");
-        formData.set("documentNumber", input.documentNumber.trim());
-
-        const result = await identifyInstitutionalUser({}, formData);
-
-        if (isCurrentCeremony(controller)) {
-          onError(result.error ?? INSTITUTIONAL_AUTH_ERROR_MESSAGES.PASSKEY_FAILED);
-        }
-
-        return;
-      }
-
       if (begin.error || !begin.ceremonyId || !begin.options) {
         onError(begin.error ?? INSTITUTIONAL_AUTH_ERROR_MESSAGES.PASSKEY_FAILED);
 
@@ -157,7 +110,6 @@ export function InstitutionalPasskeyStep({
       onPendingChange(true);
 
       const finish = await finishPasskeyLogin({
-        loginAttemptId: begin.loginAttemptId,
         ceremonyId: begin.ceremonyId,
         credentialJson: JSON.stringify(credential),
         rememberMe: remembered,
@@ -201,39 +153,10 @@ export function InstitutionalPasskeyStep({
     }
   }
 
-  return (
-    <div>
-      <div className="space-y-6">
-        {webauthnSupported === false ? (
-          <Alert>
-            <FingerprintIcon className="size-4" />
-            <AlertTitle>Llaves de acceso no disponibles</AlertTitle>
-            <AlertDescription>{INSTITUTIONAL_AUTH_ERROR_MESSAGES.PASSKEY_UNSUPPORTED}</AlertDescription>
-          </Alert>
-        ) : null}
-
-        <Field orientation="horizontal">
-          <Checkbox
-            id="remember-me-passkey"
-            className="mt-px"
-            checked={rememberMe}
-            disabled={passkeyPending}
-            onCheckedChange={(checked) => onRememberMeChange(checked === true)}
-          />
-          <FieldLabel htmlFor="remember-me-passkey" className="font-normal">
-            Recordarme
-          </FieldLabel>
-        </Field>
-
-        <InstitutionalPasskeyPrompt
-          pending={passkeyPending}
-          verifying={passkeyVerifying}
-          supported={webauthnSupported === true}
-          onContinue={() => void handlePasskeyLogin()}
-          onCancel={handleCancelCeremony}
-          onUsePassword={handleUsePassword}
-        />
-      </div>
-    </div>
-  );
+  return {
+    pending: passkeyPending,
+    verifying: passkeyVerifying,
+    login: handlePasskeyLogin,
+    cancel: handleCancelCeremony,
+  };
 }

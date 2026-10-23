@@ -8,6 +8,7 @@ import { consumeInstitutionalLoginFlashes } from "@features/institutional-auth/a
 import { institutionalCredentialsLogin } from "@features/institutional-auth/actions/institutional-credentials-login.action";
 import type { InstitutionalInstitution } from "@features/institutional-auth/components/institution-picker";
 import { useInstitutionalBrand } from "@features/institutional-auth/components/institutional-brand-context";
+import { useInstitutionalPasskeyLogin } from "@features/institutional-auth/hooks/use-institutional-passkey-login";
 import type { InstitutionalCredentialsLoginState } from "@features/institutional-auth/types/institutional-credentials-login-state.types";
 
 export function useInstitutionalLogin({ emailVerified = false, passwordChanged = false }: { emailVerified?: boolean; passwordChanged?: boolean }) {
@@ -95,6 +96,7 @@ export function useInstitutionalLogin({ emailVerified = false, passwordChanged =
     }
 
     if (value?.id !== institution?.id) {
+      passkey.cancel();
       invalidateInput({ institution: value });
 
       return;
@@ -103,23 +105,16 @@ export function useInstitutionalLogin({ emailVerified = false, passwordChanged =
     setIdentity((current) => ({ ...current, institution: value }));
   }
 
-  function changeMethod(value: "PASSWORD" | "PASSKEY"): void {
-    if (pendingRef.current) {
-      return;
-    }
-
-    invalidateInput({ method: value });
-  }
-
   function submitPassword(event: SyntheticEvent<HTMLFormElement>): void {
     event.preventDefault();
 
-    if (method !== "PASSWORD" || pendingRef.current || passwordPending) {
+    if (pendingRef.current || passwordPending || passkey.pending) {
       return;
     }
 
     const formData = new FormData(event.currentTarget);
 
+    setIdentity((current) => ({ ...current, method: "PASSWORD" }));
     setPending(true);
     startTransition(() => passwordAction({ formData, revision }));
   }
@@ -136,25 +131,36 @@ export function useInstitutionalLogin({ emailVerified = false, passwordChanged =
     setIdentity((current) => ({ ...current, rememberMe: value }));
   }
 
+  const passkey = useInstitutionalPasskeyLogin({
+    input: { institutionId: activeInstitution?.id ?? "" },
+    rememberMe,
+    onPendingChange: setPending,
+    onError: setError,
+    onFieldErrors: setPasskeyFieldErrors,
+  });
+
+  function loginWithPasskey(): void {
+    if (pendingRef.current || passwordPending) {
+      return;
+    }
+
+    setIdentity((current) => ({ ...current, method: "PASSKEY" }));
+    void passkey.login();
+  }
+
   return {
     institution,
     documentNumber,
-    method,
-    revision,
     rememberMe,
     status,
     notices,
     fieldErrors,
     showNotice,
-    activeInstitution,
     changeDocument,
     changeInstitution,
-    changeMethod,
     submitPassword,
     setRememberMe,
-    setPending,
-    setError,
-    setPasskeyFieldErrors,
-    isCurrentIdentity: () => revisionRef.current === revision,
+    passkey,
+    loginWithPasskey,
   };
 }

@@ -1,20 +1,23 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import { beginInstitutionalPasskeyLogin } from "@features/institutional-auth/actions/begin-passkey-login.action";
 import { finishPasskeyLogin } from "@features/institutional-auth/actions/finish-passkey-login.action";
-import { identifyInstitutionalUser } from "@features/institutional-auth/actions/identify-institutional-user.action";
 import { InstitutionalLoginForm } from "@features/institutional-auth/components/institutional-login-form";
 import { INSTITUTIONAL_AUTH_ERROR_MESSAGES } from "@features/institutional-auth/constants/error-messages.constants";
 
 jest.mock("@features/institutional-auth/components/institution-picker", () => ({
   InstitutionPicker: ({ onValueChange }: { onValueChange: (value: string, item: { id: string; name: string }) => void }) => (
-    <input aria-label="Institución" onChange={(event) => onValueChange("inst-1", { id: "inst-1", name: event.target.value })} />
+    <input
+      aria-label="Institución"
+      onChange={(event) =>
+        onValueChange(event.target.value === "Otra" ? "inst-2" : "inst-1", {
+          id: event.target.value === "Otra" ? "inst-2" : "inst-1",
+          name: event.target.value,
+        })
+      }
+    />
   ),
-}));
-
-jest.mock("@features/institutional-auth/actions/identify-institutional-user.action", () => ({
-  identifyInstitutionalUser: jest.fn(),
 }));
 
 jest.mock("@features/institutional-auth/actions/institutional-credentials-login.action", () => ({
@@ -33,13 +36,11 @@ jest.mock("@features/institutional-auth/actions/consume-institutional-login-flas
   consumeInstitutionalLoginFlashes: jest.fn(),
 }));
 
-const identifyMock = jest.mocked(identifyInstitutionalUser);
 const beginMock = jest.mocked(beginInstitutionalPasskeyLogin);
 const finishMock = jest.mocked(finishPasskeyLogin);
 
 describe("InstitutionalLoginForm", () => {
   beforeEach(() => {
-    identifyMock.mockReset().mockResolvedValue({});
     beginMock.mockReset();
     finishMock.mockReset();
   });
@@ -65,10 +66,9 @@ describe("InstitutionalLoginForm", () => {
       return { promise, resolve, reject };
     }
 
-    async function goToPasskeyStep() {
+    async function prepareLogin(documentNumber = "12345678") {
       const user = userEvent.setup();
       beginMock.mockResolvedValue({
-        loginAttemptId: "attempt-9",
         ceremonyId: "ceremony-9",
         options: validOptions,
       });
@@ -85,23 +85,83 @@ describe("InstitutionalLoginForm", () => {
       const view = render(<InstitutionalLoginForm />);
 
       await user.type(screen.getByLabelText("Institución"), "Boero");
-      await user.type(screen.getByLabelText(/Documento/), "12345678");
-      await user.click(screen.getByRole("button", { name: "Usar una llave de acceso" }));
-      await screen.findByRole("heading", { name: "Ingresá con tu llave de acceso" });
+
+      if (documentNumber) {
+        await user.type(screen.getByLabelText(/Documento/), documentNumber);
+      }
 
       return view;
     }
 
     function passkeyButton(): HTMLElement {
-      return screen.getByRole("button", { name: /^Continuar$/ });
+      return screen.getByRole("button", { name: "Usar una llave de acceso" });
     }
 
     beforeEach(() => {
       getMock.mockReset();
     });
 
+    it.each(["", "1", "12345678"])("uses discoverable login independently of document %j and password", async (documentNumber) => {
+      await prepareLogin(documentNumber);
+      fireEvent.change(screen.getByLabelText(/Contraseña/), { target: { value: "unrelated-password" } });
+      beginMock.mockResolvedValueOnce({ ceremonyId: "discoverable", options: validOptions });
+      getMock.mockResolvedValueOnce(fakeCredential);
+      fireEvent.click(screen.getByLabelText("Recordarme"));
+      fireEvent.click(passkeyButton());
+
+      await waitFor(() =>
+        expect(finishMock).toHaveBeenCalledWith({
+          ceremonyId: "discoverable",
+          credentialJson: JSON.stringify(fakeCredential.toJSON()),
+          rememberMe: true,
+        }),
+      );
+      expect(beginMock).toHaveBeenCalledWith({ institutionId: "inst-1" });
+      expect(getMock.mock.calls[0][0].publicKey.allowCredentials).toEqual([]);
+    });
+
+    it("does not open a stale browser prompt when the institution changes during preparation", async () => {
+      await prepareLogin();
+      const begin = deferred<Awaited<ReturnType<typeof beginInstitutionalPasskeyLogin>>>();
+      beginMock.mockReturnValueOnce(begin.promise);
+      fireEvent.click(passkeyButton());
+      expect(beginMock).toHaveBeenCalledTimes(1);
+
+      fireEvent.change(screen.getByLabelText("Institución"), { target: { value: "Otra" } });
+      await act(async () => {
+        begin.resolve({ ceremonyId: "stale", options: validOptions });
+        await begin.promise;
+      });
+
+      expect(getMock).not.toHaveBeenCalled();
+      expect(finishMock).not.toHaveBeenCalled();
+      expect(passkeyButton()).toBeEnabled();
+    });
+
+    it("shows an inline error when the browser does not support passkeys", async () => {
+      await prepareLogin();
+      Object.defineProperty(window, "PublicKeyCredential", { value: undefined, configurable: true });
+      fireEvent.click(passkeyButton());
+
+      expect(await screen.findByText(INSTITUTIONAL_AUTH_ERROR_MESSAGES.PASSKEY_UNSUPPORTED)).toBeInTheDocument();
+      expect(beginMock).not.toHaveBeenCalled();
+      expect(screen.getByLabelText(/Contraseña/)).toBeInTheDocument();
+    });
+
+    it("keeps field validation on the same form and allows correction", async () => {
+      await prepareLogin();
+      beginMock.mockResolvedValueOnce({ fieldErrors: { institutionId: "Seleccioná una institución." } });
+      fireEvent.click(passkeyButton());
+
+      expect(await screen.findByText("Seleccioná una institución.")).toBeInTheDocument();
+      expect(getMock).not.toHaveBeenCalled();
+      fireEvent.change(screen.getByLabelText("Institución"), { target: { value: "Otra" } });
+      expect(screen.queryByText("Seleccioná una institución.")).not.toBeInTheDocument();
+      expect(passkeyButton()).toBeEnabled();
+    });
+
     it("ignores a second click while a ceremony is in flight", async () => {
-      await goToPasskeyStep();
+      await prepareLogin();
       getMock.mockReturnValue(new Promise(() => {}));
       const button = passkeyButton();
 
@@ -112,22 +172,22 @@ describe("InstitutionalLoginForm", () => {
         expect(beginMock).toHaveBeenCalledTimes(1);
         expect(beginMock).toHaveBeenCalledWith({
           institutionId: "inst-1",
-          institutionName: "Boero",
-          documentNumber: "12345678",
         });
         expect(getMock).toHaveBeenCalledTimes(1);
+        expect(screen.getByLabelText(/Contraseña/)).toBeInTheDocument();
+        expect(screen.queryByRole("button", { name: "Continuar" })).not.toBeInTheDocument();
       });
     });
 
     it("ignores a stale rejection after a newer ceremony completed", async () => {
-      await goToPasskeyStep();
+      await prepareLogin();
       const first = deferred<unknown>();
       getMock.mockReturnValueOnce(first.promise);
       fireEvent.click(passkeyButton());
       await waitFor(() => expect(getMock).toHaveBeenCalled());
 
       fireEvent.click(screen.getByRole("button", { name: "Cancelar" }));
-      expect(await screen.findByRole("button", { name: /^Continuar$/ })).toBeInTheDocument();
+      expect(await screen.findByRole("button", { name: "Usar una llave de acceso" })).toBeInTheDocument();
 
       getMock.mockResolvedValueOnce(fakeCredential);
       finishMock.mockResolvedValueOnce({ error: "second-error" });
@@ -144,7 +204,7 @@ describe("InstitutionalLoginForm", () => {
       ["NotAllowedError", new DOMException("cancelled", "NotAllowedError")],
       ["AbortError", new DOMException("aborted", "AbortError")],
     ])("stays silent on %s without leaving a spinner", async (_, error) => {
-      await goToPasskeyStep();
+      await prepareLogin();
       getMock.mockRejectedValueOnce(error);
 
       fireEvent.click(passkeyButton());
@@ -156,7 +216,7 @@ describe("InstitutionalLoginForm", () => {
     });
 
     it("allows switching to password after cancelling the pending ceremony", async () => {
-      await goToPasskeyStep();
+      await prepareLogin();
       getMock.mockReturnValue(new Promise(() => {}));
       fireEvent.click(passkeyButton());
       await waitFor(() => expect(getMock).toHaveBeenCalled());
@@ -165,29 +225,42 @@ describe("InstitutionalLoginForm", () => {
       expect(signal).toBeInstanceOf(AbortSignal);
 
       fireEvent.click(screen.getByRole("button", { name: "Cancelar" }));
-      fireEvent.click(screen.getByRole("button", { name: "Usar contraseña" }));
 
       expect(signal?.aborted).toBe(true);
       expect(await screen.findByLabelText(/Contraseña/)).toBeInTheDocument();
-      expect(screen.queryByRole("button", { name: /^Continuar$/ })).not.toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: "Continuar" })).not.toBeInTheDocument();
     });
 
-    it("aborts the pending ceremony when changing account", async () => {
-      await goToPasskeyStep();
+    it("does not cancel or filter the ceremony when the document is edited", async () => {
+      await prepareLogin();
+      getMock.mockReturnValue(new Promise(() => {}));
+      fireEvent.click(passkeyButton());
+      await waitFor(() => expect(getMock).toHaveBeenCalled());
+      const signal = getMock.mock.calls[0][0].signal as AbortSignal;
+
+      fireEvent.change(screen.getByLabelText(/Documento/), { target: { value: "87654321" } });
+
+      expect(signal.aborted).toBe(false);
+      expect(beginMock).toHaveBeenCalledTimes(1);
+      expect(beginMock).toHaveBeenCalledWith({ institutionId: "inst-1" });
+    });
+
+    it("aborts the pending ceremony when changing institution", async () => {
+      await prepareLogin();
       getMock.mockReturnValue(new Promise(() => {}));
       fireEvent.click(passkeyButton());
       await waitFor(() => expect(getMock).toHaveBeenCalled());
 
       const signal = getMock.mock.calls[0][0].signal as AbortSignal | undefined;
 
-      fireEvent.change(screen.getByLabelText(/Documento/), { target: { value: "87654321" } });
+      fireEvent.change(screen.getByLabelText("Institución"), { target: { value: "Otra" } });
 
       expect(signal?.aborted).toBe(true);
       expect(await screen.findByLabelText(/Documento/)).toBeInTheDocument();
     });
 
     it("aborts the pending ceremony on unmount", async () => {
-      const boundScreen = await goToPasskeyStep();
+      const boundScreen = await prepareLogin();
       getMock.mockReturnValue(new Promise(() => {}));
       fireEvent.click(passkeyButton());
       await waitFor(() => expect(getMock).toHaveBeenCalled());
@@ -201,7 +274,7 @@ describe("InstitutionalLoginForm", () => {
     });
 
     it("shows no error flash on a successful ceremony", async () => {
-      await goToPasskeyStep();
+      await prepareLogin();
       getMock.mockResolvedValue(fakeCredential);
       finishMock.mockResolvedValue({});
 
@@ -212,7 +285,7 @@ describe("InstitutionalLoginForm", () => {
     });
 
     it("swallows NEXT_REDIRECT without flashing a passkey error", async () => {
-      await goToPasskeyStep();
+      await prepareLogin();
       getMock.mockResolvedValue(fakeCredential);
       const redirectError = Object.assign(new Error("NEXT_REDIRECT"), {
         digest: "NEXT_REDIRECT;push;/;307;",

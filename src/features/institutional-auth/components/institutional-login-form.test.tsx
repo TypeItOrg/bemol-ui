@@ -34,7 +34,9 @@ const institution = {
 describe("InstitutionalLoginForm", () => {
   beforeEach(() => {
     credentialsMock.mockReset().mockResolvedValue({});
-    beginMock.mockReset();
+    beginMock.mockReset().mockResolvedValue({ error: "No se pudo usar la llave." });
+    Object.defineProperty(window, "PublicKeyCredential", { value: function () {}, configurable: true });
+    Object.defineProperty(navigator, "credentials", { value: { get: jest.fn(), create: jest.fn() }, configurable: true });
   });
 
   it("mentions the fixed institution in bold when the login is scoped to a subdomain", () => {
@@ -91,18 +93,24 @@ describe("InstitutionalLoginForm", () => {
     expect(beginMock).not.toHaveBeenCalled();
   });
 
-  it("switches to passkeys without automatically opening WebAuthn", async () => {
+  it("starts passkey login from the first click without replacing the form", async () => {
     const user = userEvent.setup();
-    render(<InstitutionalLoginForm />);
+    render(
+      <InstitutionalBrandProvider institution={institution}>
+        <InstitutionalLoginForm />
+      </InstitutionalBrandProvider>,
+    );
 
     await user.type(screen.getByLabelText(/Documento/), "12345678");
+    await user.type(screen.getByLabelText(/Contraseña/), "kept-password");
     await user.click(screen.getByRole("button", { name: "Usar una llave de acceso" }));
 
-    expect(await screen.findByRole("heading", { name: "Ingresá con tu llave de acceso" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Usar contraseña" })).toBeInTheDocument();
-    expect(screen.queryByLabelText(/Contraseña/)).not.toBeInTheDocument();
-    expect(screen.getByLabelText(/Documento/)).toBeEnabled();
-    expect(beginMock).not.toHaveBeenCalled();
+    expect(await screen.findByText("No se pudo usar la llave.")).toBeInTheDocument();
+    expect(beginMock).toHaveBeenCalledTimes(1);
+    expect(beginMock).toHaveBeenCalledWith({ institutionId: institution.id });
+    expect(screen.getByLabelText(/Contraseña/)).toHaveValue("kept-password");
+    expect(screen.getByLabelText(/Documento/)).toHaveValue("12345678");
+    expect(screen.queryByRole("button", { name: "Continuar" })).not.toBeInTheDocument();
   });
 
   it("drops the previous password error when changing the account document", async () => {
@@ -122,22 +130,18 @@ describe("InstitutionalLoginForm", () => {
     expect(screen.getByLabelText(/Contraseña/)).toBeInTheDocument();
   });
 
-  it("allows switching from passkey to password and back without re-entering the identifier", async () => {
+  it("allows password login after a failed passkey without re-entering credentials", async () => {
     const user = userEvent.setup();
     render(<InstitutionalLoginForm />);
 
     await user.type(screen.getByLabelText(/Documento/), "12345678");
+    await user.type(screen.getByLabelText(/Contraseña/), "kept-password");
     await user.click(screen.getByRole("button", { name: "Usar una llave de acceso" }));
-    await screen.findByRole("heading", { name: "Ingresá con tu llave de acceso" });
-    await user.click(screen.getByRole("button", { name: "Usar contraseña" }));
+    await screen.findByText("No se pudo usar la llave.");
+    await user.click(screen.getByRole("button", { name: "Iniciar sesión" }));
 
-    expect(await screen.findByLabelText(/Contraseña/)).toBeInTheDocument();
+    expect(credentialsMock).toHaveBeenCalledTimes(1);
+    expect(credentialsMock.mock.calls[0][1].get("password")).toBe("kept-password");
     expect(screen.getByLabelText(/Documento/)).toHaveValue("12345678");
-    await user.click(screen.getByRole("button", { name: "Usar una llave de acceso" }));
-
-    expect(await screen.findByRole("heading", { name: "Ingresá con tu llave de acceso" })).toBeInTheDocument();
-    expect(screen.getByLabelText(/Documento/)).toHaveValue("12345678");
-    expect(credentialsMock).not.toHaveBeenCalled();
-    expect(beginMock).not.toHaveBeenCalled();
   });
 });

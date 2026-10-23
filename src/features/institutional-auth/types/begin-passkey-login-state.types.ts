@@ -4,7 +4,5 @@ export type BeginPasskeyLoginState = {
   error?: string;
   ceremonyId?: string;
   options?: PasskeyRequestOptionsJson;
-  loginAttemptId?: string;
-  emailVerificationRequired?: boolean;
-  fieldErrors?: Partial<Record<"institutionId" | "documentNumber", string>>;
+  fieldErrors?: Partial<Record<"institutionId", string>>;
 };

@@ -11,7 +11,6 @@ import { InstitutionalAuthDescription } from "@features/institutional-auth/compo
 import { InstitutionalAuthInstitutionField } from "@features/institutional-auth/components/institutional-auth-institution-field";
 import { InstitutionalAuthStepHeader } from "@features/institutional-auth/components/institutional-auth-step-header";
 import { InstitutionalLoginFeedback } from "@features/institutional-auth/components/institutional-login-feedback";
-import { InstitutionalPasskeyStep } from "@features/institutional-auth/components/institutional-passkey-step";
 import { InstitutionalPasswordLoginFields } from "@features/institutional-auth/components/institutional-password-login-fields";
 import { useInstitutionalLogin } from "@features/institutional-auth/hooks/use-institutional-login";
 
@@ -21,23 +20,17 @@ export function InstitutionalLoginForm(props: InstitutionalLoginFormProps): Reac
   const {
     institution,
     documentNumber,
-    method,
-    revision,
     rememberMe,
     status,
     notices,
     fieldErrors,
     showNotice,
-    activeInstitution,
     changeDocument,
     changeInstitution,
-    changeMethod,
     submitPassword,
     setRememberMe,
-    setPending,
-    setError,
-    setPasskeyFieldErrors,
-    isCurrentIdentity,
+    passkey,
+    loginWithPasskey,
   } = useInstitutionalLogin(props);
 
   return (
@@ -81,31 +74,14 @@ export function InstitutionalLoginForm(props: InstitutionalLoginFormProps): Reac
           />
           <FieldError errors={fieldErrors?.documentNumber ? [{ message: fieldErrors.documentNumber }] : undefined} />
         </Field>
-        {method === "PASSWORD" ? (
-          <InstitutionalPasswordLoginFields
-            fieldErrors={fieldErrors}
-            status={status}
-            rememberMe={rememberMe}
-            onRememberMeChange={setRememberMe}
-            changeMethod={changeMethod}
-          />
-        ) : (
-          <InstitutionalPasskeyStep
-            key={revision}
-            isCurrentIdentity={() => isCurrentIdentity()}
-            input={{
-              institutionId: activeInstitution?.id ?? "",
-              institutionName: activeInstitution?.name,
-              documentNumber,
-            }}
-            rememberMe={rememberMe}
-            onRememberMeChange={setRememberMe}
-            onPendingChange={setPending}
-            onError={setError}
-            onFieldErrors={setPasskeyFieldErrors}
-            onUsePassword={() => changeMethod("PASSWORD")}
-          />
-        )}
+        <InstitutionalPasswordLoginFields
+          fieldErrors={fieldErrors}
+          status={status}
+          rememberMe={rememberMe}
+          onRememberMeChange={setRememberMe}
+          passkey={passkey}
+          onPasskeyLogin={loginWithPasskey}
+        />
         <p className="text-muted-foreground text-center text-sm">
           ¿No tenés una cuenta?{" "}
           <Link className="text-primary font-medium underline underline-offset-4" href="/auth/register">

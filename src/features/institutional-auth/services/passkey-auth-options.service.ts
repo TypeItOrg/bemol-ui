@@ -7,20 +7,10 @@ import type { PasskeyRequestOptionsJson } from "@features/institutional-auth/typ
 export type PasskeyAuthOptionsOutput =
   { success: true; data: { ceremonyId: string; options: PasskeyRequestOptionsJson } } | { success: false; error: BackendError };
 
-export async function requestPasskeyAuthOptions(loginAttemptId: string): Promise<PasskeyAuthOptionsOutput> {
-  return requestOptions("/api/v1/auth/passkeys/authentication/options", { loginAttemptId });
-}
-
 export async function requestDiscoverablePasskeyAuthOptions(institutionId: string): Promise<PasskeyAuthOptionsOutput> {
-  return requestOptions("/api/v1/auth/passkeys/authentication/discoverable/options", {
-    institutionId,
-  });
-}
-
-async function requestOptions(path: string, input: { loginAttemptId: string } | { institutionId: string }): Promise<PasskeyAuthOptionsOutput> {
   try {
-    const response = await publicApiFetch(path, {
-      body: JSON.stringify(input),
+    const response = await publicApiFetch("/api/v1/auth/passkeys/authentication/discoverable/options", {
+      body: JSON.stringify({ institutionId }),
       cache: "no-store",
       headers: { "Content-Type": "application/json" },
       method: "POST",
