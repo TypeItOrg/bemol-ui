@@ -9,7 +9,8 @@ type BrandInstitution = {
   logoUrl: string | null;
 };
 
-export const BEMOL_FAVICON_ICONS: BrandIcons = {
+export const BEMOL_FAVICON_ICONS = {
+  apple: [{ url: "/brand/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
   icon: [
     {
       url: "/brand/favicon.svg",
@@ -24,7 +25,7 @@ export const BEMOL_FAVICON_ICONS: BrandIcons = {
       media: "(prefers-color-scheme: dark)",
     },
   ],
-};
+} satisfies BrandIcons;
 
 export function getBrandFaviconIcons(institution?: BrandInstitution | null): BrandIcons {
   const institutionLogoUrl = institution ? getInstitutionLogoUrl(institution.id, institution.logoUrl) : null;
@@ -34,6 +35,7 @@ export function getBrandFaviconIcons(institution?: BrandInstitution | null): Bra
   }
 
   return {
+    apple: BEMOL_FAVICON_ICONS.apple,
     icon: [
       {
         url: institutionLogoUrl,

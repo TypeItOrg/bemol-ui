@@ -45,12 +45,21 @@ export async function generateMetadata(): Promise<Metadata> {
       default: brandName,
     },
     description: "Plataforma de gestión para instituciones educativas",
+    manifest: institution ? "/manifest.webmanifest" : null,
+    appleWebApp: institution
+      ? {
+          capable: true,
+          title: "Bemol",
+          statusBarStyle: "default",
+        }
+      : false,
     icons: getBrandFaviconIcons(institution),
   };
 }
 
 export const viewport: Viewport = {
   viewportFit: "cover",
+  themeColor: "#faf9f6",
 };
 
 export default function RootLayout({

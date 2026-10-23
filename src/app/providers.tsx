@@ -5,6 +5,7 @@ import { useState, type ReactElement, type ReactNode } from "react";
 import { MutationCache, QueryCache, QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
 
+import { PwaRuntime } from "@common/components/pwa-runtime";
 import { Toaster } from "@common/components/ui/sonner";
 import { isHttpResponseError } from "@common/utils/http-response-error.util";
 
@@ -61,6 +62,7 @@ export function Providers({ children }: { children: ReactNode }): ReactElement {
       scriptProps={{ type: typeof window === "undefined" ? "text/javascript" : "text/plain" }}
     >
       <QueryClientProvider client={queryClient}>
+        <PwaRuntime />
         {children}
         <Toaster />
       </QueryClientProvider>
