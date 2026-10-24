@@ -10,6 +10,9 @@ import type { MonthlyInstitutionRegistration } from "@features/platform-dashboar
 import { formatDashboardMonth } from "@features/platform-dashboard/utils/dashboard-month.util";
 
 const chartConfig = {
+  institution: {
+    label: "Institución",
+  },
   count: {
     label: "Instituciones",
     color: "var(--primary)",
@@ -23,6 +26,7 @@ type InstitutionRegistrationChartProps = {
 export function InstitutionRegistrationChart({ registrations }: InstitutionRegistrationChartProps): ReactElement {
   const chartData = registrations.map((registration) => ({
     ...registration,
+    category: registration.count === 1 ? "institution" : "count",
     label: formatDashboardMonth(registration, "short"),
     fullLabel: formatDashboardMonth(registration, "long"),
   }));
@@ -35,7 +39,7 @@ export function InstitutionRegistrationChart({ registrations }: InstitutionRegis
         <YAxis allowDecimals={false} tickLine={false} axisLine={false} width={40} />
         <ChartTooltip
           cursor={false}
-          content={<ChartTooltipContent labelFormatter={(_value, payload) => payload[0]?.payload.fullLabel} indicator="line" />}
+          content={<ChartTooltipContent labelFormatter={(_value, payload) => payload[0]?.payload.fullLabel} nameKey="category" indicator="line" />}
         />
         <Bar dataKey="count" fill="var(--color-count)" radius={[6, 6, 2, 2]} />
       </BarChart>

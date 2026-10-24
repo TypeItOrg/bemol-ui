@@ -11,22 +11,20 @@ const numberFormatter = new Intl.NumberFormat("es-AR");
 type SummaryCardProps = {
   label: string;
   value: number;
-  description: string;
   icon: LucideIcon;
 };
 
-function SummaryCard({ label, value, description, icon: Icon }: SummaryCardProps): ReactElement {
+function SummaryCard({ label, value, icon: Icon }: SummaryCardProps): ReactElement {
   return (
-    <Card className="bg-background p-5 sm:p-6">
+    <Card className="bg-background p-5 shadow-xs ring-0 sm:p-6">
       <CardHeader className="p-0">
         <CardTitle>{label}</CardTitle>
         <CardAction className="bg-muted flex size-9 items-center justify-center rounded-lg">
           <Icon className="text-muted-foreground size-4" aria-hidden="true" />
         </CardAction>
       </CardHeader>
-      <CardContent className="flex flex-col gap-1 p-0">
+      <CardContent className="mt-auto p-0">
         <p className="text-4xl font-bold tracking-tight tabular-nums">{numberFormatter.format(value)}</p>
-        <p className="text-muted-foreground text-xs">{description}</p>
       </CardContent>
     </Card>
   );
@@ -37,25 +35,21 @@ export function PlatformDashboardSummary({ summary }: { summary: PlatformDashboa
     {
       label: "Instituciones",
       value: summary.institutions,
-      description: "Registradas en la plataforma",
       icon: Building2Icon,
     },
     {
       label: "Instituciones activas",
       value: summary.activeInstitutions,
-      description: "Habilitadas para operar en la plataforma",
       icon: BuildingIcon,
     },
     {
       label: "Personas",
       value: summary.people,
-      description: "Registros institucionales vigentes",
       icon: UsersIcon,
     },
     {
       label: "Usuarios con acceso",
       value: summary.usersWithAccess,
-      description: "Cuentas habilitadas para ingresar",
       icon: KeyRoundIcon,
     },
   ];

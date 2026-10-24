@@ -6,23 +6,23 @@ import { Label, Pie, PieChart } from "recharts";
 
 import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@common/components/ui/chart";
 
-const chartConfig = {
-  active: {
-    label: "Activas",
-    color: "var(--primary)",
-  },
-  inactive: {
-    label: "Inactivas",
-    color: "var(--muted-foreground)",
-  },
-} satisfies ChartConfig;
-
 type InstitutionStatusChartProps = {
   active: number;
   inactive: number;
 };
 
 export function InstitutionStatusChart({ active, inactive }: InstitutionStatusChartProps): ReactElement {
+  const chartConfig = {
+    active: {
+      label: active === 1 ? "Activa" : "Activas",
+      color: "var(--primary)",
+    },
+    inactive: {
+      label: inactive === 1 ? "Inactiva" : "Inactivas",
+      color: "var(--muted-foreground)",
+    },
+  } satisfies ChartConfig;
+
   const total = active + inactive;
 
   const activePercentage = Math.round((active / total) * 100);

@@ -8,19 +8,18 @@ export function PlatformDashboardSkeleton(): ReactElement {
     <div className="flex flex-col gap-4" aria-label="Cargando resumen de la plataforma" role="status">
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {Array.from({ length: 4 }, (_, index) => (
-          <Card key={index} className="p-5 sm:p-6">
+          <Card key={index} className="bg-background p-5 shadow-xs ring-0 sm:p-6">
             <CardHeader className="p-0">
               <Skeleton className="h-4 w-32" />
             </CardHeader>
-            <CardContent className="flex flex-col gap-2 p-0">
+            <CardContent className="mt-auto p-0">
               <Skeleton className="h-9 w-20" />
-              <Skeleton className="h-3 w-40 max-w-full" />
             </CardContent>
           </Card>
         ))}
       </div>
       <div className="grid gap-4 lg:grid-cols-3">
-        <Card className="p-5 sm:p-6 lg:col-span-2">
+        <Card className="bg-background p-5 shadow-xs ring-0 sm:p-6 lg:col-span-2">
           <CardHeader className="flex flex-col gap-2 p-0">
             <Skeleton className="h-4 w-40" />
             <Skeleton className="h-3 w-64 max-w-full" />
@@ -29,7 +28,7 @@ export function PlatformDashboardSkeleton(): ReactElement {
             <Skeleton className="h-72 w-full" />
           </CardContent>
         </Card>
-        <Card className="p-5 sm:p-6">
+        <Card className="bg-background p-5 shadow-xs ring-0 sm:p-6">
           <CardHeader className="flex flex-col gap-2 p-0">
             <Skeleton className="h-4 w-36" />
             <Skeleton className="h-3 w-48 max-w-full" />
@@ -39,7 +38,7 @@ export function PlatformDashboardSkeleton(): ReactElement {
           </CardContent>
         </Card>
       </div>
-      <Card className="p-5 sm:p-6">
+      <Card className="bg-background p-5 shadow-xs ring-0 sm:p-6">
         <CardHeader className="flex flex-col gap-2 p-0">
           <Skeleton className="h-4 w-40" />
           <Skeleton className="h-3 w-72 max-w-full" />

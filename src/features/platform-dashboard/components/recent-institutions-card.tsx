@@ -4,9 +4,9 @@ import Link from "next/link";
 
 import { Building2Icon, BuildingIcon, MapPinIcon } from "lucide-react";
 
+import { SectionHeader } from "@common/components/section-header";
 import { Badge } from "@common/components/ui/badge";
-import { Button } from "@common/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@common/components/ui/card";
+import { Card, CardContent, CardHeader } from "@common/components/ui/card";
 import { Separator } from "@common/components/ui/separator";
 
 import { DashboardEmptyState } from "@features/platform-dashboard/components/dashboard-empty-state";
@@ -15,17 +15,14 @@ import { formatDashboardDate } from "@features/platform-dashboard/utils/dashboar
 
 export function RecentInstitutionsCard({ institutions }: { institutions: RecentInstitution[] }): ReactElement {
   return (
-    <Card className="bg-background p-5 sm:p-6">
-      <CardHeader className="flex items-center justify-between gap-4 p-0">
-        <div className="flex min-w-0 flex-col gap-1">
-          <CardTitle>Instituciones recientes</CardTitle>
-          <CardDescription className="truncate">Las últimas instituciones incorporadas a la plataforma.</CardDescription>
-        </div>
-        <div className="shrink-0 self-end">
-          <Button asChild size="lg">
-            <Link href="/admin/institutions">Ver todas</Link>
-          </Button>
-        </div>
+    <Card className="bg-background p-5 shadow-xs ring-0 sm:p-6">
+      <CardHeader className="p-0">
+        <SectionHeader
+          icon={Building2Icon}
+          descriptionBreakpoint="sm"
+          title="Instituciones recientes"
+          description="Las últimas instituciones incorporadas a la plataforma."
+        />
       </CardHeader>
       <CardContent className="p-0">
         {institutions.length === 0 ? (

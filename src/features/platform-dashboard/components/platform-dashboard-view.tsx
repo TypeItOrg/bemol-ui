@@ -1,8 +1,9 @@
 import type { ReactElement } from "react";
 
-import { BuildingIcon, CalendarPlusIcon } from "lucide-react";
+import { BuildingIcon, CalendarPlusIcon, ChartPieIcon } from "lucide-react";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@common/components/ui/card";
+import { SectionHeader } from "@common/components/section-header";
+import { Card, CardContent, CardHeader } from "@common/components/ui/card";
 import { cn } from "@common/utils/cn.util";
 
 import { DashboardEmptyState } from "@features/platform-dashboard/components/dashboard-empty-state";
@@ -27,10 +28,14 @@ export function PlatformDashboardView({ dashboard }: PlatformDashboardViewProps)
       <PlatformDashboardSummary summary={dashboard.summary} />
 
       <div className="grid min-w-0 gap-4 lg:grid-cols-3">
-        <Card className="bg-background min-w-0 p-5 sm:p-6 lg:col-span-2">
+        <Card className="bg-background min-w-0 p-5 shadow-xs ring-0 sm:p-6 lg:col-span-2">
           <CardHeader className="p-0">
-            <CardTitle>Altas de instituciones</CardTitle>
-            <CardDescription>Instituciones creadas durante los últimos 12 meses.</CardDescription>
+            <SectionHeader
+              icon={CalendarPlusIcon}
+              title="Altas de instituciones"
+              description="Instituciones creadas durante los últimos 12 meses."
+              descriptionBreakpoint="sm"
+            />
           </CardHeader>
           <CardContent className="min-w-0 p-0">
             {hasRegistrations ? (
@@ -55,10 +60,14 @@ export function PlatformDashboardView({ dashboard }: PlatformDashboardViewProps)
 
 function InstitutionStatusCard({ summary }: { summary: PlatformDashboardSummaryData }): ReactElement {
   return (
-    <Card className="bg-background p-5 sm:p-6">
+    <Card className="bg-background p-5 shadow-xs ring-0 sm:p-6">
       <CardHeader className="p-0">
-        <CardTitle>Estado institucional</CardTitle>
-        <CardDescription>Disponibilidad actual de las instituciones.</CardDescription>
+        <SectionHeader
+          icon={ChartPieIcon}
+          title="Estado institucional"
+          description="Disponibilidad actual de las instituciones."
+          descriptionBreakpoint="sm"
+        />
       </CardHeader>
       <CardContent className="flex flex-1 flex-col justify-center p-0">
         {summary.institutions === 0 ? (

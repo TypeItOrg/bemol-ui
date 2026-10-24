@@ -147,7 +147,7 @@ function EmptyPeoplePreview({ institutionId }: { institutionId: string }): React
 function UsersPreviewHeader(): ReactElement {
   return (
     <div className="flex items-stretch justify-between gap-4">
-      <SectionHeader icon={UsersIcon} title="Usuarios" description="Personas con acceso a la institución." />
+      <SectionHeader icon={UsersIcon} title="Usuarios" description="Personas con acceso a la institución." descriptionBreakpoint="sm" />
     </div>
   );
 }
