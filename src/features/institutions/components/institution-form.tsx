@@ -1,6 +1,6 @@
 "use client";
 
-import { startTransition, useActionState, useMemo, useState, type ChangeEvent, type ReactElement } from "react";
+import { startTransition, useActionState, useMemo, useState, type ReactElement } from "react";
 
 import { useRouter } from "next/navigation";
 
@@ -33,7 +33,6 @@ import type { InstitutionLogoChange } from "@features/institutions/types/institu
 import { createInstitutionFormData } from "@features/institutions/utils/institution-form-data.util";
 import { getDefaultValues, getInitialLocation, setActionFieldErrors } from "@features/institutions/utils/institution-form.util";
 import { appendInstitutionLogoChange } from "@features/institutions/utils/institution-logo-form.util";
-import { createInstitutionSlug } from "@features/institutions/utils/institution-slug.util";
 
 const INSTITUTIONS_PATH = "/admin/institutions";
 
@@ -52,8 +51,6 @@ export function InstitutionForm({ mode, institution, returnTo, baseDomain = "" }
 
   const [publicSubdomain, setPublicSubdomain] = useState(institution?.publicSubdomain ?? "");
 
-  const [isSlugTouched, setIsSlugTouched] = useState(false);
-
   const [active, setActive] = useState(() => institution?.active ?? true);
 
   const initialLocation = useMemo(() => getInitialLocation(institution), [institution]);
@@ -63,7 +60,6 @@ export function InstitutionForm({ mode, institution, returnTo, baseDomain = "" }
   const {
     register,
     handleSubmit,
-    setValue,
     setError,
     clearErrors,
     control,
@@ -72,10 +68,6 @@ export function InstitutionForm({ mode, institution, returnTo, baseDomain = "" }
     resolver: zodResolver(institutionFormSchema),
     defaultValues,
   });
-
-  const nameField = register("name");
-
-  const slugField = register("slug");
 
   const [state, formAction, isPending] = useActionState<InstitutionActionState, FormData>(async (_previous, formData) => {
     const request = isEdit ? updateInstitutionAction(institution.id, formData) : createInstitutionAction(formData);
@@ -101,22 +93,6 @@ export function InstitutionForm({ mode, institution, returnTo, baseDomain = "" }
 
     return result;
   }, {});
-
-  function handleNameChange(event: ChangeEvent<HTMLInputElement>): void {
-    nameField.onChange(event);
-
-    if (!isSlugTouched) {
-      setValue("slug", createInstitutionSlug(event.target.value), {
-        shouldDirty: true,
-        shouldValidate: true,
-      });
-    }
-  }
-
-  function handleSlugChange(event: ChangeEvent<HTMLInputElement>): void {
-    setIsSlugTouched(true);
-    slugField.onChange(event);
-  }
 
   function onSubmit(values: InstitutionFormValues): void {
     if (errors.root?.logo?.type === "client") {
@@ -154,14 +130,7 @@ export function InstitutionForm({ mode, institution, returnTo, baseDomain = "" }
       <fieldset disabled={isPending} className="flex min-h-0 min-w-0 flex-1 flex-col gap-4 overflow-y-auto pb-4">
         {errorAlert}
 
-        <InstitutionGeneralFields
-          defaultValues={defaultValues}
-          errors={errors}
-          nameField={nameField}
-          onNameChange={handleNameChange}
-          onSlugChange={handleSlugChange}
-          slugField={slugField}
-        />
+        <InstitutionGeneralFields defaultValues={defaultValues} errors={errors} register={register} />
 
         {isEdit ? (
           <>

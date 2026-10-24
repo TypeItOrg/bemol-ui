@@ -12,7 +12,6 @@ export type InitialLocation = ComponentProps<typeof LocationPicker>["initialLoca
 
 export const EMPTY_FORM_VALUES: InstitutionFormInput = {
   name: "",
-  slug: "",
   cityId: "",
   street: "",
   number: "",
@@ -29,7 +28,6 @@ export function getDefaultValues(institution: Institution | undefined): Institut
 
   return {
     name: institution.name,
-    slug: institution.slug,
     cityId: institution.city.cityId,
     street: institution.street ?? "",
     number: institution.number ?? "",

@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 
+import { INVALID_ACTION_ARGUMENTS } from "@common/utils/action-argument.util";
 import { getResponseErrorActionState, getValidationActionState } from "@common/utils/action-state.util";
 
 import { INSTITUTION_ERROR_MESSAGES } from "@features/institutions/constants/error-messages.constants";
@@ -11,9 +12,14 @@ import { INSTITUTION_FORM_FIELD_NAMES } from "@features/institutions/types/insti
 import { platformApiFetch } from "@features/platform-auth/services/platform-api-fetch.service";
 
 export async function createInstitutionAction(formData: FormData): Promise<InstitutionActionState> {
+  const rawActive = formData.get("active");
+
+  if (rawActive !== "true" && rawActive !== "false") {
+    return { error: INVALID_ACTION_ARGUMENTS };
+  }
+
   const payload = {
     name: formData.get("name"),
-    slug: formData.get("slug"),
     cityId: formData.get("cityId"),
     street: formData.get("street"),
     number: formData.get("number"),
@@ -34,7 +40,7 @@ export async function createInstitutionAction(formData: FormData): Promise<Insti
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify(parsed.data),
+    body: JSON.stringify({ ...parsed.data, active: rawActive === "true" }),
   });
 
   const errorState = await getResponseErrorActionState(response, INSTITUTION_FORM_FIELD_NAMES, INSTITUTION_ERROR_MESSAGES.CREATE_INSTITUTION);

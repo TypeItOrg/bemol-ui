@@ -1,18 +1,18 @@
 import { getFieldErrors, pickFieldErrors } from "@common/utils/form-field-errors.util";
 
 describe("form field errors", () => {
-  const fields = ["name", "slug"] as const;
+  const fields = ["name", "email"] as const;
 
   it("picks only recognized errors with a message", () => {
     expect(
       pickFieldErrors(
         {
-          slug: "Ya existe una institución con ese slug.",
+          email: "Ya existe una cuenta con ese email.",
           ignored: "Error desconocido",
         },
         fields,
       ),
-    ).toEqual({ slug: "Ya existe una institución con ese slug." });
+    ).toEqual({ email: "Ya existe una cuenta con ese email." });
   });
 
   it("does not add undefined entries when field errors are absent", () => {

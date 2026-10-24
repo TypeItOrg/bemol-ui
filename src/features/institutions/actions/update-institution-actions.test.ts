@@ -33,7 +33,6 @@ function form() {
   for (const [key, value] of Object.entries({
     ...EXPECTED_PROFILE,
     name: " Boero ",
-    slug: "boero",
     active: "false",
     publicSubdomain: "cboero",
     logoIntent: "keep",
@@ -69,7 +68,7 @@ beforeEach(() => {
 });
 
 describe("platform institution update", () => {
-  it.each(["cboero", ""])("keeps public name '%s' independent from the slug in the complete multipart payload", async (publicName) => {
+  it.each(["cboero", ""])("keeps public name '%s' in the complete multipart payload", async (publicName) => {
     const data = form();
     data.set("publicSubdomain", publicName);
 
@@ -85,7 +84,7 @@ describe("platform institution update", () => {
     const payload = body.get("data") as Blob;
     expect(payload.type).toBe("application/json");
     expect(JSON.parse(await payload.text())).toEqual({
-      institution: { ...EXPECTED_PROFILE, slug: "boero", active: false },
+      institution: { ...EXPECTED_PROFILE, active: false },
       publicSubdomain: publicName || null,
       logoIntent: "KEEP",
     });

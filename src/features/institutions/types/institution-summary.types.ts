@@ -3,7 +3,6 @@ import type { InstitutionSummaryCountry } from "@features/institutions/types/ins
 export type InstitutionSummary = {
   id: string;
   name: string;
-  slug: string;
   country: InstitutionSummaryCountry;
   city: string;
   province: string;

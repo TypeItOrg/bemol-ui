@@ -2,7 +2,6 @@ import { institutionFormSchema } from "@features/institutions/schemas/institutio
 
 const VALID_REQUIRED_FIELDS = {
   name: "Conservatorio Felipe Boero",
-  slug: "felipe-boero",
   cityId: "019e18e4-cee5-74a1-9a6d-54cc0be88405",
 };
 
@@ -21,7 +20,7 @@ describe("institutionFormSchema", () => {
     expect(result.success).toBe(true);
   });
 
-  it.each(["name", "slug", "cityId"] as const)("requires %s", (field) => {
+  it.each(["name", "cityId"] as const)("requires %s", (field) => {
     const result = institutionFormSchema.safeParse({
       ...VALID_REQUIRED_FIELDS,
       [field]: "",

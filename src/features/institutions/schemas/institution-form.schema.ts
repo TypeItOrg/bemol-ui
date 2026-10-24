@@ -4,11 +4,6 @@ import { INSTITUTION_ERROR_MESSAGES } from "@features/institutions/constants/err
 
 export const institutionFormSchema = z.object({
   name: z.string().trim().min(1, INSTITUTION_ERROR_MESSAGES.REQUIRED_NAME).max(255, INSTITUTION_ERROR_MESSAGES.NAME_MAX_LENGTH),
-  slug: z
-    .string()
-    .min(1, INSTITUTION_ERROR_MESSAGES.REQUIRED_SLUG)
-    .max(100, INSTITUTION_ERROR_MESSAGES.SLUG_MAX_LENGTH)
-    .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, INSTITUTION_ERROR_MESSAGES.INVALID_SLUG),
   cityId: z.uuid(INSTITUTION_ERROR_MESSAGES.REQUIRED_CITY),
   street: z.string(),
   number: z.string().max(50, INSTITUTION_ERROR_MESSAGES.NUMBER_MAX_LENGTH).regex(/^\d*$/, INSTITUTION_ERROR_MESSAGES.INVALID_NUMBER),

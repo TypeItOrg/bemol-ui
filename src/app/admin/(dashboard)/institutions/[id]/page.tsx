@@ -87,10 +87,6 @@ export default async function InstitutionDetailPage({ params, searchParams }: In
               </dd>
             </div>
             <div>
-              <dt className={DETAIL_LABEL_CLASS_NAME}>Slug</dt>
-              <dd className="text-foreground mt-1.5 font-mono text-sm">@{institution.slug}</dd>
-            </div>
-            <div>
               <dt className={DETAIL_LABEL_CLASS_NAME}>Ubicación</dt>
               <dd className="text-foreground mt-1.5 text-sm font-medium">
                 {institution.city.name}, {institution.province.name}

@@ -15,7 +15,7 @@ export const OPERATION_FIELD_LABELS: Readonly<Record<string, string>> = {
   reviewStatus: "Revisión",
   versionStatus: "Estado del adjunto",
   requirementCount: "Requisitos solicitados",
-  slug: "Nombre en la dirección web",
+  slug: "Slug histórico",
   cityName: "Ciudad",
   institutionName: "Institución",
   active: "Estado",

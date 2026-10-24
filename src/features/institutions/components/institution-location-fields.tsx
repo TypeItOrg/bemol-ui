@@ -1,7 +1,9 @@
 import type { ComponentProps, ReactElement } from "react";
 
+import { MapPinIcon } from "lucide-react";
 import { Controller, type Control, type FieldErrors, type UseFormRegister } from "react-hook-form";
 
+import { SectionHeader } from "@common/components/section-header";
 import { Field, FieldContent, FieldError, FieldGroup, FieldLabel } from "@common/components/ui/field";
 import { Input } from "@common/components/ui/input";
 import { NumericInput } from "@common/components/ui/restricted-input";
@@ -27,7 +29,10 @@ export function InstitutionLocationFields({
 }: InstitutionLocationFieldsProps): ReactElement {
   return (
     <div className="bg-muted/25 flex grow flex-col rounded-xl border p-5 md:p-6">
-      <div className="flex grow flex-col gap-4">
+      <header className="-mx-5 border-b px-5 pb-5 md:-mx-6 md:px-6">
+        <SectionHeader icon={MapPinIcon} title="Ubicación" description="Localización y dirección de la institución." descriptionBreakpoint="sm" />
+      </header>
+      <div className="mt-5 flex grow flex-col gap-4">
         <Controller
           control={control}
           name="cityId"

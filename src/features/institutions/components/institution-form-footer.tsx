@@ -18,7 +18,6 @@ export function InstitutionFormFooter({
   isPending: boolean;
   errors: FieldErrors<{
     name: string;
-    slug: string;
     cityId: string;
     street: string;
     number: string;

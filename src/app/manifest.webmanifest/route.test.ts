@@ -40,19 +40,19 @@ it("offers the platform app on the generic host without an institution lookup", 
 });
 
 it("resolves successive institutions independently using the actual host and relative resources", async () => {
-  for (const [slug, name] of [
+  for (const [publicSubdomain, name] of [
     ["cboero", "Conservatorio Superior de Música Boero"],
     ["otra", "Otra institución"],
   ]) {
     fetchMock.mockResolvedValueOnce(
       Response.json({
         id: "22222222-2222-4222-8222-222222222222",
-        publicSubdomain: slug,
+        publicSubdomain: publicSubdomain,
         name,
         logoUrl: null,
       }),
     );
-    const response = await GET(request(`${slug}.example.test`));
+    const response = await GET(request(`${publicSubdomain}.example.test`));
     const manifest = await response.json();
     expect(response.status).toBe(200);
     expect(response.headers.get("cache-control")).toBe("no-store");
@@ -62,8 +62,8 @@ it("resolves successive institutions independently using the actual host and rel
       { src: "/brand/pwa-512.png?v=2", sizes: "512x512", type: "image/png", purpose: "any" },
       { src: "/brand/pwa-maskable-512.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
     ]);
-    expect(fetchMock.mock.lastCall[0].pathname).toBe(`/api/v1/institutions/by-subdomain/${slug}`);
-    expect(fetchMock.mock.lastCall[1]).toMatchObject({ cache: "no-store", headers: { "X-Institutional-Host": `${slug}.example.test` } });
+    expect(fetchMock.mock.lastCall[0].pathname).toBe(`/api/v1/institutions/by-subdomain/${publicSubdomain}`);
+    expect(fetchMock.mock.lastCall[1]).toMatchObject({ cache: "no-store", headers: { "X-Institutional-Host": `${publicSubdomain}.example.test` } });
   }
 });
 

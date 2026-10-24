@@ -26,7 +26,6 @@ export async function updateInstitutionAction(id: string, formData: FormData): P
 
   const payload = {
     name: formData.get("name"),
-    slug: formData.get("slug"),
     cityId: formData.get("cityId"),
     street: formData.get("street"),
     number: formData.get("number"),
