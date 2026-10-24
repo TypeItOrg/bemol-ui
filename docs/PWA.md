@@ -8,10 +8,10 @@ buscar «Instalar aplicación» o «Agregar a pantalla de inicio» según el nav
 En iPhone, usar Compartir → Agregar a pantalla de inicio. La disponibilidad y el
 texto exacto dependen del navegador y del sistema operativo; no hay promoción propia.
 
-| Origen                       | Nombre instalado | Nombre corto | Inicio   |
-| ---------------------------- | ---------------- | ------------ | -------- |
-| Subdominio institucional     | Bemol            | Bemol        | `/`      |
-| Dominio general, área /admin | Bemol            | Bemol        | `/admin` |
+| Origen                       | Nombre instalado       | Nombre corto           | Inicio   |
+| ---------------------------- | ---------------------- | ---------------------- | -------- |
+| Subdominio institucional     | Bemol                  | Bemol                  | `/`      |
+| Dominio general, área /admin | Bemol - Administración | Bemol - Administración | `/admin` |
 
 El dominio general fuera de `/admin` no publica el enlace al manifiesto ni declara
 modo de aplicación Apple. La PWA de plataforma se declara desde el layout común de
@@ -19,9 +19,11 @@ modo de aplicación Apple. La PWA de plataforma se declara desde el layout comú
 Esto controla dónde ofrecemos nuestra PWA, no las opciones propias del navegador:
 algunos permiten instalar cualquier web o crear accesos directos aun sin manifiesto.
 
-El nombre instalado es siempre Bemol, sin el nombre institucional largo. La institución
-sigue visible en las pantallas y los títulos web existentes. Las instalaciones de
-instituciones diferentes siguen separadas por origen aunque compartan nombre e ícono.
+El nombre completo y corto de administración son «Bemol - Administración», incluido
+el nombre Apple. Las institucionales usan «Bemol» en ambos, sin el nombre institucional
+largo. La institución sigue visible en las pantallas y los títulos web existentes.
+Las instalaciones de instituciones diferentes siguen separadas por origen aunque
+compartan nombre e ícono. El dispositivo puede recortar visualmente el nombre.
 
 El manifiesto se resuelve desde el Host real y no se comparte entre instituciones.
 El dominio general instala la aplicación de plataforma desde `/admin`; el login

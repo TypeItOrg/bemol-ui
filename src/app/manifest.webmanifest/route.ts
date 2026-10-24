@@ -7,10 +7,12 @@ export async function GET(request: Request): Promise<Response> {
   try {
     const institution = await resolveRequestInstitution(request.headers);
 
+    const name = institution ? "Bemol" : "Bemol - Administración";
+
     const manifest: MetadataRoute.Manifest = {
       id: "/",
-      name: "Bemol",
-      short_name: "Bemol",
+      name,
+      short_name: name,
       description: "Plataforma de gestión para instituciones educativas",
       lang: "es",
       start_url: institution ? "/" : "/admin",

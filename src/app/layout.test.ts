@@ -17,7 +17,7 @@ it("declares the platform PWA only inside the admin layout, not on general insti
   expect(metadata.manifest).toBeNull();
   expect(metadata.appleWebApp).toBe(false);
   expect(adminMetadata.manifest).toBe("/manifest.webmanifest");
-  expect(adminMetadata.appleWebApp).toEqual({ capable: true, title: "Bemol", statusBarStyle: "default" });
+  expect(adminMetadata.appleWebApp).toEqual({ capable: true, title: "Bemol - Administración", statusBarStyle: "default" });
   expect(metadata.icons).toMatchObject({ apple: [{ url: "/brand/apple-touch-icon.png", sizes: "180x180", type: "image/png" }] });
   expect(viewport).toEqual({ viewportFit: "cover", themeColor: "#faf9f6" });
 });
