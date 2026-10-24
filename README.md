@@ -38,9 +38,3 @@
   consultar información académica y dar seguimiento a los distintos procesos institucionales,
   mejorando la organización y facilitando la gestión cotidiana.
 </p>
-
-## Aplicación instalable (PWA)
-
-La instalación es manual desde los subdominios institucionales o desde `/admin` en el
-dominio general, siempre con nombre Bemol. Requiere conexión y ofrece un aviso offline sin guardar
-datos de negocio. Ver [instalación, aceptación y rollback](docs/PWA.md).
