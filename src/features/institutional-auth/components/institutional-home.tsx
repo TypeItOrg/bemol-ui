@@ -82,14 +82,30 @@ async function InstitutionalHomeContent({ personId }: { personId?: string }): Pr
       <InstitutionalHomeHero greeting={greeting} name={user.name} institutionName={person?.institutionName} primaryRole={primaryRole} />
 
       <div className="flex flex-col gap-4 px-3 pb-3 md:px-4 md:pb-4">
+        {personalLinks.length > 0 ? (
+          <HomeSubsection
+            id="personal-space-title"
+            title="Mi espacio"
+            description="Gestioná tus inscripciones, las personas a tu cargo y tu cuenta."
+            icon={UserRoundIcon}
+          >
+            <nav aria-label="Herramientas personales" className="[&>a]:bg-background grid gap-4">
+              {personalLinks.map((link) => (
+                <HomeAccessRow key={link.href} link={link} />
+              ))}
+            </nav>
+          </HomeSubsection>
+        ) : null}
+
         {managementLinks.length > 0 ? (
           <HomeSubsection
             id="institutional-management-title"
             title="Gestión institucional"
             description="Administrá la información, las personas y los accesos de la institución."
             icon={Building2Icon}
+            imageSrc="/images/institutional-management.webp"
           >
-            <nav aria-label="Gestión institucional" className="grid gap-3 @2xl/home-content:grid-cols-2">
+            <nav aria-label="Gestión institucional" className="[&>a]:bg-background grid gap-4">
               {managementLinks.map((link) => (
                 <HomeAccessRow key={link.href} link={link} />
               ))}
@@ -103,12 +119,15 @@ async function InstitutionalHomeContent({ personId }: { personId?: string }): Pr
             title="Área académica"
             description="Consultá la oferta y organizá los ciclos lectivos y cursos."
             icon={GraduationCapIcon}
+            imageSrc="/images/academic-management.webp"
+            imageSide="right"
           >
             <AcademicResourceLinks
               basePath=""
               resources={operationalResources}
               leadingContent={academicOfferLink ? <HomeAccessRow link={academicOfferLink} /> : undefined}
-              className="@2xl/home-content:grid-cols-2"
+              prominent
+              className="[&>a]:bg-background"
             />
           </HomeSubsection>
         ) : null}
@@ -119,8 +138,10 @@ async function InstitutionalHomeContent({ personId }: { personId?: string }): Pr
             title="Configuración académica"
             description="Definí la estructura curricular y los recursos de la institución."
             icon={Settings2Icon}
+            imageSrc="/images/academic-management.webp"
+            imageSide="right"
           >
-            <AcademicResourceLinks basePath="" resources={configurationResources} className="@2xl/home-content:grid-cols-2" />
+            <AcademicResourceLinks basePath="" resources={configurationResources} prominent className="[&>a]:bg-background" />
           </HomeSubsection>
         ) : null}
 
@@ -130,8 +151,9 @@ async function InstitutionalHomeContent({ personId }: { personId?: string }): Pr
             title="Inscripciones y cursadas"
             description="Revisá las solicitudes de inscripción y gestioná las cursadas de la institución."
             icon={ClipboardListIcon}
+            imageSrc="/images/institutional-management.webp"
           >
-            <nav aria-label="Inscripciones y cursadas" className="grid gap-3 @2xl/home-content:grid-cols-2">
+            <nav aria-label="Inscripciones y cursadas" className="[&>a]:bg-background grid gap-4">
               {institutionalEnrollmentLinks.map((link) => (
                 <HomeAccessRow key={link.href} link={link} />
               ))}
@@ -140,24 +162,16 @@ async function InstitutionalHomeContent({ personId }: { personId?: string }): Pr
         ) : null}
 
         {formationLinks.length > 0 ? (
-          <HomeSubsection id="formation-title" title="Formación" description="Accedé a tus clases, materias y horarios." icon={BookOpenIcon}>
-            <nav aria-label="Formación" className="grid gap-3 @2xl/home-content:grid-cols-2">
-              {formationLinks.map((link) => (
-                <HomeAccessRow key={link.href} link={link} />
-              ))}
-            </nav>
-          </HomeSubsection>
-        ) : null}
-
-        {personalLinks.length > 0 ? (
           <HomeSubsection
-            id="personal-space-title"
-            title="Mi espacio"
-            description="Gestioná tus inscripciones, las personas a tu cargo y tu cuenta."
-            icon={UserRoundIcon}
+            id="formation-title"
+            title="Formación"
+            description="Seguí tu recorrido académico en la institución."
+            icon={BookOpenIcon}
+            imageSrc="/images/academic-management.webp"
+            imageSide="right"
           >
-            <nav aria-label="Herramientas personales" className="grid gap-3 @2xl/home-content:grid-cols-2">
-              {personalLinks.map((link) => (
+            <nav aria-label="Formación" className="[&>a]:bg-background grid gap-4">
+              {formationLinks.map((link) => (
                 <HomeAccessRow key={link.href} link={link} />
               ))}
             </nav>
