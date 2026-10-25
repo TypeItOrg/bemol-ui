@@ -49,7 +49,9 @@ describe("InstitutionalLoginForm", () => {
     const institutionName = screen.getByText(institution.name);
 
     expect(institutionName.tagName).toBe("STRONG");
-    expect(institutionName.closest("p")).toHaveTextContent("Ingresá a Conservatorio Boero con tu contraseña o una llave de acceso.");
+    expect(institutionName.closest("p")).toHaveTextContent(
+      "Ingresá al portal institucional del Conservatorio Boero con tu contraseña o una llave de acceso.",
+    );
   });
 
   it("shows credentials and an explicit passkey option on the initial step", () => {

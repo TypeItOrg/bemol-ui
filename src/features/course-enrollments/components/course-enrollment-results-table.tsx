@@ -30,7 +30,7 @@ export function CourseEnrollmentResultsTable({
   setMutation,
 }: CourseEnrollmentResultsTableProps): ReactElement {
   return (
-    <Table className="min-w-192">
+    <Table stickyActions={showActionsColumn} className="min-w-192">
       <CourseEnrollmentTableHeader showActionsColumn={showActionsColumn} />
       <TableBody>
         {data.items.map((enrollment) => {

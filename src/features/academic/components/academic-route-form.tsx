@@ -37,7 +37,13 @@ export async function renderPrimaryForm(input: RouteFormInput): Promise<ReactEle
   const config = ACADEMIC_COLLECTION_CONFIG[input.resource];
 
   return (
-    <AcademicShell title={config.createLabel} breadcrumb={input.breadcrumb} minViewportHeight actions={<AcademicPageIcon icon={config.createIcon} />}>
+    <AcademicShell
+      backHref={returnTo}
+      title={config.createLabel}
+      breadcrumb={input.breadcrumb}
+      minViewportHeight
+      actions={<AcademicPageIcon icon={config.createIcon} />}
+    >
       <AcademicResourceForm
         scope={input.scope}
         institutionId={input.institutionId}

@@ -23,6 +23,7 @@ export default async function NewPlatformPersonPage({
 
   return (
     <PlatformPageShell
+      backHref={destination}
       title="Nuevo usuario"
       minViewportHeight
       breadcrumb={<PlatformBreadcrumb />}

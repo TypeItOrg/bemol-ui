@@ -41,7 +41,7 @@ export function InstitutionalLoginForm(props: InstitutionalLoginFormProps): Reac
         description={
           <InstitutionalAuthDescription
             generic="Ingresá con tu contraseña o una llave de acceso."
-            before="Ingresá a "
+            before="Ingresá al portal institucional del "
             after=" con tu contraseña o una llave de acceso."
           />
         }

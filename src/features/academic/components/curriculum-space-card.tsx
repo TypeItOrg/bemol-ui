@@ -32,7 +32,7 @@ export function CurriculumSpaceCard({ canEditCurriculum, institutionId, planPath
       </Link>
       {canEditCurriculum ? (
         <CardFooter className="justify-end gap-2">
-          <Button asChild size="sm" variant="ghost">
+          <Button asChild size="lg" variant="ghost">
             <ReturnToLink href={`${spacePath}/edit`} returnTo={planPath}>
               Editar
             </ReturnToLink>
@@ -44,7 +44,7 @@ export function CurriculumSpaceCard({ canEditCurriculum, institutionId, planPath
             label={`el espacio “${space.academicSpaceName}”`}
             resource={AcademicResource.STUDY_PLAN_SPACE}
             scope={scope}
-            size="sm"
+            size="lg"
           />
         </CardFooter>
       ) : null}

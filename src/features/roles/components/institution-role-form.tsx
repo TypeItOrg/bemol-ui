@@ -31,6 +31,8 @@ type InstitutionRoleFormProps = {
 const initialState: RoleFormState = {};
 
 export function InstitutionRoleForm({ institutionId, role, permissionGroups, returnTo }: InstitutionRoleFormProps): ReactElement {
+  const isEdit = Boolean(role);
+
   const destination = returnTo ?? (role ? `/roles/${role.id}` : "/roles");
 
   const action = saveInstitutionRoleAction.bind(null, institutionId, role?.id, destination);
@@ -38,6 +40,10 @@ export function InstitutionRoleForm({ institutionId, role, permissionGroups, ret
   const [state, formAction, pending] = useActionState(action, initialState);
 
   const formRef = useActionFormErrorFocus(state, pending);
+
+  const actionLabel = isEdit ? "Guardar cambios" : "Crear rol";
+
+  const pendingLabel = isEdit ? "Guardando…" : "Creando…";
 
   return (
     <ActionForm ref={formRef} action={formAction} className="flex flex-col gap-4">
@@ -94,7 +100,7 @@ export function InstitutionRoleForm({ institutionId, role, permissionGroups, ret
           <Link href={destination}>Cancelar</Link>
         </Button>
         <Button type="submit" size="lg" disabled={pending} className="flex-1 sm:flex-none">
-          {pending ? "Guardando…" : "Guardar cambios"}
+          {pending ? pendingLabel : actionLabel}
         </Button>
       </div>
     </ActionForm>

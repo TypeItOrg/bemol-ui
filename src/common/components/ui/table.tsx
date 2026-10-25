@@ -8,16 +8,22 @@ import { cn } from "@common/utils/cn.util";
 
 type TableProps = ComponentProps<"table"> & {
   containerClassName?: string;
+  stickyActions?: boolean;
 };
 
-function Table({ className, containerClassName, ...props }: TableProps) {
+function Table({ className, containerClassName, stickyActions = false, ...props }: TableProps) {
   return (
     <ScrollAreaPrimitive.Root type="auto" data-slot="table-container" className={cn("relative w-full overflow-hidden", containerClassName)}>
       <ScrollAreaPrimitive.Viewport
         tabIndex={0}
         className="focus-visible:outline-ring w-full focus-visible:outline-2 focus-visible:-outline-offset-2"
       >
-        <table data-slot="table" className={cn("w-full caption-bottom text-sm", className)} {...props} />
+        <table
+          data-slot="table"
+          data-sticky-actions={stickyActions || undefined}
+          className={cn("w-full caption-bottom text-sm", className)}
+          {...props}
+        />
       </ScrollAreaPrimitive.Viewport>
       <ScrollAreaPrimitive.Scrollbar
         data-slot="table-scrollbar"

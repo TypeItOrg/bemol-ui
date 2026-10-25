@@ -144,6 +144,7 @@ export async function renderPrimaryDetail(input: RouteDetailInput): Promise<Reac
 
     return (
       <AcademicShell
+        backHref={returnTo}
         title={`Editar ${config.singular}`}
         breadcrumb={breadcrumb}
         headerClassName="flex-row items-center justify-between"

@@ -1,10 +1,6 @@
 import type { ReactElement, ReactNode } from "react";
 
-import Link from "next/link";
-
-import { ArrowLeftIcon, type LucideIcon } from "lucide-react";
-
-import { Button } from "@common/components/ui/button";
+import type { LucideIcon } from "lucide-react";
 
 import { PlatformPageIcon } from "@features/platform-auth/components/platform-page-icon";
 import { PlatformPageShell } from "@features/platform-auth/components/platform-page-shell";
@@ -30,13 +26,12 @@ export function AcademicShell({
   headerClassName,
   minViewportHeight,
 }: AcademicShellProps): ReactElement {
-  const headerActions = actions ?? getBackAction(backHref);
-
   return (
     <PlatformPageShell
       title={title}
       breadcrumb={breadcrumb}
-      actions={headerActions}
+      actions={actions}
+      backHref={backHref}
       actionsClassName={actionsClassName}
       headerClassName={headerClassName}
       minViewportHeight={minViewportHeight}
@@ -48,21 +43,6 @@ export function AcademicShell({
 
 export function AcademicPageIcon({ icon: Icon }: { icon: LucideIcon }): ReactElement {
   return <PlatformPageIcon icon={Icon} />;
-}
-
-function getBackAction(backHref: string | undefined): ReactNode {
-  if (!backHref) {
-    return undefined;
-  }
-
-  return (
-    <Button asChild variant="outline" size="lg">
-      <Link href={backHref}>
-        <ArrowLeftIcon />
-        Volver
-      </Link>
-    </Button>
-  );
 }
 
 export function AcademicAccessDenied({ breadcrumb }: { breadcrumb: ReactNode }): ReactElement {

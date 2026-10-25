@@ -186,8 +186,8 @@ describe("InstitutionalLoginForm", () => {
       fireEvent.click(passkeyButton());
       await waitFor(() => expect(getMock).toHaveBeenCalled());
 
-      fireEvent.click(screen.getByRole("button", { name: "Cancelar" }));
-      expect(await screen.findByRole("button", { name: "Usar una llave de acceso" })).toBeInTheDocument();
+      fireEvent.change(screen.getByLabelText("Institución"), { target: { value: "Otra" } });
+      expect(passkeyButton()).toBeEnabled();
 
       getMock.mockResolvedValueOnce(fakeCredential);
       finishMock.mockResolvedValueOnce({ error: "second-error" });
@@ -215,20 +215,24 @@ describe("InstitutionalLoginForm", () => {
       expect(passkeyButton()).toBeEnabled();
     });
 
-    it("allows switching to password after cancelling the pending ceremony", async () => {
+    it("restores password login after cancelling in the browser without an app cancel button", async () => {
       await prepareLogin();
-      getMock.mockReturnValue(new Promise(() => {}));
+      const assertion = deferred<unknown>();
+      getMock.mockReturnValueOnce(assertion.promise);
       fireEvent.click(passkeyButton());
       await waitFor(() => expect(getMock).toHaveBeenCalled());
 
-      const signal = getMock.mock.calls[0][0].signal as AbortSignal | undefined;
-      expect(signal).toBeInstanceOf(AbortSignal);
+      expect(screen.queryByRole("button", { name: "Cancelar" })).not.toBeInTheDocument();
+      expect(screen.getByLabelText(/Contraseña/)).toBeDisabled();
 
-      fireEvent.click(screen.getByRole("button", { name: "Cancelar" }));
+      await act(async () => {
+        assertion.reject(new DOMException("cancelled", "NotAllowedError"));
+      });
 
-      expect(signal?.aborted).toBe(true);
-      expect(await screen.findByLabelText(/Contraseña/)).toBeInTheDocument();
-      expect(screen.queryByRole("button", { name: "Continuar" })).not.toBeInTheDocument();
+      expect(screen.getByLabelText(/Contraseña/)).toBeEnabled();
+      expect(screen.getByRole("button", { name: "Iniciar sesión" })).toBeEnabled();
+      expect(passkeyButton()).toBeEnabled();
+      expect(screen.queryByText("¡Ups! Algo salió mal")).not.toBeInTheDocument();
     });
 
     it("does not cancel or filter the ceremony when the document is edited", async () => {

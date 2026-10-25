@@ -28,6 +28,7 @@ type BaseFormProps = {
 export function NewLevel(props: BaseFormProps): ReactElement {
   return (
     <AcademicShell
+      backHref={props.planPath}
       title="Nuevo nivel"
       breadcrumb={props.breadcrumb}
       minViewportHeight
@@ -49,6 +50,7 @@ export function NewLevel(props: BaseFormProps): ReactElement {
 export function EditLevel(props: BaseFormProps & { level: AcademicLevel }): ReactElement {
   return (
     <AcademicShell
+      backHref={props.planPath}
       title="Editar nivel"
       breadcrumb={props.breadcrumb}
       headerClassName="flex-row items-center justify-between"
@@ -71,6 +73,7 @@ export function EditLevel(props: BaseFormProps & { level: AcademicLevel }): Reac
 export function NewPlanSpace(props: BaseFormProps & { levels: AcademicLevel[] }): ReactElement {
   return (
     <AcademicShell
+      backHref={props.planPath}
       title="Incorporar espacio"
       breadcrumb={props.breadcrumb}
       minViewportHeight
@@ -93,6 +96,7 @@ export function NewPlanSpace(props: BaseFormProps & { levels: AcademicLevel[] })
 export function EditPlanSpace(props: BaseFormProps & { levels: AcademicLevel[]; space: StudyPlanSpace; spacePath: string }): ReactElement {
   return (
     <AcademicShell
+      backHref={props.spacePath}
       title="Editar espacio"
       breadcrumb={props.breadcrumb}
       headerClassName="flex-row items-center justify-between"
@@ -131,6 +135,7 @@ export function NewPrerequisite(
 ): ReactElement {
   return (
     <AcademicShell
+      backHref={props.spacePath}
       title="Nueva correlatividad"
       breadcrumb={props.breadcrumb}
       minViewportHeight

@@ -46,6 +46,7 @@ export default async function EditInstitutionalInstitutionPage({ searchParams }:
 
   return (
     <PlatformPageShell
+      backHref={destination}
       title="Editar institución"
       breadcrumb={<InstitutionalBreadcrumb />}
       minViewportHeight

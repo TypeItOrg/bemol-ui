@@ -32,6 +32,7 @@ export default async function NewPlatformRolePage({
 
   return (
     <PlatformPageShell
+      backHref={destination}
       title="Nuevo rol"
       breadcrumb={<PlatformBreadcrumb />}
       headerClassName="flex-row items-center justify-between"

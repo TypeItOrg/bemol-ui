@@ -92,7 +92,7 @@ export function GuardianDependentsList({ data, institutionId, query }: GuardianD
           {data.items.length === 0 ? (
             <GuardianDependentsEmptyState hasFilters={isFiltered} />
           ) : (
-            <Table className="min-w-250">
+            <Table stickyActions className="min-w-250">
               <TableHeader className="bg-muted sticky top-0 z-10 [&_tr]:border-b">
                 <TableRow className="hover:bg-muted/50 h-11">
                   <TableHead className="w-16 pl-4">

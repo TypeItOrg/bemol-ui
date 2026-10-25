@@ -37,7 +37,7 @@ export function PlatformDashboardView({ dashboard }: PlatformDashboardViewProps)
               descriptionBreakpoint="sm"
             />
           </CardHeader>
-          <CardContent className="min-w-0 p-0">
+          <CardContent className="bg-muted/50 min-w-0 flex-1 rounded-lg p-4 sm:p-5">
             {hasRegistrations ? (
               <InstitutionRegistrationChart registrations={dashboard.institutionRegistrations} />
             ) : (
@@ -69,7 +69,7 @@ function InstitutionStatusCard({ summary }: { summary: PlatformDashboardSummaryD
           descriptionBreakpoint="sm"
         />
       </CardHeader>
-      <CardContent className="flex flex-1 flex-col justify-center p-0">
+      <CardContent className="bg-muted/50 flex flex-1 flex-col justify-center rounded-lg p-4 sm:p-5">
         {summary.institutions === 0 ? (
           <DashboardEmptyState
             icon={BuildingIcon}
@@ -98,7 +98,7 @@ type StatusValueProps = {
 
 function StatusValue({ label, value, variant }: StatusValueProps): ReactElement {
   return (
-    <div className="bg-muted/50 flex items-center gap-3 rounded-lg p-3">
+    <div className="bg-background flex items-center gap-3 rounded-lg p-3">
       <span className={cn("size-2.5 rounded-full", variant === "active" ? "bg-primary" : "bg-muted-foreground")} />
       <div className="flex min-w-0 flex-col gap-0.5">
         <span className="text-muted-foreground text-xs">{label}</span>

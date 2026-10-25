@@ -33,8 +33,12 @@ export function DocumentCatalogFormFooter({
   impact: { paths: number; drafts: number } | undefined;
   impactError: string;
 }): ReactElement {
+  const actionLabel = currentId ? "Guardar cambios" : "Crear documento";
+
+  const pendingLabel = currentId ? "Guardando…" : "Creando…";
+
   return (
-    <Footer className={isDialog ? "mt-0 shrink-0" : "bg-background relative z-10 flex flex-wrap justify-end gap-3 pt-3 md:sticky md:bottom-0"}>
+    <Footer className={isDialog ? "mt-0 shrink-0" : "flex flex-row flex-wrap items-center justify-end gap-3"}>
       <Button
         type="button"
         size="lg"
@@ -58,7 +62,7 @@ export function DocumentCatalogFormFooter({
         className={isDialog ? "h-11 w-full shrink-0 sm:h-9 sm:w-auto" : "flex-1 sm:flex-none"}
         disabled={disabled || !hasValidRequiredFields || (Boolean(currentId) && (!impact || Boolean(impactError)))}
       >
-        {pending ? "Guardando…" : "Guardar documento"}
+        {pending ? pendingLabel : actionLabel}
       </Button>
     </Footer>
   );

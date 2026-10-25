@@ -55,6 +55,7 @@ export async function StudyPlanRoute(props: StudyPlanRouteProps): Promise<ReactE
 
     return (
       <AcademicShell
+        backHref={returnTo}
         title="Nueva versión"
         breadcrumb={breadcrumb}
         minViewportHeight

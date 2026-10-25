@@ -42,7 +42,7 @@ export default async function ActivateAccount({ searchParams }: { searchParams: 
           <p className="text-muted-foreground text-sm">
             <InstitutionalAuthDescription
               generic="Solicitá una nueva invitación para activar tu cuenta."
-              before="Solicitá una nueva invitación para activar tu cuenta en "
+              before="Solicitá una nueva invitación para activar tu cuenta en el portal institucional del "
               after="."
             />
           </p>

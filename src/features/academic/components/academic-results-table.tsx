@@ -57,7 +57,7 @@ export function AcademicResultsTable({
     | AcademicResource.SHIFT;
 }): ReactElement {
   return (
-    <Table className={columns.detailLabels.length > 1 ? "min-w-220" : "min-w-180"}>
+    <Table stickyActions className={columns.detailLabels.length > 1 ? "min-w-220" : "min-w-180"}>
       <TableHeader className="bg-muted sticky top-0 z-10 [&_tr]:border-b">
         <TableRow>
           <TableHead className="w-16 pl-4">

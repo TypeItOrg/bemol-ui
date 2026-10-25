@@ -29,7 +29,7 @@ export function InstitutionFormFooter({
   isEdit: boolean;
 }): ReactElement {
   return (
-    <div className="border-border/40 flex flex-row flex-wrap items-center justify-end gap-3 border-t pt-5 pb-6">
+    <div className="flex flex-row flex-wrap items-center justify-end gap-3">
       <Button type="button" variant="outline" size="lg" className="flex-1 sm:flex-none" onClick={handleCancel} disabled={isPending}>
         Cancelar
       </Button>

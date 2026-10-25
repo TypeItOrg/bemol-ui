@@ -80,7 +80,7 @@ export function GuardianLinkRequests({
         {data.items.length === 0 ? (
           <EmptyRequests hasFilters={Boolean(query.search || query.status || query.hasDocumentation !== undefined)} />
         ) : (
-          <Table containerClassName="table-scrollbar" className="min-w-240">
+          <Table stickyActions containerClassName="table-scrollbar" className="min-w-240">
             <TableHeader className="bg-muted sticky top-0 z-10 [&_tr]:border-b">
               <TableRow className="hover:bg-muted/50 h-11">
                 <TableHead className="w-16 pl-4">

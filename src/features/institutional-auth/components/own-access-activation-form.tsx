@@ -27,7 +27,7 @@ export function OwnAccessActivationForm({ token }: { token: string }): ReactElem
           description={
             <InstitutionalAuthDescription
               generic="Tu cuenta está activa. Ya podés ingresar con tu documento y tu contraseña."
-              before="Tu cuenta de "
+              before="Tu cuenta del portal institucional del "
               after=" está activa. Ya podés ingresar con tu documento y tu contraseña."
             />
           }
@@ -47,7 +47,7 @@ export function OwnAccessActivationForm({ token }: { token: string }): ReactElem
         description={
           <InstitutionalAuthDescription
             generic="Configurá tu contraseña para acceder a tu perfil. El enlace vence en 24 horas."
-            before="Configurá tu contraseña para acceder a tu perfil de "
+            before="Configurá tu contraseña para acceder a tu perfil del portal institucional del "
             after=". El enlace vence en 24 horas."
           />
         }

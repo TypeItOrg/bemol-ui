@@ -54,7 +54,7 @@ export function EnrollmentApplicationStatusBadge({
 
   const statusLabel = getEnrollmentApplicationStatusLabel(status);
 
-  const statusClassName = cn(STATUS_CLASSNAMES[status], size === "lg" && "h-8 px-3 py-1.5");
+  const statusClassName = STATUS_CLASSNAMES[status];
 
   const CourseResolutionIcon = pendingCourses ? Clock3Icon : CircleCheckIcon;
 

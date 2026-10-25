@@ -253,6 +253,33 @@ input:is([data-slot="input"], [data-slot="input-group-control"]):is(:autofill, :
     var(--tw-shadow, 0 0 #0000);
 }
 
+@layer components {
+  [data-slot="table"][data-sticky-actions] {
+    background-color: var(--background);
+  }
+
+  [data-slot="table"][data-sticky-actions] > :is(thead, tbody, tfoot) > tr > :is(th, td):first-child:not([colspan]) {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    background-color: var(--background);
+    box-shadow: 1px 0 0 var(--border);
+  }
+
+  [data-slot="table"][data-sticky-actions] > thead > tr > th:first-child:not([colspan]) {
+    z-index: 2;
+    background-color: var(--muted);
+  }
+
+  [data-slot="table"][data-sticky-actions] > tbody > tr:is(:hover, :has([aria-expanded="true"])) > td:first-child:not([colspan]) {
+    background-color: color-mix(in oklab, var(--muted) 50%, var(--background));
+  }
+
+  [data-slot="table"][data-sticky-actions] > tbody > tr[data-state="selected"] > td:first-child:not([colspan]) {
+    background-color: var(--muted);
+  }
+}
+
 @layer utilities {
   .sidebar-navigation-collapse[data-animate="true"][data-state="open"] {
     animation: sidebarNavigationOpen 150ms ease-out;

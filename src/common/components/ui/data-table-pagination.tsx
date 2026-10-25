@@ -98,7 +98,7 @@ function PageSizeSelect({ compactLabel, disabled, label, options, size, onSizeCh
         <span className="hidden @2xl/table-pagination:inline">{label}</span>
       </p>
       <Select value={String(size)} onValueChange={onSizeChange} disabled={disabled}>
-        <SelectTrigger size="sm" className="w-20">
+        <SelectTrigger size="default" className="w-20">
           <SelectValue>{size}</SelectValue>
         </SelectTrigger>
         <SelectContent>
@@ -120,7 +120,7 @@ function PageNavigation({ canGoToNextPage, canGoToPreviousPage, isPending, page,
     <div className="flex gap-2">
       <Button
         variant="outline"
-        size="icon-sm"
+        size="icon-lg"
         className="hidden @2xl/table-pagination:inline-flex"
         aria-label="Ir a la primera página"
         onClick={() => onPageChange(0)}
@@ -130,7 +130,7 @@ function PageNavigation({ canGoToNextPage, canGoToPreviousPage, isPending, page,
       </Button>
       <Button
         variant="outline"
-        size="icon-sm"
+        size="icon-lg"
         aria-label="Ir a la página anterior"
         onClick={() => onPageChange(page - 1)}
         disabled={isPending || !canGoToPreviousPage}
@@ -139,7 +139,7 @@ function PageNavigation({ canGoToNextPage, canGoToPreviousPage, isPending, page,
       </Button>
       <Button
         variant="outline"
-        size="icon-sm"
+        size="icon-lg"
         aria-label="Ir a la página siguiente"
         onClick={() => onPageChange(page + 1)}
         disabled={isPending || !canGoToNextPage}
@@ -148,7 +148,7 @@ function PageNavigation({ canGoToNextPage, canGoToPreviousPage, isPending, page,
       </Button>
       <Button
         variant="outline"
-        size="icon-sm"
+        size="icon-lg"
         className="hidden @2xl/table-pagination:inline-flex"
         aria-label="Ir a la última página"
         onClick={() => onPageChange(totalPages - 1)}

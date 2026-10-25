@@ -24,7 +24,7 @@ export function PersonDeleteButton({
   personName,
   scope = PeopleScope.ADMIN,
   label = "Eliminar",
-  size,
+  size = "lg",
 }: PersonDeleteButtonProps): ReactElement {
   const router = useRouter();
 
@@ -33,8 +33,6 @@ export function PersonDeleteButton({
   function handleDeleted(): void {
     router.push(PeopleScope.isInstitutional(scope) ? "/people" : `/admin/institutions/${institutionId}/people`);
   }
-
-  const resolvedSize = size ?? (PeopleScope.isInstitutional(scope) ? "lg" : "default");
 
   return (
     <PersonDeleteDialog
@@ -46,7 +44,7 @@ export function PersonDeleteButton({
       onDeleted={handleDeleted}
       scope={scope}
       trigger={
-        <Button type="button" variant="destructive" size={resolvedSize}>
+        <Button type="button" variant="destructive" size={size}>
           {label}
         </Button>
       }

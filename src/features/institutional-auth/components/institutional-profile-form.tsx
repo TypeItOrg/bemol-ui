@@ -57,7 +57,7 @@ function InstitutionalProfileFormView({ person, returnTo = "/account" }: Institu
   const hasAddress = Boolean(addressCityId || addressStreet.trim());
 
   return (
-    <ActionForm action={formAction} className="flex h-full flex-1 flex-col gap-4">
+    <ActionForm action={formAction} className="flex flex-col gap-4">
       {error ? (
         <Alert variant="destructive">
           <CircleAlertIcon className="size-4" />
@@ -116,7 +116,7 @@ function InstitutionalProfileFormView({ person, returnTo = "/account" }: Institu
         onAddressStreetChange={setAddressStreet}
       />
 
-      <div className="mt-auto flex flex-row flex-wrap justify-end gap-3">
+      <div className="flex flex-row flex-wrap items-center justify-end gap-3">
         <Button asChild variant="outline" size="lg" className="flex-1 sm:flex-none">
           <Link href={returnTo}>Cancelar</Link>
         </Button>

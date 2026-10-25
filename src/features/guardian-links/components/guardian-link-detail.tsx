@@ -86,7 +86,7 @@ export function GuardianLinkDetail({
               description={formatEnrollmentApplicationDateTime(request.createdAt)}
               descriptionBreakpoint="sm"
             />
-            <RequestStatus status={request.status} className="h-8 px-3" />
+            <RequestStatus status={request.status} />
           </header>
           {request.resolvedAt ? (
             <dl className="pt-4">

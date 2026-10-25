@@ -105,7 +105,7 @@ export function useAsyncDropdown<TItem>({
 
   const isPlaceholder = !isSelected;
 
-  const canClear = clearable && value !== undefined;
+  const canClear = clearable && value !== undefined && value !== defaultOption?.value;
 
   function setOpen(nextOpen: boolean) {
     if (nextOpen && !isOpen) {

@@ -47,10 +47,12 @@ function EnrollmentPeriodFormView(props: EnrollmentPeriodFormProps): ReactElemen
 
   const actionLabel = isEdit ? "Guardar cambios" : "Crear período";
 
+  const pendingLabel = isEdit ? "Guardando…" : "Creando…";
+
   return (
-    <ActionForm ref={formRef} action={formAction} className="flex h-full min-h-0 w-full flex-1 flex-col">
+    <ActionForm ref={formRef} action={formAction} className="flex w-full flex-col gap-4">
       <input type="hidden" name="institutionId" value={institution?.id ?? ""} />
-      <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-4 overflow-x-hidden overflow-y-auto pb-4">
+      <div className="flex min-w-0 flex-col gap-4">
         {state.error ? (
           <Alert variant="destructive">
             <CircleAlertIcon />
@@ -90,7 +92,7 @@ function EnrollmentPeriodFormView(props: EnrollmentPeriodFormProps): ReactElemen
         ) : null}
       </div>
 
-      <div className="bg-background sticky bottom-0 z-10 mt-auto flex flex-row flex-wrap items-center justify-end gap-3">
+      <div className="flex flex-row flex-wrap items-center justify-end gap-3">
         <Button asChild type="button" variant="outline" size="lg" className="flex-1 sm:flex-none">
           <Link href={returnTo}>Cancelar</Link>
         </Button>
@@ -100,7 +102,7 @@ function EnrollmentPeriodFormView(props: EnrollmentPeriodFormProps): ReactElemen
           className="flex-1 sm:flex-none"
           disabled={isPending || !institution || !academicYear || !startDate || !startTime || !endDate || !endTime}
         >
-          {isPending ? "Guardando…" : actionLabel}
+          {isPending ? pendingLabel : actionLabel}
         </Button>
       </div>
     </ActionForm>

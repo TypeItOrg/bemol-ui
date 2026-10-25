@@ -27,13 +27,13 @@ export function ConfirmEmailVerificationForm({ token }: { token?: string }): Rea
             token ? (
               <InstitutionalAuthDescription
                 generic="Confirmá que esta dirección de correo electrónico te pertenece para completar el registro. Una vez verificada, tu cuenta quedará habilitada y vas a poder iniciar sesión."
-                before="Confirmá que esta dirección de correo electrónico te pertenece para completar tu registro en "
+                before="Confirmá que esta dirección de correo electrónico te pertenece para completar tu registro en el portal institucional del "
                 after=". Una vez verificada, tu cuenta quedará habilitada y vas a poder iniciar sesión."
               />
             ) : (
               <InstitutionalAuthDescription
                 generic="Este enlace no se puede usar. Solicitá uno nuevo para continuar."
-                before="Este enlace de "
+                before="Este enlace del portal institucional del "
                 after=" no se puede usar. Solicitá uno nuevo para continuar."
               />
             )

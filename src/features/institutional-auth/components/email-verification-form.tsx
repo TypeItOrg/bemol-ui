@@ -33,8 +33,8 @@ export function EmailVerificationForm({ context }: { context?: EmailVerification
               }
               before={
                 mode === "resend"
-                  ? "Ingresá tus datos para verificar tu cuenta de "
-                  : "Confirmá tu identidad e indicá el correo electrónico correcto para "
+                  ? "Ingresá tus datos para verificar tu cuenta del portal institucional del "
+                  : "Confirmá tu identidad e indicá el correo electrónico correcto para tu cuenta del portal institucional del "
               }
               after="."
             />

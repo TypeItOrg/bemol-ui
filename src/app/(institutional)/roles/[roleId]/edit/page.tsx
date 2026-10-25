@@ -57,6 +57,7 @@ export default async function EditRolePage({
 
   return (
     <PlatformPageShell
+      backHref={destination}
       title={`Editar rol ${role.name}`}
       breadcrumb={<InstitutionalBreadcrumb segmentLabels={{ [roleId]: role.name }} />}
       headerClassName="flex-row items-center justify-between"

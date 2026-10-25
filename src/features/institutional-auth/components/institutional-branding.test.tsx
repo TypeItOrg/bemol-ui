@@ -78,31 +78,31 @@ const descriptionForms = [
     formName: "login",
     Form: InstitutionalLoginForm,
     generic: "Ingresá con tu contraseña o una llave de acceso.",
-    branded: "Ingresá a Conservatorio Boero con tu contraseña o una llave de acceso.",
+    branded: "Ingresá al portal institucional del Conservatorio Boero con tu contraseña o una llave de acceso.",
   },
   {
     formName: "registration",
     Form: InstitutionalRegisterForm,
     generic: "Completá tus datos para registrarte en una institución.",
-    branded: "Completá tus datos para registrarte en Conservatorio Boero.",
+    branded: "Completá tus datos para registrarte en el portal institucional del Conservatorio Boero.",
   },
   {
     formName: "password recovery",
     Form: InstitutionalPasswordRecoveryForm,
     generic: "Ingresá tu documento para recibir un enlace.",
-    branded: "Ingresá tu documento para recuperar tu contraseña de Conservatorio Boero.",
+    branded: "Ingresá tu documento para recuperar tu contraseña del portal institucional del Conservatorio Boero.",
   },
   {
     formName: "email verification",
     Form: EmailVerificationForm,
     generic: "Ingresá tus datos para recibir un nuevo enlace de verificación.",
-    branded: "Ingresá tus datos para verificar tu cuenta de Conservatorio Boero.",
+    branded: "Ingresá tus datos para verificar tu cuenta del portal institucional del Conservatorio Boero.",
   },
   {
     formName: "password reset",
     Form: PasswordResetForm,
     generic: "Ingresá una clave de al menos 8 caracteres.",
-    branded: "Ingresá una clave de al menos 8 caracteres para tu cuenta de Conservatorio Boero.",
+    branded: "Ingresá una clave de al menos 8 caracteres para tu cuenta del portal institucional del Conservatorio Boero.",
   },
   {
     formName: "email confirmation",
@@ -110,13 +110,13 @@ const descriptionForms = [
     generic:
       "Confirmá que esta dirección de correo electrónico te pertenece para completar el registro. Una vez verificada, tu cuenta quedará habilitada y vas a poder iniciar sesión.",
     branded:
-      "Confirmá que esta dirección de correo electrónico te pertenece para completar tu registro en Conservatorio Boero. Una vez verificada, tu cuenta quedará habilitada y vas a poder iniciar sesión.",
+      "Confirmá que esta dirección de correo electrónico te pertenece para completar tu registro en el portal institucional del Conservatorio Boero. Una vez verificada, tu cuenta quedará habilitada y vas a poder iniciar sesión.",
   },
   {
     formName: "account activation",
     Form: AccountActivationForm,
     generic: "Configurá tu contraseña para acceder a tu perfil. El enlace vence en 24 horas.",
-    branded: "Configurá tu contraseña para acceder a tu perfil de Conservatorio Boero. El enlace vence en 24 horas.",
+    branded: "Configurá tu contraseña para acceder a tu perfil del portal institucional del Conservatorio Boero. El enlace vence en 24 horas.",
   },
 ];
 it.each(forms)("[A01.generic-flows] existing $formName keeps the institution selector", ({ Form }) => {
@@ -160,7 +160,9 @@ it("[A02.branded-description] changing email mentions the fixed institution in b
   await user.click(screen.getByRole("button", { name: "Cambiar correo electrónico" }));
   const institutionName = screen.getByText(institution.name);
   expect(institutionName.tagName).toBe("STRONG");
-  expect(institutionName.closest("p")).toHaveTextContent("Confirmá tu identidad e indicá el correo electrónico correcto para Conservatorio Boero.");
+  expect(institutionName.closest("p")).toHaveTextContent(
+    "Confirmá tu identidad e indicá el correo electrónico correcto para tu cuenta del portal institucional del Conservatorio Boero.",
+  );
 });
 it("[A02.branded-description] account activation success mentions the fixed institution in bold", async () => {
   jest.mocked(activateOwnAccess).mockResolvedValue({ success: true });
@@ -177,7 +179,7 @@ it("[A02.branded-description] account activation success mentions the fixed inst
   const institutionName = screen.getByText(institution.name);
   expect(institutionName.tagName).toBe("STRONG");
   expect(institutionName.closest("p")).toHaveTextContent(
-    "Tu cuenta de Conservatorio Boero está activa. Ya podés ingresar con tu documento y tu contraseña.",
+    "Tu cuenta del portal institucional del Conservatorio Boero está activa. Ya podés ingresar con tu documento y tu contraseña.",
   );
 });
 it("[A01.generic-description] invalid password reset link keeps the generic description", async () => {
@@ -190,7 +192,9 @@ it("[A02.branded-description] invalid password reset link mentions the fixed ins
   render(<InstitutionalBrandProvider institution={institution}>{page}</InstitutionalBrandProvider>);
   const institutionName = screen.getByText(institution.name);
   expect(institutionName.tagName).toBe("STRONG");
-  expect(institutionName.closest("p")).toHaveTextContent("Solicitá un nuevo enlace para restablecer tu contraseña de Conservatorio Boero.");
+  expect(institutionName.closest("p")).toHaveTextContent(
+    "Solicitá un nuevo enlace para restablecer tu contraseña del portal institucional del Conservatorio Boero.",
+  );
 });
 it("[A01.generic-description] invalid activation link keeps the generic description", async () => {
   const page = await ActivateAccountPage({ searchParams: Promise.resolve({}) });
@@ -202,7 +206,9 @@ it("[A02.branded-description] invalid activation link mentions the fixed institu
   render(<InstitutionalBrandProvider institution={institution}>{page}</InstitutionalBrandProvider>);
   const institutionName = screen.getByText(institution.name);
   expect(institutionName.tagName).toBe("STRONG");
-  expect(institutionName.closest("p")).toHaveTextContent("Solicitá una nueva invitación para activar tu cuenta en Conservatorio Boero.");
+  expect(institutionName.closest("p")).toHaveTextContent(
+    "Solicitá una nueva invitación para activar tu cuenta en el portal institucional del Conservatorio Boero.",
+  );
 });
 it("[A01.generic-description] invalid email link keeps the generic description", () => {
   render(<ConfirmEmailVerificationForm />);
@@ -216,7 +222,9 @@ it("[A02.branded-description] invalid email link mentions the fixed institution 
   );
   const institutionName = screen.getByText(institution.name);
   expect(institutionName.tagName).toBe("STRONG");
-  expect(institutionName.closest("p")).toHaveTextContent("Este enlace de Conservatorio Boero no se puede usar. Solicitá uno nuevo para continuar.");
+  expect(institutionName.closest("p")).toHaveTextContent(
+    "Este enlace del portal institucional del Conservatorio Boero no se puede usar. Solicitá uno nuevo para continuar.",
+  );
 });
 it("[A02.branded-desktop] desktop brand panel uses public same-origin logo without redundant institution name", () => {
   render(

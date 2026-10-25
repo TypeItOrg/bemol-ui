@@ -41,8 +41,8 @@ export function StudyPlanVersionForm({ institutionId, returnTo, scope, source }:
   const hasFieldErrors = Object.keys(state.fieldErrors ?? {}).length > 0;
 
   return (
-    <ActionForm ref={formRef} action={formAction} noValidate className="flex h-full min-h-0 w-full flex-1 flex-col">
-      <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto pb-4">
+    <ActionForm ref={formRef} action={formAction} noValidate className="flex w-full flex-col gap-4">
+      <div className="flex min-w-0 flex-col gap-4">
         {state.error && !hasFieldErrors ? (
           <Alert variant="destructive">
             <AlertTitle>No se pudo crear la versión</AlertTitle>
@@ -69,7 +69,7 @@ export function StudyPlanVersionForm({ institutionId, returnTo, scope, source }:
           </div>
         </section>
       </div>
-      <div className="bg-background sticky bottom-0 z-10 mt-auto flex flex-row flex-wrap items-center justify-end gap-3">
+      <div className="flex flex-row flex-wrap items-center justify-end gap-3">
         <Button asChild type="button" variant="outline" size="lg" className="flex-1 sm:flex-none">
           <Link href={returnTo}>Cancelar</Link>
         </Button>

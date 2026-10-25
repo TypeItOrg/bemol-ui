@@ -126,8 +126,8 @@ export function InstitutionForm({ mode, institution, returnTo, baseDomain = "" }
   ) : null;
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="flex h-full min-h-0 w-full flex-1 flex-col">
-      <fieldset disabled={isPending} className="flex min-h-0 min-w-0 flex-1 flex-col gap-4 overflow-y-auto pb-4">
+    <form onSubmit={handleSubmit(onSubmit)} className="flex w-full flex-col gap-4">
+      <fieldset disabled={isPending} className="flex min-w-0 flex-col gap-4">
         {errorAlert}
 
         <InstitutionGeneralFields defaultValues={defaultValues} errors={errors} register={register} />

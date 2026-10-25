@@ -60,6 +60,7 @@ export default async function EditEnrollmentPeriodPage({ params, searchParams }:
 
   return (
     <PlatformPageShell
+      backHref={destination}
       title="Editar período de inscripción"
       breadcrumb={<InstitutionalBreadcrumb hiddenSegments={[periodId]} />}
       minViewportHeight

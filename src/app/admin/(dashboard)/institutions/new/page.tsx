@@ -22,6 +22,7 @@ export default async function NewInstitutionPage({ searchParams }: { searchParam
 
   return (
     <PlatformPageShell
+      backHref={destination}
       title="Nueva institución"
       minViewportHeight
       breadcrumb={<PlatformBreadcrumb segmentLabels={{ new: "Nueva" }} />}

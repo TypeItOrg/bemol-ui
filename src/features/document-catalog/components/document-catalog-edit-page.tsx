@@ -96,6 +96,7 @@ export async function DocumentCatalogEditPage({
 
   return (
     <PlatformPageShell
+      backHref={returnTo}
       title="Editar documento"
       breadcrumb={
         scope === "admin" ? (

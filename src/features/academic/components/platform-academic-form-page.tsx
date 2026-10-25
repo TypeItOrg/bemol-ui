@@ -21,8 +21,11 @@ export function PlatformAcademicFormPage({
 
   const collectionPath = `/admin/${resource}`;
 
+  const destination = getSafeReturnTo(returnTo, collectionPath);
+
   return (
     <PlatformPageShell
+      backHref={destination}
       title={config.createLabel}
       breadcrumb={<PlatformBreadcrumb segmentLabels={{ new: config.createLabel }} />}
       minViewportHeight
@@ -30,12 +33,7 @@ export function PlatformAcademicFormPage({
       actionsClassName="self-stretch"
       actions={<AcademicPageIcon icon={config.createIcon} />}
     >
-      <AcademicResourceForm
-        allowInstitutionSelection
-        resource={resource}
-        returnTo={getSafeReturnTo(returnTo, collectionPath)}
-        scope={AcademicScope.ADMIN}
-      />
+      <AcademicResourceForm allowInstitutionSelection resource={resource} returnTo={destination} scope={AcademicScope.ADMIN} />
     </PlatformPageShell>
   );
 }

@@ -23,7 +23,7 @@ export function InstitutionalPasswordLoginFields({
   status: { pending: boolean; error: string | null };
   rememberMe: boolean;
   onRememberMeChange: (value: boolean) => void;
-  passkey: { pending: boolean; verifying: boolean; cancel: () => void };
+  passkey: { pending: boolean };
   onPasskeyLogin: () => void;
 }): ReactElement {
   const passwordPending = status.pending && !passkey.pending;
@@ -85,11 +85,6 @@ export function InstitutionalPasswordLoginFields({
           {passkey.pending ? <Loader2Icon aria-hidden="true" className="size-4 animate-spin" /> : null}
           Usar una llave de acceso
         </Button>
-        {passkey.pending ? (
-          <Button disabled={passkey.verifying} onClick={passkey.cancel} type="button" variant="ghost">
-            Cancelar
-          </Button>
-        ) : null}
       </footer>
     </>
   );

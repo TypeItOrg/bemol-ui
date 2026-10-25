@@ -95,7 +95,7 @@ export function GuardianDependentForm({ institutionId, returnTo }: { institution
     <ActionForm
       ref={formRef}
       aria-label="Solicitar vinculación"
-      className="flex h-full min-h-0 w-full flex-1 flex-col gap-4"
+      className="flex w-full flex-col gap-4"
       noValidate
       onDragOver={rejectFileDragOutside}
       onDrop={rejectFileDragOutside}

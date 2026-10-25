@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition, type MouseEvent, type ReactElement } from "react";
+import { useState, useTransition, type ComponentProps, type MouseEvent, type ReactElement } from "react";
 
 import { CircleAlertIcon, Trash2Icon } from "lucide-react";
 
@@ -29,6 +29,7 @@ type PersonDeleteDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onDeleted: () => void;
+  onCloseAutoFocus?: ComponentProps<typeof AlertDialogContent>["onCloseAutoFocus"];
   trigger?: ReactElement;
   scope?: PeopleScopeType;
 };
@@ -40,6 +41,7 @@ export function PersonDeleteDialog({
   open,
   onOpenChange,
   onDeleted,
+  onCloseAutoFocus,
   trigger,
   scope = PeopleScope.ADMIN,
 }: PersonDeleteDialogProps): ReactElement {
@@ -48,8 +50,6 @@ export function PersonDeleteDialog({
   const [isNavigating, startNavigation] = useTransition();
 
   const [error, setError] = useState<string>();
-
-  const buttonSize = PeopleScope.isInstitutional(scope) ? "lg" : "default";
 
   const isBusy = isPending || isNavigating;
 
@@ -85,7 +85,7 @@ export function PersonDeleteDialog({
   return (
     <AlertDialog open={open} onOpenChange={handleOpenChange}>
       {trigger ? <AlertDialogTrigger asChild>{trigger}</AlertDialogTrigger> : null}
-      <AlertDialogContent>
+      <AlertDialogContent onCloseAutoFocus={onCloseAutoFocus}>
         <AlertDialogHeader>
           <div className="bg-destructive/10 text-destructive mb-1 flex size-12 items-center justify-center rounded-2xl">
             <Trash2Icon className="size-6" />
@@ -105,10 +105,10 @@ export function PersonDeleteDialog({
         ) : null}
 
         <AlertDialogFooter>
-          <AlertDialogCancel size={buttonSize} disabled={isBusy}>
+          <AlertDialogCancel size="lg" disabled={isBusy}>
             Cancelar
           </AlertDialogCancel>
-          <AlertDialogAction size={buttonSize} variant="destructive" disabled={isBusy} onClick={handleDelete}>
+          <AlertDialogAction size="lg" variant="destructive" disabled={isBusy} onClick={handleDelete}>
             {isBusy ? "Eliminando..." : "Eliminar usuario"}
           </AlertDialogAction>
         </AlertDialogFooter>

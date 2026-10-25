@@ -71,6 +71,8 @@ export function AcademicResourceForm({
 
   const submitLabel = id || state.trainingPathProgress ? "Guardar cambios" : CREATE_ACTION_LABELS[resource];
 
+  const pendingLabel = id || state.trainingPathProgress ? "Guardando…" : "Creando…";
+
   const hasFieldErrors = Object.keys(state.fieldErrors ?? {}).length > 0;
 
   const savedTrainingPathHref =
@@ -81,8 +83,8 @@ export function AcademicResourceForm({
   const formRef = useActionFormErrorFocus(state, pending);
 
   return (
-    <ActionForm ref={formRef} action={formAction} noValidate className="flex h-full min-h-0 w-full flex-1 flex-col">
-      <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto pb-4">
+    <ActionForm ref={formRef} action={formAction} noValidate className="flex w-full flex-col gap-4">
+      <div className="flex min-w-0 flex-col gap-4">
         {state.error && !hasFieldErrors ? (
           <Alert variant="destructive">
             <AlertTitle>No se pudo guardar</AlertTitle>
@@ -147,12 +149,12 @@ export function AcademicResourceForm({
         ) : null}
       </div>
 
-      <div className="bg-background sticky bottom-0 z-10 mt-auto flex flex-row flex-wrap items-center justify-end gap-3">
+      <div className="flex flex-row flex-wrap items-center justify-end gap-3">
         <Button asChild type="button" variant="outline" size="lg" className="flex-1 sm:flex-none">
           <Link href={returnTo}>Cancelar</Link>
         </Button>
         <Button type="submit" size="lg" className="flex-1 sm:flex-none" disabled={pending || state.trainingPathSaveUncertain === true}>
-          {pending ? "Guardando…" : submitLabel}
+          {pending ? pendingLabel : submitLabel}
         </Button>
       </div>
     </ActionForm>

@@ -42,7 +42,7 @@ export default async function ResetPasswordPage({ searchParams }: { searchParams
           <p className="text-muted-foreground text-sm">
             <InstitutionalAuthDescription
               generic="Solicitá un nuevo enlace de recuperación para continuar."
-              before="Solicitá un nuevo enlace para restablecer tu contraseña de "
+              before="Solicitá un nuevo enlace para restablecer tu contraseña del portal institucional del "
               after="."
             />
           </p>

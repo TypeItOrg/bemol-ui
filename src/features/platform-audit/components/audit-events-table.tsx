@@ -55,7 +55,7 @@ export function AuditEventsTable({
     <div className="flex h-full min-w-0 flex-col gap-4">
       <div className="relative flex min-h-56 flex-1 overflow-hidden rounded-lg border" aria-busy={isPending}>
         {data.items.length > 0 ? (
-          <Table containerClassName="table-scrollbar" className="min-w-240">
+          <Table stickyActions containerClassName="table-scrollbar" className="min-w-240">
             <TableHeader className="bg-muted sticky top-0 z-10 [&_tr]:border-b">
               <TableRow>
                 <TableHead className="w-16 pl-4">

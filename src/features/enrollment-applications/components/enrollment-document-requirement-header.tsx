@@ -16,7 +16,7 @@ export function EnrollmentDocumentRequirementHeader({
   requirement: DocumentRequirement;
   administrativeView: boolean;
 }): ReactElement {
-  const badgeClassName = cn("h-8 px-3 py-1.5", administrativeView && "w-full @xl/documents:w-fit");
+  const badgeClassName = cn(administrativeView && "w-full @xl/documents:w-fit");
 
   return (
     <header className="flex min-w-0 flex-col gap-3 @3xl/documents:flex-row @3xl/documents:items-center @3xl/documents:justify-between @3xl/documents:gap-6">

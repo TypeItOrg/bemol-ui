@@ -37,6 +37,7 @@ export default async function NewPersonPage({ params, searchParams }: NewPersonP
 
   return (
     <PlatformPageShell
+      backHref={destination}
       title="Nuevo usuario"
       minViewportHeight
       breadcrumb={<PlatformBreadcrumb segmentLabels={{ [id]: institution.name }} />}

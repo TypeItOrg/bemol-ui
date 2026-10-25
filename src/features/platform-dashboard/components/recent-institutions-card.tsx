@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Building2Icon, BuildingIcon, MapPinIcon } from "lucide-react";
 
 import { SectionHeader } from "@common/components/section-header";
+import { Avatar, AvatarFallback, AvatarImage } from "@common/components/ui/avatar";
 import { Badge } from "@common/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@common/components/ui/card";
 import { Separator } from "@common/components/ui/separator";
@@ -24,7 +25,7 @@ export function RecentInstitutionsCard({ institutions }: { institutions: RecentI
           description="Las últimas instituciones incorporadas a la plataforma."
         />
       </CardHeader>
-      <CardContent className="p-0">
+      <CardContent className="bg-muted/50 rounded-lg p-4 sm:p-5">
         {institutions.length === 0 ? (
           <DashboardEmptyState
             icon={Building2Icon}
@@ -35,7 +36,7 @@ export function RecentInstitutionsCard({ institutions }: { institutions: RecentI
           <div className="flex flex-col">
             {institutions.map((institution, index) => (
               <Fragment key={institution.id}>
-                {index > 0 ? <Separator className="-mx-5 data-horizontal:w-auto sm:-mx-6" /> : null}
+                {index > 0 ? <Separator /> : null}
                 <RecentInstitutionRow institution={institution} />
               </Fragment>
             ))}
@@ -50,14 +51,17 @@ export function RecentInstitutionRow({ institution }: { institution: RecentInsti
   return (
     <Link
       href={`/admin/institutions/${institution.id}`}
-      className="hover:bg-muted/50 -mx-2 flex min-w-0 items-center gap-3 rounded-lg px-2 py-3 transition-colors"
+      className="group focus-visible:ring-ring flex min-w-0 items-center gap-3 rounded-lg py-3 outline-none first:pt-0 last:pb-0 focus-visible:ring-2 focus-visible:ring-offset-2"
     >
-      <div className="bg-muted text-muted-foreground flex size-10 shrink-0 items-center justify-center rounded-lg">
-        <BuildingIcon className="size-4" aria-hidden="true" />
-      </div>
+      <Avatar size="lg" className="rounded-lg after:rounded-lg">
+        <AvatarImage src={`/api/public/institutions/${institution.id}/logo`} alt="" className="bg-background rounded-lg object-contain p-1" />
+        <AvatarFallback className="bg-primary/10 text-primary rounded-lg">
+          <BuildingIcon className="size-4" aria-hidden="true" />
+        </AvatarFallback>
+      </Avatar>
       <div className="min-w-0 flex-1">
         <div className="flex min-w-0 items-center gap-2">
-          <p className="truncate font-medium">{institution.name}</p>
+          <p className="truncate font-medium underline-offset-4 group-hover:underline group-focus-visible:underline">{institution.name}</p>
           <Badge variant={institution.active ? "success" : "destructive"}>{institution.active ? "Activa" : "Inactiva"}</Badge>
         </div>
         <p className="text-muted-foreground mt-1 flex min-w-0 items-center gap-1.5 text-xs">

@@ -69,7 +69,7 @@ export function PeopleTableEmptyState({
           {canCreate ? "Comenzá creando un nuevo usuario para esta institución." : "Todavía no hay usuarios registrados en esta institución."}
         </p>
         {canCreate ? (
-          <Button asChild size="sm">
+          <Button asChild size="lg">
             <ReturnToLink href={PeopleScope.isInstitutional(scope) ? "/people/new" : `/admin/institutions/${institutionId}/people/new`}>
               <PlusIcon className="mr-2 size-4" />
               Nuevo usuario

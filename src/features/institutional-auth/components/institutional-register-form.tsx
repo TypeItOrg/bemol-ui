@@ -27,7 +27,7 @@ export function InstitutionalRegisterForm(): ReactElement {
         description={
           <InstitutionalAuthDescription
             generic="Completá tus datos para registrarte en una institución."
-            before="Completá tus datos para registrarte en "
+            before="Completá tus datos para registrarte en el portal institucional del "
             after="."
           />
         }

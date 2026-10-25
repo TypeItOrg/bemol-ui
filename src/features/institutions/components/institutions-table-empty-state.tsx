@@ -45,7 +45,7 @@ export function InstitutionsTableEmptyState({ active, isNavigating, search, size
         <p className="text-muted-foreground mt-1.5 mb-6 max-w-sm text-sm">
           Comenzá creando una nueva institución para empezar a gestionar la plataforma.
         </p>
-        <Button asChild size="sm">
+        <Button asChild size="lg">
           <ReturnToLink href="/admin/institutions/new">
             <PlusIcon className="mr-2 size-4" />
             Nueva Institución

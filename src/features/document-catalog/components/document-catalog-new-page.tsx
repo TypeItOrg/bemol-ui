@@ -131,6 +131,7 @@ export async function DocumentCatalogNewPage({
 
   return (
     <PlatformPageShell
+      backHref={returnTo}
       title="Nuevo documento"
       breadcrumb={scope === "admin" ? <PlatformBreadcrumb segmentHrefs={segmentHrefs} /> : <InstitutionalBreadcrumb segmentHrefs={segmentHrefs} />}
       actions={<PlatformPageIcon icon={FileTextIcon} />}

@@ -85,7 +85,7 @@ function AlertDialogDescription({ className, ...props }: ComponentProps<typeof A
 function AlertDialogAction({
   className,
   variant = "default",
-  size = "default",
+  size = "lg",
   ...props
 }: ComponentProps<typeof AlertDialogPrimitive.Action> & Pick<ComponentProps<typeof Button>, "variant" | "size">): ReactElement {
   return (
@@ -97,7 +97,7 @@ function AlertDialogAction({
 
 function AlertDialogCancel({
   className,
-  size = "default",
+  size = "lg",
   ...props
 }: ComponentProps<typeof AlertDialogPrimitive.Cancel> & Pick<ComponentProps<typeof Button>, "size">): ReactElement {
   return (

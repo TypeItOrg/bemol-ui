@@ -36,7 +36,7 @@ export function InstitutionalPasswordRecoveryForm(): ReactElement {
         description={
           <InstitutionalAuthDescription
             generic="Ingresá tu documento para recibir un enlace."
-            before="Ingresá tu documento para recuperar tu contraseña de "
+            before="Ingresá tu documento para recuperar tu contraseña del portal institucional del "
             after="."
           />
         }

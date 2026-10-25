@@ -7,11 +7,11 @@ export function CourseEnrollmentTableSkeleton(): ReactElement {
   return (
     <div className="flex h-full flex-col gap-4">
       <div className="h-full overflow-hidden rounded-lg border">
-        <Table className="min-w-192">
+        <Table stickyActions className="min-w-192">
           <TableHeader className="bg-muted sticky top-0 z-10 [&_tr]:border-b">
             <TableRow className="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors">
-              <TableHead>
-                <Skeleton className="h-4 w-24" />
+              <TableHead className="w-16 pl-4">
+                <span className="sr-only">Acciones</span>
               </TableHead>
               <TableHead>
                 <Skeleton className="h-4 w-28" />
@@ -36,8 +36,8 @@ export function CourseEnrollmentTableSkeleton(): ReactElement {
           <TableBody>
             {Array.from({ length: 5 }).map((_, index) => (
               <TableRow key={index}>
-                <TableCell>
-                  <Skeleton className="h-5 w-32" />
+                <TableCell className="w-16 pl-4">
+                  <Skeleton className="size-8" />
                 </TableCell>
                 <TableCell>
                   <Skeleton className="h-5 w-28" />

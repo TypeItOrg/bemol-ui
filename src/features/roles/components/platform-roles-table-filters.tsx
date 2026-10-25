@@ -2,10 +2,9 @@
 
 import type { ReactElement } from "react";
 
-import { BuildingIcon, XIcon } from "lucide-react";
+import { BuildingIcon } from "lucide-react";
 
 import { AsyncDropdown } from "@common/components/ui/async-dropdown";
-import { Button } from "@common/components/ui/button";
 import { DataTableFilters, type DataTableSelectFilter, type DataTableTriggerPosition } from "@common/components/ui/data-table-filters";
 import { useDataTableNavigation } from "@common/components/ui/data-table-navigation";
 
@@ -59,37 +58,27 @@ export function PlatformRolesTableFilters({
       advancedFilters={
         <div className="flex min-w-0 flex-col gap-1.5">
           <span className="text-foreground text-sm font-medium">Institución</span>
-          <div className="flex min-w-0 gap-2">
-            <AsyncDropdown<InstitutionSummary>
-              className="min-w-0 flex-1"
-              defaultOption={{ label: "Todas las instituciones", value: undefined }}
-              emptyDescription="No hay instituciones disponibles para filtrar."
-              emptyIcon={BuildingIcon}
-              emptyMessage="No se encontraron instituciones."
-              emptyTitle="No hay instituciones"
-              errorMessage={LOCATION_ERROR_MESSAGES.FETCH_INSTITUTIONS}
-              fetchPage={fetchPlatformInstitutionOptions}
-              getItemLabel={(institution) => institution.name}
-              getItemValue={(institution) => institution.id}
-              onValueChange={updateInstitution}
-              pageSize={20}
-              placeholder="Seleccionar institución"
-              queryKey={INSTITUTION_FILTER_QUERY_KEY}
-              searchPlaceholder="Buscar institución..."
-              selectedLabel={institutionName}
-              value={institutionId}
-            />
-            <Button
-              type="button"
-              variant="outline"
-              size="icon-lg"
-              aria-label="Limpiar institución"
-              onClick={() => updateInstitution(undefined)}
-              disabled={!institutionId}
-            >
-              <XIcon />
-            </Button>
-          </div>
+          <AsyncDropdown<InstitutionSummary>
+            className="min-w-0"
+            clearable
+            clearLabel="Limpiar institución"
+            defaultOption={{ label: "Todas las instituciones", value: undefined }}
+            emptyDescription="No hay instituciones disponibles para filtrar."
+            emptyIcon={BuildingIcon}
+            emptyMessage="No se encontraron instituciones."
+            emptyTitle="No hay instituciones"
+            errorMessage={LOCATION_ERROR_MESSAGES.FETCH_INSTITUTIONS}
+            fetchPage={fetchPlatformInstitutionOptions}
+            getItemLabel={(institution) => institution.name}
+            getItemValue={(institution) => institution.id}
+            onValueChange={updateInstitution}
+            pageSize={20}
+            placeholder="Seleccionar institución"
+            queryKey={INSTITUTION_FILTER_QUERY_KEY}
+            searchPlaceholder="Buscar institución..."
+            selectedLabel={institutionName}
+            value={institutionId}
+          />
         </div>
       }
       advancedResetKeys={["institutionId"]}

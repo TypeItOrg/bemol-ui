@@ -38,7 +38,7 @@ const MANAGEMENT_NAVIGATION_ITEMS = [
     icon: UsersIcon,
   },
   {
-    title: "Roles",
+    title: "Roles y permisos",
     url: "/admin/roles",
     icon: UserLockIcon,
   },

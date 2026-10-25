@@ -5,7 +5,7 @@ import { useId, type ReactElement } from "react";
 import { GlobeIcon } from "lucide-react";
 
 import { SectionHeader } from "@common/components/section-header";
-import { Field, FieldDescription, FieldError, FieldLabel } from "@common/components/ui/field";
+import { Field, FieldError, FieldLabel } from "@common/components/ui/field";
 import { Input } from "@common/components/ui/input";
 
 export function InstitutionPublicAccessField({
@@ -36,7 +36,7 @@ export function InstitutionPublicAccessField({
             onChange={(event) => onChange(event.target.value)}
             maxLength={63}
             className="min-w-0 border-0 bg-transparent shadow-none focus-visible:ring-0"
-            aria-describedby={`${id}-description${error ? ` ${id}-error` : ""}`}
+            aria-describedby={error ? `${id}-error` : undefined}
             autoCapitalize="none"
             autoCorrect="off"
             spellCheck={false}
@@ -46,7 +46,6 @@ export function InstitutionPublicAccessField({
             <span className="text-muted-foreground bg-muted/40 hidden shrink-0 border-l px-3 py-2 text-sm sm:block">.{baseDomain}</span>
           ) : null}
         </div>
-        <FieldDescription id={`${id}-description`}>Identifica a la institución en su dirección de acceso.</FieldDescription>
         <FieldError id={`${id}-error`}>{error}</FieldError>
       </Field>
     </section>

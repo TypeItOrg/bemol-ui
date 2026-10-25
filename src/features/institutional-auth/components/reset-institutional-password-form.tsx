@@ -32,7 +32,7 @@ export function ResetInstitutionalPasswordForm({ token }: { token: string }): Re
         description={
           <InstitutionalAuthDescription
             generic="Ingresá una clave de al menos 8 caracteres."
-            before="Ingresá una clave de al menos 8 caracteres para tu cuenta de "
+            before="Ingresá una clave de al menos 8 caracteres para tu cuenta del portal institucional del "
             after="."
           />
         }

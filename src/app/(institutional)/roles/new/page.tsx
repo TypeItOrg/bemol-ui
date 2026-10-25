@@ -37,6 +37,7 @@ export default async function NewRolePage({ searchParams }: { searchParams: Prom
 
   return (
     <PlatformPageShell
+      backHref={destination}
       title="Nuevo rol"
       breadcrumb={<InstitutionalBreadcrumb />}
       headerClassName="flex-row items-center justify-between"

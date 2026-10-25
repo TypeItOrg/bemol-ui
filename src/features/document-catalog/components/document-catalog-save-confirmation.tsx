@@ -80,6 +80,8 @@ export function DocumentCatalogSaveConfirmation({
 
   const actionLabel = context ? "Guardar cambios" : "Crear documento";
 
+  const pendingLabel = context ? "Guardando…" : "Creando…";
+
   return (
     <AlertDialog
       open
@@ -134,7 +136,7 @@ export function DocumentCatalogSaveConfirmation({
               Volver al formulario
             </AlertDialogCancel>
             <Button type="submit" size="lg" disabled={pending || state.uncertain === true}>
-              {pending ? "Guardando…" : actionLabel}
+              {pending ? pendingLabel : actionLabel}
             </Button>
           </AlertDialogFooter>
         </ActionForm>

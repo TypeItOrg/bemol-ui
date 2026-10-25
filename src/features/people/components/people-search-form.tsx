@@ -59,6 +59,8 @@ export function PeopleSearchForm({
           </label>
           <AsyncDropdown<AssignableRole>
             id={filterId}
+            clearable
+            clearLabel="Limpiar rol"
             fetchPage={fetchRoles}
             queryKey={["role-filter-options", institutionId, scope]}
             getItemValue={(role) => role.id}

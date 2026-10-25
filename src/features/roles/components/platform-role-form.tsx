@@ -45,6 +45,10 @@ export function PlatformRoleForm({ role, permissionGroups, returnTo }: PlatformR
 
   const isEdit = Boolean(role);
 
+  const actionLabel = isEdit ? "Guardar cambios" : "Crear rol";
+
+  const pendingLabel = isEdit ? "Guardando…" : "Creando…";
+
   return (
     <ActionForm ref={formRef} action={formAction} className="flex flex-col gap-4">
       {state.error ? (
@@ -112,7 +116,7 @@ export function PlatformRoleForm({ role, permissionGroups, returnTo }: PlatformR
           <Link href={destination}>Cancelar</Link>
         </Button>
         <Button type="submit" size="lg" disabled={pending} className="flex-1 sm:flex-none">
-          {pending ? "Guardando…" : "Guardar cambios"}
+          {pending ? pendingLabel : actionLabel}
         </Button>
       </div>
     </ActionForm>

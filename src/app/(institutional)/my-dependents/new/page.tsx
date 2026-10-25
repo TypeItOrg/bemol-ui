@@ -38,6 +38,7 @@ export default async function NewGuardianDependentPage({
 
   return (
     <PlatformPageShell
+      backHref={destination}
       title="Solicitar vinculación"
       breadcrumb={<InstitutionalBreadcrumb segmentLabels={{ new: "Solicitar vinculación" }} segmentHrefs={{ "my-dependents": destination }} />}
       minViewportHeight

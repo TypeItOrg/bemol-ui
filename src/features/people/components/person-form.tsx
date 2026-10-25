@@ -163,7 +163,7 @@ function PersonFormView({
   }
 
   return (
-    <form ref={formRef} id={formId} onSubmit={handleSubmit(onSubmit)} className="flex h-full min-h-0 w-full flex-1 flex-col gap-4">
+    <form ref={formRef} id={formId} onSubmit={handleSubmit(onSubmit)} className="flex w-full flex-col gap-4">
       {formError && (
         <Alert variant="destructive">
           <CircleAlertIcon />

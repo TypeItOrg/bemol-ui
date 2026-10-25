@@ -7,7 +7,7 @@ import { SectionHeader } from "@common/components/section-header";
 import { Field, FieldContent, FieldError, FieldGroup, FieldLabel } from "@common/components/ui/field";
 import { Input } from "@common/components/ui/input";
 import { PhoneInput } from "@common/components/ui/restricted-input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@common/components/ui/select";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@common/components/ui/select";
 
 import { InstitutionLocationFields } from "@features/institutions/components/institution-location-fields";
 import type { InstitutionFormInput } from "@features/institutions/schemas/institution-form.schema";
@@ -100,8 +100,14 @@ export function InstitutionStatusField({ active, onActiveChange }: { active: boo
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="true">Activa</SelectItem>
-            <SelectItem value="false">Inactiva</SelectItem>
+            <SelectGroup>
+              <SelectItem value="true" className="px-2.5 py-1.5">
+                Activa
+              </SelectItem>
+              <SelectItem value="false" className="px-2.5 py-1.5">
+                Inactiva
+              </SelectItem>
+            </SelectGroup>
           </SelectContent>
         </Select>
       </Field>

@@ -75,7 +75,7 @@ export default async function EditPersonPage({ params, searchParams }: EditPerso
       actions={<PlatformPageIcon icon={UserRoundPenIcon} />}
     >
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <Button asChild variant="outline">
+        <Button asChild variant="outline" size="lg">
           <Link href={destination}>Volver</Link>
         </Button>
         {!isDetailView ? <PersonDeleteButton institutionId={id} personId={personId} personName={personName} /> : null}

@@ -68,7 +68,7 @@ export function PersonEditForm({
   const actionLabel = canEdit ? "Guardar cambios" : "Guardar roles";
 
   return (
-    <div className="flex h-full flex-1 flex-col gap-4">
+    <div className="flex flex-col gap-4">
       <div className="grid min-w-0 grid-cols-1 items-start gap-4">
         <PersonForm
           mode="edit"
@@ -99,7 +99,7 @@ export function PersonEditForm({
         ) : null}
       </div>
 
-      <div className="mt-auto flex flex-row flex-wrap items-center justify-end gap-3">
+      <div className="flex flex-row flex-wrap items-center justify-end gap-3">
         <Button asChild variant="outline" size="lg" className={cn("flex-1 sm:flex-none", isPending && "pointer-events-none opacity-50")}>
           <Link
             href={destination}

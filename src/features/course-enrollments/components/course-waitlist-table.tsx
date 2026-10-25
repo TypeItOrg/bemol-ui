@@ -128,7 +128,7 @@ export function CourseWaitlistTable({
             ) : null}
           </Empty>
         ) : (
-          <Table className="min-w-192">
+          <Table stickyActions className="min-w-192">
             <TableHeader className="bg-muted sticky top-0 z-10 [&_tr]:border-b">
               <TableRow className="hover:bg-muted/50 data-[state=selected]:bg-muted h-11 border-b transition-colors">
                 {canEnroll ? (

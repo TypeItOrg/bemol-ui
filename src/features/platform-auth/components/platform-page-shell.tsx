@@ -1,10 +1,14 @@
 import type { ReactElement, ReactNode } from "react";
 
+import Link from "next/link";
+
+import { Button } from "@common/components/ui/button";
 import { cn } from "@common/utils/cn.util";
 
 type PlatformPageShellProps = {
   title: ReactNode;
   actions?: ReactNode;
+  backHref?: string;
   children?: ReactNode;
   minViewportHeight?: boolean;
   breadcrumb?: ReactNode;
@@ -16,6 +20,7 @@ type PlatformPageShellProps = {
 export function PlatformPageShell({
   title,
   actions,
+  backHref,
   children,
   minViewportHeight = false,
   breadcrumb,
@@ -61,6 +66,13 @@ export function PlatformPageShell({
             minViewportHeight && "flex-1",
           )}
         >
+          {backHref ? (
+            <div>
+              <Button asChild variant="outline" size="lg">
+                <Link href={backHref}>Volver</Link>
+              </Button>
+            </div>
+          ) : null}
           {children}
         </div>
       ) : null}

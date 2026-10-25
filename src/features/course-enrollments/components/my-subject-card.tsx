@@ -100,12 +100,12 @@ export function MySubjectCard({ enrollment, canWithdraw, canUpdateAcademicStatus
       {showWithdraw || showAcademicAction ? (
         <div className="flex flex-wrap gap-2 border-t px-4 py-3">
           {showWithdraw ? (
-            <Button variant="outline" size="sm" onClick={() => onMutation(enrollment, "withdraw")}>
+            <Button variant="outline" size="lg" onClick={() => onMutation(enrollment, "withdraw")}>
               Registrar baja
             </Button>
           ) : null}
           {showAcademicAction ? (
-            <Button variant="outline" size="sm" onClick={() => onMutation(enrollment, "academic")}>
+            <Button variant="outline" size="lg" onClick={() => onMutation(enrollment, "academic")}>
               Registrar resultado
             </Button>
           ) : null}
