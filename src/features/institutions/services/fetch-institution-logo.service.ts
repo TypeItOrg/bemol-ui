@@ -1,0 +1,148 @@
+import "server-only";
+
+import { NextResponse } from "next/server";
+
+import { publicApiFetch } from "@common/services/public-api-fetch.service";
+import { isValidUuid } from "@common/utils/uuid.util";
+
+import { INSTITUTION_LOGO_MIME_TYPES, MAX_INSTITUTION_LOGO_BYTES } from "@features/institutions/constants/institution-logo.constants";
+
+function unavailable(status = 503): Response {
+  return NextResponse.json({ message: "Logo no disponible." }, { status, headers: { "Cache-Control": "no-store" } });
+}
+
+export async function fetchInstitutionLogo(institutionId: string, version: string | null): Promise<Response> {
+  if (!isValidUuid(institutionId)) {
+    return unavailable(404);
+  }
+
+  try {
+    const response = await publicApiFetch(`/api/v1/institutions/${institutionId}/logo${version ? `?v=${encodeURIComponent(version)}` : ""}`);
+
+    if (!response.ok) {
+      return unavailable(response.status === 404 ? 404 : 503);
+    }
+
+    const type = response.headers.get("content-type")?.split(";")[0];
+
+    const declaredSize = Number(response.headers.get("content-length"));
+
+    if (!response.body || !type || !INSTITUTION_LOGO_MIME_TYPES.some((allowed) => allowed === type) || declaredSize > MAX_INSTITUTION_LOGO_BYTES) {
+      await response.body?.cancel();
+
+      return unavailable();
+    }
+
+    const reader = response.body.getReader();
+
+    const initialChunks: Uint8Array[] = [];
+
+    let initialSize = 0;
+
+    let complete = false;
+
+    const signatureLength = type === "image/webp" ? 12 : 8;
+
+    while (initialSize < signatureLength && !complete) {
+      const chunk = await reader.read();
+
+      complete = chunk.done;
+
+      if (chunk.value) {
+        initialChunks.push(chunk.value);
+        initialSize += chunk.value.byteLength;
+      }
+    }
+
+    if (initialSize > MAX_INSTITUTION_LOGO_BYTES) {
+      await reader.cancel();
+
+      return unavailable();
+    }
+
+    const signature = new Uint8Array(Math.min(initialSize, signatureLength));
+
+    let offset = 0;
+
+    for (const chunk of initialChunks) {
+      const prefix = chunk.subarray(0, signature.byteLength - offset);
+
+      signature.set(prefix, offset);
+      offset += prefix.byteLength;
+
+      if (offset === signature.byteLength) {
+        break;
+      }
+    }
+
+    const validSignature =
+      (type === "image/png" && [137, 80, 78, 71, 13, 10, 26, 10].every((byte, index) => signature[index] === byte)) ||
+      (type === "image/jpeg" && signature[0] === 255 && signature[1] === 216 && signature[2] === 255) ||
+      (type === "image/webp" &&
+        [82, 73, 70, 70].every((byte, index) => signature[index] === byte) &&
+        [87, 69, 66, 80].every((byte, index) => signature[index + 8] === byte));
+
+    if (!validSignature) {
+      await reader.cancel();
+
+      return unavailable();
+    }
+
+    let total = initialSize;
+
+    const stream = new ReadableStream<Uint8Array>({
+      start(controller) {
+        for (const chunk of initialChunks) {
+          controller.enqueue(chunk);
+        }
+
+        if (complete) {
+          controller.close();
+        }
+      },
+      async pull(controller) {
+        if (complete) {
+          return;
+        }
+
+        try {
+          const chunk = await reader.read();
+
+          if (chunk.done) {
+            complete = true;
+            controller.close();
+
+            return;
+          }
+
+          total += chunk.value.byteLength;
+
+          if (total > MAX_INSTITUTION_LOGO_BYTES) {
+            await reader.cancel();
+            controller.error(new Error("Logo size limit exceeded"));
+
+            return;
+          }
+
+          controller.enqueue(chunk.value);
+        } catch (error) {
+          controller.error(error);
+        }
+      },
+      cancel() {
+        return reader.cancel();
+      },
+    });
+
+    return new Response(stream, {
+      headers: {
+        "Content-Type": type,
+        "Cache-Control": "no-store",
+        "X-Content-Type-Options": "nosniff",
+        "Content-Disposition": "inline",
+      },
+    });
+  } catch {
+    return unavailable();
+  }
+}

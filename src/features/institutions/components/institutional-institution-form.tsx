@@ -37,9 +37,14 @@ import { applyServerErrors, getDefaultValues, getInitialLocation } from "@featur
 type InstitutionalInstitutionFormProps = {
   institution: Institution;
   returnTo?: string;
+  logoBlurDataURL?: string;
 };
 
-export function InstitutionalInstitutionForm({ institution, returnTo = "/institution" }: InstitutionalInstitutionFormProps): ReactElement {
+export function InstitutionalInstitutionForm({
+  institution,
+  returnTo = "/institution",
+  logoBlurDataURL,
+}: InstitutionalInstitutionFormProps): ReactElement {
   const router = useRouter();
 
   const destination = getSafeReturnTo(returnTo, "/institution");
@@ -143,6 +148,7 @@ export function InstitutionalInstitutionForm({ institution, returnTo = "/institu
           institutionId={institution.id}
           institutionName={institution.name}
           logoUrl={institution.logoUrl}
+          logoBlurDataURL={logoBlurDataURL}
           value={logoChange}
           disabled={isPending}
           error={errors.root?.logo?.message}

@@ -5,21 +5,21 @@ import Image from "next/image";
 import { Separator } from "@common/components/ui/separator";
 
 import { InstitutionalBrandIdentity } from "@features/institutional-auth/components/institutional-brand-identity";
-import { getInstitutionalBrand } from "@features/institutional-auth/services/get-institutional-brand.service";
+import type { PublicInstitution } from "@features/institutions/types/public-institution.types";
 
-export async function InstitutionalHomeHero({
+export function InstitutionalHomeHero({
   greeting,
   name,
   institutionName,
   primaryRole,
+  institution,
 }: {
   greeting: "Buenos días" | "Buenas tardes" | "Buenas noches";
   name: string;
   institutionName?: string;
   primaryRole: string;
-}): Promise<ReactElement> {
-  const institution = await getInstitutionalBrand();
-
+  institution?: Pick<PublicInstitution, "id" | "name" | "logoUrl" | "logoBlurDataURL">;
+}): ReactElement {
   return (
     <header className="@container/home-hero relative flex h-56 min-w-0 items-center overflow-hidden shadow-sm @2xl/home-hero:h-64">
       <Image src="/images/institutional-header.webp" alt="" fill sizes="100vw" quality={90} preload className="object-cover object-center" />

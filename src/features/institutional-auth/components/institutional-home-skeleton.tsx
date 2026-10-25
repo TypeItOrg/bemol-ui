@@ -3,7 +3,14 @@ import type { ReactElement } from "react";
 import { NavigationCardSkeleton } from "@common/components/navigation/navigation-card-skeleton";
 import { Skeleton } from "@common/components/ui/skeleton";
 
-export function InstitutionalHomeSkeleton(): ReactElement {
+import { InstitutionalBrandIdentity } from "@features/institutional-auth/components/institutional-brand-identity";
+import type { PublicInstitution } from "@features/institutions/types/public-institution.types";
+
+export function InstitutionalHomeSkeleton({
+  institution,
+}: {
+  institution?: Pick<PublicInstitution, "id" | "name" | "logoUrl" | "logoBlurDataURL">;
+} = {}): ReactElement {
   return (
     <main className="flex min-h-full flex-1 flex-col gap-4" aria-label="Cargando portal institucional" role="status">
       <header className="bg-muted/60 @container/home-hero relative flex h-56 min-w-0 items-center overflow-hidden shadow-sm @2xl/home-hero:h-64">
@@ -13,7 +20,12 @@ export function InstitutionalHomeSkeleton(): ReactElement {
         />
         <div aria-hidden="true" className="absolute inset-0 bg-linear-to-t from-black/20 via-transparent to-transparent dark:from-black/35" />
         <div className="relative flex max-w-3xl min-w-0 items-center gap-4 p-5 text-white @2xl/home-hero:p-6 @4xl/home-hero:p-8">
-          <Skeleton className="h-28 w-28 shrink-0 rounded-lg bg-white/15 ring-1 ring-white/10 @2xl/home-hero:h-32 @2xl/home-hero:w-32 @4xl/home-hero:h-36 @4xl/home-hero:w-36" />
+          <InstitutionalBrandIdentity
+            institution={institution}
+            darkBackground
+            className="shrink-0"
+            imageContainerClassName="h-28 w-28 @2xl/home-hero:h-32 @2xl/home-hero:w-32 @4xl/home-hero:h-36 @4xl/home-hero:w-36"
+          />
           <div className="flex h-28 min-w-0 flex-col justify-center gap-3 py-1 @2xl/home-hero:h-32 @2xl/home-hero:gap-4 @4xl/home-hero:h-36 @4xl/home-hero:py-2">
             <div>
               <Skeleton className="h-8 w-48 max-w-full bg-white/25 @2xl/home-hero:w-60 @4xl/home-hero:h-9 @4xl/home-hero:w-72" />

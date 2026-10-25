@@ -11,6 +11,7 @@ import { InstitutionalHomeHero } from "@features/institutional-auth/components/i
 import { InstitutionalHomeSkeleton } from "@features/institutional-auth/components/institutional-home-skeleton";
 import { HomeAccessRow, HomeSubsection } from "@features/institutional-auth/components/institutional-home-subsection";
 import { fetchInstitutionalPerson } from "@features/institutional-auth/services/fetch-institutional-person.service";
+import { getInstitutionalBrand } from "@features/institutional-auth/services/get-institutional-brand.service";
 import { requireInstitutionalUser } from "@features/institutional-auth/services/get-institutional-user.service";
 import { getGreeting } from "@features/institutional-auth/utils/institutional-greeting.util";
 import {
@@ -19,16 +20,30 @@ import {
   getInstitutionalFormationHomeLinks,
   getInstitutionalHomeLinks,
 } from "@features/institutional-auth/utils/institutional-home-access.util";
+import { getInstitutionLogoPlaceholder } from "@features/institutions/services/get-institution-logo-placeholder.service";
+import type { PublicInstitution } from "@features/institutions/types/public-institution.types";
 
-export function InstitutionalHome({ personId }: { personId?: string }): ReactElement {
+export async function InstitutionalHome({ personId }: { personId?: string }): Promise<ReactElement> {
+  const institution = await getInstitutionalBrand();
+
+  const brand = institution
+    ? { ...institution, logoBlurDataURL: await getInstitutionLogoPlaceholder(institution.id, institution.logoUrl) }
+    : undefined;
+
   return (
-    <Suspense fallback={<InstitutionalHomeSkeleton />}>
-      <InstitutionalHomeContent personId={personId} />
+    <Suspense fallback={<InstitutionalHomeSkeleton institution={brand} />}>
+      <InstitutionalHomeContent personId={personId} institution={brand} />
     </Suspense>
   );
 }
 
-async function InstitutionalHomeContent({ personId }: { personId?: string }): Promise<ReactElement> {
+async function InstitutionalHomeContent({
+  personId,
+  institution,
+}: {
+  personId?: string;
+  institution?: Pick<PublicInstitution, "id" | "name" | "logoUrl" | "logoBlurDataURL">;
+}): Promise<ReactElement> {
   const [user, person] = await Promise.all([
     requireInstitutionalUser(),
     fetchInstitutionalPerson(),
@@ -79,7 +94,13 @@ async function InstitutionalHomeContent({ personId }: { personId?: string }): Pr
 
   return (
     <main className="flex min-h-full flex-1 flex-col gap-4">
-      <InstitutionalHomeHero greeting={greeting} name={user.name} institutionName={person?.institutionName} primaryRole={primaryRole} />
+      <InstitutionalHomeHero
+        greeting={greeting}
+        name={user.name}
+        institutionName={person?.institutionName}
+        primaryRole={primaryRole}
+        institution={institution}
+      />
 
       <div className="flex flex-col gap-4 px-3 pb-3 md:px-4 md:pb-4">
         {personalLinks.length > 0 ? (

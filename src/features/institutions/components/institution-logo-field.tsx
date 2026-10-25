@@ -21,6 +21,7 @@ type InstitutionLogoFieldProps = {
   institutionId: string;
   institutionName: string;
   logoUrl: string | null;
+  logoBlurDataURL?: string;
   value: InstitutionLogoChange;
   onChange: (value: InstitutionLogoChange) => void;
   onError: (message: string) => void;
@@ -32,6 +33,7 @@ export function InstitutionLogoField({
   institutionId,
   institutionName,
   logoUrl,
+  logoBlurDataURL,
   value,
   onChange,
   onError,
@@ -162,6 +164,7 @@ export function InstitutionLogoField({
               displayUrl ? (
                 <InstitutionLogoImage
                   src={displayUrl}
+                  blurDataURL={displayUrl === currentUrl ? logoBlurDataURL : undefined}
                   alt={selectedFile && !undoRequested ? "Vista previa del nuevo logo" : `Logo de ${institutionName}`}
                   className="h-full w-full object-contain"
                   compact

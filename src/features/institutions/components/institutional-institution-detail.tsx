@@ -16,9 +16,15 @@ type InstitutionalInstitutionDetailProps = {
   canUpdate: boolean;
   institution: Institution;
   returnTo: string;
+  logoBlurDataURL?: string;
 };
 
-export function InstitutionalInstitutionDetail({ canUpdate, institution, returnTo }: InstitutionalInstitutionDetailProps): ReactElement {
+export function InstitutionalInstitutionDetail({
+  canUpdate,
+  institution,
+  returnTo,
+  logoBlurDataURL,
+}: InstitutionalInstitutionDetailProps): ReactElement {
   const address = formatAddress(institution);
 
   return (
@@ -39,6 +45,7 @@ export function InstitutionalInstitutionDetail({ canUpdate, institution, returnT
         institutionId={institution.id}
         institutionName={institution.name}
         logoUrl={institution.logoUrl}
+        logoBlurDataURL={logoBlurDataURL}
         scope="institutional"
         canUpdate={canUpdate}
       />

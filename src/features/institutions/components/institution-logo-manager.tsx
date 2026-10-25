@@ -2,10 +2,9 @@
 
 import { useState, type ReactElement } from "react";
 
-import Image from "next/image";
-
 import { ImageIcon } from "lucide-react";
 
+import { LogoImage } from "@common/components/logo-image";
 import { SectionHeader } from "@common/components/section-header";
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@common/components/ui/empty";
 import { cn } from "@common/utils/cn.util";
@@ -19,11 +18,12 @@ type InstitutionLogoManagerProps = {
   institutionId: string;
   institutionName: string;
   logoUrl: string | null;
+  logoBlurDataURL?: string;
   scope?: "platform" | "institutional";
   canUpdate?: boolean;
 };
 
-export function InstitutionLogoManager({ institutionId, institutionName, logoUrl }: InstitutionLogoManagerProps): ReactElement {
+export function InstitutionLogoManager({ institutionId, institutionName, logoUrl, logoBlurDataURL }: InstitutionLogoManagerProps): ReactElement {
   const currentUrl = getInstitutionLogoUrl(institutionId, logoUrl);
 
   return (
@@ -33,7 +33,12 @@ export function InstitutionLogoManager({ institutionId, institutionName, logoUrl
       </header>
       <div className="bg-background mt-5 flex min-h-32 items-center justify-center rounded-lg border p-4">
         {currentUrl ? (
-          <InstitutionLogoImage src={currentUrl} alt={`Logo de ${institutionName}`} className="h-auto max-h-40 w-auto max-w-full object-contain" />
+          <InstitutionLogoImage
+            blurDataURL={logoBlurDataURL}
+            src={currentUrl}
+            alt={`Logo de ${institutionName}`}
+            className="h-auto max-h-40 w-auto max-w-full object-contain"
+          />
         ) : (
           <InstitutionLogoPlaceholder />
         )}
@@ -47,11 +52,13 @@ export function InstitutionLogoImage({
   alt,
   className,
   compact = false,
+  blurDataURL,
 }: {
   src: string;
   alt: string;
   className?: string;
   compact?: boolean;
+  blurDataURL?: string;
 }): ReactElement {
   const [failedUrl, setFailedUrl] = useState<string>();
 
@@ -68,7 +75,19 @@ export function InstitutionLogoImage({
     );
   }
 
-  return <Image unoptimized src={src} alt={alt} width={240} height={160} className={className} onError={() => setFailedUrl(src)} />;
+  return (
+    <LogoImage
+      key={src}
+      blurDataURL={blurDataURL}
+      unoptimized
+      src={src}
+      alt={alt}
+      width={240}
+      height={160}
+      className={className}
+      onError={() => setFailedUrl(src)}
+    />
+  );
 }
 
 function InstitutionLogoPlaceholder({ unavailable = false }: { unavailable?: boolean }): ReactElement {

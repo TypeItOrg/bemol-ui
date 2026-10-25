@@ -2,8 +2,7 @@
 
 import { useState, type ReactElement } from "react";
 
-import Image from "next/image";
-
+import { LogoImage } from "@common/components/logo-image";
 import { cn } from "@common/utils/cn.util";
 
 import { useInstitutionalBrand } from "@features/institutional-auth/components/institutional-brand-context";
@@ -18,7 +17,7 @@ export function InstitutionalBrandIdentity({
   showInstitutionName = false,
   darkBackground = false,
 }: {
-  institution?: Pick<PublicInstitution, "id" | "name" | "logoUrl">;
+  institution?: Pick<PublicInstitution, "id" | "name" | "logoUrl" | "logoBlurDataURL">;
   className?: string;
   imageClassName?: string;
   imageContainerClassName?: string;
@@ -35,41 +34,23 @@ export function InstitutionalBrandIdentity({
 
   const [failedUrl, setFailedUrl] = useState<string>();
 
-  const [loadedUrl, setLoadedUrl] = useState<string>();
-
-  const [failedPreviewUrl, setFailedPreviewUrl] = useState<string>();
-
   const hasInstitutionLogo = Boolean(institutionLogoUrl && failedUrl !== institutionLogoUrl);
 
   const logoUrl = hasInstitutionLogo ? institutionLogoUrl : productLogoUrl;
 
   const hasLogo = Boolean(logoUrl && failedUrl !== logoUrl);
 
-  const isLogoLoading = hasInstitutionLogo && loadedUrl !== logoUrl;
+  const preview = hasInstitutionLogo ? institution?.logoBlurDataURL : undefined;
 
   const showProductLogoVariant = !hasInstitutionLogo && !darkBackground;
 
   return (
     <div className={cn("flex min-w-0 flex-col items-center gap-3 text-center", className)}>
       {hasLogo && logoUrl ? (
-        <div aria-busy={isLogoLoading} className={cn("relative flex items-center justify-center", imageContainerClassName)}>
-          {isLogoLoading && failedPreviewUrl !== logoUrl ? (
-            <Image
-              key={`preview-${logoUrl}`}
-              src={logoUrl.replace("/logo", "/logo/placeholder")}
-              alt=""
-              aria-hidden="true"
-              unoptimized
-              width={32}
-              height={32}
-              sizes="32px"
-              loading="eager"
-              className={cn("absolute h-full w-full object-contain blur-xs motion-safe:animate-pulse", imageClassName)}
-              onError={() => setFailedPreviewUrl(logoUrl)}
-            />
-          ) : null}
-          <Image
+        <div className={cn("relative flex items-center justify-center", imageContainerClassName)}>
+          <LogoImage
             key={logoUrl}
+            blurDataURL={preview}
             preload
             unoptimized={Boolean(institution)}
             sizes="(max-width: 640px) 80px, (max-width: 768px) 96px, (max-width: 1024px) 256px, 288px"
@@ -77,18 +58,12 @@ export function InstitutionalBrandIdentity({
             height={institution ? 240 : 32}
             src={logoUrl}
             alt={hasInstitutionLogo && institution ? `Logo de ${institution.name}` : "Logo de Bemol"}
-            className={cn(
-              "h-full w-full object-contain transition-opacity duration-200 motion-reduce:transition-none",
-              showProductLogoVariant && "dark:hidden",
-              imageClassName,
-              isLogoLoading ? "opacity-0" : "opacity-100",
-            )}
-            onLoad={() => setLoadedUrl(logoUrl)}
+            className={cn("h-full w-full object-contain", showProductLogoVariant && "dark:hidden", imageClassName)}
             onError={() => setFailedUrl(logoUrl)}
           />
           {/* CSS selects the product variant without changing image attributes during hydration. */}
           {showProductLogoVariant ? (
-            <Image
+            <LogoImage
               preload
               sizes="(max-width: 640px) 80px, (max-width: 768px) 96px, (max-width: 1024px) 256px, 288px"
               width={32}

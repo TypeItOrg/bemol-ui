@@ -16,6 +16,7 @@ import { getInstitutionalMetadata } from "@features/institutional-auth/utils/ins
 import { hasInstitutionalPermission } from "@features/institutional-auth/utils/institutional-permission.util";
 import { InstitutionalInstitutionDetail } from "@features/institutions/components/institutional-institution-detail";
 import { fetchInstitutionalInstitution } from "@features/institutions/services/fetch-institutional-institution.service";
+import { getInstitutionLogoPlaceholder } from "@features/institutions/services/get-institution-logo-placeholder.service";
 import { PlatformPageIcon } from "@features/platform-auth/components/platform-page-icon";
 import { PlatformPageShell } from "@features/platform-auth/components/platform-page-shell";
 
@@ -55,7 +56,12 @@ export default async function InstitutionalInstitutionPage({
       actionsClassName="self-stretch"
       actions={<PlatformPageIcon icon={Building2Icon} />}
     >
-      <InstitutionalInstitutionDetail canUpdate={canUpdate} institution={institution} returnTo={destination} />
+      <InstitutionalInstitutionDetail
+        logoBlurDataURL={await getInstitutionLogoPlaceholder(institution.id, institution.logoUrl)}
+        canUpdate={canUpdate}
+        institution={institution}
+        returnTo={destination}
+      />
     </PlatformPageShell>
   );
 }
