@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { BookOpenIcon, SearchIcon } from "lucide-react";
 
 import { useDataTableNavigation } from "@common/components/ui/data-table-navigation";
+import { tabsListVariants, tabsTriggerStyles } from "@common/components/ui/tabs";
 import type { PaginatedResponse } from "@common/types/paginated-response.types";
 import { cn } from "@common/utils/cn.util";
 
@@ -59,7 +60,7 @@ export function MySubjects({ data, page, size, status, academicStatus, canWithdr
     <div className="flex min-h-0 flex-1 flex-col gap-5">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <nav aria-label="Secciones de mis materias" className="w-full max-w-full sm:w-fit">
-          <div className="bg-muted text-muted-foreground grid grid-cols-2 items-center gap-1 rounded-lg p-1 text-sm font-medium sm:flex sm:gap-0.5 sm:p-[3px]">
+          <div data-variant="default" className={cn(tabsListVariants(), "grid w-full grid-cols-2 sm:inline-flex sm:w-fit")}>
             {[
               { value: "current", title: "En curso" },
               { value: "history", title: "Historial" },
@@ -68,12 +69,10 @@ export function MySubjects({ data, page, size, status, academicStatus, canWithdr
                 key={tab.value}
                 type="button"
                 aria-current={view === tab.value ? "page" : undefined}
+                data-active={view === tab.value ? "" : undefined}
                 disabled={isPending}
                 onClick={() => changeView(tab.value)}
-                className={cn(
-                  "focus-visible:outline-ring inline-flex min-h-9 items-center justify-center rounded-md px-1 py-1 text-center transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 disabled:pointer-events-none disabled:opacity-50 sm:h-[30px] sm:min-h-0 sm:px-2.5 sm:py-0 sm:whitespace-nowrap",
-                  view === tab.value ? "bg-background text-foreground shadow-xs" : "hover:text-foreground",
-                )}
+                className={tabsTriggerStyles}
               >
                 {tab.title}
               </button>
