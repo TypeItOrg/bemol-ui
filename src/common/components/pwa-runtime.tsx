@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useSyncExternalStore, type ReactElement } from "react";
+import { useEffect, type ReactElement } from "react";
 
 import { usePathname } from "next/navigation";
 
@@ -8,45 +8,21 @@ import { WifiOffIcon } from "lucide-react";
 import { useTheme } from "next-themes";
 
 import { Alert, AlertDescription, AlertTitle } from "@common/components/ui/alert";
-
-function subscribeToConnectionChange(callback: () => void): () => void {
-  window.addEventListener("online", callback);
-  window.addEventListener("offline", callback);
-
-  return () => {
-    window.removeEventListener("online", callback);
-    window.removeEventListener("offline", callback);
-  };
-}
+import { useOnlineStatus } from "@common/hooks/use-online-status";
+import { registerPwaServiceWorker, syncPwaThemeColor } from "@common/services/pwa/pwa.service";
 
 export function PwaRuntime(): ReactElement | null {
   const pathname = usePathname();
 
   const { resolvedTheme } = useTheme();
 
-  const online = useSyncExternalStore(
-    subscribeToConnectionChange,
-    () => navigator.onLine,
-    () => true,
-  );
+  const online = useOnlineStatus();
 
   useEffect(() => {
-    if (resolvedTheme !== "light" && resolvedTheme !== "dark") {
-      return;
-    }
-
-    document.querySelector<HTMLMetaElement>('meta[name="theme-color"]')?.setAttribute("content", resolvedTheme === "dark" ? "#10080a" : "#faf9f6");
+    syncPwaThemeColor(resolvedTheme);
   }, [pathname, resolvedTheme]);
 
-  useEffect(() => {
-    if (process.env.NODE_ENV !== "production" || !("serviceWorker" in navigator)) {
-      return;
-    }
-
-    void navigator.serviceWorker.register("/sw.js", { scope: "/", updateViaCache: "none" }).catch(() => {
-      console.warn("[PWA] No se pudo preparar el aviso sin conexión. La aplicación sigue disponible online.");
-    });
-  }, []);
+  useEffect(registerPwaServiceWorker, []);
 
   if (online) {
     return null;
