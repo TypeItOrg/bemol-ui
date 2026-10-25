@@ -5,6 +5,7 @@ import type { ReactElement } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import { tabsListVariants, tabsTriggerStyles } from "@common/components/ui/tabs";
 import { cn } from "@common/utils/cn.util";
 
 const ACCOUNT_TABS = [
@@ -21,7 +22,7 @@ export function InstitutionalAccountTabs(): ReactElement {
 
   return (
     <nav aria-label="Secciones de la cuenta" className="w-full max-w-full sm:w-fit">
-      <div className="bg-muted text-muted-foreground grid grid-cols-2 items-center gap-1 rounded-lg p-1 text-sm font-medium sm:flex sm:gap-0.5 sm:p-[3px]">
+      <div data-variant="default" className={cn(tabsListVariants(), "grid w-full grid-cols-2 sm:inline-flex sm:w-fit")}>
         {ACCOUNT_TABS.map((tab) => {
           const isActive = tab.url === activeUrl;
 
@@ -30,10 +31,8 @@ export function InstitutionalAccountTabs(): ReactElement {
               key={tab.url}
               href={tab.url}
               aria-current={isActive ? "page" : undefined}
-              className={cn(
-                "inline-flex min-h-9 items-center justify-center rounded-md px-1 py-1 text-center transition-colors sm:h-[30px] sm:min-h-0 sm:px-2.5 sm:py-0 sm:whitespace-nowrap",
-                isActive ? "bg-background text-foreground shadow-xs" : "hover:text-foreground",
-              )}
+              data-active={isActive ? true : undefined}
+              className={cn(tabsTriggerStyles, "text-center whitespace-normal sm:whitespace-nowrap")}
             >
               {tab.title}
             </Link>

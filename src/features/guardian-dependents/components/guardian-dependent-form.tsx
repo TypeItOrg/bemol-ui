@@ -122,11 +122,11 @@ export function GuardianDependentForm({ institutionId, returnTo }: { institution
           value={values.requestMode}
           onValueChange={(requestMode) => setValues((previous) => ({ ...previous, requestMode }))}
         >
-          <TabsList aria-label="Tipo de solicitud" className="h-auto! w-full flex-col sm:w-fit sm:flex-row">
-            <TabsTrigger className="w-full px-3 py-2 sm:w-auto" disabled={fieldsDisabled} value="EXISTING">
+          <TabsList aria-label="Tipo de solicitud" className="w-full flex-col sm:w-fit sm:flex-row">
+            <TabsTrigger className="w-full text-center whitespace-normal sm:w-auto sm:whitespace-nowrap" disabled={fieldsDisabled} value="EXISTING">
               Vincular persona existente
             </TabsTrigger>
-            <TabsTrigger className="w-full px-3 py-2 sm:w-auto" disabled={fieldsDisabled} value="NEW">
+            <TabsTrigger className="w-full text-center whitespace-normal sm:w-auto sm:whitespace-nowrap" disabled={fieldsDisabled} value="NEW">
               Registrar persona nueva
             </TabsTrigger>
           </TabsList>

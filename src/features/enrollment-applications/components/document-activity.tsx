@@ -135,11 +135,11 @@ export function DocumentActivity({
         {showRequirementChanges ? (
           <Tabs defaultValue={initialTab} className="min-h-0 flex-1 gap-0">
             <div className="border-b px-5 py-3">
-              <TabsList className="w-full group-data-horizontal/tabs:h-auto" aria-label="Tipo de historial">
-                <TabsTrigger className="min-h-11" value="deliveries">
+              <TabsList className="w-full flex-col sm:flex-row" aria-label="Tipo de historial">
+                <TabsTrigger className="text-center whitespace-normal" value="deliveries">
                   Entregas
                 </TabsTrigger>
-                <TabsTrigger className="min-h-11" value="changes">
+                <TabsTrigger className="text-center whitespace-normal" value="changes">
                   Cambios del requisito
                 </TabsTrigger>
               </TabsList>

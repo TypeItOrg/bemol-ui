@@ -41,14 +41,14 @@ function DocumentPdfPreviewView({ src, name, expanded, onError }: DocumentPdfPre
     <div className={cn("flex h-full min-h-0 flex-col", expanded && "gap-3")}>
       {expanded ? (
         <div className="flex shrink-0 flex-wrap items-center justify-between gap-2" aria-label="Controles de vista del PDF">
-          <Tabs value={automaticFit ? fitMode : ""} onValueChange={(value) => changeFit(value === "width")}>
-            <TabsList className="flex h-[52px]! gap-1 p-1" aria-label="Ajuste de la vista del PDF">
+          <Tabs className="w-full sm:w-auto" value={automaticFit ? fitMode : ""} onValueChange={(value) => changeFit(value === "width")}>
+            <TabsList className="w-full sm:w-fit" aria-label="Ajuste de la vista del PDF">
               <TabsTrigger
                 value="width"
                 id={`${previewId}-width`}
                 aria-controls={previewId}
                 disabled={controlsDisabled}
-                className="h-10! px-4 py-2 text-center text-sm"
+                className="text-center whitespace-normal sm:whitespace-nowrap"
               >
                 Ajustar al ancho
               </TabsTrigger>
@@ -57,7 +57,7 @@ function DocumentPdfPreviewView({ src, name, expanded, onError }: DocumentPdfPre
                 id={`${previewId}-page`}
                 aria-controls={previewId}
                 disabled={controlsDisabled}
-                className="h-10! px-4 py-2 text-center text-sm"
+                className="text-center whitespace-normal sm:whitespace-nowrap"
               >
                 Página completa
               </TabsTrigger>

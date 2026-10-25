@@ -13,12 +13,12 @@ export function EnrollmentWizardNavigation({ hydrated, visibleTabs, tabTriggerRe
   if (!hydrated) {
     return (
       <div
-        className="bg-muted flex h-[52px] w-full animate-pulse items-center gap-1 rounded-lg p-1"
+        className="bg-muted flex h-13 w-full animate-pulse items-center gap-1 rounded-lg p-1"
         role="status"
         aria-label="Preparando pasos de la inscripción"
       >
         {Array.from({ length: 3 }, (_, index) => (
-          <span key={index} className="bg-background/70 h-10 flex-1 rounded-md" />
+          <span key={index} className="bg-background/70 h-11 flex-1 rounded-md" />
         ))}
       </div>
     );
@@ -26,7 +26,7 @@ export function EnrollmentWizardNavigation({ hydrated, visibleTabs, tabTriggerRe
 
   return (
     <HorizontalScrollArea>
-      <TabsList className="flex h-[52px]! w-max min-w-full gap-1 p-1">
+      <TabsList className="flex w-max min-w-full">
         {visibleTabs.map((tab) => (
           <TabsTrigger
             key={tab.id}
@@ -38,7 +38,7 @@ export function EnrollmentWizardNavigation({ hydrated, visibleTabs, tabTriggerRe
               }
             }}
             value={tab.id}
-            className="h-10! min-w-44 flex-[1_0_auto] px-5 py-2 text-center text-sm group-data-[overflow=true]/horizontal-scroll-area:h-11!"
+            className="min-w-44 flex-[1_0_auto] text-center"
           >
             {tab.label}
           </TabsTrigger>
