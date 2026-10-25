@@ -88,6 +88,7 @@ async function InstitutionalHomeContent({ personId }: { personId?: string }): Pr
             title="Mi espacio"
             description="Gestioná tus inscripciones, las personas a tu cargo y tu cuenta."
             icon={UserRoundIcon}
+            imageSrc="/images/institutional-management.webp"
           >
             <nav aria-label="Herramientas personales" className="[&>a]:bg-background grid gap-4">
               {personalLinks.map((link) => (
