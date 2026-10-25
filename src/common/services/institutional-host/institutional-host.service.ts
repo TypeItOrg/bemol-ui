@@ -82,6 +82,7 @@ export async function resolveRequestInstitution(requestHeaders: Pick<Headers, "g
       !isValidUuid(institution.id) ||
       typeof institution.name !== "string" ||
       !institution.name.trim() ||
+      (institution.shortName != null && typeof institution.shortName !== "string") ||
       institution.publicSubdomain !== context.publicSubdomain ||
       (institution.logoUrl !== null && typeof institution.logoUrl !== "string")
     ) {
@@ -91,6 +92,7 @@ export async function resolveRequestInstitution(requestHeaders: Pick<Headers, "g
     return {
       id: institution.id,
       name: institution.name,
+      shortName: institution.shortName ?? null,
       publicSubdomain: institution.publicSubdomain,
       logoUrl: institution.logoUrl,
     };

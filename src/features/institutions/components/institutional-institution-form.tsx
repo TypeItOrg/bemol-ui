@@ -111,19 +111,32 @@ export function InstitutionalInstitutionForm({ institution, returnTo = "/institu
 
       <fieldset disabled={isPending} className="bg-background flex min-w-0 flex-col gap-6 rounded-xl shadow-xs">
         <FormCard icon={Building2Icon} title="Información general" description="Nombre que identifica a la institución.">
-          <Field data-invalid={!!errors.name}>
-            <FieldContent>
-              <FieldLabel htmlFor="institution-name">Nombre de la institución</FieldLabel>
-            </FieldContent>
-            <Input
-              id="institution-name"
-              defaultValue={defaultValues.name}
-              placeholder="Conservatorio Superior de Música"
-              aria-invalid={!!errors.name}
-              {...register("name")}
-            />
-            <FieldError errors={[errors.name]} />
-          </Field>
+          <FieldGroup className="gap-4">
+            <Field data-invalid={!!errors.name}>
+              <FieldContent>
+                <FieldLabel htmlFor="institution-name">Nombre de la institución</FieldLabel>
+              </FieldContent>
+              <Input
+                id="institution-name"
+                defaultValue={defaultValues.name}
+                placeholder="Conservatorio Superior de Música"
+                aria-invalid={!!errors.name}
+                {...register("name")}
+              />
+              <FieldError errors={[errors.name]} />
+            </Field>
+            <Field data-invalid={!!errors.shortName}>
+              <FieldLabel htmlFor="institution-short-name">Nombre corto</FieldLabel>
+              <Input
+                id="institution-short-name"
+                defaultValue={defaultValues.shortName}
+                maxLength={50}
+                aria-invalid={!!errors.shortName}
+                {...register("shortName")}
+              />
+              <FieldError errors={[errors.shortName]} />
+            </Field>
+          </FieldGroup>
         </FormCard>
 
         <InstitutionLogoField

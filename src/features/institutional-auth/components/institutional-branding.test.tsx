@@ -51,6 +51,7 @@ jest.mock("@features/institutional-auth/actions/activate-own-access.action", () 
 const institution = {
   id: "22222222-2222-4222-8222-222222222222",
   name: "Conservatorio Boero",
+  shortName: null,
   publicSubdomain: "cboero",
   logoUrl: `/api/v1/institutions/22222222-2222-4222-8222-222222222222/logo?v=opaque`,
 };

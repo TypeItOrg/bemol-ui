@@ -5,6 +5,7 @@ import type { InstitutionSummary } from "@features/institutions/types/institutio
 
 export type Institution = Omit<InstitutionSummary, "city" | "province"> & {
   city: InstitutionCity;
+  shortName: string | null;
   province: InstitutionProvince;
   country: InstitutionCountry;
   street: string | null;

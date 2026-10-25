@@ -18,6 +18,7 @@ export const INSTITUTION_ERROR_MESSAGES = {
   UPDATE_TITLE: "No se pudo actualizar la institución",
   PREVIEW_UNAVAILABLE: "No se pudo cargar la vista previa.",
   REQUIRED_NAME: "El nombre es requerido.",
+  SHORT_NAME_MAX_LENGTH: "El nombre corto admite hasta 50 caracteres.",
   NAME_MAX_LENGTH: "El nombre admite hasta 255 caracteres.",
   REQUIRED_CITY: "La ciudad es requerida.",
   NUMBER_MAX_LENGTH: "La altura admite hasta 50 dígitos.",

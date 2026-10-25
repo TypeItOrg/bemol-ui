@@ -22,14 +22,18 @@ it("declares the platform PWA only inside the admin layout, not on general insti
   expect(viewport).toEqual({ viewportFit: "cover", themeColor: "#faf9f6" });
 });
 
-it("keeps the installed name Bemol while retaining the institutional browser favicon", async () => {
+it("uses the institutional short name for the installed app while retaining the institutional browser favicon", async () => {
   const id = "22222222-2222-4222-8222-222222222222";
-  jest
-    .mocked(getRequestInstitution)
-    .mockResolvedValue({ id, name: "Conservatorio Superior de Música Boero", logoUrl: `/api/v1/institutions/${id}/logo`, publicSubdomain: "cboero" });
+  jest.mocked(getRequestInstitution).mockResolvedValue({
+    id,
+    name: "Conservatorio Superior de Música Boero",
+    shortName: "Boero",
+    logoUrl: `/api/v1/institutions/${id}/logo`,
+    publicSubdomain: "cboero",
+  });
   const metadata = await generateMetadata();
   expect(metadata.manifest).toBe("/manifest.webmanifest");
-  expect(metadata.appleWebApp).toMatchObject({ title: "Bemol" });
+  expect(metadata.appleWebApp).toMatchObject({ title: "Boero | Bemol" });
   expect(metadata.icons).toMatchObject({
     icon: [{ url: `/api/public/institutions/${id}/logo` }],
     apple: [{ url: "/brand/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],

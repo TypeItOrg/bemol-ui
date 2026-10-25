@@ -38,6 +38,7 @@ const institution: Institution = {
   email: null,
   active: true,
   userCount: 0,
+  shortName: null,
   publicSubdomain: null,
   logoUrl: "/api/v1/institutions/22222222-2222-4222-8222-222222222222/logo?v=old",
 };

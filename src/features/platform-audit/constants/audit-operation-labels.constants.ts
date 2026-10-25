@@ -1,5 +1,6 @@
 export const OPERATION_FIELD_LABELS: Readonly<Record<string, string>> = {
   name: "Nombre",
+  shortName: "Nombre corto",
   year: "Año",
   startDate: "Desde",
   endDate: "Hasta",

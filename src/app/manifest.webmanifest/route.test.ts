@@ -40,15 +40,16 @@ it("offers the platform app on the generic host without an institution lookup", 
 });
 
 it("resolves successive institutions independently using the actual host and relative resources", async () => {
-  for (const [publicSubdomain, name] of [
-    ["cboero", "Conservatorio Superior de Música Boero"],
-    ["otra", "Otra institución"],
+  for (const [publicSubdomain, name, shortName] of [
+    ["cboero", "Conservatorio Superior de Música Boero", "Boero"],
+    ["otra", "Otra institución", null],
   ]) {
     fetchMock.mockResolvedValueOnce(
       Response.json({
         id: "22222222-2222-4222-8222-222222222222",
         publicSubdomain: publicSubdomain,
         name,
+        shortName,
         logoUrl: null,
       }),
     );
@@ -56,7 +57,14 @@ it("resolves successive institutions independently using the actual host and rel
     const manifest = await response.json();
     expect(response.status).toBe(200);
     expect(response.headers.get("cache-control")).toBe("no-store");
-    expect(manifest).toMatchObject({ name: "Bemol", short_name: "Bemol", start_url: "/", id: "/", scope: "/", display: "standalone" });
+    expect(manifest).toMatchObject({
+      name: `${shortName || name} | Bemol`,
+      short_name: `${shortName || name} | Bemol`,
+      start_url: "/",
+      id: "/",
+      scope: "/",
+      display: "standalone",
+    });
     expect(manifest.icons).toEqual([
       { src: "/brand/pwa-192.png?v=2", sizes: "192x192", type: "image/png", purpose: "any" },
       { src: "/brand/pwa-512.png?v=2", sizes: "512x512", type: "image/png", purpose: "any" },

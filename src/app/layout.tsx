@@ -49,7 +49,7 @@ export async function generateMetadata(): Promise<Metadata> {
     appleWebApp: institution
       ? {
           capable: true,
-          title: "Bemol",
+          title: `${institution.shortName?.trim() || institution.name} | Bemol`,
           statusBarStyle: "default",
         }
       : false,

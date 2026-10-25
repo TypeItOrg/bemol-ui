@@ -12,6 +12,7 @@ export type InitialLocation = ComponentProps<typeof LocationPicker>["initialLoca
 export function getDefaultValues(institution: Institution): InstitutionalInstitutionFormInput {
   return {
     name: institution.name,
+    shortName: institution.shortName ?? "",
     cityId: institution.city.cityId,
     street: institution.street ?? "",
     number: institution.number ?? "",

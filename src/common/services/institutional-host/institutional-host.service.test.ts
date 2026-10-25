@@ -12,6 +12,7 @@ jest.mock("next/headers", () => ({ headers: jest.fn() }));
 const institution = {
   id: "22222222-2222-4222-8222-222222222222",
   name: "Conservatorio Boero",
+  shortName: null,
   publicSubdomain: "cboero",
   logoUrl: null,
 };

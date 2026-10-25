@@ -20,6 +20,7 @@ export async function updateInstitutionalInstitutionAction(institutionId: string
 
   const payload = {
     name: formData.get("name"),
+    shortName: formData.get("shortName") ?? "",
     cityId: formData.get("cityId"),
     street: formData.get("street"),
     number: formData.get("number"),

@@ -40,6 +40,17 @@ export function InstitutionGeneralFields({ defaultValues, errors, register }: In
           />
           <FieldError errors={[errors.name]} />
         </Field>
+        <Field data-invalid={!!errors.shortName} className="flex-[1_0_min(200px,100%)]">
+          <FieldLabel htmlFor="institution-short-name">Nombre corto</FieldLabel>
+          <Input
+            id="institution-short-name"
+            defaultValue={defaultValues.shortName}
+            maxLength={50}
+            aria-invalid={!!errors.shortName}
+            {...register("shortName")}
+          />
+          <FieldError errors={[errors.shortName]} />
+        </Field>
       </FieldGroup>
     </InstitutionFormCard>
   );
