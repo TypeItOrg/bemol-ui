@@ -58,8 +58,8 @@ it("resolves successive institutions independently using the actual host and rel
     expect(response.status).toBe(200);
     expect(response.headers.get("cache-control")).toBe("no-store");
     expect(manifest).toMatchObject({
-      name: `${shortName || name} | Bemol`,
-      short_name: `${shortName || name} | Bemol`,
+      name: shortName || name,
+      short_name: shortName || name,
       start_url: "/",
       id: "/",
       scope: "/",

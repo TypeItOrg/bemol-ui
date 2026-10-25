@@ -7,7 +7,7 @@ export async function GET(request: Request): Promise<Response> {
   try {
     const institution = await resolveRequestInstitution(request.headers);
 
-    const name = institution ? `${institution.shortName?.trim() || institution.name} | Bemol` : "Bemol - Administración";
+    const name = institution ? institution.shortName?.trim() || institution.name : "Bemol - Administración";
 
     const manifest: MetadataRoute.Manifest = {
       id: "/",
@@ -19,7 +19,6 @@ export async function GET(request: Request): Promise<Response> {
       scope: "/",
       display: "standalone",
       background_color: "#faf9f6",
-      theme_color: "#faf9f6",
       icons: [
         { src: "/brand/pwa-192.png?v=2", sizes: "192x192", type: "image/png", purpose: "any" },
         { src: "/brand/pwa-512.png?v=2", sizes: "512x512", type: "image/png", purpose: "any" },

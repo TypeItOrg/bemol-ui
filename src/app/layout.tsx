@@ -37,7 +37,7 @@ export async function generateMetadata(): Promise<Metadata> {
     institution = undefined;
   }
 
-  const brandName = institution?.name ?? "Bemol";
+  const brandName = institution?.shortName?.trim() || institution?.name || "Bemol";
 
   return {
     title: {
@@ -49,7 +49,7 @@ export async function generateMetadata(): Promise<Metadata> {
     appleWebApp: institution
       ? {
           capable: true,
-          title: `${institution.shortName?.trim() || institution.name} | Bemol`,
+          title: brandName,
           statusBarStyle: "default",
         }
       : false,
@@ -59,7 +59,6 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export const viewport: Viewport = {
   viewportFit: "cover",
-  themeColor: "#faf9f6",
   colorScheme: "light dark",
 };
 

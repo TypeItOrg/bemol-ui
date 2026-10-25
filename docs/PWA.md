@@ -20,10 +20,11 @@ Esto controla dónde ofrecemos nuestra PWA, no las opciones propias del navegado
 algunos permiten instalar cualquier web o crear accesos directos aun sin manifiesto.
 
 El nombre completo y corto de administración son «Bemol - Administración», incluido
-el nombre Apple. Las institucionales usan «Bemol» en ambos, sin el nombre institucional
-largo. La institución sigue visible en las pantallas y los títulos web existentes.
+el nombre Apple. Las institucionales usan su nombre corto en ambos y en el nombre Apple,
+con el nombre completo como alternativa si no tienen uno corto. Los títulos web usan
+«Pantalla | Institución», por ejemplo «Inicio | Felipe Boero», sin sumar «Bemol».
 Las instalaciones de instituciones diferentes siguen separadas por origen aunque
-compartan nombre e ícono. El dispositivo puede recortar visualmente el nombre.
+compartan ícono. El dispositivo puede recortar visualmente el nombre.
 
 El manifiesto se resuelve desde el Host real y no se comparte entre instituciones.
 El dominio general instala la aplicación de plataforma desde `/admin`; el login
@@ -66,6 +67,15 @@ El worker no fuerza activación de actualizaciones sobre pestañas abiertas ni r
 páginas. Al activarse una versión nueva, solo elimina cachés propias antiguas con el
 prefijo `bemol-pwa-offline-`. Incrementar su versión cuando cambie el fallback. Los
 cambios de nombre o ícono pueden tardar en reflejarse según el dispositivo.
+
+El color de la barra superior se inicializa después de resolver el tema, antes del
+contenido, y solo se sincroniza cuando cambia el tema. El metadato `theme-color`
+queda fuera del viewport administrado por Next.js para que navegar no lo reemplace
+por un color claro y produzca un destello. El manifiesto conserva `background_color`
+para el arranque, pero no declara `theme_color`: la barra de navegación de Android
+queda a criterio de Chrome y del sistema, sin imponer un color claro ni garantizar
+que siga el selector de tema de Bemol. Validar el resultado en la PWA instalada tras
+actualizar su manifiesto.
 
 ## Aceptación y producción
 

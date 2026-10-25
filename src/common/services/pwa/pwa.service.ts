@@ -5,11 +5,14 @@ const THEME_COLORS = new Map([
 
 const THEME_COLOR_META_SELECTOR = 'meta[name="theme-color"]';
 
+// Keep theme-color outside route metadata so navigation cannot reset the selected theme.
 export const PWA_THEME_COLOR_SCRIPT = `
-  document.querySelector('${THEME_COLOR_META_SELECTOR}')?.setAttribute(
-    "content",
-    document.documentElement.style.colorScheme === "dark" ? "${THEME_COLORS.get("dark")}" : "${THEME_COLORS.get("light")}"
-  );
+  (() => {
+    const meta = document.querySelector('${THEME_COLOR_META_SELECTOR}') ?? document.createElement("meta");
+    meta.name = "theme-color";
+    meta.content = document.documentElement.style.colorScheme === "dark" ? "${THEME_COLORS.get("dark")}" : "${THEME_COLORS.get("light")}";
+    document.head.appendChild(meta);
+  })();
 `;
 
 const PRODUCTION_ENVIRONMENT = "production";

@@ -19,7 +19,7 @@ it("declares the platform PWA only inside the admin layout, not on general insti
   expect(adminMetadata.manifest).toBe("/manifest.webmanifest");
   expect(adminMetadata.appleWebApp).toEqual({ capable: true, title: "Bemol - Administración", statusBarStyle: "default" });
   expect(metadata.icons).toMatchObject({ apple: [{ url: "/brand/apple-touch-icon.png", sizes: "180x180", type: "image/png" }] });
-  expect(viewport).toEqual({ viewportFit: "cover", themeColor: "#faf9f6", colorScheme: "light dark" });
+  expect(viewport).toEqual({ viewportFit: "cover", colorScheme: "light dark" });
 });
 
 it("uses the institutional short name for the installed app while retaining the institutional browser favicon", async () => {
@@ -33,7 +33,7 @@ it("uses the institutional short name for the installed app while retaining the 
   });
   const metadata = await generateMetadata();
   expect(metadata.manifest).toBe("/manifest.webmanifest");
-  expect(metadata.appleWebApp).toMatchObject({ title: "Boero | Bemol" });
+  expect(metadata.appleWebApp).toMatchObject({ title: "Boero" });
   expect(metadata.icons).toMatchObject({
     icon: [{ url: `/api/public/institutions/${id}/logo` }],
     apple: [{ url: "/brand/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
