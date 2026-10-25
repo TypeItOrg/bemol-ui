@@ -2,10 +2,11 @@
 
 import type { ReactElement } from "react";
 
-import { Loader2Icon } from "lucide-react";
+import { Loader2Icon, MonitorIcon } from "lucide-react";
 
 import { Badge } from "@common/components/ui/badge";
 import { useDataTableNavigation } from "@common/components/ui/data-table-navigation";
+import { Empty, EmptyHeader, EmptyMedia, EmptyTitle } from "@common/components/ui/empty";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@common/components/ui/table";
 import type { PaginatedResponse } from "@common/types/paginated-response.types";
 import type { PaginationParams } from "@common/types/pagination-params.types";
@@ -23,7 +24,16 @@ export function InstitutionalSessionsTablePresentation({ data, page, size }: Ins
   const { isPending, navigate } = useDataTableNavigation();
 
   if (data.items.length === 0) {
-    return <div className="text-muted-foreground rounded-lg border p-8 text-center text-sm">No tenés sesiones activas.</div>;
+    return (
+      <Empty className="bg-muted/25 h-full min-h-80 rounded-lg border border-solid px-4 py-12">
+        <EmptyHeader className="max-w-md">
+          <EmptyMedia variant="icon">
+            <MonitorIcon aria-hidden="true" className="size-5" />
+          </EmptyMedia>
+          <EmptyTitle className="mt-2 text-base">No tenés sesiones activas.</EmptyTitle>
+        </EmptyHeader>
+      </Empty>
+    );
   }
 
   return (
