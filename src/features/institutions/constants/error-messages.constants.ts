@@ -1,7 +1,7 @@
 export const INSTITUTION_ERROR_MESSAGES = {
   LOGO_UPDATE: "No se pudo guardar el logo. El logo anterior se conserva. Intentá nuevamente.",
   LOGO_REMOVE: "No se pudo eliminar el logo. Intentá nuevamente.",
-  LOGO_INVALID_FILE: "El formato del logo no está permitido.",
+  LOGO_INVALID_FILE: "El logo debe ser una imagen PNG, JPEG o WebP estática válida.",
   LOGO_TOO_LARGE: "El logo supera el tamaño máximo permitido de 2 MB.",
   LOGO_SINGLE_FILE: "Seleccioná una sola imagen para el logo.",
   LOGO_INVALID_CHANGE: "No se pudo interpretar el cambio del logo. Volvé a seleccionar la imagen o deshacé el cambio.",

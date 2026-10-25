@@ -20,7 +20,7 @@ export const documentDefinitionSchema = z.object({
     .max(1000, "Las instrucciones no pueden superar los 1000 caracteres."),
   allowedFormats: z
     .array(
-      z.enum(["application/pdf", "image/jpeg", "image/png"], {
+      z.enum(["application/pdf", "image/jpeg", "image/png", "image/webp"], {
         error: "Seleccioná tipos de archivo válidos.",
       }),
       {

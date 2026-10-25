@@ -70,3 +70,11 @@ it("[L03.replacement-failure] reports API and network errors without a replaceme
   expect(invalid.error).toBe("Imagen inválida");
   expect(invalid.logoUrl).toBeUndefined();
 });
+
+it("accepts WebP logo uploads without changing their content type", async () => {
+  const result = await uploadInstitutionalInstitutionLogo(institutionId, {}, image("image/webp"));
+
+  expect(result.success).toBe(true);
+  const body = jest.mocked(institutionalApiFetch).mock.calls[0][1]?.body as FormData;
+  expect((body.get("file") as File).type).toBe("image/webp");
+});

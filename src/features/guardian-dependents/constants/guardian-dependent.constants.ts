@@ -22,7 +22,7 @@ export const GUARDIAN_LINK_STATUS_LABELS: Record<GuardianLinkStatus, string> = {
   [GUARDIAN_LINK_STATUS.ENDED]: "Finalizada",
 };
 
-export const GUARDIAN_ATTACHMENT_ACCEPT = "application/pdf,image/png,image/jpeg";
+export const GUARDIAN_ATTACHMENT_ACCEPT = "application/pdf,image/png,image/jpeg,image/webp";
 export const GUARDIAN_ATTACHMENT_MAX_FILES = 5;
 export const GUARDIAN_ATTACHMENT_MAX_BYTES = 10 * 1024 * 1024;
 
@@ -36,7 +36,7 @@ export const GUARDIAN_DEPENDENT_MESSAGES = {
   ATTACHMENT_TOO_MANY: "Podés adjuntar hasta 5 documentos.",
   ATTACHMENT_REQUIRED: "Seleccioná un documento para adjuntar.",
   ATTACHMENT_TOO_LARGE: "Cada documento puede pesar hasta 10 MB.",
-  ATTACHMENT_INVALID_TYPE: "Los documentos deben ser PDF, PNG o JPG.",
+  ATTACHMENT_INVALID_TYPE: "Los documentos deben ser PDF, PNG, JPG o WebP estático.",
   FORBIDDEN: "No tenés permisos para gestionar personas a cargo.",
   REQUIRED_DOCUMENT: "El documento es requerido.",
   INVALID_DOCUMENT: "El número de documento debe tener exactamente 8 dígitos.",

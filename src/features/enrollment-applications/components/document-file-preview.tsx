@@ -62,7 +62,7 @@ export function DocumentFilePreview({
     }
   }, [src]);
 
-  const isImage = contentType === "image/png" || contentType === "image/jpeg";
+  const isImage = contentType === "image/png" || contentType === "image/jpeg" || contentType === "image/webp";
 
   const isPdf = contentType === "application/pdf";
 
@@ -198,6 +198,8 @@ function getFormatLabel(contentType: string): string {
       return "PDF";
     case "image/png":
       return "PNG";
+    case "image/webp":
+      return "WebP";
     default:
       return "JPG";
   }

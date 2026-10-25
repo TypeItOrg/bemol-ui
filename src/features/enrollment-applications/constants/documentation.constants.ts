@@ -10,7 +10,7 @@ export const DOCUMENT_STATUS_LABELS = {
   ACCEPTED: "Aceptado",
 } as const;
 export const DOCUMENT_FILE_CATEGORIES = [
-  { value: "images", label: "Imágenes", formats: ["image/jpeg", "image/png"] },
+  { value: "images", label: "Imágenes", formats: ["image/jpeg", "image/png", "image/webp"] },
   { value: "documents", label: "Documentos", formats: ["application/pdf"] },
 ] as const;
 export const DOCUMENT_MESSAGES = {

@@ -7,7 +7,7 @@ export const documentRequirementSchema = z.object({
   name: z.string().trim().min(1).max(150),
   instructions: z.string().trim().max(1000),
   level: z.enum(["AT_SUBMISSION", "BEFORE_CONFIRMATION", "OPTIONAL"]),
-  allowedFormats: z.array(z.enum(["application/pdf", "image/jpeg", "image/png"])).min(1),
+  allowedFormats: z.array(z.enum(["application/pdf", "image/jpeg", "image/png", "image/webp"])).min(1),
   displayOrder: z.number().int().min(0).max(2147483647),
   active: z.boolean(),
 });

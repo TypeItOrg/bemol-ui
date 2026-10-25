@@ -43,7 +43,9 @@ export async function GET(request: Request, { params }: { params: Promise<{ inst
 
     let complete = false;
 
-    while (initialSize < 8 && !complete) {
+    const signatureLength = type === "image/webp" ? 12 : 8;
+
+    while (initialSize < signatureLength && !complete) {
       const chunk = await reader.read();
 
       complete = chunk.done;
@@ -60,7 +62,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ inst
       return unavailable();
     }
 
-    const signature = new Uint8Array(Math.min(initialSize, 8));
+    const signature = new Uint8Array(Math.min(initialSize, signatureLength));
 
     let offset = 0;
 
@@ -76,9 +78,11 @@ export async function GET(request: Request, { params }: { params: Promise<{ inst
     }
 
     const validSignature =
-      type === "image/png"
-        ? [137, 80, 78, 71, 13, 10, 26, 10].every((byte, index) => signature[index] === byte)
-        : signature[0] === 255 && signature[1] === 216 && signature[2] === 255;
+      (type === "image/png" && [137, 80, 78, 71, 13, 10, 26, 10].every((byte, index) => signature[index] === byte)) ||
+      (type === "image/jpeg" && signature[0] === 255 && signature[1] === 216 && signature[2] === 255) ||
+      (type === "image/webp" &&
+        [82, 73, 70, 70].every((byte, index) => signature[index] === byte) &&
+        [87, 69, 66, 80].every((byte, index) => signature[index + 8] === byte));
 
     if (!validSignature) {
       await reader.cancel();

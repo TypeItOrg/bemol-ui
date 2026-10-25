@@ -4,12 +4,12 @@ import userEvent from "@testing-library/user-event";
 import { DocumentFilePreview } from "@features/enrollment-applications/components/document-file-preview";
 
 describe("document file preview", () => {
-  it("recovers from a failed file when switching documents and allows retrying the current file", async () => {
-    const { rerender } = render(<DocumentFilePreview src="/documents/a" name="Documento A" contentType="image/png" />);
+  it.each(["image/png", "image/webp"])("previews %s and recovers when switching or retrying files", async (contentType) => {
+    const { rerender } = render(<DocumentFilePreview src="/documents/a" name="Documento A" contentType={contentType} />);
     fireEvent.error(screen.getByRole("img", { name: "Vista previa de Documento A" }));
     expect(screen.getByText("No se pudo mostrar la vista previa.")).toBeVisible();
 
-    rerender(<DocumentFilePreview src="/documents/b" name="Documento B" contentType="image/png" />);
+    rerender(<DocumentFilePreview src="/documents/b" name="Documento B" contentType={contentType} />);
 
     const currentImage = screen.getByRole("img", { name: "Vista previa de Documento B" });
     expect(new URL((currentImage as HTMLImageElement).src).pathname).toBe("/documents/b");
