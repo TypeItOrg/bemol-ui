@@ -22,18 +22,18 @@ export function StudyPlanSummary({ plan }: { plan: StudyPlan }): ReactElement {
         />
       </header>
 
-      <dl className="grid gap-5 pt-5 sm:grid-cols-3">
-        <div>
+      <dl className="grid gap-5 pt-5 sm:grid-cols-2 lg:grid-cols-[minmax(0,2fr)_minmax(7rem,0.75fr)_minmax(0,1.25fr)]">
+        <div className="min-w-0 sm:col-span-2 lg:col-span-1">
           <dt className={DETAIL_LABEL_CLASS_NAME}>Trayecto formativo</dt>
-          <dd className="mt-1 font-semibold">{plan.trainingPathName}</dd>
+          <dd className="mt-1 font-semibold wrap-break-word">{plan.trainingPathName}</dd>
         </div>
         <div>
           <dt className={DETAIL_LABEL_CLASS_NAME}>Estado</dt>
-          <dd className="mt-1">
+          <dd className="mt-1 flex items-start">
             <Badge variant={plan.status === "ACTIVE" ? "success" : "secondary"}>{studyPlanStatusLabels[plan.status]}</Badge>
           </dd>
         </div>
-        <div>
+        <div className="min-w-0">
           <dt className={DETAIL_LABEL_CLASS_NAME}>Vigencia</dt>
           <dd className="mt-1 font-semibold tabular-nums">{formatStudyPlanValidity(plan)}</dd>
         </div>
