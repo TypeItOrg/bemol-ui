@@ -15,6 +15,7 @@ import { PlatformPageShell } from "@features/platform-auth/components/platform-p
 
 export const metadata = {
   title: "Nuevo período de inscripción",
+  other: { "application-title": "Nuevo período de inscripción" },
   description: "Creá un período de inscripción para una institución.",
 };
 

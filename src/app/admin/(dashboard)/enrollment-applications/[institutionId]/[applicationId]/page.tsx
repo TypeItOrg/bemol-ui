@@ -19,7 +19,10 @@ import { PlatformBreadcrumb } from "@features/platform-auth/components/platform-
 import { PlatformPageIcon } from "@features/platform-auth/components/platform-page-icon";
 import { PlatformPageShell } from "@features/platform-auth/components/platform-page-shell";
 
-export const metadata: Metadata = { title: "Detalle de solicitud de inscripción" };
+export const metadata: Metadata = {
+  title: "Detalle de solicitud de inscripción",
+  other: { "application-title": "Detalle de solicitud de inscripción" },
+};
 
 type PlatformEnrollmentApplicationDetailPageProps = {
   params: Promise<{ institutionId: string; applicationId: string }>;

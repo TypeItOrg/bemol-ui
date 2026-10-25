@@ -15,6 +15,7 @@ import { PlatformPageShell } from "@features/platform-auth/components/platform-p
 
 export const metadata = {
   title: "Nuevo usuario",
+  other: { "application-title": "Nuevo usuario" },
 };
 
 type NewPersonPageProps = {

@@ -12,6 +12,7 @@ import { PlatformPageShell } from "@features/platform-auth/components/platform-p
 
 export const metadata = {
   title: "Nueva institución",
+  other: { "application-title": "Nueva institución" },
   description: "Creá una nueva institución en la plataforma.",
 };
 

@@ -12,7 +12,7 @@ import { fetchContextualSearchPage } from "@features/contextual-search/services/
 import { PlatformBreadcrumb } from "@features/platform-auth/components/platform-breadcrumb";
 import { PlatformPageShell } from "@features/platform-auth/components/platform-page-shell";
 
-export const metadata = { title: "Resultados de búsqueda" };
+export const metadata = { title: "Resultados de búsqueda", other: { "application-title": "Resultados de búsqueda" } };
 
 export default async function AdminSearchPage({
   searchParams,

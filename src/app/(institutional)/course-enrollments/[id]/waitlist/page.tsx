@@ -17,7 +17,7 @@ import { hasTrainingPathPermission } from "@features/institutional-auth/utils/in
 import { PlatformPageIcon } from "@features/platform-auth/components/platform-page-icon";
 import { PlatformPageShell } from "@features/platform-auth/components/platform-page-shell";
 
-export const metadata: Metadata = { title: "Lista de espera" };
+export const metadata: Metadata = { title: "Lista de espera", other: { "application-title": "Lista de espera" } };
 
 export default async function CourseWaitlistPage({
   params,

@@ -13,6 +13,7 @@ import {
 
 export const metadata: Metadata = {
   title: "Iniciar sesión",
+  other: { "application-title": "Iniciar sesión" },
   description: "Iniciá sesión en tu institución",
 };
 

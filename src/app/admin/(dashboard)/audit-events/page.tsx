@@ -19,7 +19,11 @@ import { PlatformBreadcrumb } from "@features/platform-auth/components/platform-
 import { PlatformPageIcon } from "@features/platform-auth/components/platform-page-icon";
 import { PlatformPageShell } from "@features/platform-auth/components/platform-page-shell";
 
-export const metadata = { title: "Auditoría", description: "Consultá la actividad registrada en toda la plataforma." };
+export const metadata = {
+  title: "Auditoría",
+  other: { "application-title": "Auditoría" },
+  description: "Consultá la actividad registrada en toda la plataforma.",
+};
 
 export default async function AuditEventsPage({ searchParams }: { searchParams: Promise<AuditSearchParams> }): Promise<ReactElement> {
   const params = await searchParams;

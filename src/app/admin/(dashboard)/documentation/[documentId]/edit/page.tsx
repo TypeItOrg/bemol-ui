@@ -4,7 +4,7 @@ import type { QueryParamValue } from "@common/types/query-param.types";
 
 import { DocumentCatalogEditPage } from "@features/document-catalog/components/document-catalog-edit-page";
 
-export const metadata = { title: "Editar documento" };
+export const metadata = { title: "Editar documento", other: { "application-title": "Editar documento" } };
 
 export default function Page({
   params,

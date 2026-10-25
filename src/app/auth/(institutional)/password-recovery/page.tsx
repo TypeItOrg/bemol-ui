@@ -9,6 +9,7 @@ import { InstitutionalPasswordRecoveryForm } from "@features/institutional-auth/
 
 export const metadata: Metadata = {
   title: "Recuperar contraseña",
+  other: { "application-title": "Recuperar contraseña" },
   description: "Recuperá el acceso a tu cuenta institucional",
 };
 

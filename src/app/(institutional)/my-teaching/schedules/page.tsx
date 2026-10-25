@@ -16,7 +16,7 @@ import { requireInstitutionalUser } from "@features/institutional-auth/services/
 import { PlatformPageIcon } from "@features/platform-auth/components/platform-page-icon";
 import { PlatformPageShell } from "@features/platform-auth/components/platform-page-shell";
 
-export const metadata: Metadata = { title: "Mis horarios" };
+export const metadata: Metadata = { title: "Mis horarios", other: { "application-title": "Mis horarios" } };
 
 export default async function TeacherSchedulesPage({ searchParams }: { searchParams: Promise<{ week?: string | string[] }> }): Promise<ReactElement> {
   const user = await requireInstitutionalUser();

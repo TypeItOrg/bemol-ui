@@ -20,7 +20,7 @@ import { PlatformBreadcrumb } from "@features/platform-auth/components/platform-
 import { PlatformPageIcon } from "@features/platform-auth/components/platform-page-icon";
 import { PlatformPageShell } from "@features/platform-auth/components/platform-page-shell";
 
-export const metadata: Metadata = { title: "Solicitudes de inscripción" };
+export const metadata: Metadata = { title: "Solicitudes de inscripción", other: { "application-title": "Solicitudes de inscripción" } };
 
 export default async function PlatformEnrollmentApplicationsPage({
   searchParams,

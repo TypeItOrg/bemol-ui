@@ -14,6 +14,7 @@ export async function getInstitutionalMetadata(pageTitle: string): Promise<Metad
   const institutionName = institution?.shortName?.trim() || institution?.name || person?.institutionName || "Bemol";
 
   return {
+    other: { "application-title": pageTitle },
     title: {
       absolute: `${pageTitle} | ${institutionName}`,
     },

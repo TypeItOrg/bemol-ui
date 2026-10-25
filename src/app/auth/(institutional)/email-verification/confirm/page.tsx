@@ -10,6 +10,7 @@ import { confirmEmailSchema } from "@features/institutional-auth/schemas/email-v
 
 export const metadata: Metadata = {
   title: "Verificación de correo electrónico",
+  other: { "application-title": "Verificación de correo electrónico" },
   robots: { index: false, follow: false },
   referrer: "no-referrer",
 };

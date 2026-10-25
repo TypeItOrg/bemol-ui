@@ -20,7 +20,7 @@ import { InstitutionRolePermissions } from "@features/roles/components/instituti
 import { PlatformRoleDeleteButton } from "@features/roles/components/platform-role-delete-button";
 import { fetchPlatformPermissionGroups, fetchPlatformRole } from "@features/roles/services/platform-role.service";
 
-export const metadata = { title: "Detalle del rol" };
+export const metadata = { title: "Detalle del rol", other: { "application-title": "Detalle del rol" } };
 
 export default async function PlatformRoleDetailPage({
   params,

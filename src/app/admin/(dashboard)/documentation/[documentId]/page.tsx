@@ -4,7 +4,7 @@ import type { QueryParamValue } from "@common/types/query-param.types";
 
 import { DocumentCatalogDetailPage } from "@features/document-catalog/components/document-catalog-detail-page";
 
-export const metadata = { title: "Detalle del documento" };
+export const metadata = { title: "Detalle del documento", other: { "application-title": "Detalle del documento" } };
 
 export default function Page({
   params,

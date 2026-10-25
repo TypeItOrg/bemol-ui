@@ -21,7 +21,7 @@ import { institutionalApiFetch } from "@features/institutional-auth/services/ins
 import { PlatformPageIcon } from "@features/platform-auth/components/platform-page-icon";
 import { PlatformPageShell } from "@features/platform-auth/components/platform-page-shell";
 
-export const metadata: Metadata = { title: "Mis materias" };
+export const metadata: Metadata = { title: "Mis materias", other: { "application-title": "Mis materias" } };
 
 export default async function MyCourseEnrollmentsPage({
   searchParams,

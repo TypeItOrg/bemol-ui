@@ -4,7 +4,7 @@ import { PlatformAcademicCollectionPage } from "@features/academic/components/pl
 import { AcademicResource } from "@features/academic/types/academic-resource.types";
 import type { AcademicSearchParams } from "@features/academic/utils/academic-pagination.util";
 
-export const metadata = { title: "Planes de estudio" };
+export const metadata = { title: "Planes de estudio", other: { "application-title": "Planes de estudio" } };
 
 export default async function Page({ searchParams }: { searchParams: Promise<AcademicSearchParams> }): Promise<ReactElement> {
   return <PlatformAcademicCollectionPage resource={AcademicResource.STUDY_PLAN} searchParams={await searchParams} />;

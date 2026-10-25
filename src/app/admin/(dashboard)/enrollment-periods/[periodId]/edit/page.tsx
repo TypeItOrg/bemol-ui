@@ -22,7 +22,7 @@ type EditEnrollmentPeriodPageProps = {
   searchParams: Promise<{ institutionId?: QueryParamValue; returnTo?: QueryParamValue }>;
 };
 
-export const metadata: Metadata = { title: "Editar período de inscripción" };
+export const metadata: Metadata = { title: "Editar período de inscripción", other: { "application-title": "Editar período de inscripción" } };
 
 export default async function EditEnrollmentPeriodPage({ params, searchParams }: EditEnrollmentPeriodPageProps): Promise<ReactElement> {
   const [{ periodId: rawPeriodId }, query] = await Promise.all([params, searchParams]);

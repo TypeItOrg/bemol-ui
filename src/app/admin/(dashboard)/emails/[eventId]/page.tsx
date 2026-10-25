@@ -13,7 +13,7 @@ import { PlatformBreadcrumb } from "@features/platform-auth/components/platform-
 import { PlatformPageIcon } from "@features/platform-auth/components/platform-page-icon";
 import { PlatformPageShell } from "@features/platform-auth/components/platform-page-shell";
 
-export const metadata = { title: "Detalle del correo" };
+export const metadata = { title: "Detalle del correo", other: { "application-title": "Detalle del correo" } };
 
 export default async function MailEventPage({
   params,

@@ -18,7 +18,7 @@ import { hasInstitutionalPermission, hasTrainingPathPermission } from "@features
 import { PlatformPageIcon } from "@features/platform-auth/components/platform-page-icon";
 import { PlatformPageShell } from "@features/platform-auth/components/platform-page-shell";
 
-export const metadata: Metadata = { title: "Detalle de cursada" };
+export const metadata: Metadata = { title: "Detalle de cursada", other: { "application-title": "Detalle de cursada" } };
 
 export default async function CourseEnrollmentDetailPage({
   params,

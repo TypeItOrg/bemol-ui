@@ -21,7 +21,7 @@ type EditInstitutionPageProps = {
   searchParams: Promise<{ returnTo?: QueryParamValue }>;
 };
 
-export const metadata: Metadata = { title: "Editar institución" };
+export const metadata: Metadata = { title: "Editar institución", other: { "application-title": "Editar institución" } };
 
 export default async function EditInstitutionPage({ params, searchParams }: EditInstitutionPageProps): Promise<ReactElement> {
   const { id } = await params;

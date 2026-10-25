@@ -7,7 +7,7 @@ export async function GET(request: Request): Promise<Response> {
   try {
     const institution = await resolveRequestInstitution(request.headers);
 
-    const name = institution ? institution.shortName?.trim() || institution.name : "Bemol - Administración";
+    const name = institution ? `${institution.shortName?.trim() || institution.name} | Bemol` : "Administración | Bemol";
 
     const manifest: MetadataRoute.Manifest = {
       id: "/",

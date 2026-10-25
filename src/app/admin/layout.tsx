@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   manifest: "/manifest.webmanifest",
   appleWebApp: {
     capable: true,
-    title: "Bemol - Administración",
+    title: "Administración | Bemol",
     statusBarStyle: "default",
   },
 };

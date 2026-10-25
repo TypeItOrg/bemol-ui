@@ -15,7 +15,7 @@ import { PlatformPageIcon } from "@features/platform-auth/components/platform-pa
 import { PlatformPageShell } from "@features/platform-auth/components/platform-page-shell";
 import { requirePlatformAccount } from "@features/platform-auth/services/get-platform-account.service";
 
-export const metadata: Metadata = { title: "Lista de espera" };
+export const metadata: Metadata = { title: "Lista de espera", other: { "application-title": "Lista de espera" } };
 
 export default async function PlatformCourseWaitlistPage({
   params,

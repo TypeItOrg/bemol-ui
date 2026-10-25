@@ -17,6 +17,7 @@ import { PlatformPageShell } from "@features/platform-auth/components/platform-p
 
 export const metadata = {
   title: "Instituciones",
+  other: { "application-title": "Instituciones" },
   description: "Visualizá, buscá y administrá todas las instituciones registradas en la plataforma.",
 };
 

@@ -19,6 +19,7 @@ import { PlatformPageShell } from "@features/platform-auth/components/platform-p
 
 export const metadata: Metadata = {
   title: "Períodos de Inscripción",
+  other: { "application-title": "Períodos de Inscripción" },
   description: "Gestión de períodos de inscripción anuales de la institución",
 };
 

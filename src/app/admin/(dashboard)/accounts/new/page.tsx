@@ -15,6 +15,7 @@ import { PlatformPageShell } from "@features/platform-auth/components/platform-p
 
 export const metadata = {
   title: "Nuevo administrador",
+  other: { "application-title": "Nuevo administrador" },
   description: "Creá un nuevo administrador para la plataforma.",
 };
 

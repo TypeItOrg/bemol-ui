@@ -16,7 +16,7 @@ import { InstitutionalBreadcrumb } from "@features/institutional-auth/components
 import { requireInstitutionalUser } from "@features/institutional-auth/services/get-institutional-user.service";
 import { PlatformPageShell } from "@features/platform-auth/components/platform-page-shell";
 
-export const metadata = { title: "Cursadas de mi clase" };
+export const metadata = { title: "Cursadas de mi clase", other: { "application-title": "Cursadas de mi clase" } };
 
 export default async function TeacherClassPage({
   params,

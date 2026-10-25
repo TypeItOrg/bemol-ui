@@ -25,7 +25,7 @@ import { hasInstitutionalPermission } from "@features/institutional-auth/utils/i
 import { PlatformPageIcon } from "@features/platform-auth/components/platform-page-icon";
 import { PlatformPageShell } from "@features/platform-auth/components/platform-page-shell";
 
-export const metadata: Metadata = { title: "Cursadas" };
+export const metadata: Metadata = { title: "Cursadas", other: { "application-title": "Cursadas" } };
 
 export default async function CourseEnrollmentsPage({
   searchParams,

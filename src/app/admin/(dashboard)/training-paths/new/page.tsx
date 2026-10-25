@@ -3,7 +3,7 @@ import type { ReactElement } from "react";
 import { PlatformAcademicFormPage } from "@features/academic/components/platform-academic-form-page";
 import { AcademicResource } from "@features/academic/types/academic-resource.types";
 
-export const metadata = { title: "Nuevo trayecto formativo" };
+export const metadata = { title: "Nuevo trayecto formativo", other: { "application-title": "Nuevo trayecto formativo" } };
 
 export default async function Page({ searchParams }: { searchParams: Promise<{ returnTo?: string | string[] }> }): Promise<ReactElement> {
   const { returnTo } = await searchParams;

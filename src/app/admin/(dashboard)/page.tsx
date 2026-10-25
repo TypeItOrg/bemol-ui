@@ -11,6 +11,7 @@ import { PlatformDashboardSkeleton } from "@features/platform-dashboard/componen
 
 export const metadata = {
   title: "Inicio",
+  other: { "application-title": "Inicio" },
   description: "Resumen general de la actividad de la plataforma.",
 };
 

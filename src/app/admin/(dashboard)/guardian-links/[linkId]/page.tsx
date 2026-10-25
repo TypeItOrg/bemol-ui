@@ -14,7 +14,7 @@ import { PlatformBreadcrumb } from "@features/platform-auth/components/platform-
 import { PlatformPageIcon } from "@features/platform-auth/components/platform-page-icon";
 import { PlatformPageShell } from "@features/platform-auth/components/platform-page-shell";
 
-export const metadata: Metadata = { title: "Detalle de vinculación" };
+export const metadata: Metadata = { title: "Detalle de vinculación", other: { "application-title": "Detalle de vinculación" } };
 
 export default async function GuardianLinkDetailPage({
   params,

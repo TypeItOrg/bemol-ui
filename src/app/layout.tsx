@@ -49,7 +49,7 @@ export async function generateMetadata(): Promise<Metadata> {
     appleWebApp: institution
       ? {
           capable: true,
-          title: brandName,
+          title: `${brandName} | Bemol`,
           statusBarStyle: "default",
         }
       : false,

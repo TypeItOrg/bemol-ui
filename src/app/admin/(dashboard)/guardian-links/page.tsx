@@ -14,7 +14,7 @@ import { PlatformBreadcrumb } from "@features/platform-auth/components/platform-
 import { PlatformPageIcon } from "@features/platform-auth/components/platform-page-icon";
 import { PlatformPageShell } from "@features/platform-auth/components/platform-page-shell";
 
-export const metadata: Metadata = { title: "Vinculaciones" };
+export const metadata: Metadata = { title: "Vinculaciones", other: { "application-title": "Vinculaciones" } };
 
 type GuardianLinksPageProps = { searchParams: Promise<Record<string, string | string[] | undefined>> };
 

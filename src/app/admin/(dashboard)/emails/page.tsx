@@ -14,7 +14,11 @@ import { PlatformBreadcrumb } from "@features/platform-auth/components/platform-
 import { PlatformPageIcon } from "@features/platform-auth/components/platform-page-icon";
 import { PlatformPageShell } from "@features/platform-auth/components/platform-page-shell";
 
-export const metadata = { title: "Correos", description: "Consultá los intentos de envío de correos de la plataforma." };
+export const metadata = {
+  title: "Correos",
+  other: { "application-title": "Correos" },
+  description: "Consultá los intentos de envío de correos de la plataforma.",
+};
 
 export default async function MailEventsPage({ searchParams }: { searchParams: Promise<AuditSearchParams> }): Promise<ReactElement> {
   const filters = parseMailFilters(await searchParams);

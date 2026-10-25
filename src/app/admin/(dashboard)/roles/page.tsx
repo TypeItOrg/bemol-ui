@@ -21,6 +21,7 @@ import { parsePlatformRolesPaginationParams, type PlatformRolesSearchParams } fr
 
 export const metadata = {
   title: "Roles",
+  other: { "application-title": "Roles" },
   description: "Consultá y administrá los roles de todas las instituciones.",
 };
 

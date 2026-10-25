@@ -9,6 +9,7 @@ import { InstitutionalRegisterForm } from "@features/institutional-auth/componen
 
 export const metadata: Metadata = {
   title: "Crear cuenta",
+  other: { "application-title": "Crear cuenta" },
   description: "Registrate en tu institución",
 };
 

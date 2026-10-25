@@ -13,7 +13,7 @@ import { PlatformPageShell } from "@features/platform-auth/components/platform-p
 import { PlatformRoleForm } from "@features/roles/components/platform-role-form";
 import { fetchPlatformPermissionGroups } from "@features/roles/services/platform-role.service";
 
-export const metadata = { title: "Nuevo rol" };
+export const metadata = { title: "Nuevo rol", other: { "application-title": "Nuevo rol" } };
 
 export default async function NewPlatformRolePage({
   searchParams,

@@ -11,6 +11,7 @@ import { ResetInstitutionalPasswordForm } from "@features/institutional-auth/com
 
 export const metadata: Metadata = {
   title: "Restablecer contraseña",
+  other: { "application-title": "Restablecer contraseña" },
   description: "Elegí una nueva contraseña para tu cuenta institucional",
 };
 

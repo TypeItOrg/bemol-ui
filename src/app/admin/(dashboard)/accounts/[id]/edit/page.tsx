@@ -21,7 +21,7 @@ type EditPlatformAccountPageProps = {
   searchParams: Promise<{ returnTo?: QueryParamValue }>;
 };
 
-export const metadata: Metadata = { title: "Editar administrador" };
+export const metadata: Metadata = { title: "Editar administrador", other: { "application-title": "Editar administrador" } };
 
 export default async function EditPlatformAccountPage({ params, searchParams }: EditPlatformAccountPageProps): Promise<ReactElement> {
   const { id } = await params;

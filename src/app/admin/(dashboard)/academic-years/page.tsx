@@ -4,7 +4,7 @@ import { PlatformAcademicCollectionPage } from "@features/academic/components/pl
 import { AcademicResource } from "@features/academic/types/academic-resource.types";
 import type { AcademicSearchParams } from "@features/academic/utils/academic-pagination.util";
 
-export const metadata = { title: "Ciclos lectivos" };
+export const metadata = { title: "Ciclos lectivos", other: { "application-title": "Ciclos lectivos" } };
 
 export default async function Page({ searchParams }: { searchParams: Promise<AcademicSearchParams> }): Promise<ReactElement> {
   return <PlatformAcademicCollectionPage resource={AcademicResource.ACADEMIC_YEAR} searchParams={await searchParams} />;

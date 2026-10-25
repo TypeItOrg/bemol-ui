@@ -29,7 +29,9 @@ type EditPersonPageProps = {
 export async function generateMetadata({ searchParams }: Pick<EditPersonPageProps, "searchParams">): Promise<Metadata> {
   const { view } = await searchParams;
 
-  return { title: view === "detail" ? "Detalle de usuario" : "Editar usuario" };
+  const title = view === "detail" ? "Detalle de usuario" : "Editar usuario";
+
+  return { title, other: { "application-title": title } };
 }
 
 export default async function EditPersonPage({ params, searchParams }: EditPersonPageProps): Promise<ReactElement> {

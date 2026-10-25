@@ -20,6 +20,7 @@ import { PlatformPageShell } from "@features/platform-auth/components/platform-p
 
 export const metadata = {
   title: "Administradores",
+  other: { "application-title": "Administradores" },
   description: "Visualizá y administrá los administradores con acceso global a la plataforma.",
 };
 

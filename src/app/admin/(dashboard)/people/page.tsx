@@ -22,6 +22,7 @@ import { PlatformPageShell } from "@features/platform-auth/components/platform-p
 
 export const metadata = {
   title: "Usuarios",
+  other: { "application-title": "Usuarios" },
   description: "Consultá los usuarios registrados en todas las instituciones.",
 };
 

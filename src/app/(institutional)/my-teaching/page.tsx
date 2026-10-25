@@ -23,7 +23,7 @@ import { requireInstitutionalUser } from "@features/institutional-auth/services/
 import { PlatformPageIcon } from "@features/platform-auth/components/platform-page-icon";
 import { PlatformPageShell } from "@features/platform-auth/components/platform-page-shell";
 
-export const metadata = { title: "Mis clases" };
+export const metadata = { title: "Mis clases", other: { "application-title": "Mis clases" } };
 
 export default async function MyTeachingPage({ searchParams }: { searchParams: Promise<CourseEnrollmentSearchParams> }): Promise<ReactElement> {
   const user = await requireInstitutionalUser();

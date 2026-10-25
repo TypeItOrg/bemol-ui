@@ -15,7 +15,7 @@ import { PlatformPageShell } from "@features/platform-auth/components/platform-p
 import { PlatformRoleForm } from "@features/roles/components/platform-role-form";
 import { fetchPlatformPermissionGroups, fetchPlatformRole } from "@features/roles/services/platform-role.service";
 
-export const metadata = { title: "Editar rol" };
+export const metadata = { title: "Editar rol", other: { "application-title": "Editar rol" } };
 
 export default async function EditPlatformRolePage({
   params,

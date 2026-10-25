@@ -15,7 +15,7 @@ import { PlatformPageIcon } from "@features/platform-auth/components/platform-pa
 import { PlatformPageShell } from "@features/platform-auth/components/platform-page-shell";
 import { fetchPlatformPermissionGroups } from "@features/roles/services/platform-role.service";
 
-export const metadata = { title: "Detalle de evento" };
+export const metadata = { title: "Detalle de evento", other: { "application-title": "Detalle de evento" } };
 
 export default async function AuditEventPage({
   params,

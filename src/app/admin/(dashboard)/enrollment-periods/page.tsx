@@ -21,6 +21,7 @@ import { requirePlatformAccount } from "@features/platform-auth/services/get-pla
 
 export const metadata: Metadata = {
   title: "Períodos de Inscripción",
+  other: { "application-title": "Períodos de Inscripción" },
   description: "Gestión global de períodos de inscripción por institución",
 };
 

@@ -10,6 +10,7 @@ import { getSafeNextPath } from "@features/platform-auth/utils/platform-auth-pat
 
 export const metadata: Metadata = {
   title: "Iniciar sesión",
+  other: { "application-title": "Iniciar sesión" },
   description: "Inicia sesión en tu cuenta",
 };
 

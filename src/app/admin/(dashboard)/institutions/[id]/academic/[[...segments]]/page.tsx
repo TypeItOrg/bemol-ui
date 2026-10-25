@@ -15,7 +15,9 @@ import { requirePlatformAccount } from "@features/platform-auth/services/get-pla
 export async function generateMetadata({ params }: { params: Promise<{ id: string; segments?: string[] }> }): Promise<Metadata> {
   const { segments = [] } = await params;
 
-  return { title: getAcademicPageTitle(segments) };
+  const title = getAcademicPageTitle(segments);
+
+  return { title, other: { "application-title": title } };
 }
 
 export default async function AdminAcademicPage({

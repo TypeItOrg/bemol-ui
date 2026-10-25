@@ -32,6 +32,7 @@ type InstitutionDetailPageProps = {
 
 export const metadata: Metadata = {
   title: "Detalle de institución",
+  other: { "application-title": "Detalle de institución" },
 };
 
 export default async function InstitutionDetailPage({ params, searchParams }: InstitutionDetailPageProps): Promise<ReactElement> {

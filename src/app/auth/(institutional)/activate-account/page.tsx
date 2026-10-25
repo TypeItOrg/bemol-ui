@@ -11,6 +11,7 @@ import { OwnAccessActivationForm } from "@features/institutional-auth/components
 
 export const metadata: Metadata = {
   title: "Activá tu cuenta",
+  other: { "application-title": "Activá tu cuenta" },
   description: "Configurá tu contraseña para acceder a tu perfil.",
 };
 

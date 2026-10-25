@@ -29,6 +29,7 @@ type PeoplePageProps = {
 
 export const metadata: Metadata = {
   title: "Usuarios",
+  other: { "application-title": "Usuarios" },
 };
 
 export default async function InstitutionPeoplePage({ params, searchParams }: PeoplePageProps): Promise<ReactElement> {
