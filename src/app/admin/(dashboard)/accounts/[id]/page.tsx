@@ -12,6 +12,8 @@ import type { QueryParamValue } from "@common/types/query-param.types";
 import { getSafeReturnTo } from "@common/utils/return-to.util";
 
 import { PlatformAccountDetail } from "@features/platform-accounts/components/platform-account-detail";
+import { PlatformAccountRecentActivity } from "@features/platform-accounts/components/platform-account-recent-activity";
+import { PlatformAccountStatusControl } from "@features/platform-accounts/components/platform-account-status-control";
 import { fetchPlatformAccountAdmin } from "@features/platform-accounts/services/fetch-platform-account.service";
 import { PlatformBreadcrumb } from "@features/platform-auth/components/platform-breadcrumb";
 import { PlatformPageIcon } from "@features/platform-auth/components/platform-page-icon";
@@ -51,11 +53,15 @@ export default async function PlatformAccountDetailPage({ params, searchParams }
         <Button asChild variant="outline" size="lg">
           <Link href={destination}>Volver</Link>
         </Button>
-        <Button asChild size="lg">
-          <ReturnToLink href={`/admin/accounts/${id}/edit`}>Editar cuenta</ReturnToLink>
-        </Button>
+        <div className="flex flex-wrap items-center gap-3">
+          <PlatformAccountStatusControl account={account} />
+          <Button asChild size="lg">
+            <ReturnToLink href={`/admin/accounts/${id}/edit`}>Editar administrador</ReturnToLink>
+          </Button>
+        </div>
       </div>
       <PlatformAccountDetail account={account} />
+      <PlatformAccountRecentActivity accountId={account.platformAccountId} />
     </PlatformPageShell>
   );
 }

@@ -16,7 +16,7 @@ export const EMPTY_FORM_VALUES: PlatformAccountFormInput = {
 export function getSectionDescription(isEdit: boolean): string {
   return isEdit
     ? "Actualizá la identidad del administrador o definí una nueva contraseña."
-    : "El administrador quedará habilitado desde el momento de su creación.";
+    : "Nombre, apellido y correo electrónico del administrador.";
 }
 
 export function getDefaultValues(account: PlatformAccountAdmin | undefined): PlatformAccountFormInput {

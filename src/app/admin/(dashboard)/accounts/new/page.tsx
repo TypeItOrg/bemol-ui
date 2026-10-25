@@ -1,7 +1,10 @@
 import type { ReactElement } from "react";
 
+import Link from "next/link";
+
 import { UserPlusIcon } from "lucide-react";
 
+import { Button } from "@common/components/ui/button";
 import type { QueryParamValue } from "@common/types/query-param.types";
 import { getSafeReturnTo } from "@common/utils/return-to.util";
 
@@ -33,6 +36,11 @@ export default async function NewPlatformAccountPage({
       actionsClassName="self-stretch"
       actions={<PlatformPageIcon icon={UserPlusIcon} />}
     >
+      <div>
+        <Button asChild variant="outline" size="lg">
+          <Link href={destination}>Volver</Link>
+        </Button>
+      </div>
       <PlatformAccountForm mode="create" returnTo={destination} />
     </PlatformPageShell>
   );

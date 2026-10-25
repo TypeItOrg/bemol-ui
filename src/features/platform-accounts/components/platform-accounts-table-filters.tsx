@@ -4,9 +4,9 @@ import { DataTableFilters, type DataTableSelectFilter } from "@common/components
 import { getBooleanFilterValue } from "@common/utils/boolean-filter-value.util";
 
 const ENABLED_FILTER_OPTIONS = [
-  { value: "all", label: "Todas" },
-  { value: "true", label: "Habilitadas" },
-  { value: "false", label: "Deshabilitadas" },
+  { value: "all", label: "Todos" },
+  { value: "true", label: "Habilitados" },
+  { value: "false", label: "Deshabilitados" },
 ] as const;
 
 type EnabledFilterValue = (typeof ENABLED_FILTER_OPTIONS)[number]["value"];

@@ -4,20 +4,23 @@ import { useState, useTransition, type ReactElement } from "react";
 
 import { useRouter } from "next/navigation";
 
-import { CircleAlertIcon, InfoIcon, Loader2Icon } from "lucide-react";
+import { CircleAlertIcon, Loader2Icon } from "lucide-react";
 
 import { Alert, AlertDescription, AlertTitle } from "@common/components/ui/alert";
 import { Button } from "@common/components/ui/button";
 
 import { updatePlatformAccountStatusAction } from "@features/platform-accounts/actions/update-platform-account-status.action";
+import { PlatformAccountDisableDialog } from "@features/platform-accounts/components/platform-account-disable-dialog";
+import type { PlatformAccountAdmin } from "@features/platform-accounts/types/platform-account-admin.types";
 import { usePlatformAccount } from "@features/platform-auth/hooks/use-platform-account.hook";
 
 type PlatformAccountStatusControlProps = {
-  accountId: string;
-  enabled: boolean;
+  account: PlatformAccountAdmin;
 };
 
-export function PlatformAccountStatusControl({ accountId, enabled }: PlatformAccountStatusControlProps): ReactElement {
+export function PlatformAccountStatusControl({ account }: PlatformAccountStatusControlProps): ReactElement {
+  const { platformAccountId: accountId, enabled } = account;
+
   const router = useRouter();
 
   const { account: currentAccount } = usePlatformAccount();
@@ -25,6 +28,8 @@ export function PlatformAccountStatusControl({ accountId, enabled }: PlatformAcc
   const [isPending, startTransition] = useTransition();
 
   const [error, setError] = useState<string>();
+
+  const [disableOpen, setDisableOpen] = useState(false);
 
   const isCurrentAccount = currentAccount?.platformAccountId === accountId;
 
@@ -46,15 +51,7 @@ export function PlatformAccountStatusControl({ accountId, enabled }: PlatformAcc
   }
 
   return (
-    <div className="flex w-full flex-col gap-3">
-      {isCurrentAccount && enabled ? (
-        <Alert>
-          <InfoIcon />
-          <AlertTitle>Esta es tu cuenta</AlertTitle>
-          <AlertDescription>No podés deshabilitar tu propia cuenta.</AlertDescription>
-        </Alert>
-      ) : null}
-
+    <div className="flex flex-col gap-3">
       {error ? (
         <Alert variant="destructive">
           <CircleAlertIcon />
@@ -63,12 +60,16 @@ export function PlatformAccountStatusControl({ accountId, enabled }: PlatformAcc
         </Alert>
       ) : null}
 
-      <div className="flex justify-end">
-        <Button variant={enabled ? "destructive" : "default"} onClick={updateStatus} disabled={isPending || (isCurrentAccount && enabled)}>
-          {isPending ? <Loader2Icon data-icon="inline-start" className="animate-spin" /> : null}
-          {getStatusActionLabel(enabled, isPending)}
-        </Button>
-      </div>
+      <Button
+        size="lg"
+        variant={enabled ? "destructive" : "default"}
+        onClick={enabled ? () => setDisableOpen(true) : updateStatus}
+        disabled={isPending || (enabled && (!currentAccount || isCurrentAccount))}
+      >
+        {isPending ? <Loader2Icon data-icon="inline-start" className="animate-spin" /> : null}
+        {getStatusActionLabel(enabled, isPending)}
+      </Button>
+      {disableOpen ? <PlatformAccountDisableDialog account={account} onClose={() => setDisableOpen(false)} /> : null}
     </div>
   );
 }
@@ -78,5 +79,5 @@ function getStatusActionLabel(enabled: boolean, isPending: boolean): string {
     return enabled ? "Deshabilitando..." : "Habilitando...";
   }
 
-  return enabled ? "Deshabilitar administrador" : "Habilitar administrador";
+  return enabled ? "Deshabilitar" : "Habilitar";
 }

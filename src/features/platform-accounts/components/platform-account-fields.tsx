@@ -7,35 +7,16 @@ import type { FieldErrors, UseFormRegister } from "react-hook-form";
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@common/components/ui/field";
 import { Input } from "@common/components/ui/input";
 
-export function PlatformAccountFields({
-  errors,
-  defaultValues,
-  register,
-  isEdit,
-}: {
-  errors: FieldErrors<{
-    name: string;
-    lastName: string;
-    email: string;
-    password: string;
-    confirmPassword: string;
-  }>;
-  defaultValues: {
-    name: string;
-    lastName: string;
-    email: string;
-    password: string;
-    confirmPassword: string;
-  };
-  register: UseFormRegister<{
-    name: string;
-    lastName: string;
-    email: string;
-    password: string;
-    confirmPassword: string;
-  }>;
+import type { PlatformAccountFormInput } from "@features/platform-accounts/schemas/platform-account-form.schema";
+
+type PlatformAccountFieldsProps = {
+  errors: FieldErrors<PlatformAccountFormInput>;
+  defaultValues: PlatformAccountFormInput;
+  register: UseFormRegister<PlatformAccountFormInput>;
   isEdit: boolean;
-}): ReactElement {
+};
+
+export function PlatformAccountIdentityFields({ errors, defaultValues, register }: PlatformAccountFieldsProps): ReactElement {
   return (
     <FieldGroup className="mt-5 gap-4">
       <FieldGroup className="grid items-start gap-4 md:grid-cols-2">
@@ -48,7 +29,6 @@ export function PlatformAccountFields({
             defaultValue={defaultValues.name}
             maxLength={255}
             autoComplete="given-name"
-            placeholder="María"
             aria-invalid={!!errors.name}
             {...register("name")}
           />
@@ -64,7 +44,6 @@ export function PlatformAccountFields({
             defaultValue={defaultValues.lastName}
             maxLength={255}
             autoComplete="family-name"
-            placeholder="González"
             aria-invalid={!!errors.lastName}
             {...register("lastName")}
           />
@@ -82,14 +61,19 @@ export function PlatformAccountFields({
           type="email"
           maxLength={150}
           autoComplete="email"
-          placeholder="administracion@example.edu.ar"
           aria-invalid={!!errors.email}
           {...register("email")}
         />
         <FieldDescription>Se utilizará para iniciar sesión en la plataforma.</FieldDescription>
         <FieldError errors={[errors.email]} />
       </Field>
+    </FieldGroup>
+  );
+}
 
+export function PlatformAccountPasswordFields({ errors, register, isEdit }: PlatformAccountFieldsProps): ReactElement {
+  return (
+    <FieldGroup className="mt-5 gap-4">
       <FieldGroup className="grid items-start gap-4 md:grid-cols-2">
         <Field data-invalid={!!errors.password}>
           <FieldLabel htmlFor="platform-account-password" required={!isEdit}>

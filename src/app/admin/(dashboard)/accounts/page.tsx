@@ -36,7 +36,7 @@ export default async function PlatformAccountsPage({ searchParams }: PlatformAcc
         <Button asChild size="lg" className="w-full">
           <ReturnToLink href="/admin/accounts/new">
             <PlusIcon data-icon="inline-start" />
-            Nueva cuenta
+            Nuevo administrador
           </ReturnToLink>
         </Button>
       </PlatformCollectionActions>

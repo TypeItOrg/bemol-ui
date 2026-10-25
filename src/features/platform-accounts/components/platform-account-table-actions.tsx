@@ -6,11 +6,26 @@ import { EllipsisVerticalIcon } from "lucide-react";
 
 import { ReturnToLink } from "@common/components/navigation/return-to-link";
 import { Button } from "@common/components/ui/button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger } from "@common/components/ui/dropdown-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@common/components/ui/dropdown-menu";
 
 import type { PlatformAccountAdmin } from "@features/platform-accounts/types/platform-account-admin.types";
 
-export function PlatformAccountActions({ account }: { account: PlatformAccountAdmin }): ReactElement {
+export function PlatformAccountActions({
+  account,
+  disableDisabled,
+  onDisable,
+}: {
+  account: PlatformAccountAdmin;
+  disableDisabled: boolean;
+  onDisable: () => void;
+}): ReactElement {
   const accountName = `${account.name} ${account.lastName}`;
 
   return (
@@ -34,6 +49,14 @@ export function PlatformAccountActions({ account }: { account: PlatformAccountAd
               </ReturnToLink>
             </DropdownMenuItem>
           </DropdownMenuGroup>
+          {account.enabled ? (
+            <>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem variant="destructive" className="px-2.5 py-1.5" disabled={disableDisabled} onSelect={onDisable}>
+                Deshabilitar
+              </DropdownMenuItem>
+            </>
+          ) : null}
         </DropdownMenuContent>
       </DropdownMenu>
     </div>
@@ -42,6 +65,6 @@ export function PlatformAccountActions({ account }: { account: PlatformAccountAd
 
 export const dateFormatter = new Intl.DateTimeFormat("es-AR", {
   day: "2-digit",
-  month: "short",
+  month: "2-digit",
   year: "numeric",
 });

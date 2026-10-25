@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 
+import { INVALID_ACTION_ARGUMENTS } from "@common/utils/action-argument.util";
 import { getResponseErrorActionState, getValidationActionState } from "@common/utils/action-state.util";
 
 import { PLATFORM_ACCOUNT_ERROR_MESSAGES } from "@features/platform-accounts/constants/error-messages.constants";
@@ -13,6 +14,12 @@ import { platformApiFetch } from "@features/platform-auth/services/platform-api-
 const PLATFORM_ACCOUNTS_PATH = "/admin/accounts";
 
 export async function createPlatformAccountAction(formData: FormData): Promise<PlatformAccountActionState> {
+  const rawEnabled = formData.get("enabled");
+
+  if (rawEnabled !== "true" && rawEnabled !== "false") {
+    return { error: INVALID_ACTION_ARGUMENTS };
+  }
+
   const parsed = platformAccountFormSchema.safeParse({
     name: formData.get("name"),
     lastName: formData.get("lastName"),
@@ -30,6 +37,7 @@ export async function createPlatformAccountAction(formData: FormData): Promise<P
     lastName: parsed.data.lastName,
     email: parsed.data.email,
     password: parsed.data.password,
+    enabled: rawEnabled === "true",
   };
 
   const response = platformApiFetch("/api/v1/admin/accounts", {

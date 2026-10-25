@@ -5,18 +5,19 @@ import { useState, useTransition, type ReactElement } from "react";
 import { useRouter } from "next/navigation";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { CircleAlertIcon, Loader2Icon, UserRoundCogIcon } from "lucide-react";
+import { CircleAlertIcon, Loader2Icon, LockKeyholeIcon, UserRoundCogIcon } from "lucide-react";
 import { useForm } from "react-hook-form";
 
 import { SectionHeader } from "@common/components/section-header";
 import { Alert, AlertDescription, AlertTitle } from "@common/components/ui/alert";
 import { Button } from "@common/components/ui/button";
+import { Field, FieldLabel } from "@common/components/ui/field";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@common/components/ui/select";
 import { FORM_MODE } from "@common/types/form-mode.types";
-import { cn } from "@common/utils/cn.util";
 
 import { createPlatformAccountAction } from "@features/platform-accounts/actions/create-platform-account.action";
 import { updatePlatformAccountAction } from "@features/platform-accounts/actions/update-platform-account.action";
-import { PlatformAccountFields } from "@features/platform-accounts/components/platform-account-fields";
+import { PlatformAccountIdentityFields, PlatformAccountPasswordFields } from "@features/platform-accounts/components/platform-account-fields";
 import { PLATFORM_ACCOUNT_ERROR_MESSAGES } from "@features/platform-accounts/constants/error-messages.constants";
 import {
   platformAccountFormSchema,
@@ -69,6 +70,8 @@ export function PlatformAccountForm({ mode, account, returnTo }: PlatformAccount
 
   const [formError, setFormError] = useState<string>();
 
+  const [initialEnabled, setInitialEnabled] = useState("true");
+
   const defaultValues = getDefaultValues(account);
 
   const {
@@ -85,9 +88,13 @@ export function PlatformAccountForm({ mode, account, returnTo }: PlatformAccount
     setFormError(undefined);
 
     startTransition(async () => {
-      const result = isEdit
-        ? await updatePlatformAccountAction(account.platformAccountId, createFormData(values))
-        : await createPlatformAccountAction(createFormData(values));
+      const formData = createFormData(values);
+
+      if (!isEdit) {
+        formData.set("enabled", initialEnabled);
+      }
+
+      const result = isEdit ? await updatePlatformAccountAction(account.platformAccountId, formData) : await createPlatformAccountAction(formData);
 
       const hasFieldErrors = setActionFieldErrors(result, setError);
 
@@ -118,24 +125,48 @@ export function PlatformAccountForm({ mode, account, returnTo }: PlatformAccount
   ) : null;
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="flex h-full min-h-0 w-full flex-1 flex-col">
-      <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto pb-4">
+    <form onSubmit={handleSubmit(onSubmit)} className="flex w-full flex-col gap-4">
+      <div className="flex min-w-0 flex-col gap-4">
         {errorAlert}
 
         <section className="bg-muted/25 rounded-xl border p-5 md:p-6">
           <header className="-mx-5 border-b px-5 pb-5 md:-mx-6 md:px-6">
-            <SectionHeader icon={UserRoundCogIcon} title="Identidad y acceso" description={getSectionDescription(isEdit)} />
+            <SectionHeader icon={UserRoundCogIcon} title={isEdit ? "Identidad y acceso" : "Identidad"} description={getSectionDescription(isEdit)} />
           </header>
-          <PlatformAccountFields errors={errors} defaultValues={defaultValues} register={register} isEdit={isEdit} />
+          <PlatformAccountIdentityFields errors={errors} defaultValues={defaultValues} register={register} isEdit={isEdit} />
+          {isEdit ? <PlatformAccountPasswordFields errors={errors} defaultValues={defaultValues} register={register} isEdit /> : null}
         </section>
+        {!isEdit ? (
+          <section className="bg-muted/25 rounded-xl border p-5 md:p-6">
+            <header className="-mx-5 border-b px-5 pb-5 md:-mx-6 md:px-6">
+              <SectionHeader icon={LockKeyholeIcon} title="Acceso" description="Contraseña y estado inicial de acceso a la plataforma." />
+            </header>
+            <PlatformAccountPasswordFields errors={errors} defaultValues={defaultValues} register={register} isEdit={false} />
+            <Field className="mt-5">
+              <FieldLabel htmlFor="platform-account-enabled" required>
+                Estado
+              </FieldLabel>
+              <Select required value={initialEnabled} onValueChange={setInitialEnabled}>
+                <SelectTrigger id="platform-account-enabled" className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectItem value="true" className="px-2.5 py-1.5">
+                      Activo
+                    </SelectItem>
+                    <SelectItem value="false" className="px-2.5 py-1.5">
+                      Inactivo
+                    </SelectItem>
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            </Field>
+          </section>
+        ) : null}
       </div>
 
-      <div
-        className={cn(
-          "mt-auto flex items-center justify-end gap-3",
-          isEdit ? "border-border/40 border-t pt-5 pb-6" : "bg-background sticky bottom-0 z-10 flex-row flex-wrap",
-        )}
-      >
+      <div className="flex flex-row flex-wrap items-center justify-end gap-3">
         <Button type="button" variant="outline" size="lg" className="flex-1 sm:flex-none" onClick={handleCancel} disabled={isPending}>
           Cancelar
         </Button>

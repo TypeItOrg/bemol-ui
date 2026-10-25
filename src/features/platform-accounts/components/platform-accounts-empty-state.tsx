@@ -60,7 +60,7 @@ export function PlatformAccountsEmptyState({ data, search, enabled, size }: Plat
       <p className="text-muted-foreground mt-1.5 mb-6 max-w-sm text-sm">
         Comenzá creando un nuevo administrador para empezar a gestionar la plataforma.
       </p>
-      <Button asChild size="sm">
+      <Button asChild size="lg">
         <ReturnToLink href="/admin/accounts/new">
           <PlusIcon className="mr-2 size-4" />
           Nuevo administrador
