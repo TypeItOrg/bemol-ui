@@ -10,7 +10,7 @@ import { cn } from "@common/utils/cn.util";
 import { type InstitutionalHomeLink } from "@features/institutional-auth/utils/institutional-home-access.util";
 
 export function HomeAccessRow({ link }: HomeAccessRowProps): ReactElement {
-  return <NavigationCard href={link.href} icon={link.icon} title={link.title} description={link.description} prominent />;
+  return <NavigationCard href={link.href} icon={link.icon} title={link.title} />;
 }
 
 export function HomeSubsection({ children, description, icon: Icon, id, imageSide = "left", imageSrc, title }: HomeSubsectionProps): ReactElement {

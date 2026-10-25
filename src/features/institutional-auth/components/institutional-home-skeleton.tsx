@@ -29,46 +29,22 @@ export function InstitutionalHomeSkeleton(): ReactElement {
       </header>
 
       <div className="flex flex-col gap-4 px-3 pb-3 md:px-4 md:pb-4">
-        {/* Gestión institucional skeleton */}
-        <section className="bg-background @container/home-section flex flex-col gap-4 rounded-xl border p-4 shadow-xs sm:p-5">
-          <div className="flex items-stretch justify-between gap-4">
-            <div className="flex min-w-0 flex-1 flex-col gap-1.5">
-              <Skeleton className="h-6 w-44" />
-              <Skeleton className="h-4 w-64 max-w-full" />
-            </div>
-            <Skeleton className="size-11 shrink-0 rounded-xl" />
-          </div>
-          <div className="grid gap-4 @5xl/home-section:grid-cols-[minmax(200px,0.7fr)_minmax(0,2fr)]">
-            <Skeleton className="h-44 rounded-lg border sm:h-52 @5xl/home-section:h-92" />
-            <div className="grid gap-4">
-              <NavigationCardSkeleton prominent />
-              <NavigationCardSkeleton prominent />
-            </div>
-          </div>
-        </section>
-
-        {/* Gestión académica skeleton */}
-        <section className="bg-background @container/home-section flex flex-col gap-4 rounded-xl border p-4 shadow-xs sm:p-5">
-          <div className="flex items-stretch justify-between gap-4">
-            <div className="flex min-w-0 flex-1 flex-col gap-1.5">
-              <Skeleton className="h-6 w-40" />
-              <Skeleton className="h-4 w-72 max-w-full" />
-            </div>
-            <Skeleton className="size-11 shrink-0 rounded-xl" />
-          </div>
-          <div className="grid gap-4 @5xl/home-section:grid-cols-[minmax(0,2fr)_minmax(200px,0.7fr)]">
-            <div className="@container/home-content min-w-0 @5xl/home-section:order-1">
-              <div className="grid gap-4 @2xl/home-content:grid-cols-2">
-                <NavigationCardSkeleton prominent />
-                <NavigationCardSkeleton prominent />
-                <NavigationCardSkeleton prominent />
-                <NavigationCardSkeleton prominent />
-                <NavigationCardSkeleton prominent className="@2xl/home-content:col-span-2" />
+        {[4, 3, 5].map((itemCount, index) => (
+          <section key={index} className="bg-background @container/home-content flex flex-col gap-4 rounded-xl border p-4 shadow-xs sm:p-5">
+            <div className="flex items-stretch justify-between gap-4">
+              <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+                <Skeleton className="h-6 w-44" />
+                <Skeleton className="h-4 w-72 max-w-full" />
               </div>
+              <Skeleton className="size-11 shrink-0 rounded-xl" />
             </div>
-            <Skeleton className="h-44 rounded-lg border sm:h-52 @5xl/home-section:order-2 @5xl/home-section:h-92" />
-          </div>
-        </section>
+            <div className="grid gap-3 @2xl/home-content:grid-cols-2">
+              {Array.from({ length: itemCount }, (_, itemIndex) => (
+                <NavigationCardSkeleton key={itemIndex} />
+              ))}
+            </div>
+          </section>
+        ))}
       </div>
     </main>
   );
