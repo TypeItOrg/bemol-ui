@@ -7,6 +7,7 @@ import { ThemeProvider as NextThemesProvider } from "next-themes";
 
 import { PwaRuntime } from "@common/components/pwa-runtime";
 import { Toaster } from "@common/components/ui/sonner";
+import { PWA_THEME_COLOR_SCRIPT } from "@common/services/pwa/pwa.service";
 import { isHttpResponseError } from "@common/utils/http-response-error.util";
 
 import { getRedirectPath } from "@features/platform-auth/utils/platform-auth-paths.util";
@@ -56,11 +57,17 @@ export function Providers({ children }: { children: ReactNode }): ReactElement {
   return (
     <NextThemesProvider
       attribute="class"
-      defaultTheme="light"
+      defaultTheme="system"
       enableSystem
       disableTransitionOnChange
       scriptProps={{ type: typeof window === "undefined" ? "text/javascript" : "text/plain" }}
     >
+      {/* Run immediately after next-themes' inline script, before rendering page content. */}
+      <script
+        suppressHydrationWarning
+        type={typeof window === "undefined" ? "text/javascript" : "text/plain"}
+        dangerouslySetInnerHTML={{ __html: PWA_THEME_COLOR_SCRIPT }}
+      />
       <QueryClientProvider client={queryClient}>
         <PwaRuntime />
         {children}

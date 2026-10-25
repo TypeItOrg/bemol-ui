@@ -5,6 +5,13 @@ const THEME_COLORS = new Map([
 
 const THEME_COLOR_META_SELECTOR = 'meta[name="theme-color"]';
 
+export const PWA_THEME_COLOR_SCRIPT = `
+  document.querySelector('${THEME_COLOR_META_SELECTOR}')?.setAttribute(
+    "content",
+    document.documentElement.style.colorScheme === "dark" ? "${THEME_COLORS.get("dark")}" : "${THEME_COLORS.get("light")}"
+  );
+`;
+
 const PRODUCTION_ENVIRONMENT = "production";
 
 const SERVICE_WORKER_URL = "/sw.js";
