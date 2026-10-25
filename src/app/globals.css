@@ -235,7 +235,7 @@
     @apply text-foreground;
   }
   html {
-    @apply font-sans;
+    @apply bg-background font-sans;
     font-size: 110%;
   }
 }

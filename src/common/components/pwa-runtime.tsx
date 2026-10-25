@@ -2,7 +2,10 @@
 
 import { useEffect, useSyncExternalStore, type ReactElement } from "react";
 
+import { usePathname } from "next/navigation";
+
 import { WifiOffIcon } from "lucide-react";
+import { useTheme } from "next-themes";
 
 import { Alert, AlertDescription, AlertTitle } from "@common/components/ui/alert";
 
@@ -17,11 +20,23 @@ function subscribeToConnectionChange(callback: () => void): () => void {
 }
 
 export function PwaRuntime(): ReactElement | null {
+  const pathname = usePathname();
+
+  const { resolvedTheme } = useTheme();
+
   const online = useSyncExternalStore(
     subscribeToConnectionChange,
     () => navigator.onLine,
     () => true,
   );
+
+  useEffect(() => {
+    if (resolvedTheme !== "light" && resolvedTheme !== "dark") {
+      return;
+    }
+
+    document.querySelector<HTMLMetaElement>('meta[name="theme-color"]')?.setAttribute("content", resolvedTheme === "dark" ? "#10080a" : "#faf9f6");
+  }, [pathname, resolvedTheme]);
 
   useEffect(() => {
     if (process.env.NODE_ENV !== "production" || !("serviceWorker" in navigator)) {
