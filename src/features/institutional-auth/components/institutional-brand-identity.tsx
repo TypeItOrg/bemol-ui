@@ -7,22 +7,27 @@ import Image from "next/image";
 import { cn } from "@common/utils/cn.util";
 
 import { useInstitutionalBrand } from "@features/institutional-auth/components/institutional-brand-context";
+import type { PublicInstitution } from "@features/institutions/types/public-institution.types";
 import { getInstitutionLogoUrl } from "@features/institutions/utils/institution-logo-url.util";
 
 export function InstitutionalBrandIdentity({
+  institution: providedInstitution,
   className,
   imageClassName,
   imageContainerClassName = "h-56 w-full",
   showInstitutionName = false,
   darkBackground = false,
 }: {
+  institution?: Pick<PublicInstitution, "id" | "name" | "logoUrl">;
   className?: string;
   imageClassName?: string;
   imageContainerClassName?: string;
   showInstitutionName?: boolean;
   darkBackground?: boolean;
 }): ReactElement {
-  const institution = useInstitutionalBrand();
+  const contextualInstitution = useInstitutionalBrand();
+
+  const institution = providedInstitution ?? contextualInstitution;
 
   const productLogoUrl = darkBackground ? "/brand/logo-dark.svg" : "/brand/logo.svg";
 

@@ -4,7 +4,10 @@ import Image from "next/image";
 
 import { Separator } from "@common/components/ui/separator";
 
-export function InstitutionalHomeHero({
+import { InstitutionalBrandIdentity } from "@features/institutional-auth/components/institutional-brand-identity";
+import { getInstitutionalBrand } from "@features/institutional-auth/services/get-institutional-brand.service";
+
+export async function InstitutionalHomeHero({
   greeting,
   name,
   institutionName,
@@ -14,7 +17,9 @@ export function InstitutionalHomeHero({
   name: string;
   institutionName?: string;
   primaryRole: string;
-}): ReactElement {
+}): Promise<ReactElement> {
+  const institution = await getInstitutionalBrand();
+
   return (
     <header className="@container/home-hero relative flex h-56 min-w-0 items-center overflow-hidden shadow-sm @2xl/home-hero:h-64">
       <Image src="/images/institutional-header.webp" alt="" fill sizes="100vw" quality={90} preload className="object-cover object-center" />
@@ -24,13 +29,11 @@ export function InstitutionalHomeHero({
       />
       <div aria-hidden="true" className="absolute inset-0 bg-linear-to-t from-black/20 via-transparent to-transparent dark:from-black/35" />
       <div className="relative flex max-w-3xl min-w-0 items-center gap-4 p-5 text-white @2xl/home-hero:p-6 @4xl/home-hero:p-8">
-        <Image
-          width={32}
-          height={32}
-          src="/brand/logo-dark.svg"
-          loading="eager"
-          alt="Logo de Bemol"
-          className="h-28 w-28 shrink-0 object-contain @2xl/home-hero:h-32 @2xl/home-hero:w-32 @4xl/home-hero:h-36 @4xl/home-hero:w-36"
+        <InstitutionalBrandIdentity
+          institution={institution}
+          darkBackground
+          className="shrink-0"
+          imageContainerClassName="h-28 w-28 @2xl/home-hero:h-32 @2xl/home-hero:w-32 @4xl/home-hero:h-36 @4xl/home-hero:w-36"
         />
         <div className="flex h-28 min-w-0 flex-col justify-center gap-3 py-1 @2xl/home-hero:h-32 @2xl/home-hero:gap-4 @4xl/home-hero:h-36 @4xl/home-hero:py-2">
           <div>

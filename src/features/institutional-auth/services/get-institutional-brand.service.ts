@@ -8,7 +8,7 @@ import { getInstitutionalUser } from "@features/institutional-auth/services/get-
 import { fetchInstitutionalInstitution } from "@features/institutions/services/fetch-institutional-institution.service";
 import type { PublicInstitution } from "@features/institutions/types/public-institution.types";
 
-async function resolveInstitutionalBrand(): Promise<Pick<PublicInstitution, "id" | "logoUrl"> | undefined> {
+async function resolveInstitutionalBrand(): Promise<Pick<PublicInstitution, "id" | "name" | "logoUrl"> | undefined> {
   const requestInstitution = await getRequestInstitution();
 
   if (requestInstitution) {
@@ -30,6 +30,7 @@ async function resolveInstitutionalBrand(): Promise<Pick<PublicInstitution, "id"
 
     return {
       id: institution.id,
+      name: institution.name,
       logoUrl: institution.logoUrl,
     };
   } catch {
