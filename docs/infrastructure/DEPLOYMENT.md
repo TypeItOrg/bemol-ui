@@ -10,15 +10,30 @@ Este repositorio construye, valida y publica la imagen de `bemol-ui`. La topolog
 Hay dos workflows:
 
 - **CI**, en [`.github/workflows/ci.yaml`](../../.github/workflows/ci.yaml): formato, lint, tipos, tests y build. Se ejecuta para pull requests hacia `develop`, `staging` y `main`, y para pushes a `develop`/`main`. No publica imágenes ni recibe credenciales de despliegue.
-- **Deploy staging**, en [`.github/workflows/deploy-staging.yaml`](../../.github/workflows/deploy-staging.yaml): sólo por push a `staging`. Primero llama al CI reutilizable del mismo commit con `workflow_call`, sin duplicarlo; si pasa, publica `ghcr.io/typeitorg/bemol-ui:sha-<commit>` y `:staging`, y solicita el despliegue.
+- **Deploy staging**, en [`.github/workflows/deploy-staging.yaml`](../../.github/workflows/deploy-staging.yaml): sólo por push a `staging`. Publica `ghcr.io/typeitorg/bemol-ui:sha-<commit>` y `:staging`, y solicita el despliegue. No repite CI ni consulta ejecuciones anteriores.
 
-El checkout, las pruebas y el tag SHA corresponden al mismo `github.sha`. La llamada conserva la referencia de staging y sus restricciones de Environment; no usa `workflow_run`, que ejecutaría desde la rama por defecto. `develop` se ejecuta localmente y `main` sólo valida: ninguno publica imágenes ni despliega.
+La protección de `staging` exige que el commit tenga el check `verify` de GitHub Actions aprobado antes de aceptar el push. El checkout y el tag de la imagen usan ese mismo SHA. `develop` y `main` sólo validan: ninguno publica imágenes ni despliega.
 
-Los runners se fijan en `ubuntu-24.04`. Los grupos de concurrencia de CI y deploy son distintos, para cancelar versiones anteriores sin que el caller cancele su propio CI.
+Los runners se fijan en `ubuntu-24.04`. Los grupos de concurrencia de CI y deploy son distintos y cancelan ejecuciones anteriores de la misma referencia.
 
 El job `deploy-staging` usa el GitHub Environment `staging` con `DEPLOY_HOST`, `DEPLOY_PORT`, `DEPLOY_USER`, `DEPLOY_SSH_KEY` y `DEPLOY_SSH_KNOWN_HOSTS`. Verifica la clave del host y ejecuta `scripts/deploy-staging.sh` en `/opt/bemol-infra` por SSH.
 
 El script del servidor serializa API/UI, hace pull y aplica la combinación `compose.yaml` + `compose.staging.yaml`, conservando los volúmenes. Las variables `API_VERSION` y `UI_VERSION` del archivo privado `.env.staging` seleccionan tags móviles o SHA; el job espera el resultado y la salud configurada de los contenedores. No hay rollback automático ni reversión de migraciones. La operación manual está en [`bemol-infra/docs/STAGING.md`](https://github.com/TypeItOrg/bemol-infra/blob/staging/docs/STAGING.md).
+
+## Promoción a staging
+
+Una vez aprobado el CI de develop:
+
+```bash
+git fetch origin
+git switch staging
+git rebase origin/develop
+git push origin staging
+```
+
+Sin commits exclusivos en staging, el rebase conserva el SHA validado. Si genera otro commit o el CI todavía no aprobó, GitHub rechaza el push: no se ejecuta un CI de respaldo en staging.
+
+La regla se configura en GitHub para `staging`, exige `verify` de GitHub Actions y se aplica también a administradores. No exige PR ni permite force pushes o borrar la rama. No quitar esta protección mientras el workflow despliegue sin ejecutar CI.
 
 ## Responsabilidades de este repositorio
 
