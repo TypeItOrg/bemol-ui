@@ -25,6 +25,7 @@ export const getInstitutionLogoPlaceholder = cache(async (institutionId: string,
 
     const image = await sharp(new Uint8Array(await response.arrayBuffer()), { limitInputPixels: 16_777_216 })
       .resize(32, 32, { fit: "inside", withoutEnlargement: true })
+      .blur(0.6)
       .timeout({ seconds: 3 })
       .png()
       .toBuffer();
