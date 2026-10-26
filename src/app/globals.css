@@ -327,6 +327,10 @@ input:is([data-slot="input"], [data-slot="input-group-control"]):is(:autofill, :
     background-color: var(--muted);
   }
 
+  [data-slot="table"][data-sticky-actions] > tbody > tr > td:first-child:not([colspan]) {
+    @apply transition-colors;
+  }
+
   [data-slot="table"][data-sticky-actions] > tbody > tr:is(:hover, :has([aria-expanded="true"])) > td:first-child:not([colspan]) {
     background-color: color-mix(in oklab, var(--muted) 50%, var(--background));
   }
