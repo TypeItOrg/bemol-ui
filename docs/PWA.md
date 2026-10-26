@@ -83,11 +83,19 @@ cambios de nombre o ícono pueden tardar en reflejarse según el dispositivo.
 El color de la barra superior se inicializa después de resolver el tema, antes del
 contenido, y solo se sincroniza cuando cambia el tema. El metadato `theme-color`
 queda fuera del viewport administrado por Next.js para que navegar no lo reemplace
-por un color claro y produzca un destello. El manifiesto conserva `background_color`
-para el arranque, pero no declara `theme_color`: la barra de navegación de Android
-queda a criterio de Chrome y del sistema, sin imponer un color claro ni garantizar
-que siga el selector de tema de Bemol. Validar el resultado en la PWA instalada tras
-actualizar su manifiesto.
+por un color claro y produzca un destello. El manifiesto declara un `theme_color`
+oscuro fijo (`#10080a`) para que Chrome para Android pueda usarlo como fondo de la
+barra inferior del sistema, tanto en tema claro como oscuro. El color claro de los
+botones lo decide Android por contraste; la web no controla esos botones directamente.
+El metadato de la página sigue sincronizando la barra superior con el tema elegido.
+El manifiesto conserva `background_color` para el arranque.
+
+El resultado depende de la versión de Chrome y Android, del fabricante y del modo
+de navegación (botones o gestos); algunas versiones pueden ignorar el color solicitado.
+Validar ambos temas en la PWA instalada tras actualizar su manifiesto. No se acredita
+la apariencia de las barras del sistema mediante emulación de pantalla en escritorio.
+
+Referencia: [implementación de Chromium para el color de navegación de PWAs instaladas](https://chromium.googlesource.com/chromium/src/+/0a6ab4f0e2ce17e572b05400ae6eacd7fc5389f0%5E%21/).
 
 ## Aceptación y producción
 

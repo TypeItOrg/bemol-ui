@@ -18,6 +18,7 @@ export async function GET(request: Request): Promise<Response> {
       start_url: institution ? "/" : "/admin",
       scope: "/",
       display: "standalone",
+      theme_color: "#10080a",
       background_color: "#faf9f6",
       icons: [
         { src: "/brand/pwa-192.png?v=2", sizes: "192x192", type: "image/png", purpose: "any" },
