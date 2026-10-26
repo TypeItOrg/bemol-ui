@@ -60,13 +60,11 @@ export function getAcademicSidebarNavigationSections(
     urls: ["/academic-years", "/academic-spaces", "/instruments", "/shifts", "/documentation"].map((url) => `${prefix}${url}`),
   });
 
-  return scope === "platform"
-    ? groupSidebarNavigationSection(configuredSections, {
-        sectionLabel: "Plataforma",
-        id: "platform-activity",
-        title: "Actividad",
-        icon: HistoryIcon,
-        urls: ["/admin/audit-events", "/admin/emails"],
-      })
-    : configuredSections;
+  return groupSidebarNavigationSection(configuredSections, {
+    sectionLabel: scope === "platform" ? "Plataforma" : "Institución",
+    id: `${scope}-activity`,
+    title: "Actividad",
+    icon: HistoryIcon,
+    urls: [`${prefix}/audit-events`, `${prefix}/emails`],
+  });
 }

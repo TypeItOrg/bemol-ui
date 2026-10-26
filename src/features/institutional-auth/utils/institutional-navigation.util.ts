@@ -23,6 +23,7 @@ import type { NavigationItem } from "@common/utils/navigation.util";
 
 import { GUARDIAN_DEPENDENTS_PAGE_PATH } from "@features/guardian-dependents/constants/guardian-dependent.constants";
 import { GUARDIAN_LINKS_PAGE_PATH } from "@features/guardian-links/constants/guardian-link.constants";
+import { getInstitutionalActivityHomeLinks } from "@features/institutional-activity/utils/institutional-activity-access.util";
 import { INSTITUTIONAL_PERMISSION } from "@features/institutional-auth/types/institutional-permission.types";
 import type { InstitutionalUser } from "@features/institutional-auth/types/institutional-user.types";
 import {
@@ -64,6 +65,7 @@ export function getInstitutionalNavigationSections(
     ...(canReadInstitution ? [{ title: "Institución", url: "/institution", icon: Building2Icon }] : []),
     ...(canManagePeople ? [{ title: "Usuarios", url: "/people", icon: UsersIcon }] : []),
     ...(canReadRoles ? [{ title: "Roles y permisos", url: "/roles", icon: UserLockIcon }] : []),
+    ...getInstitutionalActivityHomeLinks(user).map(({ href, title, icon }) => ({ title, url: href, icon })),
   ];
 
   const academicItems: NavigationItem[] = canViewAcademicNavigation(user)

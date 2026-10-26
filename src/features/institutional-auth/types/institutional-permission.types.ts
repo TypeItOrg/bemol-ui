@@ -83,6 +83,7 @@ export const INSTITUTIONAL_PERMISSION = {
   ENROLLMENT_APPLICATION_COURSE_REJECT: "institution:enrollment-application-course:reject",
   COURSE_WAITLIST_READ: "institution:course-waitlist:read",
   AUDIT_READ: "institution:audit:read",
+  EMAIL_READ: "institution:email:read",
 } as const;
 
 export type InstitutionalPermission = (typeof INSTITUTIONAL_PERMISSION)[keyof typeof INSTITUTIONAL_PERMISSION];

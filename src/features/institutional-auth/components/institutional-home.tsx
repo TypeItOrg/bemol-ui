@@ -1,12 +1,13 @@
 import { Suspense, type ReactElement } from "react";
 
-import { BookOpenIcon, Building2Icon, ClipboardListIcon, GraduationCapIcon, Settings2Icon, UserRoundIcon } from "lucide-react";
+import { BookOpenIcon, Building2Icon, ClipboardListIcon, GraduationCapIcon, HistoryIcon, Settings2Icon, UserRoundIcon } from "lucide-react";
 
 import { AcademicResourceLinks, getReadableAcademicResources } from "@features/academic/components/academic-resource-links";
 import { AcademicResource } from "@features/academic/types/academic-resource.types";
 import { getAcademicAccess } from "@features/academic/utils/academic-access.util";
 import { GUARDIAN_LINKS_PAGE_PATH } from "@features/guardian-links/constants/guardian-link.constants";
 import { fetchOperatingProfile } from "@features/guardian-workspace/services/operating-profile.service";
+import { getInstitutionalActivityHomeLinks } from "@features/institutional-activity/utils/institutional-activity-access.util";
 import { InstitutionalHomeHero } from "@features/institutional-auth/components/institutional-home-hero";
 import { InstitutionalHomeSkeleton } from "@features/institutional-auth/components/institutional-home-skeleton";
 import { HomeAccessRow, HomeSubsection } from "@features/institutional-auth/components/institutional-home-subsection";
@@ -53,6 +54,8 @@ async function InstitutionalHomeContent({
   const links = getInstitutionalHomeLinks(user);
 
   const enrollmentLinks = getInstitutionalEnrollmentHomeLinks(user);
+
+  const activityLinks = getInstitutionalActivityHomeLinks(user);
 
   const managementLinks = [
     ...links.filter((link) => link.href !== "/account"),
@@ -178,6 +181,22 @@ async function InstitutionalHomeContent({
           >
             <nav aria-label="Inscripciones y cursadas" className="[&>a]:bg-background grid gap-4">
               {institutionalEnrollmentLinks.map((link) => (
+                <HomeAccessRow key={link.href} link={link} />
+              ))}
+            </nav>
+          </HomeSubsection>
+        ) : null}
+
+        {activityLinks.length > 0 ? (
+          <HomeSubsection
+            id="institutional-activity-title"
+            title="Actividad"
+            description="Consultá la actividad registrada en la institución."
+            icon={HistoryIcon}
+            imageSrc="/images/institutional-management.webp"
+          >
+            <nav aria-label="Actividad institucional" className="[&>a]:bg-background grid gap-4">
+              {activityLinks.map((link) => (
                 <HomeAccessRow key={link.href} link={link} />
               ))}
             </nav>

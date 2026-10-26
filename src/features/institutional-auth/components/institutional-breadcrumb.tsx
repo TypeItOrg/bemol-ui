@@ -11,6 +11,8 @@ import { getAcademicBreadcrumbGroupLabel } from "@features/academic/utils/academ
 
 const SEGMENT_LABELS: Readonly<Record<string, string>> = {
   documentation: "Documentación",
+  "audit-events": "Auditoría",
+  emails: "Correos",
   people: "Usuarios",
   new: "Nuevo",
   account: "Cuenta",
@@ -137,7 +139,7 @@ function getSegments(
 
     const label = customSegmentLabels[part] ?? SEGMENT_LABELS[part] ?? "Editar";
 
-    const groupLabel = getAcademicBreadcrumbGroupLabel(part);
+    const groupLabel = ["audit-events", "emails"].includes(part) ? "Actividad" : getAcademicBreadcrumbGroupLabel(part);
 
     if (groupLabel) {
       segments.push({ label: groupLabel });

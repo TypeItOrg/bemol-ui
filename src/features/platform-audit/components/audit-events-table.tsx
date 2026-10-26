@@ -32,14 +32,18 @@ export function AuditEventsTable({
   data,
   hasFilters,
   mailView = false,
+  basePath: customBasePath,
+  showInstitution = true,
 }: {
   data: PaginatedResponse<AuditEvent>;
   hasFilters: boolean;
   mailView?: boolean;
+  basePath?: string;
+  showInstitution?: boolean;
 }): ReactElement {
   const { isPending, navigate } = useDataTableNavigation();
 
-  const basePath = mailView ? "/admin/emails" : "/admin/audit-events";
+  const basePath = customBasePath ?? (mailView ? "/admin/emails" : "/admin/audit-events");
 
   const noun = mailView ? "correo" : "evento";
 
@@ -65,7 +69,7 @@ export function AuditEventsTable({
                 <TableHead>{mailView ? "Tipo de correo" : "Acción"}</TableHead>
                 <TableHead>{mailView ? "Destinatario" : "Módulo"}</TableHead>
                 <TableHead>{mailView ? "Resultado" : "Realizado por"}</TableHead>
-                <TableHead>Institución</TableHead>
+                {showInstitution ? <TableHead>Institución</TableHead> : null}
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -124,7 +128,7 @@ export function AuditEventsTable({
                           </TableCell>
                         </>
                       )}
-                      <TableCell className="max-w-64 whitespace-normal">{auditInstitutionName(event)}</TableCell>
+                      {showInstitution ? <TableCell className="max-w-64 whitespace-normal">{auditInstitutionName(event)}</TableCell> : null}
                     </TableRow>
                   </ContextMenuTrigger>
                   <ContextMenuContent className="w-40 p-1.5">

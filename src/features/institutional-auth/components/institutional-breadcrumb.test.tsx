@@ -72,4 +72,16 @@ describe("InstitutionalBreadcrumb", () => {
     expect(screen.getByText("Editar Nivel 1")).toBeInTheDocument();
     expect(screen.queryByText("Niveles")).not.toBeInTheDocument();
   });
+  it.each([
+    ["/audit-events/event-id", "audit-events", "Auditoría"],
+    ["/emails/event-id", "emails", "Correos"],
+  ])("shows the activity group and preserves the list return path for %s", (path, resource, label) => {
+    jest.mocked(usePathname).mockReturnValue(path);
+
+    render(<InstitutionalBreadcrumb segmentHrefs={{ [resource]: `/${resource}?page=2` }} segmentLabels={{ "event-id": "Detalle" }} />);
+
+    expect(screen.getByText("Actividad")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: label })).toHaveAttribute("href", `/${resource}?page=2`);
+    expect(screen.getByText("Detalle")).toHaveAttribute("aria-current", "page");
+  });
 });
