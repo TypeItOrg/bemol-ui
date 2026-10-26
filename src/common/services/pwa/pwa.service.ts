@@ -48,3 +48,46 @@ export function syncPwaThemeColor(theme: string | undefined): void {
 
   document.querySelector<HTMLMetaElement>(THEME_COLOR_META_SELECTOR)?.setAttribute("content", color);
 }
+
+export function syncPwaWindowTitle(): () => void {
+  const displayMode = window.matchMedia?.("(display-mode: standalone), (display-mode: minimal-ui), (display-mode: window-controls-overlay)");
+
+  let browserTitle = document.title;
+
+  let appliedTitle: string | undefined;
+
+  function syncTitle(): void {
+    if (document.title !== appliedTitle) {
+      browserTitle = document.title;
+    }
+
+    const standalone = displayMode?.matches || ("standalone" in navigator && navigator.standalone === true);
+
+    const pageTitle = document.querySelector<HTMLMetaElement>('meta[name="application-title"]')?.content.trim();
+
+    const appName = document.querySelector<HTMLMetaElement>('meta[name="application-name"]')?.content.trim();
+
+    const title = standalone && pageTitle && appName ? `${pageTitle} | ${appName}` : browserTitle;
+
+    if (document.title !== title) {
+      document.title = title;
+    }
+
+    appliedTitle = title;
+  }
+
+  const observer = new MutationObserver(syncTitle);
+
+  observer.observe(document.head, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ["content"] });
+  displayMode?.addEventListener("change", syncTitle);
+  syncTitle();
+
+  return () => {
+    observer.disconnect();
+    displayMode?.removeEventListener("change", syncTitle);
+
+    if (document.title === appliedTitle) {
+      document.title = browserTitle;
+    }
+  };
+}

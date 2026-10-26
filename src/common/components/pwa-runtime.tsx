@@ -7,7 +7,7 @@ import { useTheme } from "next-themes";
 
 import { Alert, AlertDescription, AlertTitle } from "@common/components/ui/alert";
 import { useOnlineStatus } from "@common/hooks/use-online-status";
-import { registerPwaServiceWorker, syncPwaThemeColor } from "@common/services/pwa/pwa.service";
+import { registerPwaServiceWorker, syncPwaThemeColor, syncPwaWindowTitle } from "@common/services/pwa/pwa.service";
 
 export function PwaRuntime(): ReactElement | null {
   const { resolvedTheme } = useTheme();
@@ -19,6 +19,8 @@ export function PwaRuntime(): ReactElement | null {
   }, [resolvedTheme]);
 
   useEffect(registerPwaServiceWorker, []);
+
+  useEffect(syncPwaWindowTitle, []);
 
   if (online) {
     return null;

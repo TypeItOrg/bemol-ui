@@ -11,12 +11,14 @@ export async function getInstitutionalMetadata(pageTitle: string): Promise<Metad
 
   const person = institution ? null : await fetchInstitutionalPerson();
 
-  const institutionName = institution?.shortName?.trim() || institution?.name || person?.institutionName || "Bemol";
+  const institutionName = institution?.name || person?.institutionName;
+
+  const brandName = institutionName ? `${institutionName} - Bemol` : "Bemol";
 
   return {
     other: { "application-title": pageTitle },
     title: {
-      absolute: `${pageTitle} | ${institutionName}`,
+      absolute: `${pageTitle} | ${brandName}`,
     },
   };
 }

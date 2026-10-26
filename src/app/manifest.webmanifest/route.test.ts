@@ -30,8 +30,8 @@ it("offers the platform app on the generic host without an institution lookup", 
   expect(response.headers.get("cache-control")).toBe("no-store");
   expect(await response.json()).toMatchObject({
     id: "/",
-    name: "Administración | Bemol",
-    short_name: "Administración | Bemol",
+    name: "Administración - Bemol",
+    short_name: "Administración - Bemol",
     start_url: "/admin",
     scope: "/",
     display: "standalone",
@@ -58,8 +58,8 @@ it("resolves successive institutions independently using the actual host and rel
     expect(response.status).toBe(200);
     expect(response.headers.get("cache-control")).toBe("no-store");
     expect(manifest).toMatchObject({
-      name: `${shortName || name} | Bemol`,
-      short_name: `${shortName || name} | Bemol`,
+      name: `${shortName || name} - Bemol`,
+      short_name: `${shortName || name} - Bemol`,
       start_url: "/",
       id: "/",
       scope: "/",

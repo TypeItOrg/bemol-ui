@@ -10,8 +10,8 @@ texto exacto dependen del navegador y del sistema operativo; no hay promoción p
 
 | Origen                       | Nombre instalado       | Nombre corto           | Inicio   |
 | ---------------------------- | ---------------------- | ---------------------- | -------- |
-| Subdominio institucional     | Bemol                  | Bemol                  | `/`      |
-| Dominio general, área /admin | Bemol - Administración | Bemol - Administración | `/admin` |
+| Subdominio institucional     | Nombre corto - Bemol   | Nombre corto - Bemol   | `/`      |
+| Dominio general, área /admin | Administración - Bemol | Administración - Bemol | `/admin` |
 
 El dominio general fuera de `/admin` no publica el enlace al manifiesto ni declara
 modo de aplicación Apple. La PWA de plataforma se declara desde el layout común de
@@ -19,10 +19,22 @@ modo de aplicación Apple. La PWA de plataforma se declara desde el layout comú
 Esto controla dónde ofrecemos nuestra PWA, no las opciones propias del navegador:
 algunos permiten instalar cualquier web o crear accesos directos aun sin manifiesto.
 
-El nombre completo y corto de administración son «Bemol - Administración», incluido
-el nombre Apple. Las institucionales usan su nombre corto en ambos y en el nombre Apple,
-con el nombre completo como alternativa si no tienen uno corto. Los títulos web usan
-«Pantalla | Institución», por ejemplo «Inicio | Felipe Boero», sin sumar «Bemol».
+El nombre completo y corto de administración son «Administración - Bemol», incluido
+el nombre Apple. Las institucionales usan «Nombre corto - Bemol» en ambos y en el nombre Apple,
+con el nombre completo como alternativa si no tienen uno corto.
+
+Los títulos de página siguen estas reglas, también al navegar:
+
+| Contexto                     | Ejemplo de título                                                   |
+| ---------------------------- | ------------------------------------------------------------------- |
+| PWA institucional            | Usuarios \| Felipe Boero - Bemol                                     |
+| Navegador institucional      | Usuarios \| Conservatorio Superior de Música Felipe Boero - Bemol    |
+| Administración, PWA o web    | Usuarios \| Administración - Bemol                                   |
+
+El modo instalado combina los metadatos `application-title` (pantalla) y
+`application-name` (nombre instalado); al volver al navegador se restaura el título web.
+La barra de ventana que agrega el navegador o sistema operativo puede incluir información propia.
+
 Las instalaciones de instituciones diferentes siguen separadas por origen aunque
 compartan ícono. El dispositivo puede recortar visualmente el nombre.
 
