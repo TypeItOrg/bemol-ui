@@ -23,17 +23,34 @@ El nombre completo y corto de administración son «Administración - Bemol», i
 el nombre Apple. Las institucionales usan «Nombre corto - Bemol» en ambos y en el nombre Apple,
 con el nombre completo como alternativa si no tienen uno corto.
 
-Los títulos de página siguen estas reglas, también al navegar:
+Los títulos visibles siguen estas reglas, también al navegar:
 
 | Contexto                     | Ejemplo de título                                                   |
 | ---------------------------- | ------------------------------------------------------------------- |
-| PWA institucional            | Usuarios \| Felipe Boero - Bemol                                     |
+| PWA institucional con overlay | Usuarios \| Felipe Boero - Bemol                                    |
 | Navegador institucional      | Usuarios \| Conservatorio Superior de Música Felipe Boero - Bemol    |
-| Administración, PWA o web    | Usuarios \| Administración - Bemol                                   |
+| Administración, overlay o web | Usuarios \| Administración - Bemol                                  |
 
-El modo instalado combina los metadatos `application-title` (pantalla) y
-`application-name` (nombre instalado); al volver al navegador se restaura el título web.
-La barra de ventana que agrega el navegador o sistema operativo puede incluir información propia.
+El manifiesto solicita `window-controls-overlay`, con `standalone` como alternativa.
+En escritorios compatibles y con el overlay activo, una barra propia combina los
+metadatos `application-title` (pantalla) y `application-name` (nombre instalado).
+Es arrastrable, sigue el tema de Bemol y reserva el área de los controles nativos
+mediante `env(titlebar-area-*)`. El texto largo se recorta, sin invadir esos controles.
+Al cambiar de tamaño o desactivar el overlay, CSS actualiza el espacio reservado.
+
+El título HTML en modo instalado contiene solo la pantalla, por ejemplo «Usuarios».
+Así, cuando el navegador usa su barra estándar o muestra la ventana en el selector
+de aplicaciones, puede anteponer el nombre instalado sin duplicarlo:
+«Felipe Boero - Bemol - Usuarios» o «Administración - Bemol - Usuarios».
+Ese prefijo y su orden pertenecen al navegador. Fuera de la PWA se conserva el título
+web con el nombre completo de la institución; al salir del modo instalado se restaura.
+
+El overlay no se activa en móviles ni en navegadores sin soporte. El usuario puede
+desactivarlo desde los controles de la PWA. Las instalaciones existentes deben recibir
+el manifiesto actualizado; su renovación depende del navegador. La barra nativa y su
+arrastre requieren una comprobación en la PWA instalada, no solo emulación de escritorio.
+
+Referencia: [Window Controls Overlay en Microsoft Edge](https://learn.microsoft.com/en-us/microsoft-edge/progressive-web-apps/how-to/window-controls-overlay).
 
 Las instalaciones de instituciones diferentes siguen separadas por origen aunque
 compartan ícono. El dispositivo puede recortar visualmente el nombre.

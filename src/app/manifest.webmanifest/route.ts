@@ -18,6 +18,7 @@ export async function GET(request: Request): Promise<Response> {
       start_url: institution ? "/" : "/admin",
       scope: "/",
       display: "standalone",
+      display_override: ["window-controls-overlay"],
       theme_color: "#10080a",
       background_color: "#faf9f6",
       icons: [

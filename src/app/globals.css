@@ -81,6 +81,9 @@
 }
 
 :root {
+  --pwa-titlebar-height: 0px;
+  --app-viewport-height: calc(100svh - var(--pwa-titlebar-height));
+
   /* Base */
   --background: oklch(0.985 0.004 80);
   --foreground: oklch(0.205 0.012 15);
@@ -135,6 +138,59 @@
 
   --sidebar-border: oklch(0.91 0.01 70);
   --sidebar-ring: oklch(0.375 0.14 15.5);
+}
+
+.pwa-titlebar {
+  display: none;
+}
+
+@media (display-mode: window-controls-overlay) {
+  :root {
+    --pwa-titlebar-height: calc(env(titlebar-area-y, 0px) + env(titlebar-area-height, 0px));
+  }
+
+  body {
+    padding-top: var(--pwa-titlebar-height);
+  }
+
+  .pwa-titlebar {
+    position: fixed;
+    top: env(titlebar-area-y, 0px);
+    left: env(titlebar-area-x, 0px);
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: env(titlebar-area-width, 100%);
+    height: env(titlebar-area-height, 0px);
+    padding-inline: 0.75rem;
+    overflow: hidden;
+    color: var(--foreground);
+    background: var(--background);
+    user-select: none;
+    -webkit-app-region: drag;
+    app-region: drag;
+  }
+
+  .pwa-titlebar-icon {
+    flex: 0 0 1rem;
+    width: 1rem;
+    height: 1rem;
+    object-fit: contain;
+  }
+
+  .pwa-titlebar-text {
+    min-width: 0;
+    overflow: hidden;
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  #nprogress .bar {
+    top: var(--pwa-titlebar-height);
+  }
 }
 
 .dark {

@@ -24,7 +24,7 @@ export default async function AuthLayout({ children }: { children: ReactNode }) 
     : undefined;
 
   return (
-    <main className="bg-muted flex min-h-svh flex-col items-center justify-center p-4 md:p-10">
+    <main className="bg-muted flex min-h-(--app-viewport-height) flex-col items-center justify-center p-4 md:p-10">
       <section className="w-full max-w-sm md:max-w-5xl">
         <InstitutionalBrandProvider institution={brand}>{children}</InstitutionalBrandProvider>
       </section>

@@ -49,7 +49,7 @@ export function syncPwaThemeColor(theme: string | undefined): void {
   document.querySelector<HTMLMetaElement>(THEME_COLOR_META_SELECTOR)?.setAttribute("content", color);
 }
 
-export function syncPwaWindowTitle(): () => void {
+export function syncPwaWindowTitle(onTitleChange: (title: string) => void): () => void {
   const displayMode = window.matchMedia?.("(display-mode: standalone), (display-mode: minimal-ui), (display-mode: window-controls-overlay)");
 
   let browserTitle = document.title;
@@ -67,13 +67,17 @@ export function syncPwaWindowTitle(): () => void {
 
     const appName = document.querySelector<HTMLMetaElement>('meta[name="application-name"]')?.content.trim();
 
-    const title = standalone && pageTitle && appName ? `${pageTitle} | ${appName}` : browserTitle;
+    const overlayTitle = pageTitle && appName ? `${pageTitle} | ${appName}` : appName || browserTitle;
+
+    // Native window titles already include the installed application name.
+    const title = standalone ? pageTitle || appName || browserTitle : browserTitle;
 
     if (document.title !== title) {
       document.title = title;
     }
 
     appliedTitle = title;
+    onTitleChange(overlayTitle);
   }
 
   const observer = new MutationObserver(syncTitle);
