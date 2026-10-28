@@ -32,6 +32,7 @@ import {
   canReviewGuardianLinks,
   canStartEnrollmentApplication,
   canViewOwnEnrollmentApplications,
+  canViewOwnFormation,
 } from "@features/institutional-auth/utils/institutional-applicant-role.util";
 import { hasInstitutionalPermission } from "@features/institutional-auth/utils/institutional-permission.util";
 
@@ -124,7 +125,7 @@ export function getInstitutionalNavigationSections(
     ...(platformItems.length > 0 ? [{ label: "Institución", items: platformItems }] : []),
     ...(academicItems.length > 0 ? [{ label: "Académico", items: academicItems }] : []),
     ...(enrollmentItems.length > 0 ? [{ label: "Inscripciones", items: enrollmentItems }] : []),
-    ...(profileRoot && canViewOwnEnrollmentApplications(user)
+    ...(profileRoot && canViewOwnFormation(user)
       ? [
           {
             label: "Formación",
@@ -138,7 +139,7 @@ export function getInstitutionalNavigationSections(
     {
       label: "Personal",
       items: [
-        { title: "Cuenta", url: "/account", icon: UserRoundIcon },
+        { title: "Mi perfil", url: "/account", icon: UserRoundIcon },
         ...(canManageDependents(user) ? [{ title: "Personas a cargo", url: GUARDIAN_DEPENDENTS_PAGE_PATH, icon: UsersIcon }] : []),
       ],
     },

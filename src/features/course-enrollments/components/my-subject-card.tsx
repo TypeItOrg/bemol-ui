@@ -1,9 +1,8 @@
 import type { ReactElement } from "react";
 
-import Image from "next/image";
-
 import { ClockIcon, Music2Icon } from "lucide-react";
 
+import { FadeImage } from "@common/components/fade-image";
 import { Badge } from "@common/components/ui/badge";
 import { Button } from "@common/components/ui/button";
 
@@ -40,7 +39,7 @@ export function MySubjectCard({ enrollment, canWithdraw, canUpdateAcademicStatus
   return (
     <article className="bg-background flex min-w-0 flex-col overflow-hidden rounded-xl border">
       <div className="bg-muted relative h-40 shrink-0">
-        <Image
+        <FadeImage
           src={getSubjectCover(enrollment)}
           alt=""
           fill

@@ -82,6 +82,7 @@ beforeEach(() => {
     institutionId: INSTITUTION_ID,
     roles: ["Estudiante"],
     permissions: [],
+    canRequestGuardianLinks: true,
   });
   jest.mocked(getInstitutionalAccessToken).mockResolvedValue("guardian-access");
   jest.mocked(finishGuardianDependentRequestAction).mockReset().mockResolvedValue({});
@@ -112,8 +113,10 @@ describe("GuardianDependentForm with the real create action and HTTP transport",
     render(<GuardianDependentForm institutionId={INSTITUTION_ID} returnTo={RETURN_TO} />);
 
     const submit = screen.getByRole("button", { name: "Solicitar" });
-    expect(submit).toBeDisabled();
+    expect(submit).toBeEnabled();
     await user.click(submit);
+    expect(await screen.findByText(GUARDIAN_DEPENDENT_MESSAGES.REQUIRED_DOCUMENT)).toBeVisible();
+    expect(screen.getByLabelText(/^Documento/)).toHaveFocus();
     expect(requests).toHaveLength(0);
     await fillForm(user);
     await user.click(submit);
@@ -137,6 +140,32 @@ describe("GuardianDependentForm with the real create action and HTTP transport",
     expect(uploadGuardianDependentDocumentAction).not.toHaveBeenCalled();
   });
 
+  it("shows the name validation and focuses the field before sending, then permits a corrected retry", async () => {
+    const user = userEvent.setup();
+    render(<GuardianDependentForm institutionId={INSTITUTION_ID} returnTo={RETURN_TO} />);
+    await fillForm(user);
+    const name = screen.getByLabelText(/^Nombre/);
+    await user.clear(name);
+    await user.type(name, "Al");
+
+    const submit = screen.getByRole("button", { name: "Solicitar" });
+    expect(submit).toBeEnabled();
+    await user.click(submit);
+
+    expect(await screen.findByText(GUARDIAN_DEPENDENT_MESSAGES.INVALID_NAME)).toBeVisible();
+    expect(name).toHaveFocus();
+    expect(name).toHaveValue("Al");
+    expect(requests).toHaveLength(0);
+    expect(finishGuardianDependentRequestAction).not.toHaveBeenCalled();
+
+    await user.type(name, "berto");
+    await user.click(submit);
+
+    await waitFor(() => expect(finishGuardianDependentRequestAction).toHaveBeenCalledTimes(1));
+    expect(requests).toHaveLength(1);
+    expect(requests[0].body).toMatchObject({ firstName: "Alberto" });
+  });
+
   it("requires an invitation email for own access and sends each supporting file separately after creation", async () => {
     const user = userEvent.setup();
     render(<GuardianDependentForm institutionId={INSTITUTION_ID} returnTo={RETURN_TO} />);
@@ -145,7 +174,10 @@ describe("GuardianDependentForm with the real create action and HTTP transport",
     await user.click(await screen.findByRole("option", { name: "Sí" }));
     await user.click(screen.getByRole("combobox", { name: /Acceso propio/ }));
     await user.click(await screen.findByRole("option", { name: "Sí" }));
-    expect(screen.getByRole("button", { name: "Solicitar" })).toBeDisabled();
+    await user.click(screen.getByRole("button", { name: "Solicitar" }));
+    expect(await screen.findByText(GUARDIAN_DEPENDENT_MESSAGES.REQUIRED_OWN_ACCESS_EMAIL)).toBeVisible();
+    expect(screen.getByLabelText(/Correo de la persona/)).toHaveFocus();
+    expect(requests).toHaveLength(0);
     await user.type(screen.getByLabelText(/Correo de la persona/), "mateo@example.test");
 
     const files = ["partida.pdf", "constancia.pdf"].map((name) => new File([new Uint8Array(7 * 1024 * 1024)], name, { type: "application/pdf" }));

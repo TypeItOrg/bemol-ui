@@ -9,6 +9,7 @@ const ADMIN_SESSION_ROOT_PATHS = ["/admin", "/api/admin"] as const;
 const INSTITUTIONAL_PUBLIC_ROOT_PATHS = [
   "/auth/register",
   "/auth/activate-account",
+  "/auth/confirm-account-email",
   "/auth/password-recovery",
   "/auth/email-verification",
   INSTITUTIONAL_UNAVAILABLE_PATH,

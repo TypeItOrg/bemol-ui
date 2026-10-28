@@ -11,8 +11,9 @@ type InstitutionalAccountHeaderProps = {
 };
 
 const ACCOUNT_PAGE_TITLES: Readonly<Record<string, string>> = {
-  "/account": "Cuenta",
+  "/account": "Mi perfil",
   "/account/edit": "Editar perfil",
+  "/account/email": "Correo electrónico",
   "/account/password": "Contraseña",
   "/account/passkeys": "Llaves de acceso",
   "/account/sessions": "Sesiones",
@@ -21,7 +22,7 @@ const ACCOUNT_PAGE_TITLES: Readonly<Record<string, string>> = {
 export function InstitutionalAccountTitle(): ReactElement {
   const pathname = usePathname();
 
-  return <>{ACCOUNT_PAGE_TITLES[pathname] ?? "Cuenta"}</>;
+  return <>{ACCOUNT_PAGE_TITLES[pathname] ?? "Mi perfil"}</>;
 }
 
 export function InstitutionalAccountHeader({ actions }: InstitutionalAccountHeaderProps): ReactElement {

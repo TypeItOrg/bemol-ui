@@ -18,5 +18,6 @@ export type GuardianLinkRequest = {
   declaredFirstName?: string | null;
   declaredLastName?: string | null;
   declaredBirthDate?: string | null;
+  matchingPerson?: GuardianLinkPerson | null;
   attachments: GuardianLinkAttachment[];
 };

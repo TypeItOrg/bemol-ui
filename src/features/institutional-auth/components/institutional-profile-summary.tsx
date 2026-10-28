@@ -2,8 +2,10 @@ import type { ReactElement } from "react";
 
 import { HomeIcon, UserRoundIcon, type LucideIcon } from "lucide-react";
 
+import { ReturnToLink } from "@common/components/navigation/return-to-link";
 import { OptionalValue } from "@common/components/optional-value";
 import { SectionHeader } from "@common/components/section-header";
+import { Button } from "@common/components/ui/button";
 import { DETAIL_LABEL_CLASS_NAME } from "@common/constants/detail-label.constants";
 
 import type { InstitutionalPerson } from "@features/institutional-auth/types/institutional-person.types";
@@ -17,14 +19,23 @@ export function InstitutionalProfileSummary({ person }: InstitutionalProfileSumm
     <div className="flex flex-col gap-4">
       <div className="bg-muted/25 rounded-xl border p-4 sm:p-5">
         <header className="-mx-4 border-b px-4 pb-4 sm:-mx-5 sm:px-5 sm:pb-5">
-          <ProfileSectionHeader description="Información principal de tu cuenta institucional." icon={UserRoundIcon} title="Datos personales" />
+          <SectionHeader
+            action={
+              <Button asChild className="w-full @xl/section-header:w-auto" size="lg">
+                <ReturnToLink href="/account/edit">Editar datos</ReturnToLink>
+              </Button>
+            }
+            description="Información personal registrada en tu institución."
+            icon={UserRoundIcon}
+            title="Datos personales"
+          />
         </header>
         <div className="mt-4 sm:mt-5">
           <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <ProfileValue fallback="Sin nombre registrado" label="Nombre completo" value={`${person.firstName} ${person.lastName}`} />
             <ProfileValue fallback="Sin documento" label="Documento" value={person.documentNumber} />
             <ProfileValue fallback="Sin fecha de nacimiento" label="Fecha de nacimiento" value={formatDate(person.birthDate)} />
-            <ProfileValue fallback="Sin correo electrónico" label="Email" value={person.email} />
+            <ProfileValue fallback="Sin correo electrónico" label="Correo electrónico" value={person.email} />
             <ProfileValue fallback="Sin teléfono" label="Teléfono" value={person.phoneNumber} />
             <ProfileValue fallback="Sin nacionalidad informada" label="Nacionalidad" value={person.nationalityCountry?.name} />
             <ProfileValue fallback="Sin ciudad natal informada" label="Ciudad natal" value={person.birthCity?.name} />

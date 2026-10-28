@@ -6,7 +6,7 @@ type ActionFormProps = Omit<ComponentProps<"form">, "onResetCapture"> & {
   resetOnSuccess?: boolean;
 };
 
-export function ActionForm({ resetOnSuccess = false, ref, ...props }: ActionFormProps): ReactElement {
+export function ActionForm({ noValidate = true, resetOnSuccess = false, ref, ...props }: ActionFormProps): ReactElement {
   const attachForm = useCallback(
     (element: HTMLFormElement | null) => {
       if (!element) {
@@ -47,5 +47,5 @@ export function ActionForm({ resetOnSuccess = false, ref, ...props }: ActionForm
     [ref],
   );
 
-  return <form {...props} ref={attachForm} data-reset-on-success={resetOnSuccess} />;
+  return <form {...props} ref={attachForm} noValidate={noValidate} data-reset-on-success={resetOnSuccess} />;
 }

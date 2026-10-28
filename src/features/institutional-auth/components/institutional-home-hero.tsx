@@ -1,7 +1,6 @@
 import type { ReactElement } from "react";
 
-import Image from "next/image";
-
+import { FadeImage } from "@common/components/fade-image";
 import { Separator } from "@common/components/ui/separator";
 
 import { InstitutionalBrandIdentity } from "@features/institutional-auth/components/institutional-brand-identity";
@@ -18,11 +17,11 @@ export function InstitutionalHomeHero({
   name: string;
   institutionName?: string;
   primaryRole: string;
-  institution?: Pick<PublicInstitution, "id" | "name" | "logoUrl" | "logoBlurDataURL">;
+  institution?: Pick<PublicInstitution, "id" | "name" | "logoUrl">;
 }): ReactElement {
   return (
     <header className="@container/home-hero relative flex h-56 min-w-0 items-center overflow-hidden shadow-sm @2xl/home-hero:h-64">
-      <Image src="/images/institutional-header.webp" alt="" fill sizes="100vw" quality={90} preload className="object-cover object-center" />
+      <FadeImage src="/images/institutional-header.webp" alt="" fill sizes="100vw" quality={90} preload className="object-cover object-center" />
       <div
         aria-hidden="true"
         className="absolute inset-0 bg-linear-to-r from-black/80 via-black/60 to-black/25 sm:from-black/85 sm:via-black/60 sm:via-[65%] sm:to-black/15 sm:to-[90%] 2xl:from-black/85 2xl:via-black/50 2xl:via-[50%] 2xl:to-black/5 2xl:to-[100%] dark:bg-black/20"

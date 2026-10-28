@@ -20,7 +20,7 @@ type PersonInstitutionFieldProps = {
 export function PersonInstitutionField({ institution, onChange, disabled, invalid }: PersonInstitutionFieldProps): ReactElement {
   return (
     <PersonFormCard>
-      <PersonFormSectionHeading icon={BuildingIcon} title="Institución" description="Institución a la que pertenecerá el usuario." />
+      <PersonFormSectionHeading icon={BuildingIcon} title="Institución" />
       <Field className="mt-4 sm:mt-5" data-invalid={invalid}>
         <FieldLabel htmlFor="person-institution" required>
           Institución

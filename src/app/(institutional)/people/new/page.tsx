@@ -29,7 +29,11 @@ export default async function NewPersonPage({ searchParams }: { searchParams: Pr
 
   const user = await requireInstitutionalUser();
 
-  if (!hasInstitutionalPermission(user, INSTITUTIONAL_PERMISSION.PERSON_CREATE)) {
+  if (
+    ![INSTITUTIONAL_PERMISSION.PERSON_CREATE, INSTITUTIONAL_PERMISSION.ROLE_ASSIGN, INSTITUTIONAL_PERMISSION.USER_STATUS_UPDATE].every((permission) =>
+      hasInstitutionalPermission(user, permission),
+    )
+  ) {
     return <InstitutionalAccessDenied />;
   }
 

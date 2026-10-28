@@ -3,6 +3,7 @@ import type { InstitutionalUser } from "@features/institutional-auth/types/insti
 import {
   getInstitutionalAcademicOfferLink,
   getInstitutionalEnrollmentHomeLinks,
+  getInstitutionalFormationHomeLinks,
   getInstitutionalHomeLinks,
   getInstitutionalHomeTasks,
 } from "@features/institutional-auth/utils/institutional-home-access.util";
@@ -85,6 +86,39 @@ describe("institutional home access", () => {
       }),
     ]);
   });
+
+  it.each([
+    { actorPermissions: [], selectedPermissions: [INSTITUTIONAL_PERMISSION.GUARDIAN_LINK_REVIEW], canReview: false },
+    { actorPermissions: [INSTITUTIONAL_PERMISSION.GUARDIAN_LINK_REVIEW], selectedPermissions: [], canReview: true },
+    { actorPermissions: undefined, selectedPermissions: [INSTITUTIONAL_PERMISSION.GUARDIAN_LINK_REVIEW], canReview: false },
+  ])(
+    "uses actor review grants in home without changing the selected student's academic access: $canReview",
+    ({ actorPermissions, selectedPermissions, canReview }) => {
+      const user: InstitutionalUser = {
+        userId: "user-1",
+        personId: "student-1",
+        name: "Ana",
+        lastName: "Pérez",
+        documentNumber: "12345678",
+        institutionId: "institution-1",
+        delegated: true,
+        roles: ["Estudiante"],
+        permissions: [INSTITUTIONAL_PERMISSION.ACADEMIC_OFFER_READ, ...selectedPermissions],
+        actorPermissions,
+      };
+      const links = getInstitutionalEnrollmentHomeLinks(user).map(({ href }) => href);
+
+      expect(links.includes("/guardian-links")).toBe(canReview);
+      expect(links).toEqual(
+        expect.arrayContaining(["/my-dependents", "/self-service/student-1/enrollment", "/self-service/student-1/enrollment-applications"]),
+      );
+      expect(getInstitutionalFormationHomeLinks(user).map(({ href }) => href)).toEqual([
+        "/self-service/student-1/courses",
+        "/self-service/student-1/schedules",
+      ]);
+      expect(getInstitutionalAcademicOfferLink(user)?.href).toBe("/academic-offers");
+    },
+  );
 
   it("exposes the academic offer independently from management links", () => {
     const user = { permissions: [INSTITUTIONAL_PERMISSION.ACADEMIC_OFFER_READ] };

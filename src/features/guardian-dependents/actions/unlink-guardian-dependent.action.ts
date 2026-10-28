@@ -14,8 +14,12 @@ import type { GuardianDependentActionState } from "@features/guardian-dependents
 import { authorizeGuardianAction } from "@features/guardian-dependents/utils/authorize-guardian-action.util";
 import { institutionalApiFetch } from "@features/institutional-auth/services/institutional-api-fetch.service";
 
-export async function unlinkGuardianDependentAction(institutionId: string, dependentPersonId: string): Promise<GuardianDependentActionState> {
-  if (!isValidUuid(institutionId) || !isValidUuid(dependentPersonId)) {
+export async function unlinkGuardianDependentAction(
+  institutionId: string,
+  dependentPersonId: string,
+  isPendingRequest = false,
+): Promise<GuardianDependentActionState> {
+  if (!isValidUuid(institutionId) || !isValidUuid(dependentPersonId) || typeof isPendingRequest !== "boolean") {
     return { error: INVALID_ACTION_ARGUMENTS };
   }
 
@@ -26,7 +30,9 @@ export async function unlinkGuardianDependentAction(institutionId: string, depen
   }
 
   const errorState = await getResponseErrorActionState(
-    institutionalApiFetch(`${getGuardianDependentsApiPath(institutionId)}/${dependentPersonId}`, { method: "DELETE" }),
+    institutionalApiFetch(`${getGuardianDependentsApiPath(institutionId)}/${isPendingRequest ? "requests/" : ""}${dependentPersonId}`, {
+      method: "DELETE",
+    }),
     [],
     GUARDIAN_DEPENDENT_MESSAGES.UNLINK,
   );

@@ -27,7 +27,7 @@ export function PersonDetailView({ person, assignedRoles }: PersonDetailViewProp
           <DetailValue fallback="Sin apellido" label="Apellido" value={person.lastName} />
           <DetailValue fallback="Sin documento" label="Documento" value={person.documentNumber} />
           <DetailValue fallback="Sin fecha de nacimiento" label="Fecha de nacimiento" value={formatDate(person.birthDate)} />
-          <DetailValue fallback="Sin correo electrónico" label="Email" value={person.email} />
+          <DetailValue fallback="Sin correo electrónico" label="Correo electrónico" value={person.email} />
           <DetailValue fallback="Sin teléfono" label="Teléfono" value={person.phoneNumber} />
         </dl>
       </section>

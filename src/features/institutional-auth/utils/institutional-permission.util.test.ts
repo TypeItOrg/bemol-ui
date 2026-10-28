@@ -1,6 +1,7 @@
 import { INSTITUTIONAL_PERMISSION } from "@features/institutional-auth/types/institutional-permission.types";
 import type { InstitutionalUser } from "@features/institutional-auth/types/institutional-user.types";
 import {
+  hasActorInstitutionalPermission,
   hasAllInstitutionalPermissions,
   hasAnyInstitutionalPermission,
   hasInstitutionalPermission,
@@ -22,6 +23,17 @@ describe("institutional permission helpers", () => {
     expect(hasInstitutionalPermission(user, INSTITUTIONAL_PERMISSION.PERSON_READ_ANY)).toBe(true);
     expect(hasInstitutionalPermission(user, INSTITUTIONAL_PERMISSION.PERSON_DELETE)).toBe(false);
     expect(hasInstitutionalPermission(null, INSTITUTIONAL_PERMISSION.PERSON_READ_ANY)).toBe(false);
+  });
+
+  it("never borrows management permissions from the selected identity", () => {
+    expect(hasActorInstitutionalPermission({ ...user, delegated: true, actorPermissions: [] }, INSTITUTIONAL_PERMISSION.PERSON_READ_ANY)).toBe(false);
+    expect(hasActorInstitutionalPermission({ ...user, delegated: true }, INSTITUTIONAL_PERMISSION.PERSON_READ_ANY)).toBe(false);
+    expect(
+      hasActorInstitutionalPermission(
+        { ...user, permissions: [], delegated: true, actorPermissions: user.permissions },
+        INSTITUTIONAL_PERMISSION.PERSON_READ_ANY,
+      ),
+    ).toBe(true);
   });
 
   it("checks any and all permissions", () => {

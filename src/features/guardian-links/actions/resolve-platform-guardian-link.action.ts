@@ -17,13 +17,23 @@ export async function resolvePlatformGuardianLinkAction(
   institutionId: string,
   linkId: string,
   decision: GuardianLinkDecision,
+  confirmedPersonId?: string,
 ): Promise<FieldActionState<never>> {
-  if (!isValidUuid(institutionId) || !isValidUuid(linkId) || !DECISIONS.includes(decision)) {
+  if (
+    !isValidUuid(institutionId) ||
+    !isValidUuid(linkId) ||
+    !DECISIONS.includes(decision) ||
+    (confirmedPersonId !== undefined && !isValidUuid(confirmedPersonId))
+  ) {
     return { error: INVALID_ACTION_ARGUMENTS };
   }
 
   const errorState = await getResponseErrorActionState(
-    platformApiFetch(`${getPlatformGuardianLinksApiPath()}/${institutionId}/${linkId}/${decision}`, { method: "POST" }),
+    platformApiFetch(`${getPlatformGuardianLinksApiPath()}/${institutionId}/${linkId}/${decision}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ confirmedPersonId }),
+    }),
     [],
     GUARDIAN_LINK_MESSAGES.RESOLVE,
   );

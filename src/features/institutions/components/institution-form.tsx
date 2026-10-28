@@ -36,7 +36,7 @@ import { appendInstitutionLogoChange } from "@features/institutions/utils/instit
 
 const INSTITUTIONS_PATH = "/admin/institutions";
 
-export function InstitutionForm({ mode, institution, returnTo, baseDomain = "", logoBlurDataURL }: InstitutionFormProps): ReactElement {
+export function InstitutionForm({ mode, institution, returnTo, baseDomain = "" }: InstitutionFormProps): ReactElement {
   const router = useRouter();
 
   const isEdit = mode === FORM_MODE.EDIT;
@@ -126,7 +126,7 @@ export function InstitutionForm({ mode, institution, returnTo, baseDomain = "", 
   ) : null;
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="flex w-full flex-col gap-4">
+    <form noValidate onSubmit={handleSubmit(onSubmit)} className="flex w-full flex-col gap-4">
       <fieldset disabled={isPending} className="flex min-w-0 flex-col gap-4">
         {errorAlert}
 
@@ -147,7 +147,6 @@ export function InstitutionForm({ mode, institution, returnTo, baseDomain = "", 
               institutionId={institution.id}
               institutionName={institution.name}
               logoUrl={institution.logoUrl}
-              logoBlurDataURL={logoBlurDataURL}
               value={logoChange}
               disabled={isPending}
               error={errors.root?.logo?.message}

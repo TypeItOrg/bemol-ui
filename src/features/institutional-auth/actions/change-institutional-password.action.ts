@@ -6,11 +6,9 @@ import { getResponseErrorActionState, getValidationActionState } from "@common/u
 
 import { logoutInstitutional } from "@features/institutional-auth/actions/institutional-logout.action";
 import { institutionalPasswordSchema } from "@features/institutional-auth/schemas/institutional-password.schema";
-import { fetchInstitutionalPerson } from "@features/institutional-auth/services/fetch-institutional-person.service";
 import { requireInstitutionalUser } from "@features/institutional-auth/services/get-institutional-user.service";
 import { institutionalApiFetch } from "@features/institutional-auth/services/institutional-api-fetch.service";
 import type { InstitutionalPasswordActionState } from "@features/institutional-auth/types/institutional-password-state.types";
-import type { InstitutionalPerson } from "@features/institutional-auth/types/institutional-person.types";
 import { setInstitutionalPasswordChangedCookie } from "@features/institutional-auth/utils/institutional-auth-cookies.util";
 
 const PASSWORD_FIELDS = ["currentPassword", "password", "confirmPassword"] as const;
@@ -31,24 +29,16 @@ export async function changeInstitutionalPasswordAction(
     return getValidationActionState(parsed.error.issues, PASSWORD_FIELDS);
   }
 
-  await requireInstitutionalUser();
+  const user = await requireInstitutionalUser();
 
-  const person = await fetchInstitutionalPerson();
-
-  if (!person) {
-    return { error: "No se pudieron obtener tus datos personales." };
-  }
-
-  if (!person.birthDate) {
-    return {
-      error: "Tu perfil no tiene fecha de nacimiento; completala antes de cambiar la contraseña.",
-    };
+  if (!user.userId || user.delegated) {
+    return { error: "No podés cambiar la contraseña de una persona representada." };
   }
 
   const response = institutionalApiFetch("/api/v1/person/me", {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(buildRequestBody(person, parsed.data)),
+    body: JSON.stringify({ currentPassword: parsed.data.currentPassword, password: parsed.data.password }),
   });
 
   const errorState = await getResponseErrorActionState(response, PASSWORD_FIELDS, FALLBACK_ERROR);
@@ -63,29 +53,4 @@ export async function changeInstitutionalPasswordAction(
   await logoutInstitutional();
 
   return { success: true };
-}
-
-function buildRequestBody(person: InstitutionalPerson, values: { currentPassword: string; password: string }): Record<string, unknown> {
-  return {
-    firstName: person.firstName,
-    lastName: person.lastName,
-    birthDate: person.birthDate,
-    email: person.email ?? "",
-    phoneNumber: person.phoneNumber ?? "",
-    birthCityId: person.birthCity?.id,
-    nationalityCountryId: person.nationalityCountry?.id,
-    address: person.address
-      ? {
-          cityId: person.address.city?.id ?? "",
-          street: person.address.street,
-          number: person.address.number ?? "",
-          floor: person.address.floor ?? "",
-          apartment: person.address.apartment ?? "",
-          neighborhood: person.address.neighborhood ?? "",
-          additionalInfo: person.address.additionalInfo ?? "",
-        }
-      : undefined,
-    currentPassword: values.currentPassword,
-    password: values.password,
-  };
 }

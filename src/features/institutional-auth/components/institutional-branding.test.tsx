@@ -8,7 +8,6 @@ import { InstitutionalBrandProvider } from "@features/institutional-auth/compone
 import { InstitutionalBrandIdentity, InstitutionalBrandPanel } from "@features/institutional-auth/components/institutional-brand-identity";
 import { InstitutionalLoginForm } from "@features/institutional-auth/components/institutional-login-form";
 import { InstitutionalPasswordRecoveryForm } from "@features/institutional-auth/components/institutional-password-recovery-form";
-import { InstitutionalRegisterForm } from "@features/institutional-auth/components/institutional-register-form";
 import { OwnAccessActivationForm } from "@features/institutional-auth/components/own-access-activation-form";
 import { ResetInstitutionalPasswordForm } from "@features/institutional-auth/components/reset-institutional-password-form";
 
@@ -33,13 +32,10 @@ jest.mock("@features/institutional-auth/actions/finish-passkey-login.action", ()
   finishPasskeyLogin: jest.fn(),
 }));
 jest.mock("@features/institutional-auth/actions/consume-institutional-login-flashes.action", () => ({ consumeInstitutionalLoginFlashes: jest.fn() }));
-jest.mock("@features/institutional-auth/actions/institutional-register.action", () => ({
-  registerInstitutional: jest.fn(),
-}));
+
 jest.mock("@features/institutional-auth/actions/request-institutional-password-recovery.action", () => ({ requestPasswordRecovery: jest.fn() }));
 jest.mock("@features/institutional-auth/actions/email-verification.actions", () => ({
   resendEmailVerification: jest.fn(),
-  changePendingEmail: jest.fn(),
   confirmEmailVerification: jest.fn(),
 }));
 jest.mock("@features/institutional-auth/actions/reset-institutional-password.action", () => ({
@@ -70,7 +66,6 @@ function AccountActivationForm() {
 
 const forms = [
   { formName: "login", Form: InstitutionalLoginForm },
-  { formName: "registration", Form: InstitutionalRegisterForm },
   { formName: "password recovery", Form: InstitutionalPasswordRecoveryForm },
   { formName: "email verification", Form: EmailVerificationForm },
 ];
@@ -81,12 +76,7 @@ const descriptionForms = [
     generic: "Ingresá con tu contraseña o una llave de acceso.",
     branded: "Ingresá al portal institucional del Conservatorio Boero con tu contraseña o una llave de acceso.",
   },
-  {
-    formName: "registration",
-    Form: InstitutionalRegisterForm,
-    generic: "Completá tus datos para registrarte en una institución.",
-    branded: "Completá tus datos para registrarte en el portal institucional del Conservatorio Boero.",
-  },
+
   {
     formName: "password recovery",
     Form: InstitutionalPasswordRecoveryForm,
@@ -151,19 +141,16 @@ it.each(descriptionForms)("[A02.branded-description] $formName mentions the fixe
   expect(institutionName.tagName).toBe("STRONG");
   expect(institutionName.closest("p")).toHaveTextContent(branded);
 });
-it("[A02.branded-description] changing email mentions the fixed institution in bold", async () => {
-  const user = userEvent.setup();
+it("[A02.branded-description] verification keeps institution branding and routes corrections to the institution", () => {
   render(
     <InstitutionalBrandProvider institution={institution}>
       <EmailVerificationForm />
     </InstitutionalBrandProvider>,
   );
-  await user.click(screen.getByRole("button", { name: "Cambiar correo electrónico" }));
   const institutionName = screen.getByText(institution.name);
   expect(institutionName.tagName).toBe("STRONG");
-  expect(institutionName.closest("p")).toHaveTextContent(
-    "Confirmá tu identidad e indicá el correo electrónico correcto para tu cuenta del portal institucional del Conservatorio Boero.",
-  );
+  expect(screen.getByText(/contactá a tu institución/)).toBeVisible();
+  expect(screen.queryByRole("button", { name: "Cambiar correo electrónico" })).not.toBeInTheDocument();
 });
 it("[A02.branded-description] account activation success mentions the fixed institution in bold", async () => {
   jest.mocked(activateOwnAccess).mockResolvedValue({ success: true });

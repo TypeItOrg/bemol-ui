@@ -96,7 +96,10 @@ describe("GuardianLinkRequests", () => {
 
     await user.click(within(dialog).getByRole("button", { name: label }));
 
-    await waitFor(() => expect(resolveGuardianLinkAction).toHaveBeenCalledWith(INSTITUTION_ID, "019f9c3a-f891-7bc5-a98d-e65332998001", decision));
+    await waitFor(() => {
+      const args = [INSTITUTION_ID, "019f9c3a-f891-7bc5-a98d-e65332998001", decision];
+      expect(resolveGuardianLinkAction).toHaveBeenCalledWith(...(decision === "approve" ? [...args, undefined] : args));
+    });
   });
 
   it("shows the backend error inside the confirmation dialog", async () => {

@@ -25,6 +25,6 @@ export const INSTITUTION_ERROR_MESSAGES = {
   INVALID_NUMBER: "La altura solo admite números.",
   PHONE_MAX_LENGTH: "El teléfono admite hasta 30 caracteres.",
   INVALID_PHONE: "El teléfono solo admite números y guiones.",
-  EMAIL_MAX_LENGTH: "El email admite hasta 150 caracteres.",
-  INVALID_EMAIL: "Ingresá un email válido.",
+  EMAIL_MAX_LENGTH: "El correo admite hasta 150 caracteres.",
+  INVALID_EMAIL: "El correo es inválido.",
 } as const;

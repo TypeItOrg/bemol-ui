@@ -12,7 +12,7 @@ import { parseGuardianDependentsQuery } from "@features/guardian-dependents/util
 import { InstitutionalAccessDenied } from "@features/institutional-auth/components/institutional-access-denied";
 import { InstitutionalBreadcrumb } from "@features/institutional-auth/components/institutional-breadcrumb";
 import { requireInstitutionalUser } from "@features/institutional-auth/services/get-institutional-user.service";
-import { canManageDependents } from "@features/institutional-auth/utils/institutional-applicant-role.util";
+import { canManageDependents, canRequestDependents } from "@features/institutional-auth/utils/institutional-applicant-role.util";
 import { getInstitutionalMetadata } from "@features/institutional-auth/utils/institutional-metadata.util";
 import { PlatformPageIcon } from "@features/platform-auth/components/platform-page-icon";
 import { PlatformPageShell } from "@features/platform-auth/components/platform-page-shell";
@@ -42,7 +42,7 @@ export default async function MyDependentsPage({ searchParams }: MyDependentsPag
   return (
     <PlatformPageShell title="Personas a cargo" breadcrumb={<InstitutionalBreadcrumb />} actions={<PlatformPageIcon icon={UsersIcon} />}>
       <DataTableNavigationProvider>
-        <GuardianDependentsList data={data} query={query} institutionId={user.institutionId} />
+        <GuardianDependentsList canRequest={canRequestDependents(user)} data={data} query={query} institutionId={user.institutionId} />
       </DataTableNavigationProvider>
     </PlatformPageShell>
   );

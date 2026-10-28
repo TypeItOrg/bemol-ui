@@ -10,6 +10,7 @@ import { Button } from "@common/components/ui/button";
 import type { QueryParamValue } from "@common/types/query-param.types";
 import { appendReturnTo, getSafeReturnTo } from "@common/utils/return-to.util";
 
+import { AccountAccessPanel } from "@features/people/components/account-access-panel";
 import { PersonDeleteButton } from "@features/people/components/person-delete-button";
 import { PersonDetailView } from "@features/people/components/person-detail-view";
 import { PersonEditForm } from "@features/people/components/person-edit-form";
@@ -95,6 +96,7 @@ export default async function EditPersonPage({ params, searchParams }: EditPerso
           returnTo={destination}
         />
       )}
+      {true ? <AccountAccessPanel institutionId={id} personId={personId} scope="admin" mode="administration" email={person.email ?? ""} /> : null}
     </PlatformPageShell>
   );
 }

@@ -37,14 +37,9 @@ import { applyServerErrors, getDefaultValues, getInitialLocation } from "@featur
 type InstitutionalInstitutionFormProps = {
   institution: Institution;
   returnTo?: string;
-  logoBlurDataURL?: string;
 };
 
-export function InstitutionalInstitutionForm({
-  institution,
-  returnTo = "/institution",
-  logoBlurDataURL,
-}: InstitutionalInstitutionFormProps): ReactElement {
+export function InstitutionalInstitutionForm({ institution, returnTo = "/institution" }: InstitutionalInstitutionFormProps): ReactElement {
   const router = useRouter();
 
   const destination = getSafeReturnTo(returnTo, "/institution");
@@ -148,7 +143,6 @@ export function InstitutionalInstitutionForm({
           institutionId={institution.id}
           institutionName={institution.name}
           logoUrl={institution.logoUrl}
-          logoBlurDataURL={logoBlurDataURL}
           value={logoChange}
           disabled={isPending}
           error={errors.root?.logo?.message}
@@ -186,7 +180,7 @@ export function InstitutionalInstitutionForm({
 
             <Field data-invalid={!!errors.email} className="flex-[1_0_min(200px,100%)]">
               <FieldContent>
-                <FieldLabel htmlFor="institution-email">Email</FieldLabel>
+                <FieldLabel htmlFor="institution-email">Correo electrónico</FieldLabel>
               </FieldContent>
               <Input
                 id="institution-email"

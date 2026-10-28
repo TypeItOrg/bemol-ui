@@ -5,6 +5,7 @@ import { BookOpenIcon, Building2Icon, ClipboardListIcon, GraduationCapIcon, Hist
 import { AcademicResourceLinks, getReadableAcademicResources } from "@features/academic/components/academic-resource-links";
 import { AcademicResource } from "@features/academic/types/academic-resource.types";
 import { getAcademicAccess } from "@features/academic/utils/academic-access.util";
+import { GUARDIAN_DEPENDENTS_PAGE_PATH } from "@features/guardian-dependents/constants/guardian-dependent.constants";
 import { GUARDIAN_LINKS_PAGE_PATH } from "@features/guardian-links/constants/guardian-link.constants";
 import { fetchOperatingProfile } from "@features/guardian-workspace/services/operating-profile.service";
 import { getInstitutionalActivityHomeLinks } from "@features/institutional-activity/utils/institutional-activity-access.util";
@@ -21,19 +22,14 @@ import {
   getInstitutionalFormationHomeLinks,
   getInstitutionalHomeLinks,
 } from "@features/institutional-auth/utils/institutional-home-access.util";
-import { getInstitutionLogoPlaceholder } from "@features/institutions/services/get-institution-logo-placeholder.service";
 import type { PublicInstitution } from "@features/institutions/types/public-institution.types";
 
 export async function InstitutionalHome({ personId }: { personId?: string }): Promise<ReactElement> {
   const institution = await getInstitutionalBrand();
 
-  const brand = institution
-    ? { ...institution, logoBlurDataURL: await getInstitutionLogoPlaceholder(institution.id, institution.logoUrl) }
-    : undefined;
-
   return (
-    <Suspense fallback={<InstitutionalHomeSkeleton institution={brand} />}>
-      <InstitutionalHomeContent personId={personId} institution={brand} />
+    <Suspense fallback={<InstitutionalHomeSkeleton institution={institution} />}>
+      <InstitutionalHomeContent personId={personId} institution={institution} />
     </Suspense>
   );
 }
@@ -43,7 +39,7 @@ async function InstitutionalHomeContent({
   institution,
 }: {
   personId?: string;
-  institution?: Pick<PublicInstitution, "id" | "name" | "logoUrl" | "logoBlurDataURL">;
+  institution?: Pick<PublicInstitution, "id" | "name" | "logoUrl">;
 }): Promise<ReactElement> {
   const [user, person] = await Promise.all([
     requireInstitutionalUser(),
@@ -62,17 +58,6 @@ async function InstitutionalHomeContent({
     ...enrollmentLinks.filter((link) => link.href === GUARDIAN_LINKS_PAGE_PATH),
   ];
 
-  const personalLinks = [
-    ...enrollmentLinks.filter(
-      (link) =>
-        link.href !== GUARDIAN_LINKS_PAGE_PATH &&
-        link.href !== "/course-enrollments" &&
-        link.href !== "/enrollment-applications" &&
-        !link.href.startsWith("/my-teaching"),
-    ),
-    ...links.filter((link) => link.href === "/account"),
-  ];
-
   const institutionalEnrollmentLinks = enrollmentLinks.filter(
     (link) => link.href === "/course-enrollments" || link.href === "/enrollment-applications",
   );
@@ -89,7 +74,26 @@ async function InstitutionalHomeContent({
     (resource) => resource !== AcademicResource.ACADEMIC_YEAR && resource !== AcademicResource.COURSE,
   );
 
-  const formationLinks = [...enrollmentLinks.filter((link) => link.href.startsWith("/my-teaching")), ...getInstitutionalFormationHomeLinks(user)];
+  const baseFormationLinks = [...enrollmentLinks.filter((link) => link.href.startsWith("/my-teaching")), ...getInstitutionalFormationHomeLinks(user)];
+
+  const standaloneOffer = operationalResources.length === 0 ? academicOfferLink : undefined;
+
+  const embedOfferInPersonal = Boolean(
+    standaloneOffer && ((user.roles.includes("Postulante") && !user.roles.includes("Estudiante")) || baseFormationLinks.length === 0),
+  );
+
+  const personalLinks = [
+    ...(embedOfferInPersonal && standaloneOffer ? [standaloneOffer] : []),
+    ...enrollmentLinks.filter(
+      (link) =>
+        !["/course-enrollments", "/enrollment-applications", GUARDIAN_DEPENDENTS_PAGE_PATH, GUARDIAN_LINKS_PAGE_PATH].includes(link.href) &&
+        !link.href.startsWith("/my-teaching"),
+    ),
+    ...links.filter((link) => link.href === "/account"),
+    ...enrollmentLinks.filter((link) => link.href === GUARDIAN_DEPENDENTS_PAGE_PATH),
+  ];
+
+  const formationLinks = [...(standaloneOffer && !embedOfferInPersonal ? [standaloneOffer] : []), ...baseFormationLinks];
 
   const greeting = getGreeting(new Date());
 
@@ -110,7 +114,7 @@ async function InstitutionalHomeContent({
           <HomeSubsection
             id="personal-space-title"
             title="Mi espacio"
-            description="Gestioná tus inscripciones, las personas a tu cargo y tu cuenta."
+            description="Gestioná tus inscripciones, las personas a tu cargo y tu perfil."
             icon={UserRoundIcon}
             imageSrc="/images/institutional-management.webp"
             imageSide="right"
@@ -139,7 +143,7 @@ async function InstitutionalHomeContent({
           </HomeSubsection>
         ) : null}
 
-        {operationalResources.length > 0 || academicOfferLink ? (
+        {operationalResources.length > 0 ? (
           <HomeSubsection
             id="academic-management-title"
             title="Área académica"

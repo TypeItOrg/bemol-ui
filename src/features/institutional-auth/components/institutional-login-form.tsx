@@ -2,8 +2,6 @@
 
 import type { ReactElement } from "react";
 
-import Link from "next/link";
-
 import { Field, FieldError, FieldLabel } from "@common/components/ui/field";
 import { NumericInput } from "@common/components/ui/restricted-input";
 
@@ -82,12 +80,7 @@ export function InstitutionalLoginForm(props: InstitutionalLoginFormProps): Reac
           passkey={passkey}
           onPasskeyLogin={loginWithPasskey}
         />
-        <p className="text-muted-foreground text-center text-sm">
-          ¿No tenés una cuenta?{" "}
-          <Link className="text-primary font-medium underline underline-offset-4" href="/auth/register">
-            Crear cuenta
-          </Link>
-        </p>
+        <p className="text-muted-foreground text-center text-sm">Para solicitar acceso, comunicate con tu institución.</p>
       </form>
     </div>
   );

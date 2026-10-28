@@ -1,11 +1,9 @@
 import { authenticatedApiFetch } from "@common/services/authenticated-api-fetch.service";
 
-import { changePendingEmail, resendEmailVerification } from "@features/institutional-auth/actions/email-verification.actions";
+import { resendEmailVerification } from "@features/institutional-auth/actions/email-verification.actions";
 import { identifyInstitutionalUser } from "@features/institutional-auth/actions/identify-institutional-user.action";
-import { registerInstitutional } from "@features/institutional-auth/actions/institutional-register.action";
 import { requestPasswordRecovery } from "@features/institutional-auth/actions/request-institutional-password-recovery.action";
 import { identifyInstitutionalAccount } from "@features/institutional-auth/services/identify-institutional.service";
-import { registerInstitutionalAccount } from "@features/institutional-auth/services/register-institutional.service";
 import { requestInstitutionalPasswordRecovery } from "@features/institutional-auth/services/request-institutional-password-recovery.service";
 
 jest.mock("next/headers", () => ({
@@ -17,9 +15,7 @@ jest.mock("@common/services/institutional-host/institutional-host.service", () =
 jest.mock("@features/institutional-auth/services/identify-institutional.service", () => ({
   identifyInstitutionalAccount: jest.fn(),
 }));
-jest.mock("@features/institutional-auth/services/register-institutional.service", () => ({
-  registerInstitutionalAccount: jest.fn(),
-}));
+
 jest.mock("@features/institutional-auth/services/request-institutional-password-recovery.service", () => ({
   requestInstitutionalPasswordRecovery: jest.fn(),
 }));
@@ -45,13 +41,12 @@ function form(): FormData {
   return data;
 }
 
-it.each([identifyInstitutionalUser, registerInstitutional, requestPasswordRecovery, resendEmailVerification, changePendingEmail])(
+it.each([identifyInstitutionalUser, requestPasswordRecovery, resendEmailVerification])(
   "[A03.payload-context] rejects tampered hidden institutionId before auth transport ($name)",
   async (action) => {
     const result = await action({}, form());
     expect(result.error).toMatch(/no corresponde/);
     expect(identifyInstitutionalAccount).not.toHaveBeenCalled();
-    expect(registerInstitutionalAccount).not.toHaveBeenCalled();
     expect(requestInstitutionalPasswordRecovery).not.toHaveBeenCalled();
     expect(authenticatedApiFetch).not.toHaveBeenCalled();
   },

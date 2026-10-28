@@ -46,7 +46,9 @@ export default async function PeoplePage({ searchParams }: { searchParams: Promi
 
   const [roles, canCreate, canUpdate, canManageRoles] = await Promise.all([
     rolesPromise,
-    hasInstitutionalPermission(user, INSTITUTIONAL_PERMISSION.PERSON_CREATE),
+    [INSTITUTIONAL_PERMISSION.PERSON_CREATE, INSTITUTIONAL_PERMISSION.ROLE_ASSIGN, INSTITUTIONAL_PERMISSION.USER_STATUS_UPDATE].every((permission) =>
+      hasInstitutionalPermission(user, permission),
+    ),
     hasInstitutionalPermission(user, INSTITUTIONAL_PERMISSION.PERSON_UPDATE_ANY),
     hasInstitutionalPermission(user, INSTITUTIONAL_PERMISSION.ROLE_ASSIGN) || hasInstitutionalPermission(user, INSTITUTIONAL_PERMISSION.ROLE_REVOKE),
   ]);
@@ -82,7 +84,7 @@ export default async function PeoplePage({ searchParams }: { searchParams: Promi
             roleId={roleId}
             scope={PeopleScope.INSTITUTIONAL}
             dataPromise={peoplePromise}
-            selfPersonId={user.personId}
+            selfPersonId={user.actorPersonId ?? user.personId}
             canCreate={canCreate}
             canUpdate={canUpdate}
             canManageRoles={canManageRoles}

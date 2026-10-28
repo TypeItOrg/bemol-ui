@@ -7,6 +7,10 @@ export type InstitutionalUser = {
   lastName: string;
   documentNumber: string;
   institutionId: string;
+  delegated?: boolean;
+  actorPersonId?: string | null;
+  canRequestGuardianLinks?: boolean;
+  actorPermissions?: readonly string[];
   roles: readonly string[];
   permissions: readonly string[];
   permissionScopes?: Readonly<Record<string, PermissionAccess>>;

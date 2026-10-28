@@ -26,7 +26,7 @@ type ApproveGuardianLinkDialogProps = {
   institutionId?: string;
   onApproved: (requestId: string) => void;
   onClose: () => void;
-  onResolve: (institutionId: string, linkId: string, decision: GuardianLinkDecision) => Promise<{ error?: string }>;
+  onResolve: (institutionId: string, linkId: string, decision: GuardianLinkDecision, confirmedPersonId?: string) => Promise<{ error?: string }>;
   request: GuardianLinkRequest;
 };
 
@@ -41,7 +41,7 @@ export function ApproveGuardianLinkDialog({ institutionId, onApproved, onClose, 
     }
 
     try {
-      const result = await onResolve(requestInstitutionId, request.personGuardianId, "approve");
+      const result = await onResolve(requestInstitutionId, request.personGuardianId, "approve", request.matchingPerson?.personId ?? undefined);
 
       if (result.error) {
         return { error: result.error };
@@ -55,9 +55,11 @@ export function ApproveGuardianLinkDialog({ institutionId, onApproved, onClose, 
     }
   }, {});
 
-  const tutorName = getGuardianDependentName(request.tutor);
+  const tutorName = getGuardianDependentName(request.tutor) || request.tutor.documentNumber;
 
-  const dependentName = getGuardianDependentName(request.dependent);
+  const dependent = request.matchingPerson ?? request.dependent;
+
+  const dependentName = getGuardianDependentName(dependent) || dependent.documentNumber;
 
   function handleSubmit(event: SyntheticEvent<HTMLFormElement>): void {
     event.preventDefault();
@@ -86,10 +88,8 @@ export function ApproveGuardianLinkDialog({ institutionId, onApproved, onClose, 
             </div>
             <AlertDialogTitle>Aceptar vinculación</AlertDialogTitle>
             <AlertDialogDescription>
-              ¿Estás seguro de aceptar la solicitud de vinculación de <span className="text-foreground font-semibold">{tutorName}</span> con{" "}
-              <span className="text-foreground font-semibold">{dependentName}</span>? A partir de este momento podrá activar su identidad y operar con
-              todos sus roles y permisos, incluidos los administrativos o docentes que tenga asignados. También podrá gestionar su acceso propio a la
-              plataforma.
+              ¿Aceptar que <span className="text-foreground font-semibold">{tutorName}</span> represente a{" "}
+              <span className="text-foreground font-semibold">{dependentName}</span>?
             </AlertDialogDescription>
           </AlertDialogHeader>
           {state.error ? (

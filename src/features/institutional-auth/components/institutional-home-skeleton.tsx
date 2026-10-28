@@ -9,7 +9,7 @@ import type { PublicInstitution } from "@features/institutions/types/public-inst
 export function InstitutionalHomeSkeleton({
   institution,
 }: {
-  institution?: Pick<PublicInstitution, "id" | "name" | "logoUrl" | "logoBlurDataURL">;
+  institution?: Pick<PublicInstitution, "id" | "name" | "logoUrl">;
 } = {}): ReactElement {
   return (
     <main className="flex min-h-full flex-1 flex-col gap-4" aria-label="Cargando portal institucional" role="status">

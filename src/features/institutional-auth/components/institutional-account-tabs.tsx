@@ -8,8 +8,11 @@ import { usePathname } from "next/navigation";
 import { tabsListVariants, tabsTriggerStyles } from "@common/components/ui/tabs";
 import { cn } from "@common/utils/cn.util";
 
+import { useIsRepresenting } from "@features/guardian-workspace/components/guardian-workspace-provider";
+
 const ACCOUNT_TABS = [
   { title: "Perfil", url: "/account" },
+  { title: "Correo electrónico", url: "/account/email" },
   { title: "Contraseña", url: "/account/password" },
   { title: "Llaves de acceso", url: "/account/passkeys" },
   { title: "Sesiones", url: "/account/sessions" },
@@ -18,12 +21,14 @@ const ACCOUNT_TABS = [
 export function InstitutionalAccountTabs(): ReactElement {
   const pathname = usePathname();
 
+  const representing = useIsRepresenting();
+
   const activeUrl = getActiveTabUrl(pathname);
 
   return (
     <nav aria-label="Secciones de la cuenta" className="w-full max-w-full sm:w-fit">
       <div data-variant="default" className={cn(tabsListVariants(), "grid w-full grid-cols-2 sm:inline-flex sm:w-fit")}>
-        {ACCOUNT_TABS.map((tab) => {
+        {ACCOUNT_TABS.filter((tab) => !representing || !["/account/email", "/account/password", "/account/passkeys"].includes(tab.url)).map((tab) => {
           const isActive = tab.url === activeUrl;
 
           return (
@@ -44,6 +49,10 @@ export function InstitutionalAccountTabs(): ReactElement {
 }
 
 function getActiveTabUrl(pathname: string): string {
+  if (pathname.startsWith("/account/email")) {
+    return "/account/email";
+  }
+
   if (pathname.startsWith("/account/password")) {
     return "/account/password";
   }

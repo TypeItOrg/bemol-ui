@@ -10,6 +10,10 @@ const institutionalUserResponseSchema = z.object({
     lastName: z.string(),
     documentNumber: z.string(),
     institutionId: z.string().min(1),
+    delegated: z.boolean().optional(),
+    actorPersonId: z.string().nullable().optional(),
+    canRequestGuardianLinks: z.boolean().optional(),
+    actorPermissions: z.array(z.string()).optional(),
     roles: z.array(z.string()).default([]),
     permissions: z.array(z.string()).default([]),
     permissionScopes: z

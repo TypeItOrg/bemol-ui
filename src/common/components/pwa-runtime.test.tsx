@@ -1,6 +1,11 @@
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { useTheme } from "next-themes";
+import { hydrateRoot } from "react-dom/client";
+import { renderToString } from "react-dom/server";
 
 import { PwaRuntime } from "@common/components/pwa-runtime";
+
+jest.mock("next-themes", () => ({ useTheme: jest.fn() }));
 
 const originalOnline = Object.getOwnPropertyDescriptor(window.navigator, "onLine");
 const originalWorker = Object.getOwnPropertyDescriptor(window.navigator, "serviceWorker");
@@ -13,6 +18,7 @@ function setConnection(online: boolean): void {
 }
 
 beforeEach(() => {
+  jest.mocked(useTheme).mockReturnValue({ themes: ["light", "dark", "system"], setTheme: jest.fn() });
   register.mockReset().mockResolvedValue({});
   Object.defineProperty(window.navigator, "serviceWorker", { configurable: true, value: { register } });
   setConnection(true);
@@ -97,4 +103,30 @@ it("shows the hint when the app is already offline at mount", () => {
   setConnection(false);
   render(<PwaRuntime />);
   expect(screen.getByRole("status")).toBeVisible();
+});
+
+it.each(["light", "dark"])("hydrates stable icons when the client resolves the %s theme", async (resolvedTheme) => {
+  const error = jest.spyOn(console, "error").mockImplementation(() => {});
+  const recoverableError = jest.fn();
+  const container = document.createElement("div");
+  container.innerHTML = renderToString(<PwaRuntime />);
+  const serverIcons = Array.from(container.querySelectorAll("img"));
+  jest.mocked(useTheme).mockReturnValue({ themes: ["light", "dark", "system"], setTheme: jest.fn(), resolvedTheme });
+
+  const root = await act(() => hydrateRoot(container, <PwaRuntime />, { onRecoverableError: recoverableError }));
+
+  try {
+    const icons = container.querySelectorAll("img");
+    expect(icons).toHaveLength(2);
+    expect(icons[0]).toBe(serverIcons[0]);
+    expect(icons[0]).toHaveAttribute("src", "/brand/favicon.svg");
+    expect(icons[0]).toHaveClass("dark:hidden");
+    expect(icons[1]).toBe(serverIcons[1]);
+    expect(icons[1]).toHaveAttribute("src", "/brand/favicon-dark.svg");
+    expect(icons[1]).toHaveClass("hidden", "dark:block");
+    expect(error).not.toHaveBeenCalled();
+    expect(recoverableError).not.toHaveBeenCalled();
+  } finally {
+    await act(() => root.unmount());
+  }
 });

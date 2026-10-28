@@ -3,7 +3,7 @@ import type { GuardianRelationship } from "@features/guardian-dependents/types/g
 
 export type GuardianDependent = {
   personGuardianId: string;
-  dependentPersonId: string;
+  dependentPersonId: string | null;
   status: GuardianLinkStatus;
   documentNumber: string;
   // Declared names until approval; legacy requests without declared names remain null.

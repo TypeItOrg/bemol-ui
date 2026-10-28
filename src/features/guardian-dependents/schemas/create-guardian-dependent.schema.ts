@@ -13,7 +13,9 @@ const guardianLinkFields = z.object({
   // Raw form value: it must be explicit, a missing value is invalid rather than an implicit false.
   isPrimaryContact: z.enum(["true", "false"], GUARDIAN_DEPENDENT_MESSAGES.INVALID_PRIMARY_CONTACT).transform((value) => value === "true"),
   ownAccessRequested: z.enum(["true", "false"], GUARDIAN_DEPENDENT_MESSAGES.INVALID_OWN_ACCESS).transform((value) => value === "true"),
-  email: z.union([z.literal(""), z.string().trim().email("Ingresá un correo válido.").max(150)]).transform((value) => value || undefined),
+  email: z
+    .union([z.literal(""), z.string().trim().email(GUARDIAN_DEPENDENT_MESSAGES.INVALID_EMAIL).max(150, GUARDIAN_DEPENDENT_MESSAGES.EMAIL_MAX_LENGTH)])
+    .transform((value) => value || undefined),
 });
 
 export const createGuardianDependentSchema = z

@@ -49,6 +49,8 @@ export const GUARDIAN_DEPENDENT_MESSAGES = {
   INVALID_RELATIONSHIP: "Seleccioná el vínculo.",
   INVALID_PRIMARY_CONTACT: "Indicá si es tu contacto principal.",
   INVALID_OWN_ACCESS: "Indicá si querés habilitar el acceso propio.",
-  REQUIRED_OWN_ACCESS_EMAIL: "Indicá el correo de la persona para enviarle la invitación.",
+  REQUIRED_OWN_ACCESS_EMAIL: "El correo es requerido.",
+  INVALID_EMAIL: "El correo es inválido.",
+  EMAIL_MAX_LENGTH: "El correo admite hasta 150 caracteres.",
   INVALID_FORM: "No se pudo registrar la vinculación. Revisá los campos marcados.",
 } as const;

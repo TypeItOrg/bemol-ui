@@ -39,3 +39,7 @@ export function useOperatingPersonId(): string | undefined {
 export function useOperatingInstitutionId(): string | undefined {
   return useContext(GuardianWorkspaceContext)?.institutionId;
 }
+
+export function useIsRepresenting(): boolean {
+  return useContext(GuardianWorkspaceContext)?.activeProfile?.self === false;
+}

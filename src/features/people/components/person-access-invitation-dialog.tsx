@@ -16,28 +16,32 @@ import {
   AlertDialogTitle,
 } from "@common/components/ui/alert-dialog";
 import { Button } from "@common/components/ui/button";
-import { Field, FieldDescription, FieldLabel } from "@common/components/ui/field";
+import { Field, FieldError, FieldLabel } from "@common/components/ui/field";
 import { Input } from "@common/components/ui/input";
+import { useActionFormErrorFocus } from "@common/hooks/use-action-form-error-focus";
 import { cn } from "@common/utils/cn.util";
 
-import { managePersonAccessInvitation } from "@features/people/actions/manage-person-access-invitation.action";
+import { manageAccountAccess, type ManageAccountAccessState } from "@features/people/actions/manage-account-access.action";
 import type { PersonSummary } from "@features/people/types/person-summary.types";
+import type { PeopleScope } from "@features/people/utils/people-scope.util";
 
 export function PersonAccessInvitationDialog({
   institutionId,
   person,
   cancel,
+  scope = "institutional",
   onClose,
   onSuccess,
 }: {
   institutionId: string;
   person: PersonSummary;
   cancel: boolean;
+  scope?: PeopleScope;
   onClose: () => void;
   onSuccess: () => void;
 }): ReactElement {
-  const [state, action, pending] = useActionState(async (previous: { error?: string; success?: boolean }, form: FormData) => {
-    const result = await managePersonAccessInvitation(institutionId, person.id, previous, form);
+  const [state, action, pending] = useActionState(async (previous: ManageAccountAccessState, form: FormData) => {
+    const result = await manageAccountAccess(scope, institutionId, person.id, previous, form);
 
     if (result.success) {
       onSuccess();
@@ -45,6 +49,8 @@ export function PersonAccessInvitationDialog({
 
     return result;
   }, {});
+
+  const formRef = useActionFormErrorFocus(state, pending);
 
   const sendLabel = person.accessInvitationPending ? "Reenviar invitación" : "Invitar a activar acceso";
 
@@ -60,7 +66,7 @@ export function PersonAccessInvitationDialog({
       }}
     >
       <AlertDialogContent>
-        <ActionForm action={action} className="space-y-5">
+        <ActionForm ref={formRef} action={action} className="space-y-5">
           <AlertDialogHeader>
             <div
               className={cn(
@@ -77,9 +83,9 @@ export function PersonAccessInvitationDialog({
                 : `${person.firstName} ${person.lastName} recibirá un enlace válido por 24 horas para elegir su contraseña. Verificá que el correo pertenezca a esa persona: la cuenta tendrá sus roles actuales. Reenviar invalida el enlace anterior.`}
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <input type="hidden" name="operation" value={cancel ? "cancel" : "send"} />
+          <input type="hidden" name="operation" value={cancel ? "cancel" : "invite"} />
           {!cancel ? (
-            <Field>
+            <Field data-invalid={!!state.fieldErrors?.email}>
               <FieldLabel htmlFor="initial-access-email" required>
                 Correo de la persona
               </FieldLabel>
@@ -90,13 +96,11 @@ export function PersonAccessInvitationDialog({
                 maxLength={150}
                 required
                 defaultValue={person.email ?? ""}
-                readOnly={!!person.email}
                 disabled={pending}
-                aria-describedby={person.email ? "initial-access-email-hint" : undefined}
+                aria-invalid={!!state.fieldErrors?.email}
+                aria-describedby={state.fieldErrors?.email ? "initial-access-email-error" : undefined}
               />
-              {person.email ? (
-                <FieldDescription id="initial-access-email-hint">Para cambiar este correo, editá primero los datos de la persona.</FieldDescription>
-              ) : null}
+              <FieldError id="initial-access-email-error">{state.fieldErrors?.email}</FieldError>
             </Field>
           ) : null}
           {state.error ? (

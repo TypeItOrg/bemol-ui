@@ -115,7 +115,7 @@ export function GuardianLinkDetail({
             <PersonDetails title="Representante" person={request.tutor} relationship={GUARDIAN_RELATIONSHIP_LABELS[request.relationship]} />
             <PersonDetails
               title="Persona representada"
-              person={request.dependent}
+              person={request.matchingPerson ?? request.dependent}
               relationship={REPRESENTED_RELATIONSHIP_LABELS[request.relationship]}
             />
           </div>

@@ -7,8 +7,7 @@ const validPerson = {
   email: "ana@example.com",
   phoneNumber: "",
   birthDate: "2000-01-01",
-  password: "contraseña-segura",
-  confirmPassword: "contraseña-segura",
+  initialRole: "APPLICANT",
 };
 
 describe("person form schemas", () => {
@@ -25,10 +24,12 @@ describe("person form schemas", () => {
 
   it.each([
     ["phoneNumber", "+54 353 4619146", "El teléfono solo admite números y guiones."],
+    ["email", "", "El correo es requerido."],
+    ["email", "   ", "El correo es requerido."],
+    ["email", "not-an-email", "El correo es inválido."],
     ["documentNumber", "1234A678", "El documento debe tener exactamente 8 dígitos."],
     ["birthDate", "", "La fecha de nacimiento es requerida."],
     ["birthDate", "2023-09-15", "La persona debe tener al menos 3 años."],
-    ["confirmPassword", "diferente-contraseña", "Las contraseñas no coinciden."],
   ])("rejects invalid %s (%s) for its own validation rule", (field, value, message) => {
     const result = createPersonFormSchema.safeParse({ ...validPerson, [field]: value });
 
@@ -45,30 +46,26 @@ describe("person form schemas", () => {
     });
   });
 
-  it.each([
-    ["empty", { password: "", confirmPassword: "" }],
-    ["omitted", { password: undefined, confirmPassword: undefined }],
-  ])("keeps %s update credentials empty", (_case, credentials) => {
-    expect(updatePersonFormSchema.parse({ ...validPerson, ...credentials })).toMatchObject({
-      password: "",
-      confirmPassword: "",
-    });
+  it.each(["APPLICANT", "REPRESENTATIVE"])("accepts the explicit initial role %s", (initialRole) => {
+    expect(createPersonFormSchema.parse({ ...validPerson, initialRole }).initialRole).toBe(initialRole);
   });
 
-  it.each([
-    ["phoneNumber", { phoneNumber: "+54 353 4619146" }, "El teléfono solo admite números y guiones."],
-    ["password", { password: "123", confirmPassword: "123" }, "La contraseña debe tener al menos 8 caracteres."],
-    ["confirmPassword", { password: "contraseña-nueva", confirmPassword: "otra-contraseña" }, "Las contraseñas no coinciden."],
-  ])("rejects invalid update %s", (field, credentials, message) => {
-    expect(updatePersonFormSchema.safeParse({ ...validPerson, ...credentials })).toMatchObject({
+  it.each([undefined, null, "", "STUDENT", "UNKNOWN"])("rejects missing or unsupported initial role %s", (initialRole) => {
+    const result = createPersonFormSchema.safeParse({ ...validPerson, initialRole });
+
+    expect(result).toMatchObject({
       success: false,
-      error: { issues: [expect.objectContaining({ path: [field], message })] },
+      error: { issues: [expect.objectContaining({ path: ["initialRole"], message: "Seleccioná un rol inicial." })] },
     });
   });
 
-  it("accepts matching new credentials", () => {
-    const credentials = { password: "contraseña-nueva", confirmPassword: "contraseña-nueva" };
-
-    expect(updatePersonFormSchema.parse({ ...validPerson, ...credentials })).toMatchObject(credentials);
+  it("never produces administrative credentials or a direct email change", () => {
+    const input = { ...validPerson, password: "not-accepted", confirmPassword: "not-accepted" };
+    expect(createPersonFormSchema.parse(input)).not.toHaveProperty("password");
+    const update = updatePersonFormSchema.parse(input);
+    expect(update).not.toHaveProperty("password");
+    expect(update).not.toHaveProperty("confirmPassword");
+    expect(update).not.toHaveProperty("email");
+    expect(update).not.toHaveProperty("initialRole");
   });
 });

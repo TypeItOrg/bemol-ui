@@ -71,7 +71,7 @@ export function GuardianDependentRow({
 
   const canUnlink = isActive || dependent.status === GUARDIAN_LINK_STATUS.PENDING;
 
-  const canInviteOwnAccess = isActive && dependent.ownAccessStatus === "NO_ACCOUNT";
+  const canInviteOwnAccess = isActive && !["INSTITUTION_REQUIRED", "INSTITUTION_BLOCKED", "UNAVAILABLE"].includes(dependent.ownAccessStatus);
 
   const tableRow = (
     <TableRow className="h-12">
@@ -91,7 +91,7 @@ export function GuardianDependentRow({
                   </DropdownMenuItem>
                   {canInviteOwnAccess ? (
                     <DropdownMenuItem className="px-2.5 py-1.5" onSelect={onManageAccess}>
-                      Invitar a activar su cuenta
+                      Gestionar acceso propio
                     </DropdownMenuItem>
                   ) : null}
                 </>
@@ -179,7 +179,7 @@ export function GuardianDependentRow({
             </ContextMenuItem>
             {canInviteOwnAccess ? (
               <ContextMenuItem className="px-2.5 py-1.5" onSelect={onManageAccess}>
-                Invitar a activar su cuenta
+                Gestionar acceso propio
               </ContextMenuItem>
             ) : null}
           </>

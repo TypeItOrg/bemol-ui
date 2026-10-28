@@ -17,7 +17,7 @@ export function InstitutionalBrandIdentity({
   showInstitutionName = false,
   darkBackground = false,
 }: {
-  institution?: Pick<PublicInstitution, "id" | "name" | "logoUrl" | "logoBlurDataURL">;
+  institution?: Pick<PublicInstitution, "id" | "name" | "logoUrl">;
   className?: string;
   imageClassName?: string;
   imageContainerClassName?: string;
@@ -40,8 +40,6 @@ export function InstitutionalBrandIdentity({
 
   const hasLogo = Boolean(logoUrl && failedUrl !== logoUrl);
 
-  const preview = hasInstitutionLogo ? institution?.logoBlurDataURL : undefined;
-
   const showProductLogoVariant = !hasInstitutionLogo && !darkBackground;
 
   return (
@@ -50,7 +48,6 @@ export function InstitutionalBrandIdentity({
         <div className={cn("relative flex items-center justify-center", imageContainerClassName)}>
           <LogoImage
             key={logoUrl}
-            blurDataURL={preview}
             preload
             unoptimized={Boolean(institution)}
             sizes="(max-width: 640px) 80px, (max-width: 768px) 96px, (max-width: 1024px) 256px, 288px"

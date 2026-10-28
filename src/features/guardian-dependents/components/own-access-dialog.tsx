@@ -1,52 +1,30 @@
 "use client";
 
-import { useActionState, type ReactElement } from "react";
+import { useState, type ReactElement } from "react";
 
-import { CircleAlertIcon, UserCheckIcon } from "lucide-react";
+import { ShieldCheckIcon } from "lucide-react";
 
-import { ActionForm } from "@common/components/action-form";
-import { Alert, AlertDescription } from "@common/components/ui/alert";
-import {
-  AlertDialog,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@common/components/ui/alert-dialog";
-import { Button } from "@common/components/ui/button";
-import { Field, FieldLabel } from "@common/components/ui/field";
-import { Input } from "@common/components/ui/input";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@common/components/ui/dialog";
 
-import { updateOwnAccess } from "@features/guardian-dependents/actions/update-own-access.action";
 import type { GuardianDependent } from "@features/guardian-dependents/types/guardian-dependent.types";
+import { getGuardianDependentName } from "@features/guardian-dependents/utils/guardian-dependent-display.util";
+import { AccountAccessPanel } from "@features/people/components/account-access-panel";
 
 export function OwnAccessDialog({
   institutionId,
   person,
   onClose,
-  onSuccess,
 }: {
   institutionId: string;
   person: GuardianDependent;
   onClose: () => void;
-  onSuccess: () => void;
 }): ReactElement {
-  const [state, action, pending] = useActionState(async (previous: { error?: string; success?: boolean }, form: FormData) => {
-    const result = await updateOwnAccess(institutionId, person.personGuardianId, previous, form);
+  const [pending, setPending] = useState(false);
 
-    if (result.success) {
-      onSuccess();
-    }
-
-    return result;
-  }, {});
-
-  const submitLabel = "Enviar invitación";
+  const dependentName = getGuardianDependentName(person);
 
   return (
-    <AlertDialog
+    <Dialog
       open
       onOpenChange={(open) => {
         if (!open && !pending) {
@@ -54,40 +32,41 @@ export function OwnAccessDialog({
         }
       }}
     >
-      <AlertDialogContent>
-        <ActionForm action={action} className="space-y-5">
-          <AlertDialogHeader>
-            <div className="bg-primary/10 text-primary mb-1 flex size-12 items-center justify-center rounded-2xl">
-              <UserCheckIcon aria-hidden="true" className="size-6" />
-            </div>
-            <AlertDialogTitle>Invitar a activar su cuenta</AlertDialogTitle>
-            <AlertDialogDescription>
-              Recibirá una invitación para configurar su contraseña. No cambia sus roles ni su historial.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <input type="hidden" name="enabled" value="true" />
-          <Field>
-            <FieldLabel htmlFor="own-access-email" required>
-              Correo de la persona
-            </FieldLabel>
-            <Input id="own-access-email" name="email" type="email" required disabled={pending} />
-          </Field>
-          {state.error ? (
-            <Alert variant="destructive" aria-live="polite">
-              <CircleAlertIcon aria-hidden="true" />
-              <AlertDescription>{state.error}</AlertDescription>
-            </Alert>
-          ) : null}
-          <AlertDialogFooter>
-            <AlertDialogCancel size="lg" disabled={pending}>
-              Cancelar
-            </AlertDialogCancel>
-            <Button size="lg" type="submit" variant="default" disabled={pending}>
-              {pending ? "Guardando…" : submitLabel}
-            </Button>
-          </AlertDialogFooter>
-        </ActionForm>
-      </AlertDialogContent>
-    </AlertDialog>
+      <DialogContent
+        showCloseButton={false}
+        className="flex max-h-[calc(100dvh-2rem)] min-w-0 flex-col gap-5 overflow-hidden p-5 sm:max-w-xl"
+        onInteractOutside={(event) => {
+          if (pending) {
+            event.preventDefault();
+          }
+        }}
+      >
+        <DialogHeader className="shrink-0 items-center gap-1.5 text-center">
+          <div className="bg-primary/10 text-primary mb-1 flex size-12 items-center justify-center rounded-2xl">
+            <ShieldCheckIcon aria-hidden="true" className="size-6" />
+          </div>
+          <DialogTitle className="font-semibold">Acceso de la persona a cargo</DialogTitle>
+          <DialogDescription className="max-w-md text-center text-balance">
+            {dependentName ? (
+              <>
+                Configurá cómo ingresa <span className="text-foreground font-semibold">{dependentName}</span> con su propia cuenta al portal
+                institucional.
+              </>
+            ) : (
+              "Configurá cómo ingresa esta persona con su propia cuenta al portal institucional."
+            )}
+          </DialogDescription>
+        </DialogHeader>
+        {person.dependentPersonId ? (
+          <AccountAccessPanel
+            institutionId={institutionId}
+            personId={person.dependentPersonId}
+            mode="guardian"
+            onClose={onClose}
+            onPendingChange={setPending}
+          />
+        ) : null}
+      </DialogContent>
+    </Dialog>
   );
 }

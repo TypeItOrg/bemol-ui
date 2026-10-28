@@ -18,6 +18,11 @@ const applicantRole: AssignableRole = {
   name: "Postulante",
   technicalCode: SystemRoleCode.APPLICANT,
 };
+const representativeRole: AssignableRole = {
+  id: "019bffff-0000-7000-8000-000000000004",
+  name: "Representante",
+  technicalCode: SystemRoleCode.REPRESENTATIVE,
+};
 const administrativeRole: AssignableRole = {
   id: "019bffff-0000-7000-8000-000000000002",
   name: "Administrativo",
@@ -53,6 +58,96 @@ function renderManager(
 }
 
 describe("PersonRolesManager", () => {
+  it.each([
+    [applicantRole, representativeRole],
+    [representativeRole, applicantRole],
+  ])("combines $name with the other compatible role without revocation permission", async (existing, selected) => {
+    const user = userEvent.setup();
+    const onSelectedRoleCodesChange = jest.fn();
+    render(
+      <PersonRolesManager
+        roles={[applicantRole, representativeRole]}
+        assignedRoles={[assignedRole(existing)]}
+        selectedRoleCodes={[existing.id]}
+        onSelectedRoleCodesChange={onSelectedRoleCodesChange}
+        canAssignRoles
+        canRevokeRoles={false}
+      />,
+    );
+
+    await user.click(screen.getByRole("combobox", { name: "Roles del usuario" }));
+    await user.click(await screen.findByRole("option", { name: selected.name }));
+
+    expect(onSelectedRoleCodesChange).toHaveBeenCalledWith([existing.id, selected.id]);
+  });
+
+  it.each([
+    [[administrativeRole, representativeRole], applicantRole, [representativeRole.id, applicantRole.id]],
+    [[applicantRole, representativeRole], administrativeRole, [representativeRole.id, administrativeRole.id]],
+  ])("preserves Representative when replacing incompatible roles", async (existing, selected, expected) => {
+    const user = userEvent.setup();
+    const onSelectedRoleCodesChange = jest.fn();
+    render(
+      <PersonRolesManager
+        roles={[applicantRole, representativeRole, administrativeRole]}
+        assignedRoles={existing.map(assignedRole)}
+        selectedRoleCodes={existing.map((role) => role.id)}
+        onSelectedRoleCodesChange={onSelectedRoleCodesChange}
+        canAssignRoles
+        canRevokeRoles
+      />,
+    );
+
+    await user.click(screen.getByRole("combobox", { name: "Roles del usuario" }));
+    await user.click(await screen.findByRole("option", { name: selected.name }));
+
+    expect(onSelectedRoleCodesChange).toHaveBeenCalledWith(expected);
+  });
+
+  it("requires assignment permission to add Representative and keeps the existing applicant", async () => {
+    const user = userEvent.setup();
+    const onSelectedRoleCodesChange = jest.fn();
+    render(
+      <PersonRolesManager
+        roles={[applicantRole, representativeRole]}
+        assignedRoles={[assignedRole(applicantRole)]}
+        selectedRoleCodes={[applicantRole.id]}
+        onSelectedRoleCodesChange={onSelectedRoleCodesChange}
+        canAssignRoles={false}
+        canRevokeRoles
+      />,
+    );
+
+    await user.click(screen.getByRole("combobox", { name: "Roles del usuario" }));
+    const option = await screen.findByRole("option", { name: representativeRole.name });
+    expect(option).toHaveAttribute("aria-disabled", "true");
+    await user.click(option);
+
+    expect(onSelectedRoleCodesChange).not.toHaveBeenCalled();
+  });
+
+  it("cannot replace Applicant in an Applicant + Representative pair without revocation permission", async () => {
+    const user = userEvent.setup();
+    const onSelectedRoleCodesChange = jest.fn();
+    render(
+      <PersonRolesManager
+        roles={[applicantRole, representativeRole, administrativeRole]}
+        assignedRoles={[assignedRole(applicantRole), assignedRole(representativeRole)]}
+        selectedRoleCodes={[applicantRole.id, representativeRole.id]}
+        onSelectedRoleCodesChange={onSelectedRoleCodesChange}
+        canAssignRoles
+        canRevokeRoles={false}
+      />,
+    );
+
+    await user.click(screen.getByRole("combobox", { name: "Roles del usuario" }));
+    const option = await screen.findByRole("option", { name: administrativeRole.name });
+    expect(option).toHaveAttribute("aria-disabled", "true");
+    await user.click(option);
+
+    expect(onSelectedRoleCodesChange).not.toHaveBeenCalled();
+  });
+
   it("requires revocation permission when replacing an assigned applicant role", async () => {
     const user = userEvent.setup();
     const onSelectedRoleCodesChange = jest.fn();

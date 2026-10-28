@@ -22,6 +22,10 @@ describe("parsePlatformPeoplePaginationParams", () => {
     });
   });
 
+  it("accepts the Representative catalog filter", () => {
+    expect(parsePlatformPeoplePaginationParams({ roleCode: "REPRESENTATIVE" }).roleCode).toBe("REPRESENTATIVE");
+  });
+
   it("ignores invalid filters and pagination values", () => {
     expect(
       parsePlatformPeoplePaginationParams({

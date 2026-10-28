@@ -1,9 +1,8 @@
 import type { ReactElement, ReactNode } from "react";
 
-import Image from "next/image";
-
 import { type LucideIcon } from "lucide-react";
 
+import { FadeImage } from "@common/components/fade-image";
 import { NavigationCard } from "@common/components/navigation/navigation-card";
 import { cn } from "@common/utils/cn.util";
 
@@ -42,7 +41,7 @@ export function HomeSubsection({ children, description, icon: Icon, id, imageSid
               imageSide === "right" && "@5xl/home-section:order-2",
             )}
           >
-            <Image src={imageSrc} alt="" fill sizes="(max-width: 1023px) 100vw, 28vw" className="object-cover" />
+            <FadeImage src={imageSrc} alt="" fill sizes="(max-width: 1023px) 100vw, 28vw" className="object-cover" />
           </div>
           <div className={cn("@container/home-content min-w-0", imageSide === "right" && "@5xl/home-section:order-1")}>{children}</div>
         </div>

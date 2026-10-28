@@ -18,7 +18,6 @@ import { finishGuardianDependentRequestAction } from "@features/guardian-depende
 import { GuardianDependentDocumentsField } from "@features/guardian-dependents/components/guardian-dependent-documents-field";
 import { GuardianDependentFormFields } from "@features/guardian-dependents/components/guardian-dependent-form-fields";
 import { GUARDIAN_DEPENDENT_MESSAGES } from "@features/guardian-dependents/constants/guardian-dependent.constants";
-import { createGuardianDependentSchema } from "@features/guardian-dependents/schemas/create-guardian-dependent.schema";
 import type { GuardianDependentActionState } from "@features/guardian-dependents/types/guardian-dependent-action-state.types";
 import { validateGuardianDocuments } from "@features/guardian-dependents/utils/guardian-dependent-documents.util";
 import { submitGuardianDependent } from "@features/guardian-dependents/utils/submit-guardian-dependent.util";
@@ -68,7 +67,7 @@ export function GuardianDependentForm({ institutionId, returnTo }: { institution
 
   const [submittedDocuments, setSubmittedDocuments] = useState<File[]>();
 
-  const canSubmit = !fieldsDisabled && createGuardianDependentSchema.safeParse(values).success && !validateGuardianDocuments(documents);
+  const canSubmit = !fieldsDisabled && !validateGuardianDocuments(documents);
 
   const hasFieldErrors = Object.keys(state.fieldErrors ?? {}).length > 0;
 

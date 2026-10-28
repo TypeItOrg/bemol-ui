@@ -1,12 +1,11 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
-import { resendEmailVerification, changePendingEmail } from "@features/institutional-auth/actions/email-verification.actions";
+import { resendEmailVerification } from "@features/institutional-auth/actions/email-verification.actions";
 import { EmailVerificationForm } from "@features/institutional-auth/components/email-verification-form";
 
 jest.mock("@features/institutional-auth/actions/email-verification.actions", () => ({
   resendEmailVerification: jest.fn(),
-  changePendingEmail: jest.fn(),
 }));
 jest.mock("@features/institutional-auth/components/institution-picker", () => ({
   InstitutionPicker: ({ value }: { value?: string }) => <input name="institutionId" type="hidden" value={value ?? ""} />,
@@ -25,13 +24,9 @@ it("reuses identity and shows a generic resend acknowledgement", async () => {
   const sent = jest.mocked(resendEmailVerification).mock.calls[0][1];
   expect(sent.get("institutionId")).toBe(context.institutionId);
 });
-it("requests password to correct email and preserves field errors", async () => {
-  jest.mocked(changePendingEmail).mockResolvedValue({ error: "Credenciales inválidas" });
+it("routes corrections to the institution without asking for another person password", () => {
   render(<EmailVerificationForm context={context} />);
-  await userEvent.click(screen.getByRole("button", { name: "Cambiar correo electrónico" }));
-  await userEvent.type(screen.getByLabelText(/Nuevo correo electrónico/), "correct@example.com");
-  await userEvent.type(screen.getByLabelText(/Contraseña de tu cuenta/), "incorrecta");
-  await userEvent.click(screen.getByRole("button", { name: "Cambiar correo electrónico y enviar enlace" }));
-  expect(await screen.findByText("Credenciales inválidas")).toBeVisible();
-  expect(screen.getByLabelText(/Documento/)).toHaveValue("12345678");
+  expect(screen.getByText(/contactá a tu institución/)).toBeVisible();
+  expect(screen.queryByLabelText(/Contraseña/)).not.toBeInTheDocument();
+  expect(screen.queryByRole("button", { name: "Cambiar correo electrónico" })).not.toBeInTheDocument();
 });

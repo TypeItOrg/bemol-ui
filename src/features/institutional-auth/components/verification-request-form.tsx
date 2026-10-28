@@ -1,52 +1,32 @@
 "use client";
 
-import { useActionState, useState, type ReactElement } from "react";
+import { useActionState, type ReactElement } from "react";
 
 import { Loader2Icon } from "lucide-react";
 
 import { ActionForm } from "@common/components/action-form";
 import { Button } from "@common/components/ui/button";
 import { Field, FieldError, FieldGroup, FieldLabel } from "@common/components/ui/field";
-import { Input } from "@common/components/ui/input";
-import { PasswordInput } from "@common/components/ui/password-input";
 import { NumericInput } from "@common/components/ui/restricted-input";
 
-import { changePendingEmail, resendEmailVerification } from "@features/institutional-auth/actions/email-verification.actions";
+import { resendEmailVerification } from "@features/institutional-auth/actions/email-verification.actions";
 import { EmailVerificationFeedback } from "@features/institutional-auth/components/email-verification-feedback";
 import { InstitutionalAuthInstitutionField } from "@features/institutional-auth/components/institutional-auth-institution-field";
 import type { EmailVerificationContext } from "@features/institutional-auth/types/email-verification-context.types";
 import type { EmailVerificationState } from "@features/institutional-auth/types/email-verification-state.types";
 
 export function VerificationRequestForm({
-  mode,
   identity,
   onIdentityChange,
-  onModeChange,
 }: {
-  mode: "resend" | "change";
   identity?: EmailVerificationContext;
   onIdentityChange: (value: EmailVerificationContext) => void;
-  onModeChange: (value: "resend" | "change") => void;
 }): ReactElement {
-  const [state, action, pending] = useActionState<EmailVerificationState, FormData>(
-    mode === "resend" ? resendEmailVerification : changePendingEmail,
-    {},
-  );
-
-  const [email, setEmail] = useState("");
-
-  const actionLabel = mode === "resend" ? "Reenviar enlace" : "Cambiar correo electrónico y enviar enlace";
+  const [state, action, pending] = useActionState<EmailVerificationState, FormData>(resendEmailVerification, {});
 
   return (
     <ActionForm resetOnSuccess={Boolean(state.success)} action={action} noValidate className="mt-6 space-y-5">
-      <EmailVerificationFeedback
-        state={state}
-        successMessage={
-          mode === "resend"
-            ? "Si tu cuenta está pendiente, recibirás un enlace."
-            : "Actualizamos tu correo electrónico. Revisá esa casilla y usá el último enlace que recibas."
-        }
-      />
+      <EmailVerificationFeedback state={state} successMessage="Si tu cuenta está pendiente, recibirás un enlace." />
       <FieldGroup>
         <InstitutionalAuthInstitutionField
           id="verification-institution"
@@ -83,59 +63,13 @@ export function VerificationRequestForm({
           />
           <FieldError>{state.fieldErrors?.documentNumber}</FieldError>
         </Field>
-        {mode === "change" ? (
-          <>
-            <Field data-invalid={!!state.fieldErrors?.email}>
-              <FieldLabel htmlFor="verification-email" required>
-                Nuevo correo electrónico
-              </FieldLabel>
-              <Input
-                id="verification-email"
-                name="email"
-                type="email"
-                autoComplete="email"
-                maxLength={150}
-                disabled={pending}
-                aria-invalid={!!state.fieldErrors?.email}
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-              />
-              <FieldError>{state.fieldErrors?.email}</FieldError>
-            </Field>
-            <Field data-invalid={!!state.fieldErrors?.password}>
-              <FieldLabel htmlFor="verification-password" required>
-                Contraseña de tu cuenta
-              </FieldLabel>
-              <PasswordInput
-                id="verification-password"
-                name="password"
-                autoComplete="current-password"
-                maxLength={255}
-                disabled={pending}
-                aria-invalid={!!state.fieldErrors?.password}
-              />
-              <FieldError>{state.fieldErrors?.password}</FieldError>
-            </Field>
-          </>
-        ) : null}
       </FieldGroup>
       <div className="flex flex-col gap-4">
         <Button type="submit" size="lg" className="h-auto min-h-9 py-2 whitespace-normal" disabled={pending} aria-busy={pending}>
           {pending ? <Loader2Icon className="animate-spin" /> : null}
-          {pending ? "Enviando…" : actionLabel}
+          {pending ? "Enviando…" : "Reenviar enlace"}
         </Button>
-        <p className="text-muted-foreground text-center text-sm">
-          {mode === "resend" ? "¿Necesitás usar otro correo electrónico?" : "¿No necesitás cambiarlo?"}{" "}
-          <Button
-            type="button"
-            variant="link"
-            className="h-auto p-0 align-baseline font-medium"
-            disabled={pending}
-            onClick={() => onModeChange(mode === "resend" ? "change" : "resend")}
-          >
-            {mode === "resend" ? "Cambiar correo electrónico" : "Volver al reenvío"}
-          </Button>
-        </p>
+        <p className="text-muted-foreground text-center text-sm">Si necesitás corregir el correo registrado, contactá a tu institución.</p>
       </div>
     </ActionForm>
   );

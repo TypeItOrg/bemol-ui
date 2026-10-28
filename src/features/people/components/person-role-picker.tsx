@@ -75,7 +75,7 @@ export function PersonRolePicker({
     }
 
     if (role.technicalCode === SystemRoleCode.APPLICANT) {
-      return "No se combina con otros roles; al seleccionarlo reemplaza los demás.";
+      return "Solo se combina con Representante; al seleccionarlo reemplaza los demás roles.";
     }
 
     if (selectedRoleIds.includes(role.id) && !initialRoleIds.has(role.id)) {

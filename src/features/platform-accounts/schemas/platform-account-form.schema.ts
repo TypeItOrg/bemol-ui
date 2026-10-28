@@ -15,7 +15,7 @@ const platformAccountIdentitySchema = z.object({
   email: z
     .string()
     .trim()
-    .min(1, PLATFORM_ACCOUNT_ERROR_MESSAGES.REQUIRED_EMAIL)
+    .min(1, { message: PLATFORM_ACCOUNT_ERROR_MESSAGES.REQUIRED_EMAIL, abort: true })
     .max(150, PLATFORM_ACCOUNT_ERROR_MESSAGES.EMAIL_MAX_LENGTH)
     .email(PLATFORM_ACCOUNT_ERROR_MESSAGES.INVALID_EMAIL),
 });

@@ -37,31 +37,33 @@ describe("institutional profile", () => {
     });
     jest.mocked(updateInstitutionalProfileAction).mockReturnValueOnce(pending).mockResolvedValueOnce({ success: true });
     renderWithQueryClient(<InstitutionalProfileForm person={PERSON} returnTo="/account?section=profile" />);
-    const name = screen.getByRole("textbox", { name: "Nombre" });
+    expect(screen.getByRole("textbox", { name: "Nombre" })).toBeDisabled();
+    expect(screen.getByRole("textbox", { name: "Correo electrónico" })).toBeDisabled();
+    const name = screen.getByRole("textbox", { name: "Teléfono" });
     await user.clear(name);
-    await user.type(name, "Nombre corregido");
-    expect(name).toHaveValue("Nombre corregido");
+    await user.type(name, "0353-999999");
+    expect(name).toHaveValue("0353-999999");
     const form = name.closest("form")!;
 
     fireEvent.submit(form);
     await waitFor(() => expect(screen.getByRole("button", { name: "Guardando..." })).toBeDisabled());
     await user.click(screen.getByRole("button", { name: "Guardando..." }));
-    expect(name).toHaveValue("Nombre corregido");
+    expect(name).toHaveValue("0353-999999");
     expect(updateInstitutionalProfileAction).toHaveBeenCalledTimes(1);
     expect(mockReplace).not.toHaveBeenCalled();
 
     await act(async () => {
-      finish({ fieldErrors: { firstName: "Revisá el nombre" } });
+      finish({ fieldErrors: { phoneNumber: "Revisá el teléfono" } });
     });
 
-    expect(await screen.findByText("Revisá el nombre")).toBeVisible();
-    expect(name).toHaveValue("Nombre corregido");
+    expect(await screen.findByText("Revisá el teléfono")).toBeVisible();
+    expect(name).toHaveValue("0353-999999");
     expect(screen.getByRole("button", { name: "Guardar cambios" })).toBeEnabled();
     expect(screen.getByRole("textbox", { name: "Fecha de nacimiento" })).toHaveValue("10/04/1990");
 
     fireEvent.submit(form);
 
     await waitFor(() => expect(mockReplace).toHaveBeenCalledWith("/account?section=profile"));
-    expect(jest.mocked(updateInstitutionalProfileAction).mock.calls[1][0].get("firstName")).toBe("Nombre corregido");
+    expect(jest.mocked(updateInstitutionalProfileAction).mock.calls[1][0].get("phoneNumber")).toBe("0353-999999");
   });
 });

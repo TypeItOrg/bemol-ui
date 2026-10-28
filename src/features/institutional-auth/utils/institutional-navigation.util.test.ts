@@ -99,13 +99,10 @@ describe("getInstitutionalNavigationSections", () => {
       expect.objectContaining({ title: "Nueva inscripción", url: `/self-service/${USER.personId}/enrollment` }),
       expect.objectContaining({ title: "Mis inscripciones", url: `/self-service/${USER.personId}/enrollment-applications` }),
     ]);
-    expect(sections.find((section) => section.label === "Formación")?.items).toEqual([
-      expect.objectContaining({ title: "Mis materias", url: `/self-service/${USER.personId}/courses` }),
-      expect.objectContaining({ title: "Mis horarios", url: `/self-service/${USER.personId}/schedules` }),
-    ]);
+    expect(sections.find((section) => section.label === "Formación")).toBeUndefined();
   });
 
-  it("lists the dependents page under Personal, after Cuenta, for users who can manage dependents", () => {
+  it("lists the dependents page under Personal, after Mi perfil, for users who can manage dependents", () => {
     const sections = getInstitutionalNavigationSections({
       ...USER,
       roles: ["Estudiante"],
@@ -113,7 +110,7 @@ describe("getInstitutionalNavigationSections", () => {
     });
 
     expect(sections.find((section) => section.label === "Personal")?.items).toEqual([
-      expect.objectContaining({ title: "Cuenta", url: "/account" }),
+      expect.objectContaining({ title: "Mi perfil", url: "/account" }),
       expect.objectContaining({ title: "Personas a cargo", url: "/my-dependents" }),
     ]);
   });
@@ -149,7 +146,7 @@ describe("getInstitutionalNavigationSections", () => {
     expect(personalSection).toEqual({
       label: "Personal",
       items: [
-        expect.objectContaining({ title: "Cuenta", url: "/account" }),
+        expect.objectContaining({ title: "Mi perfil", url: "/account" }),
         expect.objectContaining({ title: "Personas a cargo", url: "/my-dependents" }),
       ],
     });

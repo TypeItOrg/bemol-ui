@@ -41,13 +41,14 @@ describe("updatePersonAction", () => {
     expect(JSON.parse(request?.body as string)).toEqual({
       firstName: "María",
       lastName: "González",
-      email: "maria@boero.edu.ar",
+      documentNumber: "12345678",
+      birthDate: "2000-01-01",
       phoneNumber: "",
     });
     expect(revalidatePathMock).toHaveBeenCalledWith(`/admin/institutions/${INSTITUTION_ID}/people`);
   });
 
-  it("includes the new password when provided with matching confirmation", async () => {
+  it("never forwards operator passwords even when submitted", async () => {
     peopleApiFetchMock.mockResolvedValue(new Response(null, { status: 200 }));
 
     const result = await updatePlatformPersonAction(
@@ -61,33 +62,30 @@ describe("updatePersonAction", () => {
     expect(JSON.parse(request?.body as string)).toEqual({
       firstName: "María",
       lastName: "González",
-      email: "maria@boero.edu.ar",
+      documentNumber: "12345678",
+      birthDate: "2000-01-01",
       phoneNumber: "",
-      password: "nueva-contraseña",
     });
   });
 
-  it("returns validation error when passwords do not match", async () => {
-    const result = await updatePlatformPersonAction(
-      INSTITUTION_ID,
-      PERSON_ID,
-      createFormData({ password: "nueva-contraseña", confirmPassword: "diferente-contraseña" }),
-    );
-
-    expect(result.fieldErrors).toEqual({
-      confirmPassword: "Las contraseñas no coinciden.",
-    });
+  it("rejects an invalid document before writing", async () => {
+    const result = await updatePlatformPersonAction(INSTITUTION_ID, PERSON_ID, createFormData({ documentNumber: "123" }));
+    expect(result.fieldErrors?.documentNumber).toBeDefined();
     expect(peopleApiFetchMock).not.toHaveBeenCalled();
   });
 });
 
 function createFormData(
-  overrides: Partial<Record<"firstName" | "lastName" | "email" | "phoneNumber" | "password" | "confirmPassword", string>> = {},
+  overrides: Partial<
+    Record<"firstName" | "lastName" | "email" | "phoneNumber" | "password" | "confirmPassword" | "documentNumber" | "birthDate", string>
+  > = {},
 ): FormData {
   const values = {
     firstName: "María",
     lastName: "González",
     email: "maria@boero.edu.ar",
+    documentNumber: "12345678",
+    birthDate: "2000-01-01",
     phoneNumber: "",
     password: "",
     confirmPassword: "",

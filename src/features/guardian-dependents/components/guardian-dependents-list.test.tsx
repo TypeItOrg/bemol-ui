@@ -1,9 +1,11 @@
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import { GuardianDependentsList } from "@features/guardian-dependents/components/guardian-dependents-list";
 import type { GuardianDependent } from "@features/guardian-dependents/types/guardian-dependent.types";
 import type { GuardianDependentsQuery } from "@features/guardian-dependents/types/guardian-dependents-query.types";
+
+import { renderWithQueryClient } from "@/../test/utils/render-with-query-client";
 
 const mockNavigate = jest.fn();
 const mockSelectIdentity = jest.fn();
@@ -57,8 +59,9 @@ function renderList(items: GuardianDependent[], overrides: Partial<GuardianDepen
     ...overrides,
   };
 
-  render(
+  renderWithQueryClient(
     <GuardianDependentsList
+      canRequest
       institutionId={INSTITUTION_ID}
       query={query}
       data={{ items, page: query.page, size: query.size, totalItems, totalPages: Math.ceil(totalItems / query.size) }}

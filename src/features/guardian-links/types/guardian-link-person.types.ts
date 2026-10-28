@@ -1,7 +1,7 @@
 export type GuardianLinkPerson = {
-  personId: string;
+  personId: string | null;
   documentNumber: string;
-  firstName: string;
-  lastName: string;
+  firstName: string | null;
+  lastName: string | null;
   birthDate: string | null;
 };

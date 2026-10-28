@@ -4,5 +4,4 @@ import { type EditMode } from "@features/institutions/types/institution-edit-mod
 export type InstitutionFormProps = (CreateMode | EditMode) & {
   returnTo?: string;
   baseDomain?: string;
-  logoBlurDataURL?: string;
 };

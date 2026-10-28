@@ -15,7 +15,7 @@ import { FORM_MODE } from "@common/types/form-mode.types";
 import type { InstitutionSummary } from "@features/institutions/types/institution-summary.types";
 import { createInstitutionalPersonAction, createPlatformPersonAction } from "@features/people/actions/create-person.action";
 import { updateInstitutionalPersonAction, updatePlatformPersonAction } from "@features/people/actions/update-person.action";
-import { PersonCreateFields, PersonDetailsFields, PersonPasswordFields } from "@features/people/components/person-form-fields";
+import { PersonCreateFields, PersonDetailsFields } from "@features/people/components/person-form-fields";
 import { PersonInstitutionField } from "@features/people/components/person-institution-field";
 import { ROLE_SCOPE_MESSAGES } from "@features/people/constants/role-scope.constants";
 import type { PersonActionState } from "@features/people/types/person-action-state.types";
@@ -163,7 +163,7 @@ function PersonFormView({
   }
 
   return (
-    <form ref={formRef} id={formId} onSubmit={handleSubmit(onSubmit)} className="flex w-full flex-col gap-4">
+    <form ref={formRef} id={formId} noValidate onSubmit={handleSubmit(onSubmit)} className="flex w-full flex-col gap-4">
       {formError && (
         <Alert variant="destructive">
           <CircleAlertIcon />
@@ -181,17 +181,13 @@ function PersonFormView({
         />
       )}
 
-      <fieldset disabled={isEdit && !canEdit} className="contents">
+      <fieldset disabled={isPending || (isEdit && !canEdit)} className="contents">
         <PersonDetailsFields errors={errors} isEdit={isEdit} person={person} register={register} />
       </fieldset>
 
-      {isEdit ? (
-        <fieldset disabled={!canEdit} className="contents">
-          <PersonPasswordFields errors={errors} register={register} />
-        </fieldset>
-      ) : (
-        <PersonCreateFields control={control} errors={errors} register={register} />
-      )}
+      <fieldset disabled={isPending || (isEdit && !canEdit)} className="contents">
+        <PersonCreateFields control={control} errors={errors} register={register} isEdit={isEdit} />
+      </fieldset>
 
       {!hideActions && (
         <div className="flex flex-row flex-wrap items-center justify-end gap-3">

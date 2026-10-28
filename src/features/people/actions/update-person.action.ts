@@ -47,10 +47,9 @@ async function updatePersonActionInternal(
     const payload = {
       firstName: formData.get("firstName"),
       lastName: formData.get("lastName"),
-      email: formData.get("email") || "",
+      documentNumber: formData.get("documentNumber"),
+      birthDate: formData.get("birthDate"),
       phoneNumber: formData.get("phoneNumber") || "",
-      password: formData.get("password") || "",
-      confirmPassword: formData.get("confirmPassword") || "",
     };
 
     const parsed = updatePersonFormSchema.safeParse(payload);
@@ -62,13 +61,10 @@ async function updatePersonActionInternal(
     const updateBody: Record<string, unknown> = {
       firstName: parsed.data.firstName,
       lastName: parsed.data.lastName,
-      email: parsed.data.email,
+      documentNumber: parsed.data.documentNumber,
+      birthDate: parsed.data.birthDate,
       phoneNumber: parsed.data.phoneNumber,
     };
-
-    if (parsed.data.password) {
-      updateBody.password = parsed.data.password;
-    }
 
     const errorState = await getResponseErrorActionState(
       peopleApiFetch(scope, getPeoplePath(scope, institutionId, personId), {

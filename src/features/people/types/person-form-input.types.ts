@@ -5,6 +5,5 @@ export type PersonFormInput = {
   email: string;
   phoneNumber: string;
   birthDate: string;
-  password: string;
-  confirmPassword: string;
+  initialRole: "" | "APPLICANT" | "REPRESENTATIVE";
 };

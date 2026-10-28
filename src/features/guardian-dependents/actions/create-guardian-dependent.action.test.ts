@@ -53,7 +53,7 @@ function givenUser(overrides: { institutionId?: string; permissions?: string[] }
     documentNumber: "35123456",
     institutionId: overrides.institutionId ?? INSTITUTION_ID,
     roles: ["Estudiante"],
-    permissions: overrides.permissions ?? [],
+    permissions: overrides.permissions ?? ["institution:guardian-link:request"],
   });
 }
 
@@ -167,6 +167,29 @@ describe("createGuardianDependentAction", () => {
       expect(apiFetchMock).not.toHaveBeenCalled();
     },
   );
+
+  it("keeps previous requests readable but rejects new requests without the explicit permission", async () => {
+    givenUser({ permissions: [] });
+
+    const result = await createGuardianDependentAction(INSTITUTION_ID, {}, createForm());
+
+    expect(result).toEqual({ error: GUARDIAN_DEPENDENT_MESSAGES.FORBIDDEN });
+    expect(apiFetchMock).not.toHaveBeenCalled();
+  });
+
+  it("does not borrow the selected identity permission when representing someone", async () => {
+    givenUser();
+    jest.mocked(requireInstitutionalUser).mockResolvedValue({
+      ...(await requireInstitutionalUser()),
+      delegated: true,
+      canRequestGuardianLinks: false,
+    });
+
+    const result = await createGuardianDependentAction(INSTITUTION_ID, {}, createForm());
+
+    expect(result).toEqual({ error: GUARDIAN_DEPENDENT_MESSAGES.FORBIDDEN });
+    expect(apiFetchMock).not.toHaveBeenCalled();
+  });
 
   it("surfaces the backend business error", async () => {
     apiFetchMock.mockResolvedValue(

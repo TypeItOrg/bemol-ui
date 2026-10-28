@@ -9,7 +9,7 @@ type SectionHeaderProps = {
   actionClassName?: string;
   compactDescription?: ReactNode;
   compactTitle?: ReactNode;
-  description: ReactNode;
+  description?: ReactNode;
   descriptionBreakpoint?: "sm" | "xl";
   icon: LucideIcon;
   title: ReactNode;
@@ -29,6 +29,8 @@ export function SectionHeader({
   titleClassName,
   titleId,
 }: SectionHeaderProps): ReactElement {
+  const hasDescription = description !== undefined && description !== null && description !== false && description !== "";
+
   return (
     <div data-slot="section-header" className="@container/section-header w-full min-w-0">
       <div
@@ -41,9 +43,8 @@ export function SectionHeader({
         <div
           className={cn(
             "bg-primary/10 text-primary flex size-10 shrink-0 items-center justify-center rounded-xl",
-            descriptionBreakpoint === "sm"
-              ? "@sm/section-header:row-span-2 @sm/section-header:size-11"
-              : "@xl/section-header:row-span-2 @xl/section-header:size-11",
+            descriptionBreakpoint === "sm" ? "@sm/section-header:size-11" : "@xl/section-header:size-11",
+            hasDescription && (descriptionBreakpoint === "sm" ? "@sm/section-header:row-span-2" : "@xl/section-header:row-span-2"),
           )}
         >
           <Icon className="size-5" aria-hidden="true" />
@@ -58,27 +59,30 @@ export function SectionHeader({
             title
           )}
         </h2>
-        <p
-          className={cn(
-            "text-muted-foreground col-span-2 text-sm leading-relaxed break-words",
-            descriptionBreakpoint === "sm"
-              ? "@sm/section-header:col-span-1 @sm/section-header:col-start-2 @sm/section-header:leading-normal"
-              : "@xl/section-header:col-span-1 @xl/section-header:col-start-2 @xl/section-header:leading-normal",
-          )}
-        >
-          {compactDescription ? (
-            <>
-              <span className="@xl/section-header:hidden">{compactDescription}</span>
-              <span className="hidden @xl/section-header:inline">{description}</span>
-            </>
-          ) : (
-            description
-          )}
-        </p>
+        {hasDescription ? (
+          <p
+            className={cn(
+              "text-muted-foreground col-span-2 text-sm leading-relaxed break-words",
+              descriptionBreakpoint === "sm"
+                ? "@sm/section-header:col-span-1 @sm/section-header:col-start-2 @sm/section-header:leading-normal"
+                : "@xl/section-header:col-span-1 @xl/section-header:col-start-2 @xl/section-header:leading-normal",
+            )}
+          >
+            {compactDescription ? (
+              <>
+                <span className="@xl/section-header:hidden">{compactDescription}</span>
+                <span className="hidden @xl/section-header:inline">{description}</span>
+              </>
+            ) : (
+              description
+            )}
+          </p>
+        ) : null}
         {action ? (
           <div
             className={cn(
-              "col-span-2 mt-2 min-w-0 @xl/section-header:col-span-1 @xl/section-header:col-start-3 @xl/section-header:row-span-2 @xl/section-header:row-start-1 @xl/section-header:mt-0 @xl/section-header:justify-self-end",
+              "col-span-2 mt-2 min-w-0 @xl/section-header:col-span-1 @xl/section-header:col-start-3 @xl/section-header:row-start-1 @xl/section-header:mt-0 @xl/section-header:justify-self-end",
+              hasDescription && "@xl/section-header:row-span-2",
               actionClassName,
             )}
           >

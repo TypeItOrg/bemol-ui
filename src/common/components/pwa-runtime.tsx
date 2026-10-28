@@ -29,13 +29,8 @@ export function PwaRuntime(): ReactElement {
   return (
     <>
       <div className="pwa-titlebar" title={windowTitle}>
-        <Image
-          className="pwa-titlebar-icon"
-          src={resolvedTheme === "dark" ? "/brand/favicon-dark.svg" : "/brand/favicon.svg"}
-          alt=""
-          width={16}
-          height={16}
-        />
+        <Image className="pwa-titlebar-icon dark:hidden" src="/brand/favicon.svg" alt="" width={16} height={16} />
+        <Image className="pwa-titlebar-icon hidden dark:block" src="/brand/favicon-dark.svg" alt="" width={16} height={16} />
         <span className="pwa-titlebar-text">{windowTitle}</span>
       </div>
       {!online && (

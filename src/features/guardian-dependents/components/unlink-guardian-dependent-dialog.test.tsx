@@ -40,7 +40,7 @@ describe("UnlinkGuardianDependentDialog", () => {
     await userEvent.setup().click(screen.getByRole("button", { name: "Quitar" }));
 
     await waitFor(() => expect(onSuccess).toHaveBeenCalledTimes(1));
-    expect(mockedAction).toHaveBeenCalledWith(INSTITUTION_ID, DEPENDENT_ID);
+    expect(mockedAction).toHaveBeenCalledWith(INSTITUTION_ID, DEPENDENT_ID, false);
   });
 
   it("stays open and shows the backend error", async () => {

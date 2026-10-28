@@ -4,5 +4,4 @@ export type PublicInstitution = {
   shortName: string | null;
   publicSubdomain: string;
   logoUrl: string | null;
-  logoBlurDataURL?: string;
 };

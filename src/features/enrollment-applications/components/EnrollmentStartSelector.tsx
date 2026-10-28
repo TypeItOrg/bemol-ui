@@ -48,11 +48,7 @@ export function EnrollmentStartSelector({ studyPlans, onStart, error, isStarting
         <SectionHeader
           icon={ClipboardPlusIcon}
           title="Iniciar solicitud de inscripción"
-          description={
-            <span className="mt-1 text-pretty">
-              Elegí el trayecto formativo al que querés inscribirte. Luego vas a poder consultar los cursos disponibles.
-            </span>
-          }
+          description={<span className="mt-1 text-pretty">Elegí el trayecto formativo al que querés inscribirte.</span>}
         />
       </CardHeader>
       <CardContent className="grid gap-5">

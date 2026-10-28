@@ -14,7 +14,9 @@ import { createGuardianDependentSchema } from "@features/guardian-dependents/sch
 import type { GuardianDependentActionState } from "@features/guardian-dependents/types/guardian-dependent-action-state.types";
 import { GUARDIAN_DEPENDENT_FIELD_NAMES } from "@features/guardian-dependents/types/guardian-dependent-field-name.types";
 import { authorizeGuardianAction } from "@features/guardian-dependents/utils/authorize-guardian-action.util";
+import { requireInstitutionalUser } from "@features/institutional-auth/services/get-institutional-user.service";
 import { institutionalApiFetch } from "@features/institutional-auth/services/institutional-api-fetch.service";
+import { canRequestDependents } from "@features/institutional-auth/utils/institutional-applicant-role.util";
 
 export async function createGuardianDependentAction(
   institutionId: string,
@@ -41,7 +43,9 @@ export async function createGuardianDependentAction(
     return getValidationActionState(parsed.error.issues, GUARDIAN_DEPENDENT_FIELD_NAMES);
   }
 
-  const authError = await authorizeGuardianAction(institutionId);
+  const user = await requireInstitutionalUser();
+
+  const authError = canRequestDependents(user) ? await authorizeGuardianAction(institutionId) : { error: GUARDIAN_DEPENDENT_MESSAGES.FORBIDDEN };
 
   if (authError) {
     return authError;

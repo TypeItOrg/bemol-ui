@@ -52,7 +52,7 @@ export function EnrollmentBirthDateField({
       {birthDateRequiresProfileUpdate && (
         <FieldDescription id="birthDate-account-help">
           <ReturnToLink id="birthDate-account-link" href="/account/edit" className="underline underline-offset-4">
-            Completar fecha de nacimiento en Cuenta
+            Completar fecha de nacimiento en Mi perfil
           </ReturnToLink>
         </FieldDescription>
       )}

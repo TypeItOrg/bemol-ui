@@ -55,9 +55,11 @@ export function RejectGuardianLinkDialog({ institutionId, onClose, onRejected, o
     }
   }, {});
 
-  const tutorName = getGuardianDependentName(request.tutor);
+  const tutorName = getGuardianDependentName(request.tutor) || request.tutor.documentNumber;
 
-  const dependentName = getGuardianDependentName(request.dependent);
+  const dependent = request.matchingPerson ?? request.dependent;
+
+  const dependentName = getGuardianDependentName(dependent) || dependent.documentNumber;
 
   function handleSubmit(event: SyntheticEvent<HTMLFormElement>): void {
     event.preventDefault();
@@ -87,7 +89,7 @@ export function RejectGuardianLinkDialog({ institutionId, onClose, onRejected, o
             <AlertDialogTitle>Rechazar vinculación</AlertDialogTitle>
             <AlertDialogDescription>
               ¿Estás seguro de rechazar la solicitud de vinculación de <span className="text-foreground font-semibold">{tutorName}</span> con{" "}
-              <span className="text-foreground font-semibold">{dependentName}</span>? Esta persona no podrá gestionar las inscripciones del persona.
+              <span className="text-foreground font-semibold">{dependentName}</span>? No se aprobará este vínculo de representación.
             </AlertDialogDescription>
           </AlertDialogHeader>
           {state.error ? (

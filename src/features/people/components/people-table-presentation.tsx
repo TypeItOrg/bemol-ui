@@ -114,7 +114,7 @@ export function PeopleTablePresentation({
               <DataTableSortableHead<PeopleSortField> field="lastName" label="Nombre" sort={sort} onSortChange={updateSort} />
               <DataTableSortableHead<PeopleSortField> field="documentNumber" label="Documento" sort={sort} onSortChange={updateSort} />
               <TableHead>Teléfono</TableHead>
-              <TableHead>Email</TableHead>
+              <TableHead>Correo electrónico</TableHead>
               {PeopleScope.isInstitutional(scope) ? <TableHead>Estado</TableHead> : null}
               <TableHead>Rol</TableHead>
             </TableRow>
@@ -152,6 +152,7 @@ export function PeopleTablePresentation({
 
       {invitationDialog ? (
         <PersonAccessInvitationDialog
+          scope={scope}
           institutionId={institutionId}
           {...invitationDialog}
           onClose={() => setInvitationDialog(undefined)}

@@ -13,9 +13,11 @@ import { fetchMyWeeklySchedules } from "@features/course-enrollments/services/my
 import type { WeeklyScheduleItem } from "@features/course-enrollments/types/weekly-schedule-item.types";
 import { getScheduleWeek } from "@features/course-enrollments/utils/schedule-week.util";
 import { getSelfServiceApiPath } from "@features/guardian-workspace/services/operating-profile.service";
+import { InstitutionalAccessDenied } from "@features/institutional-auth/components/institutional-access-denied";
 import { InstitutionalBreadcrumb } from "@features/institutional-auth/components/institutional-breadcrumb";
 import { requireInstitutionalUser } from "@features/institutional-auth/services/get-institutional-user.service";
 import { institutionalApiFetch } from "@features/institutional-auth/services/institutional-api-fetch.service";
+import { canViewOwnFormation } from "@features/institutional-auth/utils/institutional-applicant-role.util";
 import { PlatformPageIcon } from "@features/platform-auth/components/platform-page-icon";
 import { PlatformPageShell } from "@features/platform-auth/components/platform-page-shell";
 
@@ -30,7 +32,11 @@ export default async function MySchedulesPage({
 }): Promise<ReactElement> {
   const { personId } = await params;
 
-  await requireInstitutionalUser();
+  const user = await requireInstitutionalUser();
+
+  if (!canViewOwnFormation(user)) {
+    return <InstitutionalAccessDenied description="Esta sección corresponde a estudiantes." />;
+  }
 
   const referenceDate = new Date().toISOString();
 

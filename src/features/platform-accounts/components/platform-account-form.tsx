@@ -125,7 +125,7 @@ export function PlatformAccountForm({ mode, account, returnTo }: PlatformAccount
   ) : null;
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="flex w-full flex-col gap-4">
+    <form noValidate onSubmit={handleSubmit(onSubmit)} className="flex w-full flex-col gap-4">
       <div className="flex min-w-0 flex-col gap-4">
         {errorAlert}
 

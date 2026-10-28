@@ -21,8 +21,14 @@ export async function resolveGuardianLinkAction(
   institutionId: string,
   linkId: string,
   decision: GuardianLinkDecision,
+  confirmedPersonId?: string,
 ): Promise<FieldActionState<never>> {
-  if (!isValidUuid(institutionId) || !isValidUuid(linkId) || !DECISIONS.includes(decision)) {
+  if (
+    !isValidUuid(institutionId) ||
+    !isValidUuid(linkId) ||
+    !DECISIONS.includes(decision) ||
+    (confirmedPersonId !== undefined && !isValidUuid(confirmedPersonId))
+  ) {
     return { error: INVALID_ACTION_ARGUMENTS };
   }
 
@@ -34,7 +40,11 @@ export async function resolveGuardianLinkAction(
   }
 
   const errorState = await getResponseErrorActionState(
-    institutionalApiFetch(`${getGuardianLinksApiPath(institutionId)}/${linkId}/${decision}`, { method: "POST" }),
+    institutionalApiFetch(`${getGuardianLinksApiPath(institutionId)}/${linkId}/${decision}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ confirmedPersonId }),
+    }),
     [],
     GUARDIAN_LINK_MESSAGES.RESOLVE,
   );

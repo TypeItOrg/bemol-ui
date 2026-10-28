@@ -65,16 +65,14 @@ export function PersonRolesManager({
     [assignedRoles, scope],
   );
 
-  const applicantRoleId = Array.from(rolesByCode.values()).find((role) => role.technicalCode === SystemRoleCode.APPLICANT)?.id;
-
   function selectRole(roleId: string, candidate?: AssignableRole): void {
     if (selectedRoleCodeSet.has(roleId)) {
       return;
     }
 
-    const roleSelection = getRoleSelection(roleId, candidate);
+    const roleIds = getRoleSelection(roleId, candidate);
 
-    if (!canApplyRoleCodes(roleSelection.roleIds)) {
+    if (!canApplyRoleCodes(roleIds)) {
       return;
     }
 
@@ -82,7 +80,7 @@ export function PersonRolesManager({
       setAdditionalRoles((current) => [...current.filter((role) => role.id !== candidate.id), candidate]);
     }
 
-    onSelectedRoleCodesChange(roleSelection.roleIds);
+    onSelectedRoleCodesChange(roleIds);
   }
 
   function removeRole(roleCode: string): void {
@@ -136,23 +134,21 @@ export function PersonRolesManager({
       return getRoleChangeRestriction(selectedRoleCodes.filter((id) => id !== role.id));
     }
 
-    return getRoleChangeRestriction(getRoleSelection(role.id, role).roleIds);
+    return getRoleChangeRestriction(getRoleSelection(role.id, role));
   }
 
-  function getRoleSelection(
-    roleId: string,
-    selectedRole?: AssignableRole,
-  ): {
-    roleIds: string[];
-  } {
+  function getRoleSelection(roleId: string, selectedRole?: AssignableRole): string[] {
     const candidate = selectedRole ?? rolesByCode.get(roleId);
 
-    const replacesSelectedRoles =
-      candidate?.technicalCode === SystemRoleCode.APPLICANT || (applicantRoleId !== undefined && selectedRoleCodeSet.has(applicantRoleId));
+    const preservedRoles = selectedRoles.filter((role) => {
+      if (candidate?.technicalCode === SystemRoleCode.APPLICANT) {
+        return role.technicalCode === SystemRoleCode.REPRESENTATIVE;
+      }
 
-    const roleIds = replacesSelectedRoles ? [roleId] : [...selectedRoleCodes, roleId];
+      return candidate?.technicalCode === SystemRoleCode.REPRESENTATIVE || role.technicalCode !== SystemRoleCode.APPLICANT;
+    });
 
-    return { roleIds };
+    return [...preservedRoles.map((role) => role.roleId), roleId];
   }
 
   return (

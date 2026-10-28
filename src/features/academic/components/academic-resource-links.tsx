@@ -41,7 +41,10 @@ export function AcademicResourceLinks({
   const itemCount = resources.length + (leadingContent ? 1 : 0);
 
   return (
-    <nav aria-label="Secciones académicas" className={cn(prominent ? "grid gap-4 @2xl/home-content:grid-cols-2" : "grid gap-3", className)}>
+    <nav
+      aria-label="Secciones académicas"
+      className={cn(prominent ? "grid gap-4 @2xl/home-content:grid-cols-2 [&>*:only-child]:@2xl/home-content:col-span-2" : "grid gap-3", className)}
+    >
       {leadingContent}
       {resources.map((resource, index) => {
         const config = ACADEMIC_COLLECTION_CONFIG[resource];

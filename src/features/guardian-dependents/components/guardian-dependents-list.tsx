@@ -4,6 +4,7 @@ import { startTransition, useState, type ReactElement } from "react";
 
 import { useRouter } from "next/navigation";
 
+import { useQueryClient } from "@tanstack/react-query";
 import { Loader2Icon, PlusIcon } from "lucide-react";
 
 import { ReturnToLink } from "@common/components/navigation/return-to-link";
@@ -26,16 +27,20 @@ import type { GuardianDependent } from "@features/guardian-dependents/types/guar
 import type { GuardianDependentsQuery } from "@features/guardian-dependents/types/guardian-dependents-query.types";
 import { getGuardianDependentName } from "@features/guardian-dependents/utils/guardian-dependent-display.util";
 import { useActiveIdentitySwitch } from "@features/guardian-workspace/hooks/use-active-identity-switch";
+import { accountAccessQueryOptions } from "@features/people/utils/account-access-query.util";
 import { PlatformCollectionActions } from "@features/platform-auth/components/platform-collection-actions";
 
 type GuardianDependentsListProps = {
   data: PaginatedResponse<GuardianDependent>;
   institutionId: string;
   query: GuardianDependentsQuery;
+  canRequest?: boolean;
 };
 
-export function GuardianDependentsList({ data, institutionId, query }: GuardianDependentsListProps): ReactElement {
+export function GuardianDependentsList({ data, institutionId, query, canRequest = false }: GuardianDependentsListProps): ReactElement {
   const router = useRouter();
+
+  const queryClient = useQueryClient();
 
   const { isPending: isNavigating, navigate } = useDataTableNavigation();
 
@@ -47,6 +52,14 @@ export function GuardianDependentsList({ data, institutionId, query }: GuardianD
 
   const isFiltered = Boolean(query.search || query.status || query.relationship || query.primaryContact !== undefined);
 
+  async function openAccessDialog(dependent: GuardianDependent): Promise<void> {
+    if (dependent.dependentPersonId) {
+      await queryClient.prefetchQuery(accountAccessQueryOptions("institutional", institutionId, dependent.dependentPersonId));
+    }
+
+    setPersonForAccess(dependent);
+  }
+
   function handleEnrollment(dependentPersonId: string): void {
     const formData = new FormData();
 
@@ -57,24 +70,17 @@ export function GuardianDependentsList({ data, institutionId, query }: GuardianD
 
   return (
     <Sheet>
-      {personForAccess ? (
-        <OwnAccessDialog
-          institutionId={institutionId}
-          person={personForAccess}
-          onClose={() => setPersonForAccess(null)}
-          onSuccess={() => {
-            setPersonForAccess(null);
-          }}
-        />
-      ) : null}
+      {personForAccess ? <OwnAccessDialog institutionId={institutionId} person={personForAccess} onClose={() => setPersonForAccess(null)} /> : null}
       <div className="flex h-full min-h-0 flex-col gap-4">
         <PlatformCollectionActions className="sm:justify-between">
-          <Button asChild size="lg">
-            <ReturnToLink href="/my-dependents/new">
-              <PlusIcon aria-hidden="true" />
-              Solicitar vinculación
-            </ReturnToLink>
-          </Button>
+          {canRequest ? (
+            <Button asChild size="lg">
+              <ReturnToLink href="/my-dependents/new">
+                <PlusIcon aria-hidden="true" />
+                Solicitar vinculación
+              </ReturnToLink>
+            </Button>
+          ) : null}
           <DataTableAdvancedFiltersTrigger count={query.primaryContact === undefined ? 0 : 1} label="Filtros avanzados" />
         </PlatformCollectionActions>
 
@@ -90,7 +96,7 @@ export function GuardianDependentsList({ data, institutionId, query }: GuardianD
           aria-busy={isNavigating}
         >
           {data.items.length === 0 ? (
-            <GuardianDependentsEmptyState hasFilters={isFiltered} />
+            <GuardianDependentsEmptyState hasFilters={isFiltered} canRequest={canRequest} />
           ) : (
             <Table stickyActions className="min-w-250">
               <TableHeader className="bg-muted sticky top-0 z-10 [&_tr]:border-b">
@@ -137,8 +143,12 @@ export function GuardianDependentsList({ data, institutionId, query }: GuardianD
                     key={dependent.personGuardianId}
                     dependent={dependent}
                     isSelectingWorkspace={isSelectingWorkspace}
-                    onEnroll={() => handleEnrollment(dependent.dependentPersonId)}
-                    onManageAccess={() => setPersonForAccess(dependent)}
+                    onEnroll={() => {
+                      if (dependent.dependentPersonId) {
+                        handleEnrollment(dependent.dependentPersonId);
+                      }
+                    }}
+                    onManageAccess={() => void openAccessDialog(dependent)}
                     onUnlink={() => setDependentToUnlink(dependent)}
                   />
                 ))}
@@ -169,7 +179,11 @@ export function GuardianDependentsList({ data, institutionId, query }: GuardianD
           <UnlinkGuardianDependentDialog
             dependentName={getGuardianDependentName(dependentToUnlink)}
             isPendingRequest={dependentToUnlink.status === "PENDING"}
-            dependentPersonId={dependentToUnlink.dependentPersonId}
+            dependentPersonId={
+              dependentToUnlink.status === "PENDING"
+                ? dependentToUnlink.personGuardianId
+                : (dependentToUnlink.dependentPersonId ?? dependentToUnlink.personGuardianId)
+            }
             institutionId={institutionId}
             onClose={() => setDependentToUnlink(null)}
             onSuccess={() => {

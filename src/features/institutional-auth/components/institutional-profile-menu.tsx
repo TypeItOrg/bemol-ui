@@ -73,12 +73,12 @@ export function InstitutionalProfileMenu({ user, onNavigate }: { user: Instituti
               <DropdownMenuSeparator />
             </>
           )}
-          <DropdownMenuLabel>Cuenta de la identidad activa</DropdownMenuLabel>
+          <DropdownMenuLabel>Perfil activo</DropdownMenuLabel>
           <DropdownMenuGroup>
             <DropdownMenuItem asChild className="px-2.5 py-1.5">
               <Link href="/account" onClick={() => onNavigate("/account")}>
                 <UserRoundIcon />
-                Mi cuenta
+                Mi perfil
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem

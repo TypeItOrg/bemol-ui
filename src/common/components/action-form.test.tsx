@@ -16,7 +16,7 @@ function SaveForm({
     <ActionForm action={action} resetOnSuccess={state.success}>
       <label>
         Nombre
-        <input name="name" defaultValue="" />
+        <input name="name" defaultValue="" required />
       </label>
       {state.error ? <p role="alert">{state.error}</p> : null}
       <button type="submit" disabled={pending}>
@@ -27,6 +27,25 @@ function SaveForm({
 }
 
 describe("action form resets", () => {
+  it("lets the action report required-field errors instead of blocking submission with browser validation", async () => {
+    const save = jest.fn().mockResolvedValue({ error: "El nombre es requerido." });
+    render(<SaveForm save={save} />);
+
+    const input = screen.getByRole("textbox", { name: "Nombre" });
+    expect(input).toBeRequired();
+    expect(input.closest("form")).toHaveAttribute("novalidate");
+    await userEvent.click(screen.getByRole("button", { name: "Guardar" }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("El nombre es requerido.");
+    expect(save).toHaveBeenCalledTimes(1);
+  });
+
+  it("preserves an explicit opt-in to native validation", () => {
+    const { container } = render(<ActionForm noValidate={false} />);
+
+    expect(container.querySelector("form")).not.toHaveAttribute("novalidate");
+  });
+
   it("preserves input after a failed action and resets only after a successful action", async () => {
     const save = jest.fn().mockResolvedValueOnce({ error: "Nombre inválido" }).mockResolvedValueOnce({ success: true });
     render(<SaveForm save={save} />);

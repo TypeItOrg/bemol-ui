@@ -31,7 +31,7 @@ export function PlatformLoginForm({ next }: { next?: string }): ReactElement {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col justify-center p-6 md:p-8">
+    <form noValidate onSubmit={handleSubmit} className="flex flex-col justify-center p-6 md:p-8">
       {next ? <input type="hidden" name="next" value={next} /> : null}
       <header className="space-y-1 text-center">
         <InstitutionalBrandIdentity

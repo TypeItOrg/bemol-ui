@@ -12,8 +12,6 @@ import type { EmailVerificationContext } from "@features/institutional-auth/type
 import type { PublicInstitution } from "@features/institutions/types/public-institution.types";
 
 export function EmailVerificationForm({ context }: { context?: EmailVerificationContext }): ReactElement {
-  const [mode, setMode] = useState<"resend" | "change">("resend");
-
   const institution = useInstitutionalBrand();
 
   const [identity, setIdentity] = useState(() => getInitialIdentity(institution, context));
@@ -23,24 +21,16 @@ export function EmailVerificationForm({ context }: { context?: EmailVerification
       <div className="flex flex-1 flex-col justify-center p-5 sm:p-8">
         <InstitutionalAuthStepHeader
           showInstitutionName={false}
-          title={mode === "resend" ? "Verificá tu correo electrónico" : "Cambiá tu correo electrónico"}
+          title="Verificá tu correo electrónico"
           description={
             <InstitutionalAuthDescription
-              generic={
-                mode === "resend"
-                  ? "Ingresá tus datos para recibir un nuevo enlace de verificación."
-                  : "Confirmá tu identidad e indicá el correo electrónico correcto para recibir un nuevo enlace."
-              }
-              before={
-                mode === "resend"
-                  ? "Ingresá tus datos para verificar tu cuenta del portal institucional del "
-                  : "Confirmá tu identidad e indicá el correo electrónico correcto para tu cuenta del portal institucional del "
-              }
+              generic="Ingresá tus datos para recibir un nuevo enlace de verificación."
+              before="Ingresá tus datos para verificar tu cuenta del portal institucional del "
               after="."
             />
           }
         />
-        <VerificationRequestForm key={mode} mode={mode} identity={identity} onIdentityChange={setIdentity} onModeChange={setMode} />
+        <VerificationRequestForm identity={identity} onIdentityChange={setIdentity} />
       </div>
 
       <footer className="text-muted-foreground flex min-h-[4.5rem] items-center justify-center gap-1 border-t px-5 text-center text-sm sm:px-8">

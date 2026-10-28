@@ -16,6 +16,7 @@ import { requireInstitutionalUser } from "@features/institutional-auth/services/
 import { INSTITUTIONAL_PERMISSION } from "@features/institutional-auth/types/institutional-permission.types";
 import { getInstitutionalMetadata } from "@features/institutional-auth/utils/institutional-metadata.util";
 import { hasInstitutionalPermission } from "@features/institutional-auth/utils/institutional-permission.util";
+import { AccountAccessPanel } from "@features/people/components/account-access-panel";
 import { PersonDeleteButton } from "@features/people/components/person-delete-button";
 import { PersonDetailView } from "@features/people/components/person-detail-view";
 import { PersonEditForm } from "@features/people/components/person-edit-form";
@@ -150,6 +151,17 @@ export default async function PersonPage({
           returnTo={destination}
         />
       )}
+      {hasInstitutionalPermission(user, INSTITUTIONAL_PERMISSION.PERSON_CREATE) &&
+      hasInstitutionalPermission(user, INSTITUTIONAL_PERMISSION.USER_STATUS_UPDATE) &&
+      hasInstitutionalPermission(user, INSTITUTIONAL_PERMISSION.ROLE_ASSIGN) ? (
+        <AccountAccessPanel
+          institutionId={user.institutionId}
+          personId={personId}
+          scope="institutional"
+          mode="administration"
+          email={person.email ?? ""}
+        />
+      ) : null}
     </PlatformPageShell>
   );
 }

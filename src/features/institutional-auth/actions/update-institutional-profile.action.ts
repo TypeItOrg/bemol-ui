@@ -10,10 +10,6 @@ import { institutionalApiFetch } from "@features/institutional-auth/services/ins
 
 export async function updateInstitutionalProfileAction(formData: FormData) {
   const payload = {
-    firstName: formData.get("firstName"),
-    lastName: formData.get("lastName"),
-    birthDate: formData.get("birthDate"),
-    email: formData.get("email") || "",
     phoneNumber: formData.get("phoneNumber") || "",
     birthCityId: formData.get("birthCityId") || undefined,
     nationalityCountryId: formData.get("nationalityCountryId") || undefined,

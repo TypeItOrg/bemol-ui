@@ -12,12 +12,12 @@ import { SectionHeader } from "@common/components/section-header";
 import { Alert, AlertDescription, AlertTitle } from "@common/components/ui/alert";
 import { Button } from "@common/components/ui/button";
 import { FieldGroup } from "@common/components/ui/field";
+import { formatDisplayDate } from "@common/utils/date-input.util";
 
 import { updateInstitutionalProfileAction } from "@features/institutional-auth/actions/update-institutional-profile.action";
-import { DateField, TextField } from "@features/institutional-auth/components/institutional-profile-fields";
+import { TextField } from "@features/institutional-auth/components/institutional-profile-fields";
 import { InstitutionalProfileLocationSection } from "@features/institutional-auth/components/institutional-profile-location-section";
 import type { InstitutionalPerson } from "@features/institutional-auth/types/institutional-person.types";
-import { parseBirthDateInput } from "@features/people/utils/person-birth-date.util";
 
 type InstitutionalProfileFormProps = {
   person: InstitutionalPerson;
@@ -48,8 +48,6 @@ function InstitutionalProfileFormView({ person, returnTo = "/account" }: Institu
 
   const error = getFormError("error" in state ? state.error : undefined, "fieldErrors" in state ? state.fieldErrors : undefined);
 
-  const [birthDate, setBirthDate] = useState<Date | undefined>(() => parseBirthDateInput(person.birthDate));
-
   const [addressCityId, setAddressCityId] = useState(person.address?.city?.id ?? "");
 
   const [addressStreet, setAddressStreet] = useState(person.address?.street ?? "");
@@ -70,33 +68,25 @@ function InstitutionalProfileFormView({ person, returnTo = "/account" }: Institu
           <SectionHeader
             icon={UserRoundIcon}
             title="Datos personales"
-            description="Actualizá la información con la que te identifica tu institución."
+            description="Para corregir nombre, documento o fecha de nacimiento, contactá a la institución. El correo se modifica desde la pestaña Correo electrónico."
           />
         </header>
         <div className="mt-4 sm:mt-5">
           <FieldGroup className="flex flex-row flex-wrap items-start gap-4">
-            <TextField
-              id="profile-first-name"
-              name="firstName"
-              label="Nombre"
-              defaultValue={person.firstName}
-              error={fieldErrors.firstName}
-              required
-            />
-            <TextField id="profile-last-name" name="lastName" label="Apellido" defaultValue={person.lastName} error={fieldErrors.lastName} required />
+            <TextField id="profile-first-name" disabled label="Nombre" defaultValue={person.firstName} error={fieldErrors.firstName} required />
+            <TextField id="profile-last-name" disabled label="Apellido" defaultValue={person.lastName} error={fieldErrors.lastName} required />
             <TextField id="profile-document" label="Documento" value={person.documentNumber} disabled />
-            <DateField
-              id="profile-birth-date"
-              name="birthDate"
-              label="Fecha de nacimiento"
-              value={birthDate}
-              onChange={setBirthDate}
-              error={fieldErrors.birthDate}
-              required
-            />
+            <TextField id="profile-birth-date" label="Fecha de nacimiento" value={formatDisplayDate(person.birthDate)} disabled />
           </FieldGroup>
           <FieldGroup className="mt-4 flex flex-row flex-wrap items-start gap-4">
-            <TextField id="profile-email" name="email" label="Email" type="email" defaultValue={person.email ?? ""} error={fieldErrors.email} />
+            <TextField
+              id="profile-email"
+              disabled
+              label="Correo electrónico"
+              type="email"
+              defaultValue={person.email ?? ""}
+              error={fieldErrors.email}
+            />
             <TextField
               id="profile-phone"
               name="phoneNumber"

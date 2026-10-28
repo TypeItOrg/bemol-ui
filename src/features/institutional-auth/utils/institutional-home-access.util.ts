@@ -21,8 +21,10 @@ import { INSTITUTIONAL_PERMISSION, type InstitutionalPermission } from "@feature
 import type { InstitutionalUser } from "@features/institutional-auth/types/institutional-user.types";
 import {
   canManageDependents,
+  canReviewGuardianLinks,
   canStartEnrollmentApplication,
   canViewOwnEnrollmentApplications,
+  canViewOwnFormation,
 } from "@features/institutional-auth/utils/institutional-applicant-role.util";
 import { hasInstitutionalPermission } from "@features/institutional-auth/utils/institutional-permission.util";
 
@@ -36,8 +38,8 @@ export type InstitutionalHomeLink = {
 
 const PERSONAL_LINK: InstitutionalHomeLink = {
   href: "/account",
-  title: "Cuenta",
-  description: "Administrá tus datos, contraseña y sesiones.",
+  title: "Mi perfil",
+  description: "Administrá tus datos personales, contraseña y sesiones.",
   icon: UserRoundIcon,
 };
 
@@ -163,7 +165,7 @@ export function getInstitutionalEnrollmentHomeLinks(user: InstitutionalUser): In
     });
   }
 
-  if (hasInstitutionalPermission(user, INSTITUTIONAL_PERMISSION.GUARDIAN_LINK_REVIEW)) {
+  if (canReviewGuardianLinks(user)) {
     links.push({
       href: GUARDIAN_LINKS_PAGE_PATH,
       title: "Vinculaciones",
@@ -178,7 +180,7 @@ export function getInstitutionalEnrollmentHomeLinks(user: InstitutionalUser): In
 export function getInstitutionalFormationHomeLinks(user: InstitutionalUser): InstitutionalHomeLink[] {
   const personId = user.personId;
 
-  if (!personId || !canViewOwnEnrollmentApplications(user)) {
+  if (!personId || !canViewOwnFormation(user)) {
     return [];
   }
 

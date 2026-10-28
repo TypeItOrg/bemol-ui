@@ -12,7 +12,7 @@ import { GUARDIAN_DEPENDENTS_PAGE_PATH } from "@features/guardian-dependents/con
 import { InstitutionalAccessDenied } from "@features/institutional-auth/components/institutional-access-denied";
 import { InstitutionalBreadcrumb } from "@features/institutional-auth/components/institutional-breadcrumb";
 import { requireInstitutionalUser } from "@features/institutional-auth/services/get-institutional-user.service";
-import { canManageDependents } from "@features/institutional-auth/utils/institutional-applicant-role.util";
+import { canRequestDependents } from "@features/institutional-auth/utils/institutional-applicant-role.util";
 import { getInstitutionalMetadata } from "@features/institutional-auth/utils/institutional-metadata.util";
 import { PlatformPageIcon } from "@features/platform-auth/components/platform-page-icon";
 import { PlatformPageShell } from "@features/platform-auth/components/platform-page-shell";
@@ -28,7 +28,7 @@ export default async function NewGuardianDependentPage({
 }): Promise<ReactElement> {
   const user = await requireInstitutionalUser();
 
-  if (!canManageDependents(user)) {
+  if (!canRequestDependents(user)) {
     return <InstitutionalAccessDenied description="No tenés permisos para gestionar personas a cargo." />;
   }
 

@@ -2,10 +2,9 @@
 
 import { useCallback, useState, type ReactElement, type ReactNode } from "react";
 
-import Image from "next/image";
-
 import { ExpandIcon, EyeIcon, FileTextIcon, ImageIcon, XIcon } from "lucide-react";
 
+import { FadeImage } from "@common/components/fade-image";
 import { Button } from "@common/components/ui/button";
 import {
   Dialog,
@@ -84,7 +83,7 @@ export function DocumentFilePreview({
 
     if (isImage) {
       return (
-        <Image
+        <FadeImage
           src={src}
           alt={`Vista previa de ${name}`}
           width={1200}

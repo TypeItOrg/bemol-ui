@@ -1,3 +1,9 @@
+import type { ReactElement } from "react";
+
+import type { Metadata } from "next";
+
+import { FilePenLineIcon } from "lucide-react";
+
 import { parsePaginationQuery } from "@common/utils/pagination-query.util";
 
 import { EnrollmentCatalogPagination } from "@features/enrollment-applications/components/enrollment-catalog-pagination";
@@ -5,7 +11,14 @@ import { EnrollmentStart } from "@features/enrollment-applications/components/En
 import { fetchAvailableEnrollmentTrainingPaths } from "@features/enrollment-applications/services/enrollment-application-options.service";
 import { fetchOperatingProfile } from "@features/guardian-workspace/services/operating-profile.service";
 import { InstitutionalAccessDenied } from "@features/institutional-auth/components/institutional-access-denied";
+import { InstitutionalBreadcrumb } from "@features/institutional-auth/components/institutional-breadcrumb";
+import { getInstitutionalMetadata } from "@features/institutional-auth/utils/institutional-metadata.util";
+import { PlatformPageIcon } from "@features/platform-auth/components/platform-page-icon";
 import { PlatformPageShell } from "@features/platform-auth/components/platform-page-shell";
+
+export async function generateMetadata(): Promise<Metadata> {
+  return getInstitutionalMetadata("Nueva inscripción");
+}
 
 export default async function EnrollmentPage({
   params,
@@ -13,7 +26,7 @@ export default async function EnrollmentPage({
 }: {
   params: Promise<{ personId: string }>;
   searchParams: Promise<Record<string, string | undefined>>;
-}) {
+}): Promise<ReactElement> {
   const { personId } = await params;
 
   const profile = await fetchOperatingProfile(personId);
@@ -29,7 +42,12 @@ export default async function EnrollmentPage({
   const plans = await fetchAvailableEnrollmentTrainingPaths(pagination, personId);
 
   return (
-    <PlatformPageShell title="Nueva inscripción" minViewportHeight>
+    <PlatformPageShell
+      title="Nueva inscripción"
+      minViewportHeight
+      breadcrumb={<InstitutionalBreadcrumb />}
+      actions={<PlatformPageIcon icon={FilePenLineIcon} />}
+    >
       <EnrollmentStart
         personId={personId}
         studyPlans={plans.items.map((plan) => ({ id: plan.id, name: plan.name, trainingPathName: plan.name }))}

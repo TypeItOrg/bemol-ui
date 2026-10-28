@@ -39,7 +39,7 @@ export function UnlinkGuardianDependentDialog({
 }: UnlinkGuardianDependentDialogProps): ReactElement {
   const [state, action, isPending] = useActionState<GuardianDependentActionState, FormData>(async () => {
     try {
-      const result = await unlinkGuardianDependentAction(institutionId, dependentPersonId);
+      const result = await unlinkGuardianDependentAction(institutionId, dependentPersonId, isPendingRequest);
 
       if (result.success) {
         onSuccess();

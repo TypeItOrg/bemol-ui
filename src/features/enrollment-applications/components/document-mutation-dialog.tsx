@@ -76,7 +76,7 @@ export function DocumentMutation({
       }}
     >
       <AlertDialogContent asChild className="max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-md">
-        <form action={action}>
+        <form noValidate action={action}>
           <AlertDialogHeader>
             <div
               className={`mb-1 flex size-12 items-center justify-center rounded-2xl ${

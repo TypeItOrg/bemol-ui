@@ -7,6 +7,12 @@ export function hasInstitutionalPermission(user: InstitutionalPermissionSource, 
   return user?.permissions.includes(permission) ?? false;
 }
 
+export function hasActorInstitutionalPermission(user: InstitutionalUser | null | undefined, permission: InstitutionalPermission): boolean {
+  const grants = user?.actorPermissions ?? (user?.delegated ? [] : user?.permissions);
+
+  return grants?.includes(permission) ?? false;
+}
+
 export function hasAnyInstitutionalPermission(user: InstitutionalPermissionSource, permissions: readonly InstitutionalPermission[]): boolean {
   return permissions.some((permission) => hasInstitutionalPermission(user, permission));
 }

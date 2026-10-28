@@ -9,8 +9,9 @@ import { AlertCircleIcon, Loader2Icon } from "lucide-react";
 import { ActionForm } from "@common/components/action-form";
 import { Alert, AlertDescription, AlertTitle } from "@common/components/ui/alert";
 import { Button } from "@common/components/ui/button";
-import { Field, FieldGroup, FieldLabel } from "@common/components/ui/field";
+import { Field, FieldError, FieldGroup, FieldLabel } from "@common/components/ui/field";
 import { PasswordInput } from "@common/components/ui/password-input";
+import { useActionFormErrorFocus } from "@common/hooks/use-action-form-error-focus";
 
 import { activateOwnAccess } from "@features/institutional-auth/actions/activate-own-access.action";
 import { InstitutionalAuthDescription } from "@features/institutional-auth/components/institutional-auth-description";
@@ -18,6 +19,8 @@ import { InstitutionalAuthStepHeader } from "@features/institutional-auth/compon
 
 export function OwnAccessActivationForm({ token }: { token: string }): ReactElement {
   const [state, action, pending] = useActionState(activateOwnAccess, {});
+
+  const formRef = useActionFormErrorFocus(state, pending);
 
   if (state.success) {
     return (
@@ -40,7 +43,7 @@ export function OwnAccessActivationForm({ token }: { token: string }): ReactElem
   }
 
   return (
-    <ActionForm action={action} className="flex flex-col justify-center p-5 sm:p-8">
+    <ActionForm ref={formRef} action={action} className="flex flex-col justify-center p-5 sm:p-8">
       <input type="hidden" name="token" value={token} />
       <InstitutionalAuthStepHeader
         title="Activá tu cuenta"
@@ -61,17 +64,35 @@ export function OwnAccessActivationForm({ token }: { token: string }): ReactElem
           </Alert>
         ) : null}
         <FieldGroup>
-          <Field>
+          <Field data-invalid={!!state.fieldErrors?.password}>
             <FieldLabel htmlFor="activate-password" required>
               Contraseña
             </FieldLabel>
-            <PasswordInput id="activate-password" name="password" autoComplete="new-password" required disabled={pending} />
+            <PasswordInput
+              id="activate-password"
+              name="password"
+              autoComplete="new-password"
+              required
+              disabled={pending}
+              aria-invalid={!!state.fieldErrors?.password}
+              aria-describedby={state.fieldErrors?.password ? "activate-password-error" : undefined}
+            />
+            <FieldError id="activate-password-error">{state.fieldErrors?.password}</FieldError>
           </Field>
-          <Field>
+          <Field data-invalid={!!state.fieldErrors?.confirmPassword}>
             <FieldLabel htmlFor="activate-confirm" required>
               Repetir contraseña
             </FieldLabel>
-            <PasswordInput id="activate-confirm" name="confirmPassword" autoComplete="new-password" required disabled={pending} />
+            <PasswordInput
+              id="activate-confirm"
+              name="confirmPassword"
+              autoComplete="new-password"
+              required
+              disabled={pending}
+              aria-invalid={!!state.fieldErrors?.confirmPassword}
+              aria-describedby={state.fieldErrors?.confirmPassword ? "activate-confirm-error" : undefined}
+            />
+            <FieldError id="activate-confirm-error">{state.fieldErrors?.confirmPassword}</FieldError>
           </Field>
         </FieldGroup>
         <Button className="w-full" size="lg" disabled={pending || !token} aria-busy={pending} type="submit">

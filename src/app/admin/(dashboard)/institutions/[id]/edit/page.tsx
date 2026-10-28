@@ -12,7 +12,6 @@ import { getSafeReturnTo } from "@common/utils/return-to.util";
 
 import { InstitutionForm } from "@features/institutions/components/institution-form";
 import { fetchInstitution } from "@features/institutions/services/fetch-institution.service";
-import { getInstitutionLogoPlaceholder } from "@features/institutions/services/get-institution-logo-placeholder.service";
 import { PlatformBreadcrumb } from "@features/platform-auth/components/platform-breadcrumb";
 import { PlatformPageIcon } from "@features/platform-auth/components/platform-page-icon";
 import { PlatformPageShell } from "@features/platform-auth/components/platform-page-shell";
@@ -67,13 +66,7 @@ export default async function EditInstitutionPage({ params, searchParams }: Edit
           <Link href={`/admin/institutions/${id}/people`}>Administrar usuarios</Link>
         </Button>
       </div>
-      <InstitutionForm
-        logoBlurDataURL={await getInstitutionLogoPlaceholder(institution.id, institution.logoUrl)}
-        mode="edit"
-        institution={institution}
-        returnTo={destination}
-        baseDomain={process.env.INSTITUTIONAL_BASE_DOMAIN ?? ""}
-      />
+      <InstitutionForm mode="edit" institution={institution} returnTo={destination} baseDomain={process.env.INSTITUTIONAL_BASE_DOMAIN ?? ""} />
     </PlatformPageShell>
   );
 }

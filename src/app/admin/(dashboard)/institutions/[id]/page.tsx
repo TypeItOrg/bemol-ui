@@ -21,7 +21,6 @@ import { InstitutionPeoplePreview, InstitutionPeoplePreviewSkeleton } from "@fea
 import { InstitutionPublicAccessDetail } from "@features/institutions/components/institution-public-access-detail";
 import { InstitutionReactivateButton } from "@features/institutions/components/institution-reactivate-button";
 import { fetchInstitution } from "@features/institutions/services/fetch-institution.service";
-import { getInstitutionLogoPlaceholder } from "@features/institutions/services/get-institution-logo-placeholder.service";
 import { PlatformBreadcrumb } from "@features/platform-auth/components/platform-breadcrumb";
 import { PlatformPageIcon } from "@features/platform-auth/components/platform-page-icon";
 import { PlatformPageShell } from "@features/platform-auth/components/platform-page-shell";
@@ -103,14 +102,7 @@ export default async function InstitutionDetailPage({ params, searchParams }: In
       </Card>
 
       <InstitutionPublicAccessDetail publicSubdomain={institution.publicSubdomain} baseDomain={process.env.INSTITUTIONAL_BASE_DOMAIN ?? ""} />
-      <InstitutionLogoManager
-        logoBlurDataURL={await getInstitutionLogoPlaceholder(institution.id, institution.logoUrl)}
-        institutionId={id}
-        institutionName={institution.name}
-        logoUrl={institution.logoUrl}
-        scope="platform"
-        canUpdate
-      />
+      <InstitutionLogoManager institutionId={id} institutionName={institution.name} logoUrl={institution.logoUrl} scope="platform" canUpdate />
 
       <div className={institution.active ? "grid flex-1 items-start gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(22rem,28rem)]" : "flex flex-1 flex-col"}>
         <InstitutionDetail institution={institution} />

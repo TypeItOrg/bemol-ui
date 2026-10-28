@@ -2,11 +2,7 @@ import { redirect } from "next/navigation";
 
 import { authenticatedApiFetch } from "@common/services/authenticated-api-fetch.service";
 
-import {
-  changePendingEmail,
-  confirmEmailVerification,
-  resendEmailVerification,
-} from "@features/institutional-auth/actions/email-verification.actions";
+import { confirmEmailVerification, resendEmailVerification } from "@features/institutional-auth/actions/email-verification.actions";
 import { clearEmailVerificationContext } from "@features/institutional-auth/utils/email-verification-context.util";
 import { setInstitutionalEmailVerifiedCookie } from "@features/institutional-auth/utils/institutional-auth-cookies.util";
 
@@ -41,7 +37,6 @@ function form(values: Record<string, string>): FormData {
 beforeEach(() => jest.clearAllMocks());
 it("validates identity and credentials before calling the API", async () => {
   expect((await resendEmailVerification({}, form({ institutionId: "bad", documentNumber: "abc" }))).fieldErrors).toBeDefined();
-  expect((await changePendingEmail({}, form({ institutionId, documentNumber: "12345678", email: "bad" }))).fieldErrors).toBeDefined();
   expect(api).not.toHaveBeenCalled();
 });
 it("posts valid resend without credentials and retains a generic success", async () => {
@@ -49,34 +44,7 @@ it("posts valid resend without credentials and retains a generic success", async
   expect(await resendEmailVerification({}, form({ institutionId, documentNumber: "12345678" }))).toEqual({ success: true });
   expect(api).toHaveBeenCalledWith("/api/v1/auth/email-verification/resend", undefined, expect.objectContaining({ method: "POST" }));
 });
-it("sends corrected email and password only in the request body", async () => {
-  api.mockResolvedValue(new Response(null, { status: 204 }));
-  const data = {
-    institutionId,
-    documentNumber: "12345678",
-    password: "secret123",
-    email: "ana@example.com",
-  };
-  expect(await changePendingEmail({}, form(data))).toEqual({ success: true });
-  expect(api.mock.calls[0][0]).toBe("/api/v1/auth/email-verification/change-email");
-  expect(JSON.parse(api.mock.calls[0][2]?.body as string)).toEqual(data);
-});
-it("preserves cooldown and authentication errors", async () => {
-  api.mockResolvedValue(new Response(JSON.stringify({ status: 409, message: "Esperá un minuto" }), { status: 409 }));
-  expect(
-    await changePendingEmail(
-      {},
-      form({
-        institutionId,
-        documentNumber: "12345678",
-        password: "secret123",
-        email: "ana@example.com",
-      }),
-    ),
-  ).toEqual({
-    error: "Esperá un minuto",
-  });
-});
+
 it("handles network failures without reporting success", async () => {
   api.mockRejectedValue(new Error("offline"));
   expect((await resendEmailVerification({}, form({ institutionId, documentNumber: "12345678" }))).error).toBeDefined();

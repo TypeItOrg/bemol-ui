@@ -9,6 +9,16 @@ const validAccount = {
 };
 
 describe("platformAccountFormSchema", () => {
+  it.each([
+    ["", "El correo es requerido."],
+    ["not-an-email", "El correo es inválido."],
+  ])("reports the email validation for %p", (email, message) => {
+    expect(platformAccountFormSchema.safeParse({ ...validAccount, email })).toMatchObject({
+      success: false,
+      error: { issues: [expect.objectContaining({ path: ["email"], message })] },
+    });
+  });
+
   it("normalizes names and email", () => {
     const result = platformAccountFormSchema.parse({
       ...validAccount,

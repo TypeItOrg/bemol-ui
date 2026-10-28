@@ -1,9 +1,8 @@
 import { changeInstitutionalPasswordAction } from "@features/institutional-auth/actions/change-institutional-password.action";
 import { logoutInstitutional } from "@features/institutional-auth/actions/institutional-logout.action";
-import { fetchInstitutionalPerson } from "@features/institutional-auth/services/fetch-institutional-person.service";
 import { requireInstitutionalUser } from "@features/institutional-auth/services/get-institutional-user.service";
 import { institutionalApiFetch } from "@features/institutional-auth/services/institutional-api-fetch.service";
-import type { InstitutionalPerson } from "@features/institutional-auth/types/institutional-person.types";
+import type { InstitutionalUser } from "@features/institutional-auth/types/institutional-user.types";
 import { setInstitutionalPasswordChangedCookie } from "@features/institutional-auth/utils/institutional-auth-cookies.util";
 
 jest.mock("next/cache", () => ({
@@ -12,10 +11,6 @@ jest.mock("next/cache", () => ({
 
 jest.mock("@features/institutional-auth/services/institutional-api-fetch.service", () => ({
   institutionalApiFetch: jest.fn(),
-}));
-
-jest.mock("@features/institutional-auth/services/fetch-institutional-person.service", () => ({
-  fetchInstitutionalPerson: jest.fn(),
 }));
 
 jest.mock("@features/institutional-auth/services/get-institutional-user.service", () => ({
@@ -30,63 +25,43 @@ jest.mock("@features/institutional-auth/actions/institutional-logout.action", ()
   logoutInstitutional: jest.fn(),
 }));
 
-const PERSON: InstitutionalPerson = {
+const USER: InstitutionalUser = {
+  userId: "user-1",
   personId: "person-1",
-  firstName: "Ana",
+  name: "Ana",
   lastName: "Pérez",
   documentNumber: "12345678",
-  birthDate: "1995-05-15",
-  phoneNumber: null,
-  email: "ana@example.com",
   institutionId: "institution-1",
-  institutionName: "Institución",
-  address: {
-    street: "San Martín",
-    number: "123",
-    floor: null,
-    apartment: null,
-    neighborhood: null,
-    additionalInfo: null,
-    city: { id: "city-1", name: "Rio Cuarto" },
-  },
-  birthCity: { id: "birth-city-1", name: "Rio Cuarto" },
-  nationalityCountry: { id: "country-1", name: "Argentina" },
-  deleted: false,
+  roles: ["Estudiante"],
+  permissions: [],
 };
 
 describe("changeInstitutionalPasswordAction", () => {
   const institutionalApiFetchMock = jest.mocked(institutionalApiFetch);
-  const fetchInstitutionalPersonMock = jest.mocked(fetchInstitutionalPerson);
   const requireInstitutionalUserMock = jest.mocked(requireInstitutionalUser);
   const setPasswordChangedCookieMock = jest.mocked(setInstitutionalPasswordChangedCookie);
   const logoutInstitutionalMock = jest.mocked(logoutInstitutional);
 
   beforeEach(() => {
     institutionalApiFetchMock.mockReset();
-    fetchInstitutionalPersonMock.mockReset();
-    requireInstitutionalUserMock.mockReset();
+    requireInstitutionalUserMock.mockReset().mockResolvedValue(USER);
     setPasswordChangedCookieMock.mockReset();
     logoutInstitutionalMock.mockReset();
     logoutInstitutionalMock.mockResolvedValue(undefined as never);
   });
 
-  it("merges the stored person data, changes the password and forces logout", async () => {
+  it("sends only validated credentials without fetching a profile and forces logout", async () => {
     institutionalApiFetchMock.mockResolvedValue(new Response(null, { status: 200 }));
-    fetchInstitutionalPersonMock.mockResolvedValue(PERSON);
 
     await expect(changeInstitutionalPasswordAction({}, createFormData())).resolves.toEqual({
       success: true,
     });
 
-    expect(JSON.parse(institutionalApiFetchMock.mock.calls[0][1]?.body as string)).toMatchObject({
-      firstName: "Ana",
-      lastName: "Pérez",
-      birthDate: "1995-05-15",
-      birthCityId: "birth-city-1",
-      nationalityCountryId: "country-1",
-      address: { street: "San Martín", number: "123", cityId: "city-1" },
-      currentPassword: "old-password",
-      password: "new-password",
+    expect(institutionalApiFetchMock).toHaveBeenCalledTimes(1);
+    expect(institutionalApiFetchMock).toHaveBeenCalledWith("/api/v1/person/me", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ currentPassword: "old-password", password: "new-password" }),
     });
     expect(requireInstitutionalUserMock).toHaveBeenCalled();
     expect(setPasswordChangedCookieMock).toHaveBeenCalled();
@@ -106,19 +81,22 @@ describe("changeInstitutionalPasswordAction", () => {
     expect(logoutInstitutionalMock).not.toHaveBeenCalled();
   });
 
-  it("reports a missing person instead of calling the API", async () => {
-    fetchInstitutionalPersonMock.mockResolvedValue(null);
+  it.each([
+    { ...USER, delegated: true },
+    { ...USER, userId: null },
+  ])("rejects a represented identity or a person without an account before calling the API", async (user) => {
+    requireInstitutionalUserMock.mockResolvedValue(user);
 
     await expect(changeInstitutionalPasswordAction({}, createFormData())).resolves.toEqual({
-      error: "No se pudieron obtener tus datos personales.",
+      error: "No podés cambiar la contraseña de una persona representada.",
     });
     expect(institutionalApiFetchMock).not.toHaveBeenCalled();
+    expect(setPasswordChangedCookieMock).not.toHaveBeenCalled();
     expect(logoutInstitutionalMock).not.toHaveBeenCalled();
   });
 
   it("propagates backend field errors without setting the flash cookie", async () => {
     institutionalApiFetchMock.mockResolvedValue(Response.json({ message: "La contraseña actual es incorrecta." }, { status: 400 }));
-    fetchInstitutionalPersonMock.mockResolvedValue(PERSON);
 
     await expect(changeInstitutionalPasswordAction({}, createFormData())).resolves.toEqual({
       error: "La contraseña actual es incorrecta.",

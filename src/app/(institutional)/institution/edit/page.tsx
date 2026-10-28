@@ -16,7 +16,6 @@ import { getInstitutionalMetadata } from "@features/institutional-auth/utils/ins
 import { hasInstitutionalPermission } from "@features/institutional-auth/utils/institutional-permission.util";
 import { InstitutionalInstitutionForm } from "@features/institutions/components/institutional-institution-form";
 import { fetchInstitutionalInstitution } from "@features/institutions/services/fetch-institutional-institution.service";
-import { getInstitutionLogoPlaceholder } from "@features/institutions/services/get-institution-logo-placeholder.service";
 import { PlatformPageIcon } from "@features/platform-auth/components/platform-page-icon";
 import { PlatformPageShell } from "@features/platform-auth/components/platform-page-shell";
 
@@ -55,11 +54,7 @@ export default async function EditInstitutionalInstitutionPage({ searchParams }:
       actionsClassName="self-stretch"
       actions={<PlatformPageIcon icon={Building2Icon} />}
     >
-      <InstitutionalInstitutionForm
-        logoBlurDataURL={await getInstitutionLogoPlaceholder(institution.id, institution.logoUrl)}
-        institution={institution}
-        returnTo={destination}
-      />
+      <InstitutionalInstitutionForm institution={institution} returnTo={destination} />
     </PlatformPageShell>
   );
 }

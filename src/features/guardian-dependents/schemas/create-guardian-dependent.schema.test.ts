@@ -22,6 +22,17 @@ function issuePaths(input: Record<string, string>): string[] {
 }
 
 describe("createGuardianDependentSchema", () => {
+  it.each([
+    ["", "El correo es requerido."],
+    ["not-an-email", "El correo es inválido."],
+    [`${"a".repeat(145)}@b.com`, "El correo admite hasta 150 caracteres."],
+  ])("reports the own access email validation for %p", (email, message) => {
+    expect(createGuardianDependentSchema.safeParse(createValidInput({ ownAccessRequested: "true", email }))).toMatchObject({
+      success: false,
+      error: { issues: [expect.objectContaining({ path: ["email"], message })] },
+    });
+  });
+
   it("parses a valid dependent and coerces the explicit boolean", () => {
     expect(createGuardianDependentSchema.parse(createValidInput())).toEqual({
       documentNumber: "54123456",
