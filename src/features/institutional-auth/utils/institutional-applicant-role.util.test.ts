@@ -43,20 +43,20 @@ describe("institutional applicant role utils", () => {
     expect(canRequestDependents(createUser(["Postulante"], ["institution:guardian-link:request"]))).toBe(true);
   });
 
-  it("uses the real actor permission when reviewing links", () => {
-    expect(canReviewGuardianLinks({ ...createUser([], ["institution:guardian-link:review"]), delegated: true, actorPermissions: [] })).toBe(false);
-    expect(canReviewGuardianLinks({ ...createUser([]), delegated: true, actorPermissions: ["institution:guardian-link:review"] })).toBe(true);
+  it("uses the selected identity permission when reviewing links", () => {
+    expect(canReviewGuardianLinks({ ...createUser([], ["institution:guardian-link:review"]), delegated: true, actorPermissions: [] })).toBe(true);
+    expect(canReviewGuardianLinks({ ...createUser([]), delegated: true, actorPermissions: ["institution:guardian-link:review"] })).toBe(false);
   });
 
-  it("does not borrow review permission from a delegated identity when actor grants are absent", () => {
-    expect(canReviewGuardianLinks({ ...createUser([], ["institution:guardian-link:review"]), delegated: true })).toBe(false);
+  it("uses selected identity permissions when actor grants are absent", () => {
+    expect(canReviewGuardianLinks({ ...createUser([], ["institution:guardian-link:review"]), delegated: true })).toBe(true);
   });
 
-  it("preserves own-session compatibility while respecting explicit actor grants", () => {
+  it("uses the selected permissions in an own session", () => {
     const user = createUser([], ["institution:guardian-link:review"]);
 
     expect(canReviewGuardianLinks(user)).toBe(true);
-    expect(canReviewGuardianLinks({ ...user, actorPermissions: [] })).toBe(false);
+    expect(canReviewGuardianLinks({ ...user, actorPermissions: [] })).toBe(true);
     expect(canReviewGuardianLinks(createUser(["Representante"]))).toBe(false);
   });
 

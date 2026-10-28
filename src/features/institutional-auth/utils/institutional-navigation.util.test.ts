@@ -14,6 +14,15 @@ const USER: InstitutionalUser = {
 };
 
 describe("getInstitutionalNavigationSections", () => {
+  it("uses the active identity permission for guardian links", () => {
+    const user = { ...USER, roles: ["Postulante"], delegated: true, actorPermissions: [INSTITUTIONAL_PERMISSION.GUARDIAN_LINK_REVIEW] };
+    const urls = (permissions: string[]) =>
+      getInstitutionalNavigationSections({ ...user, permissions }).flatMap((section) => section.items.map(({ url }) => url));
+
+    expect(urls([])).not.toContain("/guardian-links");
+    expect(urls([INSTITUTIONAL_PERMISSION.GUARDIAN_LINK_REVIEW])).toContain("/guardian-links");
+  });
+
   it("shows accessible academic resources without an overview link", () => {
     const sections = getInstitutionalNavigationSections({
       ...USER,

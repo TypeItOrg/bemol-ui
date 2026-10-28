@@ -88,11 +88,11 @@ describe("institutional home access", () => {
   });
 
   it.each([
-    { actorPermissions: [], selectedPermissions: [INSTITUTIONAL_PERMISSION.GUARDIAN_LINK_REVIEW], canReview: false },
-    { actorPermissions: [INSTITUTIONAL_PERMISSION.GUARDIAN_LINK_REVIEW], selectedPermissions: [], canReview: true },
-    { actorPermissions: undefined, selectedPermissions: [INSTITUTIONAL_PERMISSION.GUARDIAN_LINK_REVIEW], canReview: false },
+    { actorPermissions: [], selectedPermissions: [INSTITUTIONAL_PERMISSION.GUARDIAN_LINK_REVIEW], canReview: true },
+    { actorPermissions: [INSTITUTIONAL_PERMISSION.GUARDIAN_LINK_REVIEW], selectedPermissions: [], canReview: false },
+    { actorPermissions: undefined, selectedPermissions: [INSTITUTIONAL_PERMISSION.GUARDIAN_LINK_REVIEW], canReview: true },
   ])(
-    "uses actor review grants in home without changing the selected student's academic access: $canReview",
+    "uses selected identity review grants without changing the student's academic access: $canReview",
     ({ actorPermissions, selectedPermissions, canReview }) => {
       const user: InstitutionalUser = {
         userId: "user-1",
