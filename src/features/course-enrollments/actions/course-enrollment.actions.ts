@@ -178,9 +178,11 @@ export async function updateCourseAcademicStatusAction(
   status: string,
   reason: string,
   expectedVersion?: number,
+  teacherClassId?: string,
 ): Promise<CourseEnrollmentActionResult> {
   if (
     !isValidUuid(enrollmentId) ||
+    (teacherClassId !== undefined && !isValidUuid(teacherClassId)) ||
     typeof reason !== "string" ||
     !reason.trim() ||
     !allowedAcademicStatuses.has(status) ||
@@ -191,7 +193,11 @@ export async function updateCourseAcademicStatusAction(
 
   const user = await requireInstitutionalUser();
 
-  const response = institutionalApiFetch(`/api/v1/institutions/${user.institutionId}/course-enrollments/${enrollmentId}/academic-status`, {
+  const path = teacherClassId
+    ? `/api/v1/institutions/${user.institutionId}/teacher/classes/${teacherClassId}/enrollments/${enrollmentId}/academic-status`
+    : `/api/v1/institutions/${user.institutionId}/course-enrollments/${enrollmentId}/academic-status`;
+
+  const response = institutionalApiFetch(path, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ status, reason, expectedVersion }),

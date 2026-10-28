@@ -6,7 +6,7 @@ import { DataTableNavigationProvider } from "@common/components/ui/data-table-na
 import { isValidUuid } from "@common/utils/action-argument.util";
 
 import { CourseEnrollmentTable } from "@features/course-enrollments/components/course-enrollment-table";
-import { fetchTeacherClassEnrollments } from "@features/course-enrollments/services/teacher-course.service";
+import { fetchTeacherClass, fetchTeacherClassEnrollments } from "@features/course-enrollments/services/teacher-course.service";
 import {
   parseCourseEnrollmentPaginationParams,
   type CourseEnrollmentSearchParams,
@@ -16,7 +16,7 @@ import { InstitutionalBreadcrumb } from "@features/institutional-auth/components
 import { requireInstitutionalUser } from "@features/institutional-auth/services/get-institutional-user.service";
 import { PlatformPageShell } from "@features/platform-auth/components/platform-page-shell";
 
-export const metadata = { title: "Cursadas de mi clase", other: { "application-title": "Cursadas de mi clase" } };
+export const metadata = { title: "Cursadas", other: { "application-title": "Cursadas" } };
 
 export default async function TeacherClassPage({
   params,
@@ -39,15 +39,26 @@ export default async function TeacherClassPage({
 
   const { page, size } = parseCourseEnrollmentPaginationParams(await searchParams);
 
-  const data = await fetchTeacherClassEnrollments(user.institutionId, classId, page, size);
+  const [teacherClass, data] = await Promise.all([
+    fetchTeacherClass(user.institutionId, classId),
+    fetchTeacherClassEnrollments(user.institutionId, classId, page, size),
+  ]);
 
   return (
     <PlatformPageShell
-      title="Cursadas de mi clase"
-      breadcrumb={<InstitutionalBreadcrumb hiddenSegments={[classId]} segmentLabels={{ classes: "Cursadas de mi clase" }} />}
+      title={teacherClass.academicSpaceName}
+      breadcrumb={<InstitutionalBreadcrumb hiddenSegments={[classId]} segmentLabels={{ classes: teacherClass.academicSpaceName }} />}
     >
       <DataTableNavigationProvider>
-        <CourseEnrollmentTable data={data} page={page} size={size} emptyMessage="Esta clase todavía no tiene cursadas." />
+        <CourseEnrollmentTable
+          data={data}
+          page={page}
+          size={size}
+          emptyMessage="Esta clase todavía no tiene cursadas."
+          detailBasePath={`/my-teaching/classes/${classId}/enrollments`}
+          canUpdateAcademicStatus
+          teacherClassId={classId}
+        />
       </DataTableNavigationProvider>
     </PlatformPageShell>
   );

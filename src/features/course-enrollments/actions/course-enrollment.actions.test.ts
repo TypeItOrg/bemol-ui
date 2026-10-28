@@ -39,6 +39,14 @@ beforeEach(() => {
   jest.mocked(institutionalApiFetch).mockResolvedValue(new Response(null, { status: 201 }));
 });
 
+it("records teacher results through the class-scoped endpoint", async () => {
+  await expect(updateCourseAcademicStatusAction(ID, "PASSED", "Resultado", 1, ID)).resolves.toEqual({});
+  expect(institutionalApiFetch).toHaveBeenCalledWith(
+    `/api/v1/institutions/${ID}/teacher/classes/${ID}/enrollments/${ID}/academic-status`,
+    expect.objectContaining({ method: "PATCH", body: JSON.stringify({ status: "PASSED", reason: "Resultado", expectedVersion: 1 }) }),
+  );
+});
+
 it.each([null, undefined, 123, {}, [], "", "   "])("rejects invalid remote reasons without throwing: %p", async (value) => {
   const reason = value as unknown as string;
   await expect(rejectApplicationCourseAction(ID, ID, 0, reason)).resolves.toEqual({

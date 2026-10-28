@@ -17,6 +17,7 @@ type CourseEnrollmentMutationDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onUpdated: () => void;
+  teacherClassId?: string;
 };
 
 const ACADEMIC_STATUS_OPTIONS = [
@@ -35,6 +36,7 @@ export function CourseEnrollmentMutationDialog({
   open,
   onOpenChange,
   onUpdated,
+  teacherClassId,
 }: CourseEnrollmentMutationDialogProps): ReactElement {
   const [state, formAction, isPending] = useActionState(async (_previous: { error?: string }, formData: FormData) => {
     const reason = formData.get("reason");
@@ -51,7 +53,7 @@ export function CourseEnrollmentMutationDialog({
             reason,
             enrollment.version,
           )
-        : updateCourseAcademicStatusAction(enrollment.id, String(formData.get("status") ?? ""), reason, enrollment.version),
+        : updateCourseAcademicStatusAction(enrollment.id, String(formData.get("status") ?? ""), reason, enrollment.version, teacherClassId),
       COURSE_ENROLLMENT_MESSAGES.MUTATION_UNAVAILABLE,
     );
 

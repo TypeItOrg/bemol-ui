@@ -17,6 +17,7 @@ type CourseEnrollmentDetailActionsProps = {
   canUpdateAcademicStatus: boolean;
   canReadWaitlist: boolean;
   returnTo: string;
+  teacherClassId?: string;
 };
 
 export function CourseEnrollmentDetailActions({
@@ -25,6 +26,7 @@ export function CourseEnrollmentDetailActions({
   canUpdateAcademicStatus,
   canReadWaitlist,
   returnTo,
+  teacherClassId,
 }: CourseEnrollmentDetailActionsProps): ReactElement {
   const router = useRouter();
 
@@ -60,6 +62,7 @@ export function CourseEnrollmentDetailActions({
       {mode ? (
         <CourseEnrollmentMutationDialog
           enrollment={enrollment}
+          teacherClassId={teacherClassId}
           mode={mode}
           open
           onOpenChange={(open) => {

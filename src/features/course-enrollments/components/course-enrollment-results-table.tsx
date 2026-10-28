@@ -27,6 +27,7 @@ export function CourseEnrollmentResultsTable({
   permissionScopes,
   canUpdateAcademicStatus,
   detailBasePath,
+  teacherClassId,
   setMutation,
 }: CourseEnrollmentResultsTableProps): ReactElement {
   return (
@@ -41,7 +42,8 @@ export function CourseEnrollmentResultsTable({
 
           const canUpdateResult =
             canUpdateAcademicStatus &&
-            scopeIncludesTrainingPath(permissionScopes, P.COURSE_ENROLLMENT_ACADEMIC_STATUS_UPDATE, enrollment.trainingPathId) &&
+            (Boolean(teacherClassId) ||
+              scopeIncludesTrainingPath(permissionScopes, P.COURSE_ENROLLMENT_ACADEMIC_STATUS_UPDATE, enrollment.trainingPathId)) &&
             enrollment.status !== "WITHDRAWN" &&
             enrollment.status !== "ADMINISTRATIVELY_WITHDRAWN";
 

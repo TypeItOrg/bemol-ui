@@ -31,6 +31,7 @@ type CourseEnrollmentTableProps = {
   canWithdraw?: boolean;
   canUpdateAcademicStatus?: boolean;
   detailBasePath?: string;
+  teacherClassId?: string;
 };
 
 export function CourseEnrollmentTable({
@@ -44,6 +45,7 @@ export function CourseEnrollmentTable({
   canWithdraw = false,
   canUpdateAcademicStatus = false,
   detailBasePath,
+  teacherClassId,
 }: CourseEnrollmentTableProps): ReactElement {
   const router = useRouter();
 
@@ -113,6 +115,7 @@ export function CourseEnrollmentTable({
           permissionScopes={permissionScopes}
           canUpdateAcademicStatus={canUpdateAcademicStatus}
           detailBasePath={detailBasePath}
+          teacherClassId={teacherClassId}
           setMutation={setMutation}
         />
 
@@ -130,6 +133,7 @@ export function CourseEnrollmentTable({
       {mutation ? (
         <CourseEnrollmentMutationDialog
           enrollment={mutation.enrollment}
+          teacherClassId={teacherClassId}
           mode={mutation.mode}
           open
           onOpenChange={(open) => {
