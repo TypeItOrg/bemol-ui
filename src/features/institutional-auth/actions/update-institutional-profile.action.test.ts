@@ -25,7 +25,7 @@ describe("updateInstitutionalProfileAction", () => {
     requireInstitutionalUserMock.mockReset();
   });
 
-  it("updates personal data without password fields", async () => {
+  it("updates contact data without forwarding protected identity or password fields", async () => {
     institutionalApiFetchMock.mockResolvedValue(new Response(null, { status: 200 }));
 
     await expect(updateInstitutionalProfileAction(createFormData())).resolves.toEqual({
@@ -35,7 +35,7 @@ describe("updateInstitutionalProfileAction", () => {
     expect(institutionalApiFetchMock).toHaveBeenCalledWith("/api/v1/person/me", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ firstName: "Matías", lastName: "Boero", birthDate: "1995-05-15", email: "matias@example.com", phoneNumber: "12345678" }),
+      body: JSON.stringify({ phoneNumber: "12345678" }),
     });
     expect(JSON.parse(institutionalApiFetchMock.mock.calls[0][1]?.body as string)).not.toHaveProperty("password");
     expect(requireInstitutionalUserMock).toHaveBeenCalled();
@@ -44,10 +44,10 @@ describe("updateInstitutionalProfileAction", () => {
   });
 
   it("rejects invalid input before calling the API", async () => {
-    const result = await updateInstitutionalProfileAction(createFormData({ firstName: "Al" }));
+    const result = await updateInstitutionalProfileAction(createFormData({ phoneNumber: "+54 123" }));
 
     expect("fieldErrors" in result ? result.fieldErrors : undefined).toEqual({
-      firstName: "El nombre debe tener al menos 3 caracteres.",
+      phoneNumber: "El teléfono solo admite números y guiones.",
     });
     expect(institutionalApiFetchMock).not.toHaveBeenCalled();
     expect(requireInstitutionalUserMock).not.toHaveBeenCalled();

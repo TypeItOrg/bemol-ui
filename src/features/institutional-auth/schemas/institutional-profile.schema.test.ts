@@ -9,27 +9,14 @@ const validProfile = {
 };
 
 describe("institutionalProfileSchema", () => {
-  beforeEach(() => {
-    jest.useFakeTimers();
-    jest.setSystemTime(new Date("2026-09-14T15:00:00Z"));
+  it("keeps ordinary contact fields and excludes protected identity fields", () => {
+    expect(institutionalProfileSchema.parse(validProfile)).toEqual({ phoneNumber: "12345678" });
   });
 
-  afterEach(() => jest.useRealTimers());
-
-  it("normalizes valid identity fields", () => {
-    expect(institutionalProfileSchema.parse({ ...validProfile, firstName: " Matias ", email: " matias@example.com " })).toEqual(validProfile);
-  });
-
-  it.each([
-    ["firstName", "Al", "El nombre debe tener al menos 3 caracteres."],
-    ["lastName", "Bo", "El apellido debe tener al menos 3 caracteres."],
-    ["email", "not-an-email", "Ingresá un email válido."],
-    ["phoneNumber", "+54 123", "El teléfono solo admite números y guiones."],
-    ["birthDate", "2023-09-15", "La persona debe tener al menos 3 años."],
-  ])("reports the rule for invalid %s", (field, value, message) => {
-    expect(institutionalProfileSchema.safeParse({ ...validProfile, [field]: value })).toMatchObject({
+  it("reports an invalid phone number", () => {
+    expect(institutionalProfileSchema.safeParse({ ...validProfile, phoneNumber: "+54 123" })).toMatchObject({
       success: false,
-      error: { issues: [expect.objectContaining({ path: [field], message })] },
+      error: { issues: [expect.objectContaining({ path: ["phoneNumber"], message: "El teléfono solo admite números y guiones." })] },
     });
   });
 
