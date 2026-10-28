@@ -96,13 +96,13 @@ describe("ApproveGuardianLinkDialog confirmation", () => {
 
     await user.click(screen.getByRole("button", { name: "Aceptar" }));
 
-    expect(screen.getByRole("alert")).toHaveTextContent("Revisá la identidad de la persona.");
+    expect(await screen.findByRole("alert")).toHaveTextContent("Revisá la identidad de la persona.");
     expect(screen.getByRole("button", { name: "Cancelar" })).toBeEnabled();
     expect(onApproved).not.toHaveBeenCalled();
     expect(onClose).not.toHaveBeenCalled();
 
     await user.click(screen.getByRole("button", { name: "Aceptar" }));
 
-    expect(onApproved).toHaveBeenCalledWith("link-1");
+    await waitFor(() => expect(onApproved).toHaveBeenCalledWith("link-1"));
   });
 });

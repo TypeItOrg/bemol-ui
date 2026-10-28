@@ -46,6 +46,9 @@ const originalEnvironment = {
 };
 const requests: { body: unknown; authorization: string | null }[] = [];
 
+// Full date-field and HTTP flows need headroom on constrained CI runners.
+jest.setTimeout(15_000);
+
 const server = setupServer(
   http.post(CREATE_URL, async ({ request }) => {
     requests.push({ body: await request.json(), authorization: request.headers.get("authorization") });

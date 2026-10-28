@@ -118,9 +118,7 @@ describe("DataTableFilters", () => {
       jest.advanceTimersByTime(350);
     });
     expect(mockNavigate).not.toHaveBeenCalled();
-    await act(async () => {
-      rerender(<DataTableFilters dateFilters={[{ label: "Inicio", name: "startDate", value: "2035-01-01" }]} />);
-    });
+    rerender(<DataTableFilters dateFilters={[{ label: "Inicio", name: "startDate", value: "2035-01-01" }]} />);
     expect(input).toHaveValue("01/01/2035");
   });
 
