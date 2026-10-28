@@ -37,10 +37,10 @@ describe("Representative access without academic escalation", () => {
       canRequestGuardianLinks: canRequest,
     };
     const ownLinks = ["/self-service/person-1/enrollment", "/self-service/person-1/enrollment-applications"];
-    const expectedLinks = ["/my-dependents", ...(ownEnrollment ? ownLinks : [])];
+    const expectedLinks = [...(canRequest ? ["/my-dependents"] : []), ...(ownEnrollment ? ownLinks : [])];
 
     expect(canRequestDependents(user)).toBe(canRequest);
-    expect(canManageDependents(user)).toBe(true);
+    expect(canManageDependents(user)).toBe(canRequest);
     expect(canStartEnrollmentApplication(user)).toBe(ownEnrollment);
     expect(canViewOwnEnrollmentApplications(user)).toBe(ownEnrollment);
     expect(canViewOwnFormation(user)).toBe(false);
@@ -48,7 +48,8 @@ describe("Representative access without academic escalation", () => {
     expect(getInstitutionalFormationHomeLinks(user)).toEqual([]);
 
     const navigation = getInstitutionalNavigationSections(user).flatMap(({ items }) => items.map(({ url }) => url));
-    expect(navigation).toEqual(expect.arrayContaining(["/account", "/my-dependents"]));
+    expect(navigation).toContain("/account");
+    expect(navigation.includes("/my-dependents")).toBe(canRequest);
 
     for (const url of ownLinks) {
       expect(navigation.includes(url)).toBe(ownEnrollment);
@@ -57,7 +58,7 @@ describe("Representative access without academic escalation", () => {
     expect(navigation).not.toContain("/self-service/person-1/courses");
   });
 
-  it("uses the actor capability while representing an applicant without inheriting their roles", () => {
+  it("requires the selected permission as well as the actor capability while representing an applicant", () => {
     const user: InstitutionalUser = {
       ...USER,
       delegated: true,
@@ -68,18 +69,18 @@ describe("Representative access without academic escalation", () => {
       actorPermissions: [INSTITUTIONAL_PERMISSION.GUARDIAN_LINK_REQUEST],
     };
 
-    expect(canRequestDependents(user)).toBe(true);
+    expect(canRequestDependents(user)).toBe(false);
     expect(canStartEnrollmentApplication(user)).toBe(true);
     expect(canRequestDependents({ ...user, canRequestGuardianLinks: false, permissions: [INSTITUTIONAL_PERMISSION.GUARDIAN_LINK_REQUEST] })).toBe(
       false,
     );
     expect(canRequestDependents({ ...user, canRequestGuardianLinks: undefined, actorPermissions: undefined })).toBe(false);
-    expect(getInstitutionalEnrollmentHomeLinks(user).map(({ href }) => href)).toContain("/my-dependents");
+    expect(getInstitutionalEnrollmentHomeLinks(user).map(({ href }) => href)).not.toContain("/my-dependents");
   });
 
-  it("preserves history without Representative and formation only for Student", () => {
-    expect(canManageDependents(USER)).toBe(true);
-    expect(getInstitutionalEnrollmentHomeLinks(USER).map(({ href }) => href)).toEqual(["/my-dependents"]);
+  it("requires permission for history and formation only for Student", () => {
+    expect(canManageDependents(USER)).toBe(false);
+    expect(getInstitutionalEnrollmentHomeLinks(USER).map(({ href }) => href)).toEqual([]);
     expect(canViewOwnFormation({ ...USER, roles: ["Estudiante", "Representante"] })).toBe(true);
   });
 });

@@ -60,7 +60,8 @@ describe("institutional applicant role utils", () => {
     expect(canReviewGuardianLinks(createUser(["Representante"]))).toBe(false);
   });
 
-  it("allows every institutional user to view their representation history", () => {
-    expect(canManageDependents(createUser(["Profesor"]))).toBe(true);
+  it("requires the active identity permission to manage dependents", () => {
+    expect(canManageDependents(createUser(["Profesor"]))).toBe(false);
+    expect(canManageDependents(createUser([], ["institution:guardian-link:request"]))).toBe(true);
   });
 });

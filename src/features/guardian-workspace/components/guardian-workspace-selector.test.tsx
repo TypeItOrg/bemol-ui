@@ -24,6 +24,24 @@ const DEPENDENT: OperatingProfile = {
 };
 
 describe("representation workspace selector", () => {
+  it("keeps identity switching available without a dependents management link", async () => {
+    const user = userEvent.setup();
+    render(
+      <GuardianWorkspaceProvider institutionId="institution-1" profiles={[DEPENDENT]} activePersonId={DEPENDENT.personId}>
+        <DropdownMenu>
+          <DropdownMenuTrigger>Identidad</DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <GuardianWorkspaceMenuItems onNavigate={jest.fn()} canManageDependents={false} />
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </GuardianWorkspaceProvider>,
+    );
+
+    await user.click(screen.getByRole("button", { name: "Identidad" }));
+    expect(screen.getByRole("menuitemradio", { name: /Persona Representada/ })).toBeVisible();
+    expect(screen.queryByRole("menuitem", { name: "Gestionar personas a cargo" })).not.toBeInTheDocument();
+  });
+
   it.each([{ roles: ["Representante"] }, { roles: ["Postulante"] }, { roles: ["Postulante", "Representante"] }, { roles: [] }])(
     "keeps authorized profiles and history available for $roles",
     async ({ roles }) => {
@@ -37,7 +55,7 @@ describe("representation workspace selector", () => {
           <DropdownMenu>
             <DropdownMenuTrigger>Identidad</DropdownMenuTrigger>
             <DropdownMenuContent>
-              <GuardianWorkspaceMenuItems onNavigate={jest.fn()} />
+              <GuardianWorkspaceMenuItems onNavigate={jest.fn()} canManageDependents />
             </DropdownMenuContent>
           </DropdownMenu>
         </GuardianWorkspaceProvider>,

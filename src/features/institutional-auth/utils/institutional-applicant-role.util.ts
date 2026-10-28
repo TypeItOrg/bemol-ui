@@ -9,11 +9,11 @@ export function canViewAcademicNavigation(user: InstitutionalUser): boolean {
 }
 
 export function canManageDependents(user: InstitutionalUser): boolean {
-  return Boolean(user.institutionId);
+  return hasInstitutionalPermission(user, INSTITUTIONAL_PERMISSION.GUARDIAN_LINK_REQUEST);
 }
 
 export function canRequestDependents(user: InstitutionalUser): boolean {
-  return user.canRequestGuardianLinks ?? (!user.delegated && hasInstitutionalPermission(user, INSTITUTIONAL_PERMISSION.GUARDIAN_LINK_REQUEST));
+  return canManageDependents(user) && (user.canRequestGuardianLinks ?? !user.delegated);
 }
 
 export function canReviewGuardianLinks(user: InstitutionalUser): boolean {

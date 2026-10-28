@@ -115,7 +115,7 @@ describe("getInstitutionalNavigationSections", () => {
     const sections = getInstitutionalNavigationSections({
       ...USER,
       roles: ["Estudiante"],
-      permissions: [],
+      permissions: [INSTITUTIONAL_PERMISSION.GUARDIAN_LINK_REQUEST],
     });
 
     expect(sections.find((section) => section.label === "Personal")?.items).toEqual([
@@ -154,10 +154,7 @@ describe("getInstitutionalNavigationSections", () => {
 
     expect(personalSection).toEqual({
       label: "Personal",
-      items: [
-        expect.objectContaining({ title: "Mi perfil", url: "/account" }),
-        expect.objectContaining({ title: "Personas a cargo", url: "/my-dependents" }),
-      ],
+      items: [expect.objectContaining({ title: "Mi perfil", url: "/account" })],
     });
   });
   it("shows teaching without granting administration and preserves student access for teachers", () => {

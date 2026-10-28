@@ -18,7 +18,13 @@ import { useGuardianWorkspace } from "@features/guardian-workspace/components/gu
 import { PersonInitialsAvatar } from "@features/guardian-workspace/components/person-initials-avatar";
 import { useActiveIdentitySwitch } from "@features/guardian-workspace/hooks/use-active-identity-switch";
 
-export function GuardianWorkspaceMenuItems({ onNavigate }: { onNavigate: (url: string) => void }): ReactElement {
+export function GuardianWorkspaceMenuItems({
+  onNavigate,
+  canManageDependents,
+}: {
+  onNavigate: (url: string) => void;
+  canManageDependents: boolean;
+}): ReactElement {
   const { profiles, personId } = useGuardianWorkspace();
 
   const { state, action, pending } = useActiveIdentitySwitch();
@@ -78,13 +84,17 @@ export function GuardianWorkspaceMenuItems({ onNavigate }: { onNavigate: (url: s
           {state.error}
         </p>
       ) : null}
-      <DropdownMenuSeparator />
-      <DropdownMenuItem asChild className="px-2.5 py-1.5">
-        <Link href="/my-dependents" onClick={() => onNavigate("/my-dependents")}>
-          <UsersRoundIcon />
-          Gestionar personas a cargo
-        </Link>
-      </DropdownMenuItem>
+      {canManageDependents && (
+        <>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem asChild className="px-2.5 py-1.5">
+            <Link href="/my-dependents" onClick={() => onNavigate("/my-dependents")}>
+              <UsersRoundIcon />
+              Gestionar personas a cargo
+            </Link>
+          </DropdownMenuItem>
+        </>
+      )}
     </>
   );
 }

@@ -84,7 +84,7 @@ beforeEach(() => {
     documentNumber: "35123456",
     institutionId: INSTITUTION_ID,
     roles: ["Estudiante"],
-    permissions: [],
+    permissions: ["institution:guardian-link:request"],
     canRequestGuardianLinks: true,
   });
   jest.mocked(getInstitutionalAccessToken).mockResolvedValue("guardian-access");

@@ -40,7 +40,7 @@ describe("institutional home access", () => {
     } as unknown as InstitutionalUser;
 
     const links = getInstitutionalEnrollmentHomeLinks(user);
-    expect(links.map(({ href }) => href)).toEqual(["/my-dependents", "/self-service/p-1/enrollment", "/self-service/p-1/enrollment-applications"]);
+    expect(links.map(({ href }) => href)).toEqual(["/self-service/p-1/enrollment", "/self-service/p-1/enrollment-applications"]);
   });
 
   it("puts the dependents link first for users who can manage dependents", () => {
@@ -48,7 +48,7 @@ describe("institutional home access", () => {
       institutionId: "inst-1",
       personId: "p-1",
       roles: ["Estudiante"],
-      permissions: [INSTITUTIONAL_PERMISSION.ACADEMIC_OFFER_READ],
+      permissions: [INSTITUTIONAL_PERMISSION.ACADEMIC_OFFER_READ, INSTITUTIONAL_PERMISSION.GUARDIAN_LINK_REQUEST],
     } as unknown as InstitutionalUser;
 
     const links = getInstitutionalEnrollmentHomeLinks(user);
@@ -64,7 +64,7 @@ describe("institutional home access", () => {
     } as unknown as InstitutionalUser;
 
     const links = getInstitutionalEnrollmentHomeLinks(user);
-    expect(links.map(({ href }) => href)).toEqual(["/my-dependents", "/enrollment-applications"]);
+    expect(links.map(({ href }) => href)).toEqual(["/enrollment-applications"]);
   });
 
   it("shows guardian link review separately from dependent management", () => {
@@ -78,7 +78,6 @@ describe("institutional home access", () => {
     const links = getInstitutionalEnrollmentHomeLinks(user);
 
     expect(links).toEqual([
-      expect.objectContaining({ href: "/my-dependents" }),
       expect.objectContaining({
         href: "/guardian-links",
         title: "Vinculaciones",
@@ -109,9 +108,7 @@ describe("institutional home access", () => {
       const links = getInstitutionalEnrollmentHomeLinks(user).map(({ href }) => href);
 
       expect(links.includes("/guardian-links")).toBe(canReview);
-      expect(links).toEqual(
-        expect.arrayContaining(["/my-dependents", "/self-service/student-1/enrollment", "/self-service/student-1/enrollment-applications"]),
-      );
+      expect(links).toEqual(expect.arrayContaining(["/self-service/student-1/enrollment", "/self-service/student-1/enrollment-applications"]));
       expect(getInstitutionalFormationHomeLinks(user).map(({ href }) => href)).toEqual([
         "/self-service/student-1/courses",
         "/self-service/student-1/schedules",

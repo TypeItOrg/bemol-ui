@@ -67,9 +67,9 @@ export function InstitutionalProfileMenu({ user, onNavigate }: { user: Instituti
           }}
           className="w-72 max-w-[calc(100vw-2rem)] min-w-0"
         >
-          {canManageDependents(user) && (
+          {user.institutionId && (
             <>
-              <GuardianWorkspaceMenuItems onNavigate={onNavigate} />
+              <GuardianWorkspaceMenuItems onNavigate={onNavigate} canManageDependents={canManageDependents(user)} />
               <DropdownMenuSeparator />
             </>
           )}
