@@ -32,6 +32,7 @@ import { RejectGuardianLinkDialog } from "@features/guardian-links/components/re
 import type { GuardianLinkDecision } from "@features/guardian-links/types/guardian-link-decision.types";
 import type { GuardianLinkRequest } from "@features/guardian-links/types/guardian-link-request.types";
 import type { GuardianLinksQuery } from "@features/guardian-links/types/guardian-links-query.types";
+import { getGuardianLinkApprovalError, getGuardianLinkReviewPerson } from "@features/guardian-links/utils/guardian-link-review.util";
 
 type GuardianLinkRequestsProps = {
   data: PaginatedResponse<GuardianLinkRequest>;
@@ -203,7 +204,11 @@ function RequestRow({
 }): ReactElement {
   const isPendingStatus = request.status === GUARDIAN_LINK_STATUS.PENDING;
 
-  const dependentName = getGuardianDependentName(request.dependent) || "esta solicitud";
+  const dependent = getGuardianLinkReviewPerson(request);
+
+  const dependentName = getGuardianDependentName(dependent) || dependent.documentNumber;
+
+  const approvalError = getGuardianLinkApprovalError(request);
 
   const tableRow = (
     <TableRow className="h-12">
@@ -220,7 +225,7 @@ function RequestRow({
             </DropdownMenuItem>
             {isPendingStatus ? (
               <>
-                <DropdownMenuItem className="px-2.5 py-1.5" onSelect={onApprove}>
+                <DropdownMenuItem className="px-2.5 py-1.5" disabled={Boolean(approvalError)} onSelect={onApprove}>
                   Aceptar
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
@@ -241,7 +246,8 @@ function RequestRow({
         <PersonCell person={request.tutor} />
       </TableCell>
       <TableCell>
-        <PersonCell person={request.dependent} />
+        <PersonCell person={dependent} />
+        {approvalError ? <p className="text-muted-foreground mt-1 text-xs">Sin coincidencia registrada</p> : null}
       </TableCell>
       <TableCell>{GUARDIAN_RELATIONSHIP_LABELS[request.relationship]}</TableCell>
       <TableCell>{formatEnrollmentApplicationDateTime(request.createdAt)}</TableCell>
@@ -272,7 +278,7 @@ function RequestRow({
         </ContextMenuItem>
         {isPendingStatus ? (
           <>
-            <ContextMenuItem className="px-2.5 py-1.5" onSelect={onApprove}>
+            <ContextMenuItem className="px-2.5 py-1.5" disabled={Boolean(approvalError)} onSelect={onApprove}>
               Aceptar
             </ContextMenuItem>
             <ContextMenuSeparator />

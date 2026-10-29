@@ -21,6 +21,7 @@ export const GUARDIAN_LINK_MESSAGES = {
   FETCH: "No se pudieron cargar las solicitudes de vinculación.",
   FETCH_ATTACHMENTS: "No se pudo cargar la documentación de la solicitud.",
   RESOLVE: "No se pudo resolver la solicitud.",
+  NO_MATCHING_PERSON: "No se puede aprobar actualmente: no hay una persona registrada con este documento en la institución.",
   FORBIDDEN: "No tenés permisos para validar vinculaciones.",
   DOWNLOAD_FAILED: "No se pudo descargar el documento.",
 } as const;

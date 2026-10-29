@@ -21,6 +21,7 @@ import { getGuardianDependentName } from "@features/guardian-dependents/utils/gu
 import { GUARDIAN_LINK_MESSAGES } from "@features/guardian-links/constants/guardian-link.constants";
 import type { GuardianLinkDecision } from "@features/guardian-links/types/guardian-link-decision.types";
 import type { GuardianLinkRequest } from "@features/guardian-links/types/guardian-link-request.types";
+import { getGuardianLinkApprovalError, getGuardianLinkReviewPerson } from "@features/guardian-links/utils/guardian-link-review.util";
 
 type ApproveGuardianLinkDialogProps = {
   institutionId?: string;
@@ -33,7 +34,13 @@ type ApproveGuardianLinkDialogProps = {
 type ApproveActionState = FieldActionState<never>;
 
 export function ApproveGuardianLinkDialog({ institutionId, onApproved, onClose, onResolve, request }: ApproveGuardianLinkDialogProps): ReactElement {
+  const approvalError = getGuardianLinkApprovalError(request);
+
   const [state, action, isPending] = useActionState<ApproveActionState, FormData>(async () => {
+    if (approvalError) {
+      return { error: approvalError };
+    }
+
     const requestInstitutionId = institutionId ?? request.institution?.institutionId;
 
     if (!requestInstitutionId) {
@@ -41,7 +48,12 @@ export function ApproveGuardianLinkDialog({ institutionId, onApproved, onClose, 
     }
 
     try {
-      const result = await onResolve(requestInstitutionId, request.personGuardianId, "approve", request.matchingPerson?.personId ?? undefined);
+      const result = await onResolve(
+        requestInstitutionId,
+        request.personGuardianId,
+        "approve",
+        getGuardianLinkReviewPerson(request).personId ?? undefined,
+      );
 
       if (result.error) {
         return { error: result.error };
@@ -57,14 +69,14 @@ export function ApproveGuardianLinkDialog({ institutionId, onApproved, onClose, 
 
   const tutorName = getGuardianDependentName(request.tutor) || request.tutor.documentNumber;
 
-  const dependent = request.matchingPerson ?? request.dependent;
+  const dependent = getGuardianLinkReviewPerson(request);
 
   const dependentName = getGuardianDependentName(dependent) || dependent.documentNumber;
 
   function handleSubmit(event: SyntheticEvent<HTMLFormElement>): void {
     event.preventDefault();
 
-    if (isPending) {
+    if (isPending || approvalError) {
       return;
     }
 
@@ -92,17 +104,17 @@ export function ApproveGuardianLinkDialog({ institutionId, onApproved, onClose, 
               <span className="text-foreground font-semibold">{dependentName}</span>?
             </AlertDialogDescription>
           </AlertDialogHeader>
-          {state.error ? (
+          {approvalError || state.error ? (
             <Alert className="mt-4" variant="destructive">
               <CircleAlertIcon />
-              <AlertDescription>{state.error}</AlertDescription>
+              <AlertDescription>{approvalError || state.error}</AlertDescription>
             </Alert>
           ) : null}
           <AlertDialogFooter className="mt-5">
             <AlertDialogCancel disabled={isPending} size="lg" type="button">
               Cancelar
             </AlertDialogCancel>
-            <Button disabled={isPending} size="lg" type="submit">
+            <Button disabled={isPending || Boolean(approvalError)} size="lg" type="submit">
               {isPending ? "Aceptando…" : "Aceptar"}
             </Button>
           </AlertDialogFooter>

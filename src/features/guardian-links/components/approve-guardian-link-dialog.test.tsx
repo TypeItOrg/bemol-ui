@@ -7,6 +7,7 @@ import type { GuardianLinkRequest } from "@features/guardian-links/types/guardia
 const REQUEST: GuardianLinkRequest = {
   personGuardianId: "link-1",
   status: "PENDING",
+  requestMode: "EXISTING",
   relationship: "LEGAL_GUARDIAN",
   tutor: { personId: "tutor-1", documentNumber: "35123456", firstName: "Ana", lastName: "García", birthDate: null },
   dependent: { personId: null, documentNumber: "54123456", firstName: "Mateo", lastName: "González", birthDate: "2018-09-10" },
@@ -67,9 +68,27 @@ describe("ApproveGuardianLinkDialog confirmation", () => {
     expect(onApproved).toHaveBeenCalledWith("link-1");
   });
 
-  it("does not confirm an existing identity when the request has no matching person", async () => {
+  it("allows a new-person request without a match to proceed to institutional registration", async () => {
     const user = userEvent.setup();
     const onResolve = jest.fn().mockResolvedValue({});
+    render(
+      <ApproveGuardianLinkDialog
+        institutionId="institution-1"
+        onApproved={jest.fn()}
+        onClose={jest.fn()}
+        onResolve={onResolve}
+        request={{ ...REQUEST, requestMode: "NEW", matchingPerson: null }}
+      />,
+    );
+
+    await user.click(screen.getByRole("button", { name: "Aceptar" }));
+
+    expect(onResolve).toHaveBeenCalledWith("institution-1", "link-1", "approve", undefined);
+  });
+
+  it("cannot approve an existing-person request without a registered match", async () => {
+    const user = userEvent.setup();
+    const onResolve = jest.fn();
     render(
       <ApproveGuardianLinkDialog
         institutionId="institution-1"
@@ -80,9 +99,12 @@ describe("ApproveGuardianLinkDialog confirmation", () => {
       />,
     );
 
-    await user.click(screen.getByRole("button", { name: "Aceptar" }));
-
-    expect(onResolve).toHaveBeenCalledWith("institution-1", "link-1", "approve", undefined);
+    expect(screen.getByRole("alert")).toHaveTextContent("no hay una persona registrada con este documento en la institución");
+    const accept = screen.getByRole("button", { name: "Aceptar" });
+    expect(accept).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Cancelar" })).toBeEnabled();
+    await user.click(accept);
+    expect(onResolve).not.toHaveBeenCalled();
   });
 
   it("keeps the dialog recoverable when approval fails", async () => {

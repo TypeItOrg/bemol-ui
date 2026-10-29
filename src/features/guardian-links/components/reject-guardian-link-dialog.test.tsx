@@ -6,6 +6,7 @@ import type { GuardianLinkRequest } from "@features/guardian-links/types/guardia
 const REQUEST: GuardianLinkRequest = {
   personGuardianId: "link-1",
   status: "PENDING",
+  requestMode: "EXISTING",
   relationship: "LEGAL_GUARDIAN",
   tutor: { personId: "tutor-1", documentNumber: "35123456", firstName: "Ana", lastName: "García", birthDate: null },
   dependent: { personId: null, documentNumber: "54123456", firstName: null, lastName: null, birthDate: null },

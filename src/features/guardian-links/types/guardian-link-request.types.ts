@@ -6,6 +6,7 @@ import type { GuardianLinkPerson } from "@features/guardian-links/types/guardian
 export type GuardianLinkRequest = {
   personGuardianId: string;
   status: GuardianLinkStatus;
+  requestMode: "NEW" | "EXISTING";
   relationship: GuardianRelationship;
   institution?: {
     institutionId: string;

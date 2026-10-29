@@ -26,6 +26,7 @@ import { RequestAttachments, RequestStatus } from "@features/guardian-links/comp
 import { RejectGuardianLinkDialog } from "@features/guardian-links/components/reject-guardian-link-dialog";
 import type { GuardianLinkPerson } from "@features/guardian-links/types/guardian-link-person.types";
 import type { GuardianLinkRequest } from "@features/guardian-links/types/guardian-link-request.types";
+import { getGuardianLinkApprovalError, getGuardianLinkReviewPerson } from "@features/guardian-links/utils/guardian-link-review.util";
 
 const REPRESENTED_RELATIONSHIP_LABELS = {
   [GUARDIAN_RELATIONSHIP.MOTHER]: "Hijo/a",
@@ -55,6 +56,8 @@ export function GuardianLinkDetail({
 
   const attachmentPathMode = platform ? "platform" : "institutional";
 
+  const approvalError = getGuardianLinkApprovalError(request);
+
   function onSuccess(): void {
     setDecision(null);
     router.refresh();
@@ -71,7 +74,7 @@ export function GuardianLinkDetail({
             <Button className="w-full sm:w-auto" size="lg" type="button" variant="destructive" onClick={() => setDecision("reject")}>
               Rechazar
             </Button>
-            <Button className="w-full sm:w-auto" size="lg" type="button" onClick={() => setDecision("approve")}>
+            <Button className="w-full sm:w-auto" disabled={Boolean(approvalError)} size="lg" type="button" onClick={() => setDecision("approve")}>
               Aceptar vinculación
             </Button>
           </div>
@@ -88,6 +91,7 @@ export function GuardianLinkDetail({
             />
             <RequestStatus status={request.status} />
           </header>
+          {approvalError ? <p className="text-muted-foreground text-sm">{approvalError}</p> : null}
           {request.resolvedAt ? (
             <dl className="pt-4">
               <div className="space-y-1">
@@ -115,7 +119,7 @@ export function GuardianLinkDetail({
             <PersonDetails title="Representante" person={request.tutor} relationship={GUARDIAN_RELATIONSHIP_LABELS[request.relationship]} />
             <PersonDetails
               title="Persona representada"
-              person={request.matchingPerson ?? request.dependent}
+              person={getGuardianLinkReviewPerson(request)}
               relationship={REPRESENTED_RELATIONSHIP_LABELS[request.relationship]}
             />
           </div>

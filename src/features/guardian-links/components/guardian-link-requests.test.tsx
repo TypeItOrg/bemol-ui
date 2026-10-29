@@ -1,6 +1,6 @@
 import type { ReactElement } from "react";
 
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import { resolveGuardianLinkAction } from "@features/guardian-links/actions/resolve-guardian-link.action";
@@ -31,6 +31,7 @@ function buildRequest(overrides: Partial<GuardianLinkRequest> = {}): GuardianLin
   return {
     personGuardianId: "019f9c3a-f891-7bc5-a98d-e65332998001",
     status: "PENDING",
+    requestMode: "EXISTING",
     relationship: "LEGAL_GUARDIAN",
     tutor: { personId: "t1", documentNumber: "35123456", firstName: "Ana", lastName: "García", birthDate: null },
     dependent: { personId: "d1", documentNumber: "54123456", firstName: "Mateo", lastName: "González", birthDate: "2018-09-10" },
@@ -98,7 +99,7 @@ describe("GuardianLinkRequests", () => {
 
     await waitFor(() => {
       const args = [INSTITUTION_ID, "019f9c3a-f891-7bc5-a98d-e65332998001", decision];
-      expect(resolveGuardianLinkAction).toHaveBeenCalledWith(...(decision === "approve" ? [...args, undefined] : args));
+      expect(resolveGuardianLinkAction).toHaveBeenCalledWith(...(decision === "approve" ? [...args, "d1"] : args));
     });
   });
 
@@ -126,6 +127,41 @@ describe("GuardianLinkRequests", () => {
     await user.clear(screen.getByRole("textbox", { name: "Buscar" }));
     await user.type(screen.getByRole("textbox", { name: "Buscar" }), "35123456");
     await waitFor(() => expect(mockNavigate).toHaveBeenLastCalledWith({ search: "35123456", page: "0", size: "20" }, { replace: true }));
+  });
+
+  it("shows the matched registered identity while the requested link is still pending", () => {
+    const request = buildRequest({
+      dependent: { personId: null, documentNumber: "44741318", firstName: null, lastName: null, birthDate: null },
+      matchingPerson: { personId: "bruno", documentNumber: "44741318", firstName: "Bruno", lastName: "Ferreyra", birthDate: "2016-09-01" },
+    });
+    render(<RequestsFixture institutionId={INSTITUTION_ID} requests={[request]} />);
+
+    expect(screen.getByText("Bruno Ferreyra")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Abrir acciones de Bruno Ferreyra" })).toBeInTheDocument();
+    expect(screen.getByRole("cell", { name: "Pendiente" })).toBeInTheDocument();
+  });
+
+  it.each(["dropdown", "context"])("blocks approval without a match in the %s menu but permits rejection", async (menu) => {
+    const user = userEvent.setup();
+    const request = buildRequest({
+      dependent: { personId: null, documentNumber: "44741318", firstName: null, lastName: null, birthDate: null },
+      matchingPerson: null,
+    });
+    render(<RequestsFixture institutionId={INSTITUTION_ID} requests={[request]} />);
+
+    expect(screen.getByText("Sin coincidencia registrada")).toBeInTheDocument();
+
+    if (menu === "dropdown") {
+      await user.click(screen.getByRole("button", { name: "Abrir acciones de 44741318" }));
+    } else {
+      fireEvent.contextMenu(screen.getByRole("cell", { name: "Pendiente" }));
+    }
+
+    expect(await screen.findByRole("menuitem", { name: "Aceptar" })).toHaveAttribute("aria-disabled", "true");
+    expect(screen.getByRole("menuitem", { name: "Ver detalle" })).not.toHaveAttribute("aria-disabled", "true");
+    await user.click(screen.getByRole("menuitem", { name: "Rechazar" }));
+    expect(await screen.findByRole("alertdialog")).toHaveTextContent("Rechazar vinculación");
+    expect(resolveGuardianLinkAction).not.toHaveBeenCalled();
   });
 
   it("refreshes after rejection and hides decisions for the refreshed resolved request", async () => {

@@ -21,6 +21,7 @@ import { getGuardianDependentName } from "@features/guardian-dependents/utils/gu
 import { GUARDIAN_LINK_MESSAGES } from "@features/guardian-links/constants/guardian-link.constants";
 import type { GuardianLinkDecision } from "@features/guardian-links/types/guardian-link-decision.types";
 import type { GuardianLinkRequest } from "@features/guardian-links/types/guardian-link-request.types";
+import { getGuardianLinkReviewPerson } from "@features/guardian-links/utils/guardian-link-review.util";
 
 type RejectGuardianLinkDialogProps = {
   institutionId?: string;
@@ -57,7 +58,7 @@ export function RejectGuardianLinkDialog({ institutionId, onClose, onRejected, o
 
   const tutorName = getGuardianDependentName(request.tutor) || request.tutor.documentNumber;
 
-  const dependent = request.matchingPerson ?? request.dependent;
+  const dependent = getGuardianLinkReviewPerson(request);
 
   const dependentName = getGuardianDependentName(dependent) || dependent.documentNumber;
 
