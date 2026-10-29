@@ -5,7 +5,7 @@ import { useState, type ReactElement } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-import { ClipboardCheckIcon, FileTextIcon, UsersIcon } from "lucide-react";
+import { ClipboardCheckIcon, ClipboardListIcon, FileTextIcon, UsersIcon } from "lucide-react";
 
 import { OptionalValue } from "@common/components/optional-value";
 import { SectionHeader } from "@common/components/section-header";
@@ -51,8 +51,6 @@ export function GuardianLinkDetail({
   const [decision, setDecision] = useState<"approve" | "reject" | null>(null);
 
   const onResolve = platform ? resolvePlatformGuardianLinkAction : resolveGuardianLinkAction;
-
-  const showInstitution = platform;
 
   const attachmentPathMode = platform ? "platform" : "institutional";
 
@@ -106,7 +104,7 @@ export function GuardianLinkDetail({
             <SectionHeader icon={UsersIcon} title="Datos de la vinculación" description="Personas vinculadas y relación entre ellas." />
           </header>
           <div className="grid gap-5 md:grid-cols-2 md:gap-6">
-            {showInstitution ? (
+            {platform ? (
               <section className="bg-background col-span-full min-w-0 space-y-1 rounded-xl border p-4 sm:p-5" aria-label="Institución">
                 <div className="flex min-h-5 items-center">
                   <h3 className={DETAIL_LABEL_CLASS_NAME}>Institución</h3>
@@ -123,31 +121,34 @@ export function GuardianLinkDetail({
               relationship={REPRESENTED_RELATIONSHIP_LABELS[request.relationship]}
             />
           </div>
-          {request.declaredFirstName || request.declaredLastName || request.declaredBirthDate ? (
-            <div className="space-y-3">
-              <h3 className="text-sm font-medium">Datos declarados en la solicitud</h3>
-              <p className="text-muted-foreground text-sm">Comparalos con los datos registrados antes de aceptar la vinculación.</p>
-              <dl className="grid gap-4 sm:grid-cols-3">
-                <div>
-                  <dt className={DETAIL_LABEL_CLASS_NAME}>Nombre</dt>
-                  <dd className="mt-1 text-sm">
-                    <OptionalValue value={request.declaredFirstName} fallback="No declarado" />
-                  </dd>
-                </div>
-                <div>
-                  <dt className={DETAIL_LABEL_CLASS_NAME}>Apellido</dt>
-                  <dd className="mt-1 text-sm">
-                    <OptionalValue value={request.declaredLastName} fallback="No declarado" />
-                  </dd>
-                </div>
-                <div>
-                  <dt className={DETAIL_LABEL_CLASS_NAME}>Fecha de nacimiento</dt>
-                  <dd className="mt-1 text-sm tabular-nums">{formatDisplayDate(request.declaredBirthDate, "No declarada")}</dd>
-                </div>
-              </dl>
-            </div>
-          ) : null}
         </section>
+        {request.declaredFirstName || request.declaredLastName || request.declaredBirthDate ? (
+          <section className="bg-muted/25 space-y-5 rounded-xl border p-4 sm:p-5" aria-label="Datos declarados en la solicitud">
+            <SectionHeader
+              icon={ClipboardListIcon}
+              title="Datos declarados en la solicitud"
+              description="Comparalos con los datos registrados antes de aceptar la vinculación."
+            />
+            <dl className="grid gap-4 sm:grid-cols-3">
+              <div className="min-w-0">
+                <dt className={DETAIL_LABEL_CLASS_NAME}>Nombre</dt>
+                <dd className="mt-1 text-sm break-words">
+                  <OptionalValue value={request.declaredFirstName} fallback="No declarado" />
+                </dd>
+              </div>
+              <div className="min-w-0">
+                <dt className={DETAIL_LABEL_CLASS_NAME}>Apellido</dt>
+                <dd className="mt-1 text-sm break-words">
+                  <OptionalValue value={request.declaredLastName} fallback="No declarado" />
+                </dd>
+              </div>
+              <div>
+                <dt className={DETAIL_LABEL_CLASS_NAME}>Fecha de nacimiento</dt>
+                <dd className="mt-1 text-sm tabular-nums">{formatDisplayDate(request.declaredBirthDate, "No declarada")}</dd>
+              </div>
+            </dl>
+          </section>
+        ) : null}
         {request.attachments.length > 0 ? (
           <section className="bg-muted/25 space-y-5 rounded-xl border p-4 sm:p-5" aria-label="Documentación de la vinculación">
             <header className="pb-1">
