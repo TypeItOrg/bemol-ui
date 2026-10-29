@@ -22,6 +22,7 @@ type MyEnrollmentApplicationTablePresentationProps = {
   hasFilters?: boolean;
   currentPersonId?: string;
   showApplicant?: boolean;
+  canManageApplications?: boolean;
 };
 
 export function MyEnrollmentApplicationTablePresentation({
@@ -32,6 +33,7 @@ export function MyEnrollmentApplicationTablePresentation({
   hasFilters = Boolean(status),
   currentPersonId,
   showApplicant = false,
+  canManageApplications = false,
 }: MyEnrollmentApplicationTablePresentationProps): ReactElement {
   const { isPending: isNavigating } = useDataTableNavigation();
 
@@ -62,6 +64,7 @@ export function MyEnrollmentApplicationTablePresentation({
                 application={application}
                 currentPersonId={currentPersonId}
                 showApplicant={showApplicant}
+                canManageApplications={canManageApplications}
               />
             ))}
           </TableBody>

@@ -98,8 +98,8 @@ export function getInstitutionalNavigationSections(
         ...(hasInstitutionalPermission(user, INSTITUTIONAL_PERMISSION.COURSE_ENROLLMENT_READ)
           ? [{ title: "Cursadas", url: "/course-enrollments", icon: ScrollTextIcon }]
           : []),
-        ...(user.roles.includes("Profesor") ? [{ title: "Mis clases", url: "/my-teaching", icon: GraduationCapIcon }] : []),
-        ...(user.roles.includes("Profesor") ? [{ title: "Mis horarios", url: "/my-teaching/schedules", icon: CalendarRangeIcon }] : []),
+        ...(user.capabilities.canViewTeaching ? [{ title: "Mis clases", url: "/my-teaching", icon: GraduationCapIcon }] : []),
+        ...(user.capabilities.canViewTeaching ? [{ title: "Mis horarios", url: "/my-teaching/schedules", icon: CalendarRangeIcon }] : []),
         ...(hasInstitutionalPermission(user, INSTITUTIONAL_PERMISSION.SHIFT_READ) ? [{ title: "Turnos", url: "/shifts", icon: ClockIcon }] : []),
       ]
     : [];

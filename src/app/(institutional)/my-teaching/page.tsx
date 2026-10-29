@@ -1,9 +1,8 @@
 import type { ReactElement } from "react";
 
-import Link from "next/link";
-
 import { CalendarDaysIcon, Clock3Icon, GraduationCapIcon } from "lucide-react";
 
+import { ReturnToLink } from "@common/components/navigation/return-to-link";
 import { Button } from "@common/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@common/components/ui/card";
 import { DataTableNavigationProvider } from "@common/components/ui/data-table-navigation";
@@ -28,7 +27,7 @@ export const metadata = { title: "Mis clases", other: { "application-title": "Mi
 export default async function MyTeachingPage({ searchParams }: { searchParams: Promise<CourseEnrollmentSearchParams> }): Promise<ReactElement> {
   const user = await requireInstitutionalUser();
 
-  if (!user.roles.includes("Profesor")) {
+  if (!user.capabilities.canViewTeaching) {
     return <InstitutionalAccessDenied description="Esta vista corresponde a profesores con clases asignadas." />;
   }
 
@@ -85,7 +84,7 @@ export default async function MyTeachingPage({ searchParams }: { searchParams: P
 
                 <CardFooter className="justify-end bg-transparent p-3">
                   <Button asChild variant="ghost">
-                    <Link href={`/my-teaching/classes/${item.courseClass.id}`}>Ver cursadas</Link>
+                    <ReturnToLink href={`/my-teaching/classes/${item.courseClass.id}`}>Ver cursadas</ReturnToLink>
                   </Button>
                 </CardFooter>
               </Card>

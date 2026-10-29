@@ -24,6 +24,7 @@ type MyEnrollmentApplicationTableRowProps = {
   application: EnrollmentApplication;
   currentPersonId?: string;
   showApplicant?: boolean;
+  canManageApplications?: boolean;
 };
 
 function getSubmitterNote(application: EnrollmentApplication, currentPersonId?: string): string | null {
@@ -40,6 +41,7 @@ export function MyEnrollmentApplicationTableRow({
   application,
   currentPersonId,
   showApplicant = false,
+  canManageApplications = false,
 }: MyEnrollmentApplicationTableRowProps): ReactElement {
   const personId = useOperatingPersonId();
 
@@ -47,7 +49,7 @@ export function MyEnrollmentApplicationTableRow({
 
   const [isCancelOpen, setIsCancelOpen] = useState(false);
 
-  const canCancel = application.status === ENROLLMENT_APPLICATION_STATUS.DRAFT;
+  const canCancel = canManageApplications && application.status === ENROLLMENT_APPLICATION_STATUS.DRAFT;
 
   const detailHref = `/self-service/${personId}/enrollment-applications/${application.applicationId}`;
 

@@ -2,6 +2,8 @@ import { Building2Icon, ClipboardCheckIcon, GraduationCapIcon, HistoryIcon, Shie
 
 const PERMISSION_GROUP_ICONS: Readonly<Record<string, LucideIcon>> = {
   ACADEMIC: GraduationCapIcon,
+  SELF_SERVICE: UsersRoundIcon,
+  TEACHING: GraduationCapIcon,
   ACTIVITY: HistoryIcon,
   GRADES: ClipboardCheckIcon,
   INSTITUTION: Building2Icon,

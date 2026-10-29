@@ -14,6 +14,7 @@ import {
   parseEnrollmentApplicationPaginationParams,
   type EnrollmentApplicationSearchParams,
 } from "@features/enrollment-applications/utils/enrollment-application-pagination.util";
+import { InstitutionalAccessDenied } from "@features/institutional-auth/components/institutional-access-denied";
 import { InstitutionalBreadcrumb } from "@features/institutional-auth/components/institutional-breadcrumb";
 import { requireInstitutionalUser } from "@features/institutional-auth/services/get-institutional-user.service";
 import { getInstitutionalMetadata } from "@features/institutional-auth/utils/institutional-metadata.util";
@@ -32,6 +33,10 @@ export default async function MyEnrollmentApplicationsPage({
   searchParams: Promise<EnrollmentApplicationSearchParams>;
 }): Promise<ReactElement> {
   const user = await requireInstitutionalUser();
+
+  if (!user.capabilities.canViewOwnEnrollmentApplications) {
+    return <InstitutionalAccessDenied />;
+  }
 
   const { personId } = await params;
 
@@ -60,6 +65,7 @@ export default async function MyEnrollmentApplicationsPage({
             dataPromise={dataPromise}
             page={page}
             showApplicant={false}
+            canManageApplications={user.capabilities.canManageOwnEnrollmentApplications}
             size={size}
             status={status}
             hasFilters={Boolean(status || pendingCourses !== undefined)}

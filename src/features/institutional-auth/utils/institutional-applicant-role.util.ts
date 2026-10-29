@@ -2,8 +2,6 @@ import { INSTITUTIONAL_PERMISSION } from "@features/institutional-auth/types/ins
 import type { InstitutionalUser } from "@features/institutional-auth/types/institutional-user.types";
 import { hasInstitutionalPermission } from "@features/institutional-auth/utils/institutional-permission.util";
 
-const INSTITUTIONAL_APPLICANT_ROLE_NAMES = new Set(["Postulante", "Estudiante"]);
-
 export function canViewAcademicNavigation(user: InstitutionalUser): boolean {
   return Boolean(user.institutionId);
 }
@@ -21,15 +19,13 @@ export function canReviewGuardianLinks(user: InstitutionalUser): boolean {
 }
 
 export function canViewOwnEnrollmentApplications(user: InstitutionalUser): boolean {
-  const hasApplicantRole = user.roles.some((role) => INSTITUTIONAL_APPLICANT_ROLE_NAMES.has(role));
-
-  return hasApplicantRole;
+  return user.capabilities.canViewOwnEnrollmentApplications;
 }
 
 export function canViewOwnFormation(user: InstitutionalUser): boolean {
-  return user.roles.includes("Estudiante");
+  return user.capabilities.canViewOwnFormation;
 }
 
 export function canStartEnrollmentApplication(user: InstitutionalUser): boolean {
-  return canViewOwnEnrollmentApplications(user);
+  return user.capabilities.canManageOwnEnrollmentApplications;
 }

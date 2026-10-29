@@ -65,6 +65,14 @@ const USER: InstitutionalUser = {
   lastName: "Garcia",
   documentNumber: "12345678",
   institutionId: INSTITUTION_ID,
+  capabilities: {
+    canViewOwnEnrollmentApplications: false,
+    canManageOwnEnrollmentApplications: false,
+    canViewOwnFormation: false,
+    canViewTeaching: false,
+    canUpdateTeachingAcademicStatus: false,
+  },
+  systemRoleCodes: [] as const,
   roles: [],
   permissions: Object.values(INSTITUTIONAL_PERMISSION),
   permissionScopes: Object.fromEntries(

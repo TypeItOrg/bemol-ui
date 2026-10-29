@@ -15,6 +15,7 @@ import { HomeAccessRow, HomeSubsection } from "@features/institutional-auth/comp
 import { fetchInstitutionalPerson } from "@features/institutional-auth/services/fetch-institutional-person.service";
 import { getInstitutionalBrand } from "@features/institutional-auth/services/get-institutional-brand.service";
 import { requireInstitutionalUser } from "@features/institutional-auth/services/get-institutional-user.service";
+import { canStartEnrollmentApplication, canViewOwnFormation } from "@features/institutional-auth/utils/institutional-applicant-role.util";
 import { getGreeting } from "@features/institutional-auth/utils/institutional-greeting.util";
 import {
   getInstitutionalAcademicOfferLink,
@@ -79,7 +80,7 @@ async function InstitutionalHomeContent({
   const standaloneOffer = operationalResources.length === 0 ? academicOfferLink : undefined;
 
   const embedOfferInPersonal = Boolean(
-    standaloneOffer && ((user.roles.includes("Postulante") && !user.roles.includes("Estudiante")) || baseFormationLinks.length === 0),
+    standaloneOffer && ((canStartEnrollmentApplication(user) && !canViewOwnFormation(user)) || baseFormationLinks.length === 0),
   );
 
   const personalLinks = [
@@ -95,14 +96,12 @@ async function InstitutionalHomeContent({
 
   const formationLinks = [...(standaloneOffer && !embedOfferInPersonal ? [standaloneOffer] : []), ...baseFormationLinks];
 
-  const greeting = getGreeting(new Date());
-
   const primaryRole = user.roles[0] ?? "Usuario institucional";
 
   return (
     <main className="flex min-h-full flex-1 flex-col gap-4">
       <InstitutionalHomeHero
-        greeting={greeting}
+        greeting={getGreeting(new Date())}
         name={user.name}
         institutionName={person?.institutionName}
         primaryRole={primaryRole}

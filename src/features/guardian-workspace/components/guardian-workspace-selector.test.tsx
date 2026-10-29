@@ -20,6 +20,13 @@ const DEPENDENT: OperatingProfile = {
   documentNumber: "22345678",
   self: false,
   canEnroll: true,
+  capabilities: {
+    canViewOwnEnrollmentApplications: true,
+    canManageOwnEnrollmentApplications: true,
+    canViewOwnFormation: false,
+    canViewTeaching: false,
+    canUpdateTeachingAcademicStatus: false,
+  },
   roles: ["Postulante"],
 };
 

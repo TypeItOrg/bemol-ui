@@ -52,7 +52,7 @@ export default async function EditRolePage({
   }
 
   if (!role.editable) {
-    return <InstitutionalAccessDenied description="Este rol no se puede modificar." />;
+    return <InstitutionalAccessDenied description="Este rol del sistema es administrado por la plataforma." />;
   }
 
   return (

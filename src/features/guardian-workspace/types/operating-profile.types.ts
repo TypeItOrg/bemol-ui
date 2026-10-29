@@ -1,3 +1,5 @@
+import type { InstitutionalCapabilities } from "@features/institutional-auth/types/institutional-capabilities.types";
+
 export type OperatingProfile = {
   actorPersonId: string;
   personId: string;
@@ -6,5 +8,6 @@ export type OperatingProfile = {
   documentNumber: string;
   self: boolean;
   canEnroll: boolean;
+  capabilities: InstitutionalCapabilities;
   roles: readonly string[];
 };

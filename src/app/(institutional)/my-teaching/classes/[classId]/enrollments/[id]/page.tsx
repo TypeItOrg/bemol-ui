@@ -31,7 +31,7 @@ export default async function TeacherEnrollmentPage({
 }): Promise<ReactElement> {
   const user = await requireInstitutionalUser();
 
-  if (!user.roles.includes("Profesor")) {
+  if (!user.capabilities.canViewTeaching) {
     return <InstitutionalAccessDenied description="Esta vista corresponde a profesores con clases asignadas." />;
   }
 
@@ -65,7 +65,7 @@ export default async function TeacherEnrollmentPage({
         returnTo={returnTo}
         canWithdraw={false}
         canReadWaitlist={false}
-        canUpdateAcademicStatus
+        canUpdateAcademicStatus={user.capabilities.canUpdateTeachingAcademicStatus}
         teacherClassId={classId}
       />
       <CourseEnrollmentDetail enrollment={enrollment} history={history} />

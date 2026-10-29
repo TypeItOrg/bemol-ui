@@ -1,9 +1,13 @@
 import type { ReactElement } from "react";
 
+import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { Button } from "@common/components/ui/button";
 import { DataTableNavigationProvider } from "@common/components/ui/data-table-navigation";
+import type { QueryParamValue } from "@common/types/query-param.types";
 import { isValidUuid } from "@common/utils/action-argument.util";
+import { getSafeReturnTo } from "@common/utils/return-to.util";
 
 import { CourseEnrollmentTable } from "@features/course-enrollments/components/course-enrollment-table";
 import { fetchTeacherClass, fetchTeacherClassEnrollments } from "@features/course-enrollments/services/teacher-course.service";
@@ -23,11 +27,11 @@ export default async function TeacherClassPage({
   searchParams,
 }: {
   params: Promise<{ classId: string }>;
-  searchParams: Promise<CourseEnrollmentSearchParams>;
+  searchParams: Promise<CourseEnrollmentSearchParams & { returnTo?: QueryParamValue }>;
 }): Promise<ReactElement> {
   const user = await requireInstitutionalUser();
 
-  if (!user.roles.includes("Profesor")) {
+  if (!user.capabilities.canViewTeaching) {
     return <InstitutionalAccessDenied description="Esta vista corresponde a profesores con clases asignadas." />;
   }
 
@@ -37,7 +41,11 @@ export default async function TeacherClassPage({
     notFound();
   }
 
-  const { page, size } = parseCourseEnrollmentPaginationParams(await searchParams);
+  const query = await searchParams;
+
+  const { page, size } = parseCourseEnrollmentPaginationParams(query);
+
+  const returnTo = getSafeReturnTo(query.returnTo, "/my-teaching");
 
   const [teacherClass, data] = await Promise.all([
     fetchTeacherClass(user.institutionId, classId),
@@ -49,6 +57,11 @@ export default async function TeacherClassPage({
       title={teacherClass.academicSpaceName}
       breadcrumb={<InstitutionalBreadcrumb hiddenSegments={[classId]} segmentLabels={{ classes: teacherClass.academicSpaceName }} />}
     >
+      <div className="flex items-center">
+        <Button asChild variant="outline" size="lg">
+          <Link href={returnTo}>Volver</Link>
+        </Button>
+      </div>
       <DataTableNavigationProvider>
         <CourseEnrollmentTable
           data={data}
@@ -56,7 +69,7 @@ export default async function TeacherClassPage({
           size={size}
           emptyMessage="Esta clase todavía no tiene cursadas."
           detailBasePath={`/my-teaching/classes/${classId}/enrollments`}
-          canUpdateAcademicStatus
+          canUpdateAcademicStatus={user.capabilities.canUpdateTeachingAcademicStatus}
           teacherClassId={classId}
         />
       </DataTableNavigationProvider>

@@ -21,7 +21,7 @@ export const metadata: Metadata = { title: "Mis horarios", other: { "application
 export default async function TeacherSchedulesPage({ searchParams }: { searchParams: Promise<{ week?: string | string[] }> }): Promise<ReactElement> {
   const user = await requireInstitutionalUser();
 
-  if (!user.roles.includes("Profesor")) {
+  if (!user.capabilities.canViewTeaching) {
     return <InstitutionalAccessDenied description="Esta vista corresponde a profesores con clases asignadas." />;
   }
 

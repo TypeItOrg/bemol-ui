@@ -31,7 +31,7 @@ export default async function EnrollmentPage({
 
   const profile = await fetchOperatingProfile(personId);
 
-  if (!profile.canEnroll) {
+  if (!profile.capabilities.canManageOwnEnrollmentApplications) {
     return <InstitutionalAccessDenied description="Este perfil no tiene habilitadas nuevas inscripciones." />;
   }
 

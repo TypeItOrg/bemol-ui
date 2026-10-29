@@ -18,6 +18,14 @@ describe.each(permissions)("permission matrix: %s", (permission) => {
     lastName: "Garcia",
     documentNumber: "99190001",
     institutionId: "institution",
+    capabilities: {
+      canViewOwnEnrollmentApplications: false,
+      canManageOwnEnrollmentApplications: false,
+      canViewOwnFormation: false,
+      canViewTeaching: false,
+      canUpdateTeachingAcademicStatus: false,
+    },
+    systemRoleCodes: [] as const,
     roles: [],
     permissions: [permission],
   };

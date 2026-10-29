@@ -123,7 +123,7 @@ export function getInstitutionalEnrollmentHomeLinks(user: InstitutionalUser): In
     });
   }
 
-  if (user.roles.includes("Profesor")) {
+  if (user.capabilities.canViewTeaching) {
     links.push({
       href: "/my-teaching",
       title: "Mis clases",

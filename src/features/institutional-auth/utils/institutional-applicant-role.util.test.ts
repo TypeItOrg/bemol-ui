@@ -6,6 +6,16 @@ import {
   canStartEnrollmentApplication,
   canViewOwnEnrollmentApplications,
 } from "@features/institutional-auth/utils/institutional-applicant-role.util";
+import type { SystemRoleCode } from "@features/people/types/system-role-code.types";
+
+const ROLE_CODES: Record<string, SystemRoleCode> = {
+  Postulante: "APPLICANT",
+  Estudiante: "STUDENT",
+  Profesor: "TEACHER",
+  Representante: "REPRESENTATIVE",
+  Administrativo: "ADMINISTRATIVE",
+  "Administrador Institucional": "INSTITUTIONAL_AUTHORITY",
+};
 
 function createUser(roles: string[], permissions: string[] = []): InstitutionalUser {
   return {
@@ -16,6 +26,14 @@ function createUser(roles: string[], permissions: string[] = []): InstitutionalU
     documentNumber: "35123456",
     institutionId: "institution-id",
     roles,
+    capabilities: {
+      canViewOwnEnrollmentApplications: roles.includes("Postulante") || roles.includes("Estudiante"),
+      canManageOwnEnrollmentApplications: roles.includes("Postulante") || roles.includes("Estudiante"),
+      canViewOwnFormation: roles.includes("Estudiante"),
+      canViewTeaching: roles.includes("Profesor"),
+      canUpdateTeachingAcademicStatus: roles.includes("Profesor"),
+    },
+    systemRoleCodes: roles.map((role) => ROLE_CODES[role]).filter((code): code is SystemRoleCode => Boolean(code)),
     permissions,
   };
 }

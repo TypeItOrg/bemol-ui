@@ -62,6 +62,14 @@ beforeEach(() => {
       name: "Ana",
       lastName: "García",
       documentNumber: "12345678",
+      capabilities: {
+        canViewOwnEnrollmentApplications: false,
+        canManageOwnEnrollmentApplications: false,
+        canViewOwnFormation: false,
+        canViewTeaching: false,
+        canUpdateTeachingAcademicStatus: false,
+      },
+      systemRoleCodes: [] as const,
       roles: [],
       permissions: ["institution:update"],
     });

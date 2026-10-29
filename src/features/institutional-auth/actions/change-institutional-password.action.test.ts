@@ -32,6 +32,14 @@ const USER: InstitutionalUser = {
   lastName: "Pérez",
   documentNumber: "12345678",
   institutionId: "institution-1",
+  capabilities: {
+    canViewOwnEnrollmentApplications: true,
+    canManageOwnEnrollmentApplications: true,
+    canViewOwnFormation: true,
+    canViewTeaching: false,
+    canUpdateTeachingAcademicStatus: false,
+  },
+  systemRoleCodes: ["STUDENT"] as const,
   roles: ["Estudiante"],
   permissions: [],
 };

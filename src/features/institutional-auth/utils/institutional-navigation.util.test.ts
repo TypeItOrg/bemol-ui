@@ -9,13 +9,32 @@ const USER: InstitutionalUser = {
   lastName: "Pérez",
   documentNumber: "12345678",
   institutionId: "7e429f76-1fb4-45ee-a176-0020bc43b11d",
+  capabilities: {
+    canViewOwnEnrollmentApplications: false,
+    canManageOwnEnrollmentApplications: false,
+    canViewOwnFormation: false,
+    canViewTeaching: false,
+    canUpdateTeachingAcademicStatus: false,
+  },
+  systemRoleCodes: [] as const,
   roles: [],
   permissions: [],
 };
 
 describe("getInstitutionalNavigationSections", () => {
   it("uses the active identity permission for guardian links", () => {
-    const user = { ...USER, roles: ["Postulante"], delegated: true, actorPermissions: [INSTITUTIONAL_PERMISSION.GUARDIAN_LINK_REVIEW] };
+    const user = {
+      ...USER,
+      capabilities: {
+        ...USER.capabilities,
+        canViewOwnEnrollmentApplications: true,
+        canManageOwnEnrollmentApplications: true,
+      },
+      systemRoleCodes: ["APPLICANT"] as const,
+      roles: ["Postulante"],
+      delegated: true,
+      actorPermissions: [INSTITUTIONAL_PERMISSION.GUARDIAN_LINK_REVIEW],
+    };
     const urls = (permissions: string[]) =>
       getInstitutionalNavigationSections({ ...user, permissions }).flatMap((section) => section.items.map(({ url }) => url));
 
@@ -100,6 +119,12 @@ describe("getInstitutionalNavigationSections", () => {
   it("shows the applicant section with new enrollment and my applications for applicant roles", () => {
     const sections = getInstitutionalNavigationSections({
       ...USER,
+      capabilities: {
+        ...USER.capabilities,
+        canViewOwnEnrollmentApplications: true,
+        canManageOwnEnrollmentApplications: true,
+      },
+      systemRoleCodes: ["APPLICANT"] as const,
       roles: ["Postulante"],
       permissions: [INSTITUTIONAL_PERMISSION.ACADEMIC_OFFER_READ],
     });
@@ -114,6 +139,13 @@ describe("getInstitutionalNavigationSections", () => {
   it("lists the dependents page under Personal, after Mi perfil, for users who can manage dependents", () => {
     const sections = getInstitutionalNavigationSections({
       ...USER,
+      capabilities: {
+        ...USER.capabilities,
+        canViewOwnEnrollmentApplications: true,
+        canManageOwnEnrollmentApplications: true,
+        canViewOwnFormation: true,
+      },
+      systemRoleCodes: ["STUDENT"] as const,
       roles: ["Estudiante"],
       permissions: [INSTITUTIONAL_PERMISSION.GUARDIAN_LINK_REQUEST],
     });
@@ -127,6 +159,7 @@ describe("getInstitutionalNavigationSections", () => {
   it("hides the applicant section for staff roles even with the management permission", () => {
     const sections = getInstitutionalNavigationSections({
       ...USER,
+      systemRoleCodes: ["INSTITUTIONAL_AUTHORITY"] as const,
       roles: ["Administrador Institucional"],
       permissions: [INSTITUTIONAL_PERMISSION.ENROLLMENT_APPLICATION_READ],
     });
@@ -160,6 +193,14 @@ describe("getInstitutionalNavigationSections", () => {
   it("shows teaching without granting administration and preserves student access for teachers", () => {
     const items = getInstitutionalNavigationSections({
       ...USER,
+      capabilities: {
+        canViewOwnEnrollmentApplications: true,
+        canManageOwnEnrollmentApplications: true,
+        canViewOwnFormation: true,
+        canViewTeaching: true,
+        canUpdateTeachingAcademicStatus: true,
+      },
+      systemRoleCodes: ["TEACHER", "STUDENT"] as const,
       roles: ["Profesor", "Estudiante"],
     }).flatMap((section) => section.items);
     expect(items).toEqual(

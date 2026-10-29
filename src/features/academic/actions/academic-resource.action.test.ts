@@ -103,6 +103,14 @@ describe("academic resource actions", () => {
       lastName: "García",
       documentNumber: "12345678",
       institutionId,
+      capabilities: {
+        canViewOwnEnrollmentApplications: false,
+        canManageOwnEnrollmentApplications: false,
+        canViewOwnFormation: false,
+        canViewTeaching: false,
+        canUpdateTeachingAcademicStatus: false,
+      },
+      systemRoleCodes: [] as const,
       roles: [],
       permissions: [INSTITUTIONAL_PERMISSION.STUDY_PLAN_CREATE],
     });
@@ -142,6 +150,14 @@ describe("academic resource actions", () => {
       lastName: "García",
       documentNumber: "12345678",
       institutionId: INSTITUTION_ID,
+      capabilities: {
+        canViewOwnEnrollmentApplications: false,
+        canManageOwnEnrollmentApplications: false,
+        canViewOwnFormation: false,
+        canViewTeaching: false,
+        canUpdateTeachingAcademicStatus: false,
+      },
+      systemRoleCodes: [] as const,
       roles: [],
       permissions: [INSTITUTIONAL_PERMISSION.TRAINING_PATH_UPDATE, INSTITUTIONAL_PERMISSION.TRAINING_PATH_STATUS_UPDATE],
     });
@@ -189,6 +205,14 @@ describe("academic resource actions", () => {
       lastName: "García",
       documentNumber: "12345678",
       institutionId,
+      capabilities: {
+        canViewOwnEnrollmentApplications: false,
+        canManageOwnEnrollmentApplications: false,
+        canViewOwnFormation: false,
+        canViewTeaching: false,
+        canUpdateTeachingAcademicStatus: false,
+      },
+      systemRoleCodes: [] as const,
       roles: [],
       permissions: [INSTITUTIONAL_PERMISSION.STUDY_PLAN_DELETE],
     });
@@ -277,6 +301,14 @@ function mockInstitutionalUser(permission: InstitutionalPermission): void {
     lastName: "García",
     documentNumber: "12345678",
     institutionId: INSTITUTION_ID,
+    capabilities: {
+      canViewOwnEnrollmentApplications: false,
+      canManageOwnEnrollmentApplications: false,
+      canViewOwnFormation: false,
+      canViewTeaching: false,
+      canUpdateTeachingAcademicStatus: false,
+    },
+    systemRoleCodes: [] as const,
     roles: [],
     permissions: [permission],
   });

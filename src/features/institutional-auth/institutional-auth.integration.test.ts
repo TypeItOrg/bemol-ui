@@ -7,7 +7,23 @@ const API_URL = "https://api.example.test";
 const institutionId = "22222222-2222-4222-8222-222222222222";
 const identity = { institutionId, documentNumber: "12345678" };
 const tokens = { accessToken: "institutional-access", refreshToken: "institutional-refresh" };
-const user = { ...identity, userId: "user-1", personId: "person-1", name: "Ana", lastName: "García", roles: ["Estudiante"], permissions: [] };
+const user = {
+  ...identity,
+  userId: "user-1",
+  personId: "person-1",
+  name: "Ana",
+  lastName: "García",
+  capabilities: {
+    canViewOwnEnrollmentApplications: true,
+    canManageOwnEnrollmentApplications: true,
+    canViewOwnFormation: true,
+    canViewTeaching: false,
+    canUpdateTeachingAcademicStatus: false,
+  },
+  systemRoleCodes: ["STUDENT"] as const,
+  roles: ["Estudiante"],
+  permissions: [],
+};
 const ACCESS_COOKIE = "institutional_access_token";
 const REFRESH_COOKIE = "institutional_refresh_token";
 const originalEnvironment = {

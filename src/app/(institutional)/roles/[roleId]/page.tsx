@@ -86,6 +86,7 @@ export default async function RoleDetailPage({
           )}
         </div>
       </div>
+      {role.technicalCode ? <p className="text-muted-foreground text-sm">Este rol del sistema es administrado por la plataforma.</p> : null}
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         <RoleSummaryCard
           icon={UserLockIcon}

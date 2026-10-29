@@ -52,6 +52,14 @@ function givenUser(overrides: { institutionId?: string; permissions?: string[] }
     lastName: "González",
     documentNumber: "35123456",
     institutionId: overrides.institutionId ?? INSTITUTION_ID,
+    capabilities: {
+      canViewOwnEnrollmentApplications: true,
+      canManageOwnEnrollmentApplications: true,
+      canViewOwnFormation: true,
+      canViewTeaching: false,
+      canUpdateTeachingAcademicStatus: false,
+    },
+    systemRoleCodes: ["STUDENT"] as const,
     roles: ["Estudiante"],
     permissions: overrides.permissions ?? ["institution:guardian-link:request"],
   });

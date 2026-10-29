@@ -35,6 +35,14 @@ describe("institutional home access", () => {
     const user = {
       institutionId: "inst-1",
       personId: "p-1",
+      capabilities: {
+        canViewOwnEnrollmentApplications: true,
+        canManageOwnEnrollmentApplications: true,
+        canViewOwnFormation: false,
+        canViewTeaching: false,
+        canUpdateTeachingAcademicStatus: false,
+      },
+      systemRoleCodes: ["APPLICANT"] as const,
       roles: ["Postulante"],
       permissions: [INSTITUTIONAL_PERMISSION.ACADEMIC_OFFER_READ],
     } as unknown as InstitutionalUser;
@@ -47,6 +55,14 @@ describe("institutional home access", () => {
     const user = {
       institutionId: "inst-1",
       personId: "p-1",
+      capabilities: {
+        canViewOwnEnrollmentApplications: true,
+        canManageOwnEnrollmentApplications: true,
+        canViewOwnFormation: true,
+        canViewTeaching: false,
+        canUpdateTeachingAcademicStatus: false,
+      },
+      systemRoleCodes: ["STUDENT"] as const,
       roles: ["Estudiante"],
       permissions: [INSTITUTIONAL_PERMISSION.ACADEMIC_OFFER_READ, INSTITUTIONAL_PERMISSION.GUARDIAN_LINK_REQUEST],
     } as unknown as InstitutionalUser;
@@ -59,6 +75,14 @@ describe("institutional home access", () => {
     const user = {
       institutionId: "inst-1",
       personId: "p-1",
+      capabilities: {
+        canViewOwnEnrollmentApplications: false,
+        canManageOwnEnrollmentApplications: false,
+        canViewOwnFormation: false,
+        canViewTeaching: false,
+        canUpdateTeachingAcademicStatus: false,
+      },
+      systemRoleCodes: ["ADMINISTRATIVE"] as const,
       roles: ["Administrativo"],
       permissions: [INSTITUTIONAL_PERMISSION.ENROLLMENT_APPLICATION_READ],
     } as unknown as InstitutionalUser;
@@ -71,6 +95,14 @@ describe("institutional home access", () => {
     const user = {
       institutionId: "inst-1",
       personId: "p-1",
+      capabilities: {
+        canViewOwnEnrollmentApplications: false,
+        canManageOwnEnrollmentApplications: false,
+        canViewOwnFormation: false,
+        canViewTeaching: false,
+        canUpdateTeachingAcademicStatus: false,
+      },
+      systemRoleCodes: ["INSTITUTIONAL_AUTHORITY"] as const,
       roles: ["Administrador Institucional"],
       permissions: [INSTITUTIONAL_PERMISSION.GUARDIAN_LINK_REVIEW],
     } as unknown as InstitutionalUser;
@@ -101,6 +133,14 @@ describe("institutional home access", () => {
         documentNumber: "12345678",
         institutionId: "institution-1",
         delegated: true,
+        capabilities: {
+          canViewOwnEnrollmentApplications: true,
+          canManageOwnEnrollmentApplications: true,
+          canViewOwnFormation: true,
+          canViewTeaching: false,
+          canUpdateTeachingAcademicStatus: false,
+        },
+        systemRoleCodes: ["STUDENT"] as const,
         roles: ["Estudiante"],
         permissions: [INSTITUTIONAL_PERMISSION.ACADEMIC_OFFER_READ, ...selectedPermissions],
         actorPermissions,

@@ -13,6 +13,7 @@ type MyEnrollmentApplicationTableContainerProps = PaginationParams & {
   hasFilters?: boolean;
   currentPersonId?: string;
   showApplicant?: boolean;
+  canManageApplications?: boolean;
 };
 
 export async function MyEnrollmentApplicationTableContainer({
@@ -23,6 +24,7 @@ export async function MyEnrollmentApplicationTableContainer({
   size,
   currentPersonId,
   showApplicant,
+  canManageApplications = false,
 }: MyEnrollmentApplicationTableContainerProps): Promise<ReactElement> {
   const data = await dataPromise;
 
@@ -33,6 +35,7 @@ export async function MyEnrollmentApplicationTableContainer({
       data={data}
       page={page}
       showApplicant={showApplicant}
+      canManageApplications={canManageApplications}
       size={size}
       status={status}
       hasFilters={hasFilters}

@@ -17,6 +17,7 @@ import {
 } from "@features/enrollment-applications/services/enrollment-application.service";
 import { ENROLLMENT_APPLICATION_STATUS } from "@features/enrollment-applications/types/enrollment-application-status.types";
 import { fetchOperatingProfile } from "@features/guardian-workspace/services/operating-profile.service";
+import { InstitutionalAccessDenied } from "@features/institutional-auth/components/institutional-access-denied";
 import { InstitutionalBreadcrumb } from "@features/institutional-auth/components/institutional-breadcrumb";
 import { requireInstitutionalUser } from "@features/institutional-auth/services/get-institutional-user.service";
 import { getInstitutionalMetadata } from "@features/institutional-auth/utils/institutional-metadata.util";
@@ -55,15 +56,19 @@ export default async function MyEnrollmentApplicationDetailPage({
 
   const profile = await fetchOperatingProfile(personId);
 
+  if (!profile.capabilities.canViewOwnEnrollmentApplications) {
+    return <InstitutionalAccessDenied />;
+  }
+
   const application = await fetchEnrollmentApplicationById(applicationId, personId);
 
-  const isEditable = application.status === ENROLLMENT_APPLICATION_STATUS.DRAFT;
+  const isEditable = application.status === ENROLLMENT_APPLICATION_STATUS.DRAFT && profile.capabilities.canManageOwnEnrollmentApplications;
 
   const detailLabel = isEditable ? "Continuar inscripción" : "Detalle de inscripción";
 
   const detailContext = [application.trainingPathName, application.academicYear].filter(Boolean).join(" ");
 
-  const breadcrumbLabel = !isEditable && detailContext ? `${detailLabel} · ${detailContext}` : detailLabel;
+  const breadcrumbLabel = !isEditable && detailContext ? detailContext : detailLabel;
 
   const PageIcon = isEditable ? FilePenLineIcon : ClipboardListIcon;
 

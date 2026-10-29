@@ -20,6 +20,14 @@ const USER: InstitutionalUser = {
   lastName: "Pérez",
   documentNumber: "12345678",
   institutionId: "institution-1",
+  capabilities: {
+    canViewOwnEnrollmentApplications: false,
+    canManageOwnEnrollmentApplications: false,
+    canViewOwnFormation: false,
+    canViewTeaching: false,
+    canUpdateTeachingAcademicStatus: false,
+  },
+  systemRoleCodes: [] as const,
   roles: [],
   permissions: [],
 };
@@ -33,6 +41,12 @@ describe("Representative access without academic escalation", () => {
     const user: InstitutionalUser = {
       ...USER,
       roles,
+      capabilities: {
+        ...USER.capabilities,
+        canViewOwnEnrollmentApplications: ownEnrollment,
+        canManageOwnEnrollmentApplications: ownEnrollment,
+      },
+      systemRoleCodes: roles.map((role) => (role === "Representante" ? "REPRESENTATIVE" : "APPLICANT")),
       permissions: canRequest ? [INSTITUTIONAL_PERMISSION.GUARDIAN_LINK_REQUEST] : [],
       canRequestGuardianLinks: canRequest,
     };
@@ -63,6 +77,12 @@ describe("Representative access without academic escalation", () => {
       ...USER,
       delegated: true,
       actorPersonId: "representative-1",
+      capabilities: {
+        ...USER.capabilities,
+        canViewOwnEnrollmentApplications: true,
+        canManageOwnEnrollmentApplications: true,
+      },
+      systemRoleCodes: ["APPLICANT"] as const,
       roles: ["Postulante"],
       permissions: [],
       canRequestGuardianLinks: true,
@@ -81,6 +101,18 @@ describe("Representative access without academic escalation", () => {
   it("requires permission for history and formation only for Student", () => {
     expect(canManageDependents(USER)).toBe(false);
     expect(getInstitutionalEnrollmentHomeLinks(USER).map(({ href }) => href)).toEqual([]);
-    expect(canViewOwnFormation({ ...USER, roles: ["Estudiante", "Representante"] })).toBe(true);
+    expect(
+      canViewOwnFormation({
+        ...USER,
+        capabilities: {
+          ...USER.capabilities,
+          canViewOwnEnrollmentApplications: true,
+          canManageOwnEnrollmentApplications: true,
+          canViewOwnFormation: true,
+        },
+        systemRoleCodes: ["STUDENT", "REPRESENTATIVE"] as const,
+        roles: ["Estudiante", "Representante"],
+      }),
+    ).toBe(true);
   });
 });
