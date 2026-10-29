@@ -11,6 +11,7 @@ import { TooltipProvider } from "@common/components/ui/tooltip";
 import { getRequestInstitution } from "@common/services/institutional-host/institutional-host.service";
 import { getBrandFaviconIcons } from "@common/utils/brand-favicon.util";
 import { cn } from "@common/utils/cn.util";
+import { IPHONE_STARTUP_IMAGES } from "@common/utils/pwa-startup-images.util";
 
 import type { PublicInstitution } from "@features/institutions/types/public-institution.types";
 
@@ -54,6 +55,7 @@ export async function generateMetadata(): Promise<Metadata> {
           capable: true,
           title: appName,
           statusBarStyle: "default",
+          startupImage: IPHONE_STARTUP_IMAGES,
         }
       : false,
     icons: getBrandFaviconIcons(institution),

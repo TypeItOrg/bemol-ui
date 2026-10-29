@@ -2,6 +2,7 @@
 
 import type { ComponentProps, ReactElement } from "react";
 
+import { PwaInstallCard } from "@common/components/pwa-install";
 import { Sidebar, SidebarContent, SidebarFooter, SidebarMenu, SidebarMenuItem } from "@common/components/ui/sidebar";
 import { useMobileSidebarNavigation } from "@common/hooks/use-mobile-sidebar-navigation";
 import { cn } from "@common/utils/cn.util";
@@ -25,6 +26,7 @@ export function InstitutionalSidebar({ user, navigationSections, className, ...p
         <InstitutionalSidebarNav sections={navigationSections} navigation={navigation} />
       </SidebarContent>
       <SidebarFooter className="border-sidebar-border border-t p-4 group-data-[collapsible=icon]:items-center">
+        <PwaInstallCard />
         <SidebarMenu>
           <SidebarMenuItem>
             <InstitutionalProfileMenu user={user} onNavigate={navigation.handleNavigation} />

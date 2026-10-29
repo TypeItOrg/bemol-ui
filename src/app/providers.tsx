@@ -5,6 +5,7 @@ import { useState, type ReactElement, type ReactNode } from "react";
 import { MutationCache, QueryCache, QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
 
+import { PwaInstallProvider } from "@common/components/pwa-install";
 import { PwaRuntime } from "@common/components/pwa-runtime";
 import { Toaster } from "@common/components/ui/sonner";
 import { PWA_THEME_COLOR_SCRIPT } from "@common/services/pwa/pwa.service";
@@ -70,7 +71,7 @@ export function Providers({ children }: { children: ReactNode }): ReactElement {
       />
       <QueryClientProvider client={queryClient}>
         <PwaRuntime />
-        {children}
+        <PwaInstallProvider>{children}</PwaInstallProvider>
         <Toaster />
       </QueryClientProvider>
     </NextThemesProvider>

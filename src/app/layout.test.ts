@@ -1,4 +1,5 @@
 import { getRequestInstitution } from "@common/services/institutional-host/institutional-host.service";
+import { IPHONE_STARTUP_IMAGES } from "@common/utils/pwa-startup-images.util";
 
 import { metadata as adminMetadata } from "@app/admin/layout";
 import { generateMetadata, viewport } from "@app/layout";
@@ -17,7 +18,12 @@ it("declares the platform PWA only inside the admin layout, not on general insti
   expect(metadata.manifest).toBeNull();
   expect(metadata.appleWebApp).toBe(false);
   expect(adminMetadata.manifest).toBe("/manifest.webmanifest");
-  expect(adminMetadata.appleWebApp).toEqual({ capable: true, title: "Administración - Bemol", statusBarStyle: "default" });
+  expect(adminMetadata.appleWebApp).toEqual({
+    capable: true,
+    title: "Administración - Bemol",
+    statusBarStyle: "default",
+    startupImage: IPHONE_STARTUP_IMAGES,
+  });
   expect(metadata.icons).toMatchObject({ apple: [{ url: "/brand/apple-touch-icon.png", sizes: "180x180", type: "image/png" }] });
   expect(viewport).toEqual({ viewportFit: "cover", colorScheme: "light dark" });
 });

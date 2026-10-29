@@ -1,12 +1,36 @@
 # PWA de Bemol
 
-## Instalación manual
+## Instalación
+
+En Android y navegadores de escritorio compatibles, el pie del menú lateral ofrece
+«Instalar aplicación» cuando el navegador notifica que puede abrir su confirmación nativa.
+El acceso es compartido por administración
+y el portal institucional; permanece visible y deshabilitado mientras está abierto
+el diálogo nativo. Se oculta al terminar ese intento, al instalar o al usar Bemol
+como aplicación. Un nuevo evento del navegador vuelve a habilitarlo si corresponde;
+cada evento de instalación solo puede usarse una vez.
+No aparece en iPhone ni navegadores sin instalación directa disponible.
+No hay guías, ventanas automáticas ni avisos de instalación.
+
+El login institucional con contraseña o passkey guarda las cookies en la Server
+Action y devuelve el destino fijo `/`. El cliente navega con el router SPA, sin
+recargar el documento ni pasar por la petición interna de una redirección de acción.
+El destino no viene del formulario; la validación de institución y sesión sigue
+en el servidor y el formulario permanece bloqueado hasta completar la navegación.
+
+Para las demás redirecciones, el proxy no transmite RSC cuando `Host` difiere de
+`X-Forwarded-Host`. Si Next sigue
+internamente una redirección de Server Action usando su host interno, se deja que
+el navegador cargue el destino completo con el host original. Esto conserva el
+manifiesto institucional sin pedir una recarga manual ni confiar
+en `X-Forwarded-Host` para seleccionar la institución. Las navegaciones SPA habituales
+no cambian.
 
 Abrir el sitio con conexión y usar la opción de instalar del navegador. En Chrome/Edge
 de escritorio puede aparecer en la barra de direcciones o en el menú. En Android,
 buscar «Instalar aplicación» o «Agregar a pantalla de inicio» según el navegador.
 En iPhone, usar Compartir → Agregar a pantalla de inicio. La disponibilidad y el
-texto exacto dependen del navegador y del sistema operativo; no hay promoción propia.
+texto exacto dependen del navegador y del sistema operativo.
 
 | Origen                       | Nombre instalado       | Nombre corto           | Inicio   |
 | ---------------------------- | ---------------------- | ---------------------- | -------- |
@@ -156,6 +180,25 @@ El push a `staging` activa el despliegue existente y requiere autorización expl
   worker con clientes abiertos. El navegador integrado no expone esos controles.
 
 No se usaron cuentas o datos reales, no se probó autenticación y no se desplegó.
+
+### Evidencia local del 2026-10-29
+
+- Navegador integrado, cuenta demo y `cboero.localhost:3000`: antes del ajuste,
+  la redirección de autenticación cambiaba internamente `Host` a `localhost:3000`
+  y quitaba el enlace al manifiesto.
+- Tras el ajuste, dos ingresos y un cierre de sesión conservaron el manifiesto y
+  el nombre institucional sin recarga manual, inicialmente mediante el fallback
+  de navegación completa. Navegar a Institución y volver al
+  inicio también conservó el manifiesto.
+- El ajuste posterior del login institucional conserva SPA: el ingreso real con
+  contraseña mantuvo el mismo `performance.timeOrigin` en login e inicio, además
+  del manifiesto y nombre institucional. Se retiró la instrumentación temporal.
+- El acceso de instalación ahora conserva la tarjeta deshabilitada mientras espera
+  la respuesta de `prompt()`. Este estado tiene revisión de código, no comprobación
+  nativa desde el navegador integrado.
+- Formato, ESLint y TypeScript correctos. No se ejecutaron tests automatizados.
+- El navegador integrado no ofreció instalación nativa: no se verificó la apertura
+  del diálogo en Brave ni la instalación en Android/iPhone físicos. No se desplegó.
 
 ## Rollback
 

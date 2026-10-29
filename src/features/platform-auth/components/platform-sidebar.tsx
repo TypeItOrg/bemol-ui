@@ -2,6 +2,7 @@
 
 import type { ComponentProps } from "react";
 
+import { PwaInstallCard } from "@common/components/pwa-install";
 import { Sidebar, SidebarContent, SidebarFooter } from "@common/components/ui/sidebar";
 import { cn } from "@common/utils/cn.util";
 
@@ -27,6 +28,7 @@ export function PlatformSidebar({ className, ...props }: ComponentProps<typeof S
         <PlatformSidebarNav sections={PLATFORM_NAVIGATION_SECTIONS} />
       </SidebarContent>
       <SidebarFooter className="border-sidebar-border border-t p-4 group-data-[collapsible=icon]:items-center">
+        <PwaInstallCard />
         {account ? <PlatformSidebarUser user={account} /> : null}
       </SidebarFooter>
     </Sidebar>
