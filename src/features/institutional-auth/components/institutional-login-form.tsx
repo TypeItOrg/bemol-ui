@@ -80,7 +80,6 @@ export function InstitutionalLoginForm(props: InstitutionalLoginFormProps): Reac
           passkey={passkey}
           onPasskeyLogin={loginWithPasskey}
         />
-        <p className="text-muted-foreground text-center text-sm">Para solicitar acceso, comunicate con tu institución.</p>
       </form>
     </div>
   );

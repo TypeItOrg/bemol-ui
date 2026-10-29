@@ -37,7 +37,7 @@ export async function identifyInstitutionalUser(
 
   if (!output.success) {
     if (output.error.status === 404) {
-      return { error: INSTITUTIONAL_AUTH_ERROR_MESSAGES.ACCOUNT_NOT_FOUND };
+      return { error: INSTITUTIONAL_AUTH_ERROR_MESSAGES.INVALID_CREDENTIALS };
     }
 
     return { error: output.error.message || INSTITUTIONAL_AUTH_ERROR_MESSAGES.INVALID_FORM };

@@ -155,7 +155,7 @@ describe("institutional authentication over HTTP", () => {
     server.use(http.post(`${API_URL}/api/v1/auth/login/identify`, () => HttpResponse.json({ status: 404, message: "not found" }, { status: 404 })));
     const { institutionalCredentialsLogin } = await import("@features/institutional-auth/actions/institutional-credentials-login.action");
     await expect(institutionalCredentialsLogin({}, credentialsForm())).resolves.toEqual({
-      error: INSTITUTIONAL_AUTH_ERROR_MESSAGES.ACCOUNT_NOT_FOUND,
+      error: INSTITUTIONAL_AUTH_ERROR_MESSAGES.INVALID_CREDENTIALS,
     });
     expect(requests).toHaveLength(0);
     expect(cookieValues.size).toBe(0);
