@@ -8,6 +8,7 @@ import { Button } from "@common/components/ui/button";
 import { Card } from "@common/components/ui/card";
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@common/components/ui/empty";
 import { COMMON_ERROR_MESSAGES } from "@common/constants/error-messages.constants";
+import { useApiUnavailableRedirect } from "@common/hooks/use-api-unavailable-redirect";
 import { cn } from "@common/utils/cn.util";
 
 type BlockingErrorProps = {
@@ -26,6 +27,8 @@ export function BlockingError({
   description = COMMON_ERROR_MESSAGES.BLOCKING_PAGE_DESCRIPTION,
   homeHref = "/",
 }: BlockingErrorProps): ReactElement {
+  useApiUnavailableRedirect();
+
   return (
     <main className={cn("bg-muted flex min-h-full flex-1 items-center justify-center p-6", className)}>
       <Card className="bg-background w-full max-w-lg p-6 md:p-8">

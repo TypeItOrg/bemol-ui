@@ -35,16 +35,19 @@ function createRequest(
   host: string,
   {
     path = "/auth/login",
+    method = "GET",
     cookies = "",
     headers = {},
   }: {
     path?: string;
+    method?: string;
     cookies?: string;
     headers?: Record<string, string>;
   } = {},
 ): NextRequest {
   return new NextRequest(`https://${host}${path}`, {
-    headers: { host, cookie: cookies, ...headers },
+    method,
+    headers: { host, cookie: cookies, accept: "text/html", ...headers },
   });
 }
 
@@ -97,8 +100,10 @@ it("[A03.untrusted-header] rebuilds branded context from actual configured Host"
   expect(response.headers.get("x-middleware-request-x-institutional-host")).toBe("cboero.testing.typeit.com.ar");
 });
 
-it.each([404, 503])("[I02.unknown-inactive] branded lookup failure %s does not fall back to selector", async (status) => {
-  fetchMock.mockResolvedValue(new Response(null, { status }));
+it.each([404, 503])("[I02.unknown-inactive] branded lookup failure %s with a healthy API keeps the institutional error", async (status) => {
+  fetchMock.mockImplementation(async (url: URL) =>
+    url.pathname === "/actuator/health/readiness" ? Response.json({ status: "UP" }) : new Response(null, { status }),
+  );
 
   const response = await proxy(createRequest("cboero.testing.typeit.com.ar"));
 
@@ -106,17 +111,61 @@ it.each([404, 503])("[I02.unknown-inactive] branded lookup failure %s does not f
   expect(response.headers.get("x-middleware-rewrite")).toContain("/institutional-unavailable");
   expect(response.headers.get("x-middleware-rewrite")).toContain(`status=${status}`);
   expect(response.headers.get("cache-control")).toBe("no-store");
+  expect(fetchMock).toHaveBeenCalledTimes(status === 404 ? 1 : 2);
 });
 
-it("[I02.unavailable] transport outage returns 503", async () => {
-  fetchMock.mockRejectedValue(new Error("offline"));
+it.each(["GET", "HEAD"])("[I02.unavailable] HTTP outage serves maintenance for HTML %s navigation", async (method) => {
+  fetchMock.mockResolvedValue(new Response(null, { status: 503 }));
 
-  const response = await proxy(createRequest("cboero.testing.typeit.com.ar"));
+  const response = await proxy(createRequest("cboero.testing.typeit.com.ar", { method }));
 
   expect(response.status).toBe(503);
-  expect(response.headers.get("x-middleware-rewrite")).toContain("/institutional-unavailable");
-  expect(response.headers.get("x-middleware-rewrite")).toContain("status=503");
+  expect(response.headers.get("x-middleware-rewrite")).toBe("https://cboero.testing.typeit.com.ar/maintenance.html");
   expect(response.headers.get("cache-control")).toBe("no-store");
+  expect(response.headers.get("retry-after")).toBe("5");
+  expect(fetchMock.mock.calls[1][0].pathname).toBe("/actuator/health/readiness");
+});
+
+it("[I02.unavailable] transport outage serves maintenance without redirecting away from the original page", async () => {
+  fetchMock.mockRejectedValue(new Error("offline"));
+
+  const response = await proxy(createRequest("cboero.testing.typeit.com.ar", { path: "/self-service?tab=enrollments" }));
+
+  expect(response.status).toBe(503);
+  expect(response.headers.get("x-middleware-rewrite")).toBe("https://cboero.testing.typeit.com.ar/maintenance.html");
+  expect(response.headers.get("location")).toBeNull();
+  expect(response.headers.get("cache-control")).toBe("no-store");
+  expect(response.headers.get("retry-after")).toBe("5");
+});
+
+it.each<{ name: string; path: string; method: string; headers: Record<string, string>; json: boolean }>([
+  { name: "API JSON", path: "/api/institutional/search", method: "GET", headers: { accept: "application/json" }, json: true },
+  { name: "RSC", path: "/self-service", method: "GET", headers: { rsc: "1" }, json: false },
+  { name: "Server Action", path: "/self-service", method: "POST", headers: { "next-action": "action-id" }, json: false },
+])("[I02.unavailable] outage never serves maintenance HTML for $name requests", async ({ path, method, headers, json }) => {
+  fetchMock.mockRejectedValue(new Error("offline"));
+
+  const response = await proxy(
+    createRequest("cboero.testing.typeit.com.ar", {
+      path,
+      method,
+      headers,
+      cookies: `${INSTITUTIONAL_REFRESH_TOKEN_COOKIE}=existing-refresh`,
+    }),
+  );
+
+  expect(response.status).toBe(503);
+  expect(response.headers.get("x-middleware-rewrite")).toBeNull();
+  expect(response.headers.get("cache-control")).toBe("no-store");
+  expect(response.headers.get("retry-after")).toBe("5");
+  expect(response.cookies.get(INSTITUTIONAL_REFRESH_TOKEN_COOKIE)).toBeUndefined();
+
+  if (json) {
+    expect(response.headers.get("content-type")).toContain("application/json");
+    await expect(response.json()).resolves.toEqual({ message: expect.any(String) });
+  } else {
+    await expect(response.text()).resolves.toBe("");
+  }
 });
 
 it("[A02.no-logo] health probe on branded host does not require tenant resolution", async () => {

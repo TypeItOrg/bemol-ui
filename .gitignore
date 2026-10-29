@@ -19,6 +19,7 @@
 
 # production
 /build
+/public/maintenance.html
 
 # misc
 .DS_Store

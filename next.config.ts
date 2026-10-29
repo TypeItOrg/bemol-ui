@@ -11,6 +11,10 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
+        source: "/maintenance.html",
+        headers: [{ key: "Cache-Control", value: "no-store" }],
+      },
+      {
         source: "/sw.js",
         headers: [
           { key: "Content-Type", value: "application/javascript; charset=utf-8" },

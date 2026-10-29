@@ -2,6 +2,7 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
 import { COMMON_ERROR_MESSAGES } from "@common/constants/error-messages.constants";
+import { getApiUnavailableResponse } from "@common/services/auth-proxy/api-unavailable-response.util";
 import type { AuthProxyPolicy } from "@common/services/auth-proxy/auth-proxy-policy.types";
 import type { RefreshAttempt } from "@common/services/auth-proxy/refresh-attempt.types";
 import type { RefreshedTokens } from "@common/services/auth-proxy/refreshed-tokens.types";
@@ -21,6 +22,12 @@ export async function handleGuestOnlyRoute(request: NextRequest, policy: AuthPro
 
     if (sessionStatus === SessionStatus.VALID) {
       return NextResponse.redirect(policy.getAuthenticatedRedirect(request));
+    }
+
+    if (sessionStatus === SessionStatus.UNAVAILABLE) {
+      const unavailable = await getApiUnavailableResponse(request);
+
+      return unavailable ?? nextWithRequestHeaders(request);
     }
   }
 
@@ -46,6 +53,14 @@ export async function handleGuestOnlyRoute(request: NextRequest, policy: AuthPro
     policy.setRefreshedCookies(response, refreshAttempt.tokens);
 
     return response;
+  }
+
+  if (refreshAttempt.status === undefined || refreshAttempt.status >= 500) {
+    const unavailable = await getApiUnavailableResponse(request);
+
+    if (unavailable) {
+      return unavailable;
+    }
   }
 
   const response = nextWithRequestHeaders(request);
@@ -74,6 +89,14 @@ export async function handleProtectedRoute(request: NextRequest, policy: AuthPro
 
   if (refreshAttempt.tokens) {
     return createRefreshedSessionResponse(request, policy, refreshAttempt.tokens);
+  }
+
+  if (refreshAttempt.status === undefined || refreshAttempt.status >= 500) {
+    const unavailable = await getApiUnavailableResponse(request);
+
+    if (unavailable) {
+      return unavailable;
+    }
   }
 
   return createUnauthenticatedResponse(request, policy, refreshAttempt.status);

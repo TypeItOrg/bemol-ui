@@ -8,8 +8,8 @@
     "pnpm": "12.3.4"
   },
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
+    "dev": "node scripts/build-maintenance.mjs && next dev",
+    "build": "node scripts/build-maintenance.mjs && next build",
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",

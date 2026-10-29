@@ -205,14 +205,21 @@ describe("proxy", () => {
     expect(response.cookies.get(PLATFORM_REFRESH_TOKEN_COOKIE)?.value).toBe("");
   });
 
-  it("redirects to login when refresh throws", async () => {
+  it("serves maintenance without clearing cookies when refresh is unavailable", async () => {
     fetchMock.mockRejectedValue(new Error("network"));
 
     const request = createRequest("/admin/orders?page=2", `${PLATFORM_REFRESH_TOKEN_COOKIE}=refresh-token`);
 
+    request.headers.set("accept", "text/html");
+
     const response = await proxy(request);
 
-    expectPlatformLoginRedirect(response);
+    expect(response.status).toBe(503);
+    expect(response.headers.get("x-middleware-rewrite")).toBe("https://app.example.test/maintenance.html");
+    expect(response.headers.get("location")).toBeNull();
+    expect(response.headers.get("cache-control")).toBe("no-store");
+    expect(response.headers.get("retry-after")).toBe("5");
+    expect(response.cookies.get(PLATFORM_ACCESS_TOKEN_COOKIE)).toBeUndefined();
     expect(response.cookies.get(PLATFORM_REFRESH_TOKEN_COOKIE)).toBeUndefined();
   });
 

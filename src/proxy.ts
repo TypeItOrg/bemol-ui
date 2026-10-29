@@ -1,6 +1,7 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
+import { getApiUnavailableResponse } from "@common/services/auth-proxy/api-unavailable-response.util";
 import { INSTITUTIONAL_UNAVAILABLE_PATH, RouteAccess, getRouteAccess } from "@common/services/auth-proxy/auth-proxy-route.util";
 import { handleGuestOnlyRoute, handleProtectedRoute } from "@common/services/auth-proxy/auth-proxy.service";
 import { InstitutionalHostError } from "@common/services/institutional-host/institutional-host-error";
@@ -41,6 +42,14 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
     }
   } catch (error) {
     const status = error instanceof InstitutionalHostError ? error.status : 503;
+
+    if (status === 503) {
+      const unavailable = await getApiUnavailableResponse(request);
+
+      if (unavailable) {
+        return unavailable;
+      }
+    }
 
     const message = error instanceof InstitutionalHostError ? error.message : "No se pudo consultar la institución. Intentá nuevamente.";
 
