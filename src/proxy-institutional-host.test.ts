@@ -100,6 +100,33 @@ it("[A03.untrusted-header] rebuilds branded context from actual configured Host"
   expect(response.headers.get("x-middleware-request-x-institutional-host")).toBe("cboero.testing.typeit.com.ar");
 });
 
+it("does not stream RSC rendered for a different internal host", async () => {
+  const response = await proxy(
+    createRequest("localhost:3000", {
+      headers: { rsc: "1", "X-Forwarded-Host": "cboero.testing.typeit.com.ar" },
+    }),
+  );
+
+  expect(response.status).toBe(404);
+  expect(response.headers.get("cache-control")).toBe("no-store");
+  expect(response.headers.get("x-middleware-rewrite")).toBeNull();
+  await expect(response.text()).resolves.toBe("");
+  expect(fetchMock).not.toHaveBeenCalled();
+});
+
+it("keeps ordinary branded RSC navigation when the forwarded host matches", async () => {
+  fetchMock.mockResolvedValue(new Response(JSON.stringify(boeroInstitution)));
+
+  const response = await proxy(
+    createRequest("cboero.testing.typeit.com.ar", {
+      headers: { rsc: "1", "X-Forwarded-Host": "cboero.testing.typeit.com.ar" },
+    }),
+  );
+
+  expect(response.status).toBe(200);
+  expect(response.headers.get("x-middleware-request-x-institutional-host")).toBe("cboero.testing.typeit.com.ar");
+});
+
 it.each([404, 503])("[I02.unknown-inactive] branded lookup failure %s with a healthy API keeps the institutional error", async (status) => {
   fetchMock.mockImplementation(async (url: URL) =>
     url.pathname === "/actuator/health/readiness" ? Response.json({ status: "UP" }) : new Response(null, { status }),

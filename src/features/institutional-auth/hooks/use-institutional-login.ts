@@ -3,6 +3,7 @@
 import { startTransition, useActionState, useEffect, useRef, useState, type SyntheticEvent } from "react";
 
 import { isRedirectError } from "next/dist/client/components/redirect-error";
+import { useRouter } from "next/navigation";
 
 import { consumeInstitutionalLoginFlashes } from "@features/institutional-auth/actions/consume-institutional-login-flashes.action";
 import { institutionalCredentialsLogin } from "@features/institutional-auth/actions/institutional-credentials-login.action";
@@ -12,6 +13,8 @@ import { useInstitutionalPasskeyLogin } from "@features/institutional-auth/hooks
 import type { InstitutionalCredentialsLoginState } from "@features/institutional-auth/types/institutional-credentials-login-state.types";
 
 export function useInstitutionalLogin({ emailVerified = false, passwordChanged = false }: { emailVerified?: boolean; passwordChanged?: boolean }) {
+  const router = useRouter();
+
   const fixedInstitution = useInstitutionalBrand();
 
   const [identity, setIdentity] = useState<{
@@ -44,6 +47,12 @@ export function useInstitutionalLogin({ emailVerified = false, passwordChanged =
   >(async (_previous, submitted) => {
     try {
       const result = await institutionalCredentialsLogin({}, submitted.formData);
+
+      if (result.redirectTo) {
+        router.push(result.redirectTo);
+
+        return { ...result, revision: submitted.revision };
+      }
 
       setPending(false);
       setError(result.error ?? null);

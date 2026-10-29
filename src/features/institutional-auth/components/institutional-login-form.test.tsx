@@ -1,10 +1,16 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import { beginInstitutionalPasskeyLogin } from "@features/institutional-auth/actions/begin-passkey-login.action";
 import { institutionalCredentialsLogin } from "@features/institutional-auth/actions/institutional-credentials-login.action";
 import { InstitutionalBrandProvider } from "@features/institutional-auth/components/institutional-brand-context";
 import { InstitutionalLoginForm } from "@features/institutional-auth/components/institutional-login-form";
+
+const pushMock = jest.fn();
+
+jest.mock("next/navigation", () => ({
+  useRouter: () => ({ push: pushMock }),
+}));
 
 jest.mock("@features/institutional-auth/components/institution-picker", () => ({
   InstitutionPicker: () => <input name="institutionId" defaultValue="inst-1" aria-label="Institución" />,
@@ -99,6 +105,22 @@ describe("InstitutionalLoginForm", () => {
     expect(screen.getByLabelText(/Contraseña/)).toHaveValue("kept-password");
     expect(screen.getByLabelText(/Documento/)).toHaveValue("12345678");
     expect(screen.queryByRole("button", { name: "Continuar" })).not.toBeInTheDocument();
+  });
+
+  it("navigates after password login and keeps the form locked until unmount", async () => {
+    const user = userEvent.setup();
+    credentialsMock.mockResolvedValue({ redirectTo: "/" });
+    render(<InstitutionalLoginForm />);
+
+    await user.type(screen.getByLabelText(/Documento/), "12345678");
+    await user.type(screen.getByLabelText(/Contraseña/), "secret-password");
+    const submit = screen.getByRole("button", { name: "Iniciar sesión" });
+    await user.click(submit);
+
+    await waitFor(() => expect(pushMock).toHaveBeenCalledWith("/"));
+    expect(screen.getByLabelText(/Documento/)).toBeDisabled();
+    expect(submit).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Usar una llave de acceso" })).toBeDisabled();
   });
 
   it("drops the previous password error when changing the account document", async () => {

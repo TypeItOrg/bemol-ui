@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 
-import { isRedirectError } from "next/dist/client/components/redirect-error";
+import { useRouter } from "next/navigation";
 
 import { beginInstitutionalPasskeyLogin } from "@features/institutional-auth/actions/begin-passkey-login.action";
 import { finishPasskeyLogin } from "@features/institutional-auth/actions/finish-passkey-login.action";
@@ -22,6 +22,8 @@ type InstitutionalPasskeyLoginProps = {
 };
 
 export function useInstitutionalPasskeyLogin({ input, onFieldErrors, rememberMe, onPendingChange, onError }: InstitutionalPasskeyLoginProps) {
+  const router = useRouter();
+
   const [ceremony, setCeremony] = useState<PasskeyCeremonyState>({ phase: "idle" });
 
   const ceremonyRef = useRef<AbortController | null>(null);
@@ -119,17 +121,17 @@ export function useInstitutionalPasskeyLogin({ input, onFieldErrors, rememberMe,
         return;
       }
 
-      if (finish.error) {
-        onError(finish.error);
-      }
-    } catch (error) {
-      if (isRedirectError(error)) {
-        // Next already navigates from the action response; keep the controls locked until unmount.
+      if (finish.redirectTo) {
+        router.push(finish.redirectTo);
         ceremonyRef.current = null;
 
         return;
       }
 
+      if (finish.error) {
+        onError(finish.error);
+      }
+    } catch (error) {
       if (process.env.NODE_ENV === "development") {
         console.debug("[passkey] login ceremony settled with error", error instanceof DOMException ? error.name : error?.constructor?.name);
       }

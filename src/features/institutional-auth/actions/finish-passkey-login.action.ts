@@ -1,7 +1,6 @@
 "use server";
 
 import { headers } from "next/headers";
-import { redirect } from "next/navigation";
 
 import { z } from "zod";
 
@@ -54,5 +53,6 @@ export async function finishPasskeyLogin(input: {
   }
 
   await setInstitutionalAuthCookies(output.data.tokens, parsed.data.rememberMe);
-  redirect("/");
+
+  return { redirectTo: "/" };
 }

@@ -14,6 +14,10 @@ import { ResetInstitutionalPasswordForm } from "@features/institutional-auth/com
 import ActivateAccountPage from "@app/auth/(institutional)/activate-account/page";
 import ResetPasswordPage from "@app/auth/(institutional)/password-recovery/reset/page";
 
+jest.mock("next/navigation", () => ({
+  useRouter: () => ({ push: jest.fn() }),
+}));
+
 jest.mock("@features/institutional-auth/components/institution-picker", () => ({
   InstitutionPicker: ({ id, value }: { id: string; value?: string }) => (
     <input id={id} aria-label="Institución" name="institutionId" defaultValue={value ?? ""} />

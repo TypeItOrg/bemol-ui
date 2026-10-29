@@ -135,7 +135,7 @@ describe("institutional authentication over HTTP", () => {
       expect(cookieValues.has(ACCESS_COOKIE)).toBe(false);
       expect(cookieValues.has(REFRESH_COOKIE)).toBe(false);
 
-      await expect(institutionalCredentialsLogin({}, credentialsForm(rememberMe ? { rememberMe: "on" } : {}))).rejects.toMatchObject({ url: "/" });
+      await expect(institutionalCredentialsLogin({}, credentialsForm(rememberMe ? { rememberMe: "on" } : {}))).resolves.toEqual({ redirectTo: "/" });
       expect(cookieValues.get(ACCESS_COOKIE)).toBe(tokens.accessToken);
       expect(cookieValues.get(REFRESH_COOKIE)).toBe(tokens.refreshToken);
       expect(cookieMaxAges.get(REFRESH_COOKIE)).toBe(rememberMe ? 2592000 : 604800);

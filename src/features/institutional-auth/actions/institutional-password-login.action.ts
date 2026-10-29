@@ -1,7 +1,6 @@
 "use server";
 
 import { headers } from "next/headers";
-import { redirect } from "next/navigation";
 
 import { z } from "zod";
 
@@ -46,5 +45,6 @@ export async function institutionalPasswordLogin(
   }
 
   await setInstitutionalAuthCookies(output.data.tokens, rememberMe);
-  redirect("/");
+
+  return { redirectTo: "/" };
 }

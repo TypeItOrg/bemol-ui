@@ -6,6 +6,12 @@ import { finishPasskeyLogin } from "@features/institutional-auth/actions/finish-
 import { InstitutionalLoginForm } from "@features/institutional-auth/components/institutional-login-form";
 import { INSTITUTIONAL_AUTH_ERROR_MESSAGES } from "@features/institutional-auth/constants/error-messages.constants";
 
+const pushMock = jest.fn();
+
+jest.mock("next/navigation", () => ({
+  useRouter: () => ({ push: pushMock }),
+}));
+
 jest.mock("@features/institutional-auth/components/institution-picker", () => ({
   InstitutionPicker: ({ onValueChange }: { onValueChange: (value: string, item: { id: string; name: string }) => void }) => (
     <input
@@ -288,18 +294,16 @@ describe("InstitutionalLoginForm", () => {
       expect(screen.queryByText("¡Ups! Algo salió mal")).not.toBeInTheDocument();
     });
 
-    it("swallows NEXT_REDIRECT without flashing a passkey error", async () => {
+    it("keeps the controls locked while navigating after passkey login", async () => {
       await prepareLogin();
       getMock.mockResolvedValue(fakeCredential);
-      const redirectError = Object.assign(new Error("NEXT_REDIRECT"), {
-        digest: "NEXT_REDIRECT;push;/;307;",
-      });
-      finishMock.mockRejectedValueOnce(redirectError);
+      finishMock.mockResolvedValueOnce({ redirectTo: "/" });
 
       fireEvent.click(passkeyButton());
 
       await waitFor(() => expect(finishMock).toHaveBeenCalled());
       await waitFor(() => expect(passkeyButton()).toHaveAttribute("aria-busy", "true"));
+      expect(pushMock).toHaveBeenCalledWith("/");
       expect(screen.queryByText("¡Ups! Algo salió mal")).not.toBeInTheDocument();
       expect(screen.queryByText(INSTITUTIONAL_AUTH_ERROR_MESSAGES.PASSKEY_FAILED)).not.toBeInTheDocument();
     });

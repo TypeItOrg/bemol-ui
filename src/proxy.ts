@@ -30,6 +30,13 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
   }
 
   try {
+    const forwardedHost = request.headers.get("x-forwarded-host");
+
+    // Do not stream an action redirect rendered for Next's internal host.
+    if (request.headers.get("rsc") === "1" && forwardedHost && forwardedHost !== request.headers.get("host")) {
+      throw new InstitutionalHostError(404);
+    }
+
     rebuildInstitutionalHostHeader(request.headers, request.headers);
 
     const institution = await resolveRequestInstitution(request.headers);
