@@ -14,6 +14,7 @@ import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuSeparator,
 import { DataTableFilters } from "@common/components/ui/data-table-filters";
 import { useDataTableNavigation } from "@common/components/ui/data-table-navigation";
 import { DataTablePagination } from "@common/components/ui/data-table-pagination";
+import { DataTableSortableHead } from "@common/components/ui/data-table-sortable-head";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@common/components/ui/dropdown-menu";
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@common/components/ui/empty";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@common/components/ui/table";
@@ -91,9 +92,20 @@ export function GuardianLinkRequests({
                 <TableHead>Representante</TableHead>
                 <TableHead>Persona representada</TableHead>
                 <TableHead>Vínculo</TableHead>
-                <TableHead>Fecha de solicitud</TableHead>
+                <DataTableSortableHead
+                  field="createdAt"
+                  label="Fecha de solicitud"
+                  defaultDirection="desc"
+                  sort={query.sort}
+                  onSortChange={(sort) => navigate({ page: "0", sortField: sort.field, sortDirection: sort.direction })}
+                />
                 <TableHead>Documentación</TableHead>
-                <TableHead>Estado</TableHead>
+                <DataTableSortableHead
+                  field="status"
+                  label="Estado"
+                  sort={query.sort}
+                  onSortChange={(sort) => navigate({ page: "0", sortField: sort.field, sortDirection: sort.direction })}
+                />
               </TableRow>
             </TableHeader>
             <TableBody>

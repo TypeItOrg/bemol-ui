@@ -51,7 +51,7 @@ function RequestsFixture({
   institutionId: string;
   query?: Partial<GuardianLinksQuery>;
 }): ReactElement {
-  const query: GuardianLinksQuery = { page: 0, size: 10, search: "", ...overrides };
+  const query: GuardianLinksQuery = { page: 0, size: 10, search: "", sort: { field: "createdAt", direction: "desc" }, ...overrides };
 
   return (
     <GuardianLinkRequests
