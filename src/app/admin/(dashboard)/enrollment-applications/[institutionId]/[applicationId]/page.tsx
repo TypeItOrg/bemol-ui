@@ -82,7 +82,7 @@ export default async function PlatformEnrollmentApplicationDetailPage({
 
       <EnrollmentStatusCard
         application={application}
-        showApplicantAlert={false}
+        showApplicantGuidance={false}
         showRequirementChanges
         administrativeView
         scope={AcademicScope.ADMIN}

@@ -193,7 +193,7 @@ describe("EnrollmentWizard", () => {
     await confirmSubmission();
 
     await waitFor(() => expect(submitAction).toHaveBeenCalledWith("app-1", "person-1"));
-    expect(await screen.findByText("Solicitud en revisión")).toBeVisible();
+    expect(await screen.findByText("Enviada")).toBeVisible();
     expect(screen.getByText("Lucas Mendoza")).toBeVisible();
     expect(screen.queryByRole("tab", { name: /datos personales/i })).not.toBeInTheDocument();
   });
@@ -209,7 +209,7 @@ describe("EnrollmentWizard", () => {
     fireEvent.click(within(dialog).getByRole("button", { name: "Cancelar inscripción" }));
 
     await waitFor(() => expect(cancelAction).toHaveBeenCalledWith("app-1", "person-1"));
-    expect(await screen.findByText("Solicitud cancelada")).toBeVisible();
+    expect(await screen.findByText("Cancelada")).toBeVisible();
     expect(screen.queryByRole("tab", { name: /datos personales/i })).not.toBeInTheDocument();
   });
 
@@ -372,7 +372,7 @@ describe("EnrollmentWizard", () => {
     await user.click(screen.getByRole("button", { name: "Cancelar" }));
     await user.click(within(screen.getByRole("alertdialog")).getByRole("button", { name: "Cancelar inscripción" }));
 
-    expect(await screen.findByText("Solicitud cancelada")).toBeVisible();
+    expect(await screen.findByText("Cancelada")).toBeVisible();
     expect(cancelAction).toHaveBeenCalledTimes(2);
   });
 });

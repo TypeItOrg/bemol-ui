@@ -1,10 +1,10 @@
 "use client";
 
-import type { ReactElement } from "react";
+import { useId, type ReactElement } from "react";
 
 import { ClipboardCheckIcon } from "lucide-react";
 
-import { Card, CardHeader } from "@common/components/ui/card";
+import { Card, CardContent, CardHeader } from "@common/components/ui/card";
 
 import { AcademicScope } from "@features/academic/utils/academic-scope.util";
 import { EnrollmentAdmissionHistory } from "@features/enrollment-applications/components/enrollment-admission-history";
@@ -18,14 +18,14 @@ import { EnrollmentPreferenceSummary } from "@features/enrollment-applications/c
 import { EnrollmentResponsibleSummary } from "@features/enrollment-applications/components/enrollment-responsible-summary";
 import { EnrollmentSchoolingSummary } from "@features/enrollment-applications/components/enrollment-schooling-summary";
 import { EnrollmentSpacesSummary } from "@features/enrollment-applications/components/enrollment-spaces-summary";
-import { getStatusAlert } from "@features/enrollment-applications/components/enrollment-status-alert";
 import type { EnrollmentApplicationResponse } from "@features/enrollment-applications/types/enrollment-application-response.types";
 import { ENROLLMENT_APPLICATION_STATUS } from "@features/enrollment-applications/types/enrollment-application-status.types";
 import { formatEnrollmentApplicationDateTime } from "@features/enrollment-applications/utils/enrollment-application-date.util";
+import { getEnrollmentStatusDescription } from "@features/enrollment-applications/utils/enrollment-status-description.util";
 
 interface EnrollmentStatusCardProps {
   application: EnrollmentApplicationResponse;
-  showApplicantAlert?: boolean;
+  showApplicantGuidance?: boolean;
   showRequirementChanges?: boolean;
   administrativeView?: boolean;
   scope?: AcademicScope;
@@ -38,7 +38,7 @@ interface EnrollmentStatusCardProps {
 
 export function EnrollmentStatusCard({
   application,
-  showApplicantAlert = true,
+  showApplicantGuidance = true,
   showRequirementChanges = false,
   administrativeView = false,
   scope = AcademicScope.INSTITUTIONAL,
@@ -48,6 +48,10 @@ export function EnrollmentStatusCard({
   canRejectCourses = false,
   canReadCourseWaitlist = false,
 }: EnrollmentStatusCardProps): ReactElement {
+  const statusTitleId = useId();
+
+  const statusDescription = showApplicantGuidance ? getEnrollmentStatusDescription(application) : null;
+
   const data = application.data || {};
 
   const personal = data.personalData || {};
@@ -68,13 +72,15 @@ export function EnrollmentStatusCard({
 
   return (
     <div className="flex flex-col gap-4">
-      <Card className={SECTION_CARD_CLASS_NAME}>
+      <Card className={SECTION_CARD_CLASS_NAME} role="region" aria-labelledby={statusTitleId}>
         <CardHeader>
           <div className="grid min-w-0 grid-cols-[auto_minmax(0,1fr)] items-center gap-x-3 gap-y-2 @xl/card-header:grid-cols-[auto_minmax(0,1fr)_auto] @xl/card-header:gap-x-3.5 @xl/card-header:gap-y-0.5">
             <div className="bg-primary/10 text-primary flex size-10 shrink-0 items-center justify-center rounded-xl @xl/card-header:row-span-2 @xl/card-header:size-11">
               <ClipboardCheckIcon className="size-5" aria-hidden="true" />
             </div>
-            <h2 className="font-heading min-w-0 text-base leading-snug font-medium text-balance break-words">Estado de la solicitud</h2>
+            <h2 id={statusTitleId} className="font-heading min-w-0 text-base leading-snug font-medium text-balance break-words">
+              Estado de la solicitud
+            </h2>
             <div className="col-span-2 flex min-w-0 flex-col items-start gap-1 @xl/card-header:col-span-1 @xl/card-header:col-start-3 @xl/card-header:row-span-2 @xl/card-header:row-start-1 @xl/card-header:justify-self-end">
               <EnrollmentApplicationStatusBadge
                 status={application.status}
@@ -91,9 +97,16 @@ export function EnrollmentStatusCard({
             </p>
           </div>
         </CardHeader>
+        {statusDescription ? (
+          <CardContent>
+            <p
+              className={application.status === ENROLLMENT_APPLICATION_STATUS.REJECTED ? "text-destructive text-sm" : "text-muted-foreground text-sm"}
+            >
+              {statusDescription}
+            </p>
+          </CardContent>
+        ) : null}
       </Card>
-
-      {showApplicantAlert ? getStatusAlert(application) : null}
 
       {application.courses?.length ? (
         <EnrollmentApplicationCoursesManagement

@@ -90,7 +90,7 @@ export default async function EnrollmentApplicationDetailPage({ params, searchPa
 
       <EnrollmentStatusCard
         application={application}
-        showApplicantAlert={false}
+        showApplicantGuidance={false}
         showRequirementChanges
         administrativeView
         scope={AcademicScope.INSTITUTIONAL}

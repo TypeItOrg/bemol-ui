@@ -108,9 +108,10 @@ export function EnrollmentApplicationCoursesManagement({
                     {formatStudyPlanNameWithPrefix(course)} · {course.academicLevelName ?? "Sin nivel"}
                     {course.instrumentName ? ` · ${course.instrumentName}` : ""}
                   </p>
-                  {course.waitlistNumber ? (
+                  {course.status === "WAITLISTED" && course.waitlistNumber !== null ? (
                     <p className="text-muted-foreground mt-1 text-sm">
-                      Número histórico de espera: <span className="font-medium">{course.waitlistNumber}</span>
+                      Número de ingreso a la lista de espera: <span className="font-medium">{course.waitlistNumber}</span>
+                      <span className="block">No indica tu posición actual.</span>
                     </p>
                   ) : null}
                   {course.resolutionReasonText ? <p className="text-destructive mt-1 text-sm">{course.resolutionReasonText}</p> : null}
