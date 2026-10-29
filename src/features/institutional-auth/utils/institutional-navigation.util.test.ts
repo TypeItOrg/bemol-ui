@@ -161,7 +161,11 @@ describe("getInstitutionalNavigationSections", () => {
       ...USER,
       systemRoleCodes: ["INSTITUTIONAL_AUTHORITY"] as const,
       roles: ["Administrador Institucional"],
-      permissions: [INSTITUTIONAL_PERMISSION.ENROLLMENT_APPLICATION_READ],
+      permissions: [
+        INSTITUTIONAL_PERMISSION.ENROLLMENT_APPLICATION_READ,
+        INSTITUTIONAL_PERMISSION.OWN_ENROLLMENT_APPLICATION_READ,
+        INSTITUTIONAL_PERMISSION.OWN_ENROLLMENT_APPLICATION_MANAGE,
+      ],
     });
 
     expect(sections.find((section) => section.label === "Inscripciones")?.items).toEqual([

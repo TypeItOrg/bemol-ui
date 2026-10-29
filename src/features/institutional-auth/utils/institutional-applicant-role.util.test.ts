@@ -53,6 +53,17 @@ describe("institutional applicant role utils", () => {
     it.each(["Postulante", "Estudiante"])("allows a %s", (role) => {
       expect(canViewOwnEnrollmentApplications(createUser([role]))).toBe(true);
     });
+
+    it.each(["Administrador Institucional", "Administrativo", "Profesor", "Representante"])(
+      "does not grant personal enrollment access to a %s",
+      (role) => {
+        expect(canViewOwnEnrollmentApplications(createUser([role], ["institution:own-enrollment-application:read"]))).toBe(false);
+      },
+    );
+
+    it("keeps personal enrollment access for an administrator who is also a student", () => {
+      expect(canViewOwnEnrollmentApplications(createUser(["Administrador Institucional", "Estudiante"]))).toBe(true);
+    });
   });
 
   it("requires the explicit request permission instead of an applicant or student role", () => {
