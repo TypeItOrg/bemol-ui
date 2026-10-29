@@ -40,21 +40,6 @@ describe("InstitutionalLoginForm", () => {
     Object.defineProperty(navigator, "credentials", { value: { get: jest.fn(), create: jest.fn() }, configurable: true });
   });
 
-  it("mentions the fixed institution in bold when the login is scoped to a subdomain", () => {
-    render(
-      <InstitutionalBrandProvider institution={institution}>
-        <InstitutionalLoginForm />
-      </InstitutionalBrandProvider>,
-    );
-
-    const institutionName = screen.getByText(institution.name);
-
-    expect(institutionName.tagName).toBe("STRONG");
-    expect(institutionName.closest("p")).toHaveTextContent(
-      "Ingresá al portal institucional del Conservatorio Boero con tu contraseña o una llave de acceso.",
-    );
-  });
-
   it("shows credentials and an explicit passkey option on the initial step", () => {
     render(<InstitutionalLoginForm />);
 

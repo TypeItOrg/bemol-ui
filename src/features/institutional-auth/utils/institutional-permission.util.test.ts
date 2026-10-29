@@ -5,6 +5,8 @@ import {
   hasAllInstitutionalPermissions,
   hasAnyInstitutionalPermission,
   hasInstitutionalPermission,
+  hasTrainingPathPermission,
+  scopeIncludesTrainingPath,
 } from "@features/institutional-auth/utils/institutional-permission.util";
 
 const user: InstitutionalUser = {
@@ -27,10 +29,11 @@ const user: InstitutionalUser = {
 };
 
 describe("institutional permission helpers", () => {
-  it("checks one permission", () => {
+  it("requires the exact permission and rejects absent sessions", () => {
     expect(hasInstitutionalPermission(user, INSTITUTIONAL_PERMISSION.PERSON_READ_ANY)).toBe(true);
     expect(hasInstitutionalPermission(user, INSTITUTIONAL_PERMISSION.PERSON_DELETE)).toBe(false);
     expect(hasInstitutionalPermission(null, INSTITUTIONAL_PERMISSION.PERSON_READ_ANY)).toBe(false);
+    expect(hasInstitutionalPermission(undefined, INSTITUTIONAL_PERMISSION.PERSON_READ_ANY)).toBe(false);
   });
 
   it("never borrows management permissions from the selected identity", () => {
@@ -46,7 +49,46 @@ describe("institutional permission helpers", () => {
 
   it("checks any and all permissions", () => {
     expect(hasAnyInstitutionalPermission(user, [INSTITUTIONAL_PERMISSION.PERSON_DELETE, INSTITUTIONAL_PERMISSION.ROLE_ASSIGN])).toBe(true);
+    expect(hasAnyInstitutionalPermission(user, [INSTITUTIONAL_PERMISSION.PERSON_DELETE])).toBe(false);
     expect(hasAllInstitutionalPermissions(user, [INSTITUTIONAL_PERMISSION.PERSON_READ_ANY, INSTITUTIONAL_PERMISSION.ROLE_ASSIGN])).toBe(true);
     expect(hasAllInstitutionalPermissions(user, [INSTITUTIONAL_PERMISSION.PERSON_READ_ANY, INSTITUTIONAL_PERMISSION.PERSON_DELETE])).toBe(false);
+    expect(hasAnyInstitutionalPermission(null, [INSTITUTIONAL_PERMISSION.ROLE_ASSIGN])).toBe(false);
+    expect(hasAllInstitutionalPermissions(undefined, [INSTITUTIONAL_PERMISSION.ROLE_ASSIGN])).toBe(false);
+  });
+
+  it("never borrows training paths from a different permission", () => {
+    const scoped: InstitutionalUser = {
+      ...user,
+      permissionScopes: {
+        [INSTITUTIONAL_PERMISSION.PERSON_READ_ANY]: { accessScope: "TRAINING_PATHS", trainingPathIds: ["profesorado", "tecnicatura"] },
+        [INSTITUTIONAL_PERMISSION.ROLE_ASSIGN]: { accessScope: "TRAINING_PATHS", trainingPathIds: ["profesorado"] },
+      },
+    };
+
+    expect(hasTrainingPathPermission(scoped, INSTITUTIONAL_PERMISSION.PERSON_READ_ANY, "tecnicatura")).toBe(true);
+    expect(hasTrainingPathPermission(scoped, INSTITUTIONAL_PERMISSION.ROLE_ASSIGN, "tecnicatura")).toBe(false);
+    expect(hasTrainingPathPermission(scoped, INSTITUTIONAL_PERMISSION.ROLE_ASSIGN, "profesorado")).toBe(true);
+    expect(scopeIncludesTrainingPath(scoped.permissionScopes, INSTITUTIONAL_PERMISSION.PERSON_READ_ANY, "tecnicatura")).toBe(true);
+    expect(scopeIncludesTrainingPath(scoped.permissionScopes, INSTITUTIONAL_PERMISSION.ROLE_ASSIGN, "tecnicatura")).toBe(false);
+    expect(scopeIncludesTrainingPath(scoped.permissionScopes, INSTITUTIONAL_PERMISSION.ROLE_ASSIGN, "profesorado")).toBe(true);
+    expect(scopeIncludesTrainingPath(scoped.permissionScopes, INSTITUTIONAL_PERMISSION.ROLE_ASSIGN, null)).toBe(false);
+    expect(scopeIncludesTrainingPath(scoped.permissionScopes, INSTITUTIONAL_PERMISSION.ROLE_ASSIGN, undefined)).toBe(false);
+  });
+
+  it("rejects training path access when the session or permission scope is absent", () => {
+    expect(hasTrainingPathPermission(null, INSTITUTIONAL_PERMISSION.ROLE_ASSIGN, "profesorado")).toBe(false);
+    expect(hasTrainingPathPermission(user, INSTITUTIONAL_PERMISSION.ROLE_ASSIGN, "profesorado")).toBe(false);
+    expect(scopeIncludesTrainingPath(undefined, INSTITUTIONAL_PERMISSION.ROLE_ASSIGN, "profesorado")).toBe(false);
+    expect(scopeIncludesTrainingPath({}, INSTITUTIONAL_PERMISSION.ROLE_ASSIGN, "profesorado")).toBe(false);
+  });
+
+  it("includes future training paths for institutional grants", () => {
+    const global: InstitutionalUser = {
+      ...user,
+      permissionScopes: { [INSTITUTIONAL_PERMISSION.ROLE_ASSIGN]: { accessScope: "INSTITUTION", trainingPathIds: [] } },
+    };
+
+    expect(hasTrainingPathPermission(global, INSTITUTIONAL_PERMISSION.ROLE_ASSIGN, "new-path")).toBe(true);
+    expect(scopeIncludesTrainingPath(global.permissionScopes, INSTITUTIONAL_PERMISSION.ROLE_ASSIGN, "new-path")).toBe(true);
   });
 });
