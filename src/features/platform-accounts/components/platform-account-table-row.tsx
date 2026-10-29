@@ -41,7 +41,7 @@ export function PlatformAccountTableRow({ account }: { account: PlatformAccountA
             </TableCell>
             <TableCell className="text-muted-foreground">{account.email}</TableCell>
             <TableCell>
-              <Badge size="lg" variant={account.roleName === "ADMIN" ? "default" : "secondary"}>
+              <Badge size="lg" variant="secondary">
                 {account.roleName}
               </Badge>
             </TableCell>
