@@ -22,8 +22,11 @@ const { css } = await postcss([tailwindcss({ optimize: { minify: true } })]).pro
   from: stylesheetPath,
 });
 const font = await readFile(resolve(root, "public/brand/manrope-latin.woff2"));
+const favicon = await readFile(resolve(root, "public/brand/favicon.svg"));
+const darkFavicon = await readFile(resolve(root, "public/brand/favicon-dark.svg"));
 const originalLogo = (await readFile(resolve(root, "public/brand/logo-dark.svg"), "utf8"))
   .replace(/<\?xml[^>]*\?>\s*/, "")
+  .replace(/<title\b[^>]*>[\s\S]*?<\/title>\s*/, "")
   .replace('role="img" aria-labelledby="logo-title"', 'aria-hidden="true" focusable="false"');
 const pickPath = originalLogo.match(/<path\b[^>]*\bid="pua"[^>]*>/)?.[0];
 const contour = pickPath?.match(/\bd="([^"]+)"/)?.[1];
@@ -39,6 +42,8 @@ const logo = originalLogo.replace(
 const html = (await readFile(templatePath, "utf8"))
   .replace("__TAILWIND_STYLES__", css)
   .replace("__MANROPE_FONT__", font.toString("base64"))
+  .replace("__BEMOL_FAVICON__", favicon.toString("base64"))
+  .replace("__BEMOL_DARK_FAVICON__", darkFavicon.toString("base64"))
   .replace("__BEMOL_LOGO__", logo);
 
 await writeFile(resolve(root, "public/maintenance.html"), html);
