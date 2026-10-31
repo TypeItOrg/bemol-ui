@@ -2,7 +2,7 @@
 
 import { headers } from "next/headers";
 
-import { requireGenericPlatformHost } from "@common/services/institutional-host/institutional-host.service";
+import { requirePlatformHost } from "@common/services/institutional-host/institutional-host.service";
 import { getFieldErrors, pickFieldErrors } from "@common/utils/form-field-errors.util";
 
 import { platformLoginSchema } from "@features/platform-auth/schemas/platform-login.schema";
@@ -26,7 +26,7 @@ export async function loginPlatform(_previousState: PlatformLoginActionState, fo
 
   const requestHeaders = await headers();
 
-  requireGenericPlatformHost(requestHeaders);
+  requirePlatformHost(requestHeaders);
 
   const output = await loginPlatformAccount(parsed.data, requestHeaders);
 
@@ -40,6 +40,13 @@ export async function loginPlatform(_previousState: PlatformLoginActionState, fo
     return { error: output.error.message };
   }
 
-  await setPlatformAuthCookies(output.data.tokens);
-  redirectToNext(formData.get("next") as string | null);
+  if ("tokens" in output.data) {
+    await setPlatformAuthCookies(output.data.tokens);
+
+    const next = formData.get("next");
+
+    redirectToNext(typeof next === "string" ? next : null);
+  }
+
+  return { challenge: output.data };
 }

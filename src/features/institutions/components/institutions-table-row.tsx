@@ -43,7 +43,7 @@ export function InstitutionsTableRow({ institution, onStatusChange }: Institutio
             <InstitutionActionsMenu institution={institution} onStatusChange={() => onStatusChange(institution)} />
           </TableCell>
           <TableCell className="font-medium">
-            <Link className="hover:underline" href={`/admin/institutions/${institution.id}`}>
+            <Link className="hover:underline" href={`/institutions/${institution.id}`}>
               {institution.name}
             </Link>
           </TableCell>
@@ -86,7 +86,7 @@ export function InstitutionsTableRow({ institution, onStatusChange }: Institutio
 }
 
 function getInstitutionActions(institution: InstitutionSummary): InstitutionAction[] {
-  const detailHref = `/admin/institutions/${institution.id}`;
+  const detailHref = `/institutions/${institution.id}`;
 
   if (!institution.active) {
     return [{ label: "Ver", href: detailHref }];
@@ -111,7 +111,7 @@ function InstitutionUsersCell({ institution }: { institution: InstitutionSummary
   const overflow = count - visibleAvatars;
 
   return (
-    <Link href={`/admin/institutions/${institution.id}/people`} className="inline-flex items-center">
+    <Link href={`/institutions/${institution.id}/people`} className="inline-flex items-center">
       <AvatarGroup>
         {Array.from({ length: visibleAvatars }).map((_, index) => (
           <Avatar key={index} size="sm">

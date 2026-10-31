@@ -46,7 +46,7 @@ const CONTEXTUAL_SEARCH_COPY: Record<ContextualSearchScope, { label: string; pla
 };
 
 const CONTEXTUAL_SEARCH_EXCLUDED_ACCESS_URLS: Record<ContextualSearchScope, readonly string[]> = {
-  platform: ["/admin"],
+  platform: ["/"],
   institutional: ["/", "/account"],
   "self-service": [],
 };

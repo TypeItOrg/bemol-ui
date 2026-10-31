@@ -14,7 +14,12 @@ import { academicApiFetch } from "@features/academic/services/academic-api-fetch
 import type { AcademicActionState } from "@features/academic/types/academic-action-state.types";
 import { AcademicResource } from "@features/academic/types/academic-resource.types";
 import { authorizeAcademicAction } from "@features/academic/utils/academic-action-auth.util";
-import { getAcademicApiBase, getAcademicResourceRoute, type AcademicScope as AcademicScopeType } from "@features/academic/utils/academic-scope.util";
+import {
+  getAcademicApiBase,
+  getAcademicResourceRoute,
+  type AcademicScope as AcademicScopeType,
+  getAcademicRevalidationPath,
+} from "@features/academic/utils/academic-scope.util";
 import { INSTITUTIONAL_PERMISSION } from "@features/institutional-auth/types/institutional-permission.types";
 
 export async function createStudyPlanVersionAction(
@@ -83,7 +88,7 @@ export async function createStudyPlanVersionAction(
 
   const fallback = getAcademicResourceRoute(context.data.scope, context.data.institutionId, AcademicResource.STUDY_PLAN);
 
-  revalidatePath(fallback);
+  revalidatePath(getAcademicRevalidationPath(context.data.scope, fallback));
 
   const origin = getSafeReturnTo(context.data.returnTo, fallback);
 

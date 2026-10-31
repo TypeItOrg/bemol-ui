@@ -63,7 +63,7 @@ export async function InstitutionPeoplePreview({ institutionId }: InstitutionPeo
             return (
               <ReturnToLink
                 key={person.id}
-                href={`/admin/institutions/${institutionId}/people/${person.id}`}
+                href={`/institutions/${institutionId}/people/${person.id}`}
                 className="group focus-visible:ring-ring grid min-w-0 grid-cols-[auto_minmax(0,1fr)] items-start gap-3 px-0 transition-colors focus-visible:ring-2 focus-visible:outline-none"
               >
                 <Avatar className="size-12">
@@ -88,7 +88,7 @@ export async function InstitutionPeoplePreview({ institutionId }: InstitutionPeo
           })}
         </div>
         <Button asChild className="mt-4 h-9 w-full justify-center">
-          <Link href={`/admin/institutions/${institutionId}/people`}>Ver todos los usuarios</Link>
+          <Link href={`/institutions/${institutionId}/people`}>Ver todos los usuarios</Link>
         </Button>
       </CardContent>
     </Card>
@@ -135,7 +135,7 @@ function EmptyPeoplePreview({ institutionId }: { institutionId: string }): React
           </EmptyHeader>
           <EmptyContent className="mt-2 w-full">
             <Button asChild size="lg" className="w-full justify-center">
-              <ReturnToLink href={`/admin/institutions/${institutionId}/people/new`}>Crear usuario</ReturnToLink>
+              <ReturnToLink href={`/institutions/${institutionId}/people/new`}>Crear usuario</ReturnToLink>
             </Button>
           </EmptyContent>
         </Empty>

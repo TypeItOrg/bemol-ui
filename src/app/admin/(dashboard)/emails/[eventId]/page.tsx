@@ -34,7 +34,7 @@ export default async function MailEventPage({
     notFound();
   }
 
-  const returnTo = getSafeReturnTo((await searchParams).returnTo, "/admin/emails");
+  const returnTo = getSafeReturnTo((await searchParams).returnTo, "/emails");
 
   return (
     <PlatformPageShell

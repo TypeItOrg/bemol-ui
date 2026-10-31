@@ -42,7 +42,7 @@ export function getRouteAccess(pathname: string, searchParams?: URLSearchParams)
     return RouteAccess.HealthProbe;
   }
 
-  if (pathname === PLATFORM_LOGIN_PATH) {
+  if (pathname === `/admin${PLATFORM_LOGIN_PATH}`) {
     return RouteAccess.AdminGuestOnly;
   }
 

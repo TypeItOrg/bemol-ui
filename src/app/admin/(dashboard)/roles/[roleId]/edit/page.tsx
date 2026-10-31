@@ -28,7 +28,7 @@ export default async function EditPlatformRolePage({
 
   const { returnTo } = await searchParams;
 
-  const destination = getSafeReturnTo(returnTo, `/admin/roles/${roleId}`);
+  const destination = getSafeReturnTo(returnTo, `/roles/${roleId}`);
 
   const [role, permissionGroups] = await Promise.all([fetchPlatformRole(roleId), fetchPlatformPermissionGroups()]);
 

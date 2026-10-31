@@ -28,7 +28,7 @@ export default async function EditPlatformAccountPage({ params, searchParams }: 
 
   const { returnTo } = await searchParams;
 
-  const destination = getSafeReturnTo(returnTo, `/admin/accounts/${id}`);
+  const destination = getSafeReturnTo(returnTo, `/accounts/${id}`);
 
   const account = await fetchPlatformAccountAdmin(id);
 

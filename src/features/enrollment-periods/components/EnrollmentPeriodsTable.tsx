@@ -86,7 +86,7 @@ function EnrollmentPeriodsTableContent({
     }
 
     const createHref = AcademicScope.isAdmin(scope)
-      ? `/admin/enrollment-periods/new?institutionId=${encodeURIComponent(institutionId)}`
+      ? `/enrollment-periods/new?institutionId=${encodeURIComponent(institutionId)}`
       : "/enrollment-periods/new";
 
     return (

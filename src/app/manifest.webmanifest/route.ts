@@ -15,7 +15,7 @@ export async function GET(request: Request): Promise<Response> {
       short_name: name,
       description: "Plataforma de gestión para instituciones educativas",
       lang: "es",
-      start_url: institution ? "/" : "/admin",
+      start_url: "/",
       scope: "/",
       display: "standalone",
       display_override: ["window-controls-overlay"],

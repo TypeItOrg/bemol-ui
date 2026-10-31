@@ -26,7 +26,7 @@ export default async function NewPlatformAccountPage({
 }): Promise<ReactElement> {
   const { returnTo } = await searchParams;
 
-  const destination = getSafeReturnTo(returnTo, "/admin/accounts");
+  const destination = getSafeReturnTo(returnTo, "/accounts");
 
   return (
     <PlatformPageShell

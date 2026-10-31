@@ -25,7 +25,12 @@ import type { AcademicActionState } from "@features/academic/types/academic-acti
 import { AcademicResource } from "@features/academic/types/academic-resource.types";
 import type { TrainingPathSaveProgress } from "@features/academic/types/training-path-save-progress.types";
 import { authorizeAcademicAction } from "@features/academic/utils/academic-action-auth.util";
-import { getAcademicApiBase, getAcademicResourceRoute, type AcademicScope } from "@features/academic/utils/academic-scope.util";
+import {
+  getAcademicApiBase,
+  getAcademicResourceRoute,
+  type AcademicScope,
+  getAcademicRevalidationPath,
+} from "@features/academic/utils/academic-scope.util";
 import { parseTrainingPathRequirements } from "@features/academic/utils/parse-training-path-requirements.util";
 import { INSTITUTIONAL_PERMISSION } from "@features/institutional-auth/types/institutional-permission.types";
 
@@ -147,8 +152,8 @@ export async function saveTrainingPathAction(
 
   const fallback = getAcademicResourceRoute(input.scope, input.institutionId, AcademicResource.TRAINING_PATH);
 
-  revalidatePath(fallback);
-  revalidatePath(`${fallback}/${pathId}`);
+  revalidatePath(getAcademicRevalidationPath(input.scope, fallback));
+  revalidatePath(getAcademicRevalidationPath(input.scope, `${fallback}/${pathId}`));
 
   const requirementError = await saveTrainingPathRequirements(input.scope, apiBase, pathId, changedDrafts, progress);
 
@@ -172,7 +177,7 @@ export async function saveTrainingPathAction(
     }
   }
 
-  revalidatePath(fallback);
-  revalidatePath(`${fallback}/${pathId}`);
+  revalidatePath(getAcademicRevalidationPath(input.scope, fallback));
+  revalidatePath(getAcademicRevalidationPath(input.scope, `${fallback}/${pathId}`));
   redirect(getSafeReturnTo(input.returnTo, fallback));
 }

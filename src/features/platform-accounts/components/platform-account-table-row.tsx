@@ -35,7 +35,7 @@ export function PlatformAccountTableRow({ account }: { account: PlatformAccountA
               <PlatformAccountActions account={account} disableDisabled={disableDisabled} onDisable={() => setDisableOpen(true)} />
             </TableCell>
             <TableCell className="font-medium">
-              <ReturnToLink className="hover:underline" href={`/admin/accounts/${account.platformAccountId}`}>
+              <ReturnToLink className="hover:underline" href={`/accounts/${account.platformAccountId}`}>
                 {account.name} {account.lastName}
               </ReturnToLink>
             </TableCell>
@@ -54,12 +54,12 @@ export function PlatformAccountTableRow({ account }: { account: PlatformAccountA
         <ContextMenuContent className="w-40 p-1.5">
           <ContextMenuGroup>
             <ContextMenuItem asChild>
-              <ReturnToLink href={`/admin/accounts/${account.platformAccountId}`} className="px-2.5 py-1.5">
+              <ReturnToLink href={`/accounts/${account.platformAccountId}`} className="px-2.5 py-1.5">
                 Ver detalle
               </ReturnToLink>
             </ContextMenuItem>
             <ContextMenuItem asChild>
-              <ReturnToLink href={`/admin/accounts/${account.platformAccountId}/edit`} className="px-2.5 py-1.5">
+              <ReturnToLink href={`/accounts/${account.platformAccountId}/edit`} className="px-2.5 py-1.5">
                 Editar
               </ReturnToLink>
             </ContextMenuItem>

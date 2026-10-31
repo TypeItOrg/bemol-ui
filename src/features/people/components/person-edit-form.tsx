@@ -63,7 +63,7 @@ export function PersonEditForm({
 
   const [isPending, setIsPending] = useState(false);
 
-  const destination = returnTo ?? (PeopleScope.isInstitutional(scope) ? "/people" : `/admin/institutions/${institutionId}/people`);
+  const destination = returnTo ?? (PeopleScope.isInstitutional(scope) ? "/people" : `/institutions/${institutionId}/people`);
 
   const actionLabel = canEdit ? "Guardar cambios" : "Guardar roles";
 

@@ -8,6 +8,7 @@ import { usePathname } from "next/navigation";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@common/components/ui/breadcrumb";
 
 import { getAcademicBreadcrumbGroupLabel } from "@features/academic/utils/academic-breadcrumb.util";
+import { toPlatformPublicPath } from "@features/platform-auth/utils/platform-route-paths.util";
 
 const ROUTE_LABELS: Readonly<Record<string, string>> = {
   documentation: "Documentación",
@@ -34,6 +35,7 @@ const ROUTE_LABELS: Readonly<Record<string, string>> = {
   "guardian-links": "Vinculaciones",
   "course-enrollments": "Cursadas",
   waitlist: "Lista de espera",
+  passkeys: "Llaves de acceso",
 };
 
 type BreadcrumbSegment = {
@@ -59,21 +61,19 @@ function getSegments(
   hiddenSegments: readonly string[],
   trailingLabel?: string,
 ): BreadcrumbSegment[] {
-  const withoutPlatform = pathname.replace(/^\/admin\/?/, "");
-
-  const parts = withoutPlatform.split("/").filter(Boolean);
+  const parts = toPlatformPublicPath(pathname).split("/").filter(Boolean);
 
   if (parts.length === 0) {
     return [{ label: "Inicio" }];
   }
 
-  const segments: BreadcrumbSegment[] = [{ label: "Inicio", href: "/admin" }];
+  const segments: BreadcrumbSegment[] = [{ label: "Inicio", href: "/" }];
 
   const hiddenSegmentSet = new Set(["academic", ...hiddenSegments]);
 
   const visiblePartCount = parts.filter((part) => !hiddenSegmentSet.has(part)).length;
 
-  let accumulatedPath = "/admin";
+  let accumulatedPath = "";
 
   let visiblePartIndex = 0;
 

@@ -55,7 +55,7 @@ export default async function InstitutionPeoplePage({ params, searchParams }: Pe
     >
       <PlatformCollectionActions className="sm:justify-start">
         <Button asChild size="lg" className="w-full">
-          <ReturnToLink href={`/admin/institutions/${id}/people/new`}>
+          <ReturnToLink href={`/institutions/${id}/people/new`}>
             <PlusIcon data-icon="inline-start" />
             Nuevo usuario
           </ReturnToLink>

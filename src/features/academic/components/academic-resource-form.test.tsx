@@ -45,7 +45,7 @@ it("selects an active institution through the real dropdown and submits its inst
       allowInstitutionSelection
       scope={AcademicScope.ADMIN}
       resource={AcademicResource.INSTRUMENT}
-      returnTo="/admin/instruments?page=2"
+      returnTo="/instruments?page=2"
     />,
   );
 
@@ -63,7 +63,7 @@ it("selects an active institution through the real dropdown and submits its inst
     name: "Piano",
     description: "Instrumento de teclas",
   });
-  expect(screen.getByRole("link", { name: "Cancelar" })).toHaveAttribute("href", "/admin/instruments?page=2");
+  expect(screen.getByRole("link", { name: "Cancelar" })).toHaveAttribute("href", "/instruments?page=2");
 });
 
 it("focuses server validation, blocks duplicate submits while pending and preserves edited values after failure", async () => {

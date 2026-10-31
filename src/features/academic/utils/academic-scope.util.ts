@@ -1,4 +1,5 @@
 import { AcademicResource } from "@features/academic/types/academic-resource.types";
+import { toPlatformInternalPath } from "@features/platform-auth/utils/platform-route-paths.util";
 
 export type AcademicScope = "admin" | "institutional";
 
@@ -18,7 +19,7 @@ export function getAcademicApiBase(scope: AcademicScope, institutionId: string):
 }
 
 export function getAcademicRouteBase(scope: AcademicScope, institutionId: string): string {
-  return AcademicScope.isAdmin(scope) ? `/admin/institutions/${institutionId}/academic` : "";
+  return AcademicScope.isAdmin(scope) ? `/institutions/${institutionId}/academic` : "";
 }
 
 export function getAcademicResourceRoute(scope: AcademicScope, institutionId: string, resource: AcademicResource): string {
@@ -34,4 +35,8 @@ function getCollectionResource(resource: AcademicResource): AcademicResource {
     default:
       return resource;
   }
+}
+
+export function getAcademicRevalidationPath(scope: AcademicScope, path: string): string {
+  return AcademicScope.isAdmin(scope) ? toPlatformInternalPath(path) : path;
 }

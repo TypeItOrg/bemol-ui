@@ -32,7 +32,7 @@ it("offers the platform app on the generic host without an institution lookup", 
     id: "/",
     name: "Administración - Bemol",
     short_name: "Administración - Bemol",
-    start_url: "/admin",
+    start_url: "/",
     scope: "/",
     display: "standalone",
   });

@@ -16,21 +16,28 @@ describe("proxy", () => {
   const originalApiUrl = process.env.BEMOL_API_URL;
   const originalPublicUrl = process.env.FRONTEND_PUBLIC_URL;
   const originalDomain = process.env.INSTITUTIONAL_BASE_DOMAIN;
+  const originalPlatformUrl = process.env.PLATFORM_PUBLIC_URL;
 
-  function createRequest(path: string, cookie: string): NextRequest {
-    return new NextRequest(`https://app.example.test${path}`, {
-      headers: { cookie, host: "app.example.test" },
+  function createRequest(path: string, cookie: string, platform = false): NextRequest {
+    const host =
+      platform || path.startsWith("/admin") || path.startsWith("/api/admin") || path.includes("scope=admin")
+        ? "admin.example.test"
+        : "app.example.test";
+
+    return new NextRequest(`https://${host}${path}`, {
+      headers: { cookie, host },
     });
   }
 
   function expectPlatformLoginRedirect(response: NextResponse): void {
     expect(response.status).toBe(307);
-    expect(response.headers.get("location")).toBe("https://app.example.test/admin/auth/login?next=%2Fadmin%2Forders%3Fpage%3D2");
+    expect(response.headers.get("location")).toBe("https://admin.example.test/auth/login?next=%2Forders%3Fpage%3D2");
     expect(response.cookies.get(PLATFORM_ACCESS_TOKEN_COOKIE)?.value).toBeUndefined();
     expect(response.cookies.get(PLATFORM_REFRESH_TOKEN_COOKIE)?.value).toBeUndefined();
   }
 
   beforeEach(() => {
+    process.env.PLATFORM_PUBLIC_URL = "https://admin.example.test";
     process.env.BEMOL_API_URL = "https://api.example.test";
     process.env.FRONTEND_PUBLIC_URL = "https://app.example.test";
     process.env.INSTITUTIONAL_BASE_DOMAIN = "";
@@ -45,6 +52,7 @@ describe("proxy", () => {
     process.env.BEMOL_API_URL = originalApiUrl;
     process.env.FRONTEND_PUBLIC_URL = originalPublicUrl;
     process.env.INSTITUTIONAL_BASE_DOMAIN = originalDomain;
+    process.env.PLATFORM_PUBLIC_URL = originalPlatformUrl;
   });
 
   it.each([
@@ -64,13 +72,13 @@ describe("proxy", () => {
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
-  it("allows admin routes when an access token cookie is present", async () => {
-    const request = createRequest("/admin", `${PLATFORM_ACCESS_TOKEN_COOKIE}=access-token`);
+  it("rewrites clean platform pages when an access token cookie is present", async () => {
+    const request = createRequest("/", `${PLATFORM_ACCESS_TOKEN_COOKIE}=access-token`, true);
 
     const response = await proxy(request);
 
     expect(fetchMock).not.toHaveBeenCalled();
-    expect(response.headers.get("x-middleware-next")).toBe("1");
+    expect(response.headers.get("x-middleware-rewrite")).toBe("https://admin.example.test/admin");
   });
 
   it("refreshes an admin BFF request when the refresh token is valid", async () => {
@@ -97,7 +105,7 @@ describe("proxy", () => {
       new URL("/api/v1/admin/auth/refresh", "https://api.example.test"),
       expect.objectContaining({
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "X-Institutional-Host": "admin.example.test" },
         body: JSON.stringify({ refreshToken: "refresh-token" }),
         signal: expect.any(AbortSignal),
       }),
@@ -122,8 +130,8 @@ describe("proxy", () => {
         : Promise.resolve(new Response(null, { status: 200 })),
     );
 
-    const firstRequest = createRequest("/admin/institutions/1", `${PLATFORM_REFRESH_TOKEN_COOKIE}=refresh-token`);
-    const secondRequest = createRequest("/admin/institutions/2", `${PLATFORM_REFRESH_TOKEN_COOKIE}=refresh-token`);
+    const firstRequest = createRequest("/institutions/1", `${PLATFORM_REFRESH_TOKEN_COOKIE}=refresh-token`, true);
+    const secondRequest = createRequest("/institutions/2", `${PLATFORM_REFRESH_TOKEN_COOKIE}=refresh-token`, true);
     const firstResponsePromise = proxy(firstRequest);
     const secondResponsePromise = proxy(secondRequest);
 
@@ -164,8 +172,8 @@ describe("proxy", () => {
         ),
     );
 
-    const firstRequest = createRequest("/admin/institutions/1", `${PLATFORM_REFRESH_TOKEN_COOKIE}=refresh-token-1`);
-    const secondRequest = createRequest("/admin/institutions/2", `${PLATFORM_REFRESH_TOKEN_COOKIE}=refresh-token-2`);
+    const firstRequest = createRequest("/institutions/1", `${PLATFORM_REFRESH_TOKEN_COOKIE}=refresh-token-1`, true);
+    const secondRequest = createRequest("/institutions/2", `${PLATFORM_REFRESH_TOKEN_COOKIE}=refresh-token-2`, true);
 
     const [firstResponse, secondResponse] = await Promise.all([proxy(firstRequest), proxy(secondRequest)]);
 
@@ -182,7 +190,7 @@ describe("proxy", () => {
       }),
     );
 
-    const request = createRequest("/admin/orders?page=2", `${PLATFORM_REFRESH_TOKEN_COOKIE}=refresh-token`);
+    const request = createRequest("/orders?page=2", `${PLATFORM_REFRESH_TOKEN_COOKIE}=refresh-token`, true);
 
     const response = await proxy(request);
 
@@ -197,7 +205,7 @@ describe("proxy", () => {
       }),
     );
 
-    const request = createRequest("/admin/orders?page=2", `${PLATFORM_REFRESH_TOKEN_COOKIE}=refresh-token`);
+    const request = createRequest("/orders?page=2", `${PLATFORM_REFRESH_TOKEN_COOKIE}=refresh-token`, true);
 
     const response = await proxy(request);
 
@@ -208,14 +216,14 @@ describe("proxy", () => {
   it("serves maintenance without clearing cookies when refresh is unavailable", async () => {
     fetchMock.mockRejectedValue(new Error("network"));
 
-    const request = createRequest("/admin/orders?page=2", `${PLATFORM_REFRESH_TOKEN_COOKIE}=refresh-token`);
+    const request = createRequest("/orders?page=2", `${PLATFORM_REFRESH_TOKEN_COOKIE}=refresh-token`, true);
 
     request.headers.set("accept", "text/html");
 
     const response = await proxy(request);
 
     expect(response.status).toBe(503);
-    expect(response.headers.get("x-middleware-rewrite")).toBe("https://app.example.test/maintenance.html");
+    expect(response.headers.get("x-middleware-rewrite")).toBe("https://admin.example.test/maintenance.html");
     expect(response.headers.get("location")).toBeNull();
     expect(response.headers.get("cache-control")).toBe("no-store");
     expect(response.headers.get("retry-after")).toBe("5");
@@ -225,9 +233,9 @@ describe("proxy", () => {
 
   it("redirects authenticated users away from the login page", async () => {
     fetchMock.mockResolvedValue(new Response(null, { status: 200 }));
-    const request = new NextRequest("https://app.example.test/admin/auth/login?next=%2Fadmin%2Fa", {
+    const request = new NextRequest("https://admin.example.test/auth/login?next=%2Fadmin%2Fa", {
       headers: {
-        host: "app.example.test",
+        host: "admin.example.test",
         cookie: `${PLATFORM_ACCESS_TOKEN_COOKIE}=access-token`,
       },
     });
@@ -235,13 +243,13 @@ describe("proxy", () => {
     const response = await proxy(request);
 
     expect(response.status).toBe(307);
-    expect(response.headers.get("location")).toBe("https://app.example.test/admin/a");
+    expect(response.headers.get("location")).toBe("https://admin.example.test/a");
   });
 
   it("bounds guest session checks with an abort signal", async () => {
     fetchMock.mockResolvedValue(new Response(null, { status: 503 }));
-    const request = new NextRequest("https://app.example.test/admin/auth/login", {
-      headers: { host: "app.example.test", cookie: `${PLATFORM_ACCESS_TOKEN_COOKIE}=access-token` },
+    const request = new NextRequest("https://admin.example.test/auth/login", {
+      headers: { host: "admin.example.test", cookie: `${PLATFORM_ACCESS_TOKEN_COOKIE}=access-token` },
     });
 
     await proxy(request);
@@ -253,12 +261,12 @@ describe("proxy", () => {
   });
 
   it("allows unauthenticated users to access the login page", async () => {
-    const request = createRequest("/admin/auth/login", "");
+    const request = createRequest("/auth/login", "", true);
 
     const response = await proxy(request);
 
     expect(fetchMock).not.toHaveBeenCalled();
-    expect(response.headers.get("x-middleware-next")).toBe("1");
+    expect(response.headers.get("x-middleware-rewrite")).toBe("https://admin.example.test/admin/auth/login");
   });
 
   it("does not apply admin authentication to public routes", async () => {
@@ -422,15 +430,15 @@ describe("proxy", () => {
 
   it("sanitizes absolute next urls on login redirects", async () => {
     fetchMock.mockResolvedValue(new Response(null, { status: 200 }));
-    const request = new NextRequest("https://app.example.test/admin/auth/login?next=https://evil.com/a", {
+    const request = new NextRequest("https://admin.example.test/auth/login?next=https://evil.com/a", {
       headers: {
-        host: "app.example.test",
+        host: "admin.example.test",
         cookie: `${PLATFORM_ACCESS_TOKEN_COOKIE}=access-token`,
       },
     });
 
     const response = await proxy(request);
 
-    expect(response.headers.get("location")).toBe("https://app.example.test/a");
+    expect(response.headers.get("location")).toBe("https://admin.example.test/a");
   });
 });

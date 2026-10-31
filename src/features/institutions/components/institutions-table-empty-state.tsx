@@ -29,7 +29,7 @@ export function InstitutionsTableEmptyState({ active, isNavigating, search, size
           La página seleccionada no contiene elementos. Podés volver a la primera página para ver los resultados.
         </p>
         <Button asChild variant="outline" size="sm">
-          <Link href={`/admin/institutions?size=${size}`}>Volver a la primera página</Link>
+          <Link href={`/institutions?size=${size}`}>Volver a la primera página</Link>
         </Button>
       </EmptyState>
     );
@@ -46,7 +46,7 @@ export function InstitutionsTableEmptyState({ active, isNavigating, search, size
           Comenzá creando una nueva institución para empezar a gestionar la plataforma.
         </p>
         <Button asChild size="lg">
-          <ReturnToLink href="/admin/institutions/new">
+          <ReturnToLink href="/institutions/new">
             <PlusIcon className="mr-2 size-4" />
             Nueva Institución
           </ReturnToLink>

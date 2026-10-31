@@ -37,10 +37,10 @@ export default async function AuditEventPage({
   }
 
   if (event.entityType === "EMAIL") {
-    redirect(`/admin/emails/${eventId}`);
+    redirect(`/emails/${eventId}`);
   }
 
-  const returnTo = getSafeReturnTo((await searchParams).returnTo, "/admin/audit-events");
+  const returnTo = getSafeReturnTo((await searchParams).returnTo, "/audit-events");
 
   const [roleCatalog, permissionGroups] = await Promise.all([
     event.action === "PERSON_ROLES_CHANGED" || typeof event.details.initialRole === "string" ? fetchSystemRolesCatalog() : null,

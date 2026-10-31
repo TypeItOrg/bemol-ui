@@ -23,6 +23,12 @@ export function classifyInstitutionalHost(
       return { kind: InstitutionalHostKind.INVALID };
     }
 
+    const platform = new URL(process.env.PLATFORM_PUBLIC_URL || "http://admin.localhost:3000");
+
+    if (hostname === platform.hostname && new URL(`${platform.protocol}//${host}`).port === platform.port) {
+      return { kind: InstitutionalHostKind.PLATFORM, hostname };
+    }
+
     const base = baseDomain.trim().toLowerCase();
 
     // Optional branded mode must not require new configuration in existing deployments.

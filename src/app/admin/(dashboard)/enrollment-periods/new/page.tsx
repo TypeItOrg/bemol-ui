@@ -30,7 +30,7 @@ export default async function NewEnrollmentPeriodPage({
 
   const institution = institutionId ? await fetchInstitution(institutionId) : null;
 
-  const returnTo = getSafeReturnTo(query.returnTo, "/admin/enrollment-periods");
+  const returnTo = getSafeReturnTo(query.returnTo, "/enrollment-periods");
 
   return (
     <PlatformPageShell

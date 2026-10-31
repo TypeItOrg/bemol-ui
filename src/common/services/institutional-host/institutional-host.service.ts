@@ -16,12 +16,8 @@ import type { PublicInstitution } from "@features/institutions/types/public-inst
 
 export const INSTITUTIONAL_HOST_HEADER = "X-Institutional-Host";
 
-export function requireGenericPlatformHost(requestHeaders: Pick<Headers, "get">): void {
-  if (!process.env.INSTITUTIONAL_BASE_DOMAIN?.trim()) {
-    return;
-  }
-
-  if (classifyInstitutionalHost(requestHeaders.get("host")).kind !== InstitutionalHostKind.GENERIC) {
+export function requirePlatformHost(requestHeaders: Pick<Headers, "get">): void {
+  if (classifyInstitutionalHost(requestHeaders.get("host")).kind !== InstitutionalHostKind.PLATFORM) {
     redirect(INSTITUTIONAL_LOGIN_PATH);
   }
 }
@@ -36,7 +32,12 @@ export function rebuildInstitutionalHostHeader(outgoing: Headers, requestHeaders
   }
 
   // Generic is an explicit trusted origin context too, not a tenant selection.
-  outgoing.set(INSTITUTIONAL_HOST_HEADER, context.hostname);
+  outgoing.set(
+    INSTITUTIONAL_HOST_HEADER,
+    context.kind === InstitutionalHostKind.PLATFORM
+      ? new URL(process.env.PLATFORM_PUBLIC_URL || "http://admin.localhost:3000").host
+      : context.hostname,
+  );
 }
 
 // A React request cache only: never retain a tenant across requests or processes.
@@ -51,7 +52,7 @@ export async function resolveRequestInstitution(requestHeaders: Pick<Headers, "g
     throw new InstitutionalHostError(404);
   }
 
-  if (context.kind === InstitutionalHostKind.GENERIC) {
+  if (context.kind === InstitutionalHostKind.GENERIC || context.kind === InstitutionalHostKind.PLATFORM) {
     return undefined;
   }
 

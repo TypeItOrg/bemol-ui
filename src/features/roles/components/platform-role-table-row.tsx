@@ -23,12 +23,12 @@ export function PlatformRoleTableRow({ role }: { role: PlatformRoleListItem }): 
             <PlatformRoleActions role={role} />
           </TableCell>
           <TableCell className="font-medium">
-            <Link href={`/admin/roles/${role.id}`} className="hover:underline">
+            <Link href={`/roles/${role.id}`} className="hover:underline">
               {role.name}
             </Link>
           </TableCell>
           <TableCell>
-            <Link href={`/admin/institutions/${role.institution.id}`} className="text-muted-foreground font-medium hover:underline">
+            <Link href={`/institutions/${role.institution.id}`} className="text-muted-foreground font-medium hover:underline">
               {role.institution.name}
             </Link>
             {!role.institution.active ? (
@@ -52,13 +52,13 @@ export function PlatformRoleTableRow({ role }: { role: PlatformRoleListItem }): 
       <ContextMenuContent className="w-48 p-1.5">
         <ContextMenuGroup>
           <ContextMenuItem asChild>
-            <Link href={`/admin/roles/${role.id}`} className="px-2.5 py-1.5">
+            <Link href={`/roles/${role.id}`} className="px-2.5 py-1.5">
               Ver detalle
             </Link>
           </ContextMenuItem>
           {role.editable ? (
             <ContextMenuItem asChild>
-              <ReturnToLink href={`/admin/roles/${role.id}/edit`} className="px-2.5 py-1.5">
+              <ReturnToLink href={`/roles/${role.id}/edit`} className="px-2.5 py-1.5">
                 Editar rol
               </ReturnToLink>
             </ContextMenuItem>

@@ -5,15 +5,14 @@ import "server-only";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
-import { requireGenericPlatformHost } from "@common/services/institutional-host/institutional-host.service";
-import { getApiUrlOrThrow } from "@common/utils/get-api-url-or-throw.util";
+import { authenticatedApiFetch } from "@common/services/authenticated-api-fetch.service";
 import { parseHttpResponse } from "@common/utils/http-response-error.util";
 
 import { getPlatformAccessToken } from "@features/platform-auth/services/get-platform-access-token.service";
 import type { PlatformAccount } from "@features/platform-auth/types/platform-account.types";
 
 async function fetchPlatformAccount(): Promise<PlatformAccount | null> {
-  requireGenericPlatformHost(await headers());
+  const requestHeaders = await headers();
 
   const accessToken = await getPlatformAccessToken();
 
@@ -21,10 +20,7 @@ async function fetchPlatformAccount(): Promise<PlatformAccount | null> {
     return null;
   }
 
-  const response = await fetch(new URL("/api/v1/admin/auth/me", getApiUrlOrThrow()), {
-    headers: { Authorization: `Bearer ${accessToken}` },
-    cache: "no-store",
-  });
+  const response = await authenticatedApiFetch("/api/v1/admin/auth/me", accessToken, {}, requestHeaders);
 
   if (response.status === 401) {
     return null;
@@ -45,7 +41,7 @@ export async function requirePlatformAccount(): Promise<PlatformAccount> {
   const account = await getPlatformAccount();
 
   if (!account) {
-    redirect("/admin/auth/login");
+    redirect("/auth/login");
   }
 
   return account;

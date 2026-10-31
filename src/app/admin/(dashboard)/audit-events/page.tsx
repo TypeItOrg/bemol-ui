@@ -39,7 +39,7 @@ export default async function AuditEventsPage({ searchParams }: { searchParams: 
       }
     }
 
-    redirect(`/admin/emails?${query}`);
+    redirect(`/emails?${query}`);
   }
 
   const filters = parseAuditFilters(params);

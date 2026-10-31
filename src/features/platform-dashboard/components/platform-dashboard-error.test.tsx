@@ -30,7 +30,7 @@ describe("PlatformDashboardErrorBoundary", () => {
     try {
       render(<Harness />);
 
-      expect(screen.getByRole("link", { name: "Ir al inicio" })).toHaveAttribute("href", "/admin");
+      expect(screen.getByRole("link", { name: "Ir al inicio" })).toHaveAttribute("href", "/");
       await user.click(screen.getByRole("button", { name: "Preparar recuperación" }));
       await user.click(screen.getByRole("button", { name: "Reintentar" }));
 

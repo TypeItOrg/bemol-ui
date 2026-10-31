@@ -52,8 +52,8 @@ export default async function PlatformCourseWaitlistPage({
         <PlatformBreadcrumb
           segmentLabels={{ "course-enrollments": "Cursos", [courseId]: options.courseName }}
           segmentHrefs={{
-            "course-enrollments": "/admin/courses",
-            [courseId]: `/admin/institutions/${institutionId}/academic/courses/${courseId}`,
+            "course-enrollments": "/courses",
+            [courseId]: `/institutions/${institutionId}/academic/courses/${courseId}`,
           }}
         />
       }

@@ -2,8 +2,18 @@
 
 import { startTransition, useActionState, type ReactElement, type SyntheticEvent } from "react";
 
+import { PencilIcon } from "lucide-react";
+
+import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@common/components/ui/alert-dialog";
 import { Button } from "@common/components/ui/button";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@common/components/ui/dialog";
 import { Field, FieldError, FieldLabel } from "@common/components/ui/field";
 import { Input } from "@common/components/ui/input";
 
@@ -11,13 +21,14 @@ import { renamePasskeyAction } from "@features/institutional-auth/actions/passke
 import { INSTITUTIONAL_AUTH_ERROR_MESSAGES } from "@features/institutional-auth/constants/error-messages.constants";
 import type { Passkey } from "@features/institutional-auth/types/passkey.types";
 import type { RenamePasskeyState } from "@features/institutional-auth/types/rename-passkey-state.types";
+import { renamePlatformPasskey } from "@features/platform-auth/actions/platform-passkey.actions";
 
-type PasskeyRenameDialogProps = { passkey: Passkey; onClose: () => void; onSuccess: () => void };
+type PasskeyRenameDialogProps = { platform?: boolean; passkey: Passkey; onClose: () => void; onSuccess: () => void };
 
-export function PasskeyRenameDialog({ passkey, onClose, onSuccess }: PasskeyRenameDialogProps): ReactElement {
+export function PasskeyRenameDialog({ passkey, onClose, onSuccess, platform = false }: PasskeyRenameDialogProps): ReactElement {
   const [state, action, isPending] = useActionState<RenamePasskeyState, FormData>(async (previous, formData) => {
     try {
-      const result = await renamePasskeyAction(passkey.id, previous, formData);
+      const result = await (platform ? renamePlatformPasskey : renamePasskeyAction)(passkey.id, previous, formData);
 
       if (result.success) {
         onSuccess();
@@ -44,7 +55,7 @@ export function PasskeyRenameDialog({ passkey, onClose, onSuccess }: PasskeyRena
   const error = state.fieldErrors?.label ?? state.error;
 
   return (
-    <Dialog
+    <AlertDialog
       open
       onOpenChange={(open) => {
         if (!open && !isPending) {
@@ -52,28 +63,32 @@ export function PasskeyRenameDialog({ passkey, onClose, onSuccess }: PasskeyRena
         }
       }}
     >
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Renombrar llave de acceso</DialogTitle>
-        </DialogHeader>
-        <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
-          <Field data-invalid={!!error}>
+      <AlertDialogContent>
+        <form onSubmit={handleSubmit}>
+          <AlertDialogHeader>
+            <div className="bg-primary/10 text-primary mb-1 flex size-12 items-center justify-center rounded-2xl">
+              <PencilIcon aria-hidden="true" className="size-6" />
+            </div>
+            <AlertDialogTitle>Renombrar llave de acceso</AlertDialogTitle>
+            <AlertDialogDescription>Usá un nombre que te ayude a identificar el dispositivo donde la guardaste.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <Field className="mt-5" data-invalid={!!error}>
             <FieldLabel htmlFor="passkey-rename" required>
               Nombre
             </FieldLabel>
             <Input disabled={isPending} id="passkey-rename" name="label" maxLength={100} defaultValue={passkey.label} />
             <FieldError>{error}</FieldError>
           </Field>
-          <DialogFooter>
-            <Button disabled={isPending} onClick={onClose} type="button" variant="outline">
+          <AlertDialogFooter className="mt-5">
+            <AlertDialogCancel disabled={isPending} size="lg" type="button">
               Cancelar
+            </AlertDialogCancel>
+            <Button disabled={isPending} size="lg" type="submit">
+              {isPending ? "Guardando…" : "Guardar"}
             </Button>
-            <Button disabled={isPending} type="submit">
-              Guardar
-            </Button>
-          </DialogFooter>
+          </AlertDialogFooter>
         </form>
-      </DialogContent>
-    </Dialog>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }

@@ -35,7 +35,7 @@ describe("academic resource actions", () => {
       AcademicResource.INSTRUMENT,
       undefined,
       undefined,
-      "/admin/instruments",
+      "/instruments",
       {},
       formData,
     );
@@ -52,16 +52,7 @@ describe("academic resource actions", () => {
     formData.set("name", "Piano");
     formData.set("description", "");
 
-    await saveAcademicResourceAction(
-      AcademicScope.ADMIN,
-      undefined,
-      AcademicResource.INSTRUMENT,
-      undefined,
-      undefined,
-      "/admin/instruments",
-      {},
-      formData,
-    );
+    await saveAcademicResourceAction(AcademicScope.ADMIN, undefined, AcademicResource.INSTRUMENT, undefined, undefined, "/instruments", {}, formData);
 
     expect(requirePlatformAccount).toHaveBeenCalled();
     expect(academicApiFetch).toHaveBeenCalledWith(

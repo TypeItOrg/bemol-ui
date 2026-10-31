@@ -71,7 +71,7 @@ export function EnrollmentApplicationCoursesManagement({
 
   const waitlistHref = (courseId: string) =>
     scope === AcademicScope.ADMIN && institutionId
-      ? `/admin/course-enrollments/${courseId}/waitlist?institutionId=${institutionId}`
+      ? `/course-enrollments/${courseId}/waitlist?institutionId=${institutionId}`
       : `/course-enrollments/${courseId}/waitlist`;
 
   return (

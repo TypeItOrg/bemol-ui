@@ -116,16 +116,18 @@ export function getAcademicRowActions(
   }
 
   if (resource === AcademicResource.COURSE) {
-    const waitlistInstitutionId = row.institutionId ?? basePath.split("/")[3];
+    const platform = basePath.startsWith("/institutions/");
+
+    const waitlistInstitutionId = row.institutionId ?? basePath.split("/")[2];
 
     const waitlistActions: AcademicRowAction[] =
-      canReadWaitlist && (!basePath.startsWith("/admin") || waitlistInstitutionId)
+      canReadWaitlist && (!platform || waitlistInstitutionId)
         ? [
             {
               kind: ACADEMIC_ROW_ACTION_KIND.NAVIGATE,
               label: "Ver lista de espera",
-              href: basePath.startsWith("/admin")
-                ? `/admin/course-enrollments/${row.id}/waitlist?institutionId=${waitlistInstitutionId}`
+              href: platform
+                ? `/course-enrollments/${row.id}/waitlist?institutionId=${waitlistInstitutionId}`
                 : `/course-enrollments/${row.id}/waitlist`,
             },
           ]

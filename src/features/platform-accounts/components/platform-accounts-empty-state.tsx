@@ -33,7 +33,7 @@ export function PlatformAccountsEmptyState({ data, search, enabled, size }: Plat
           La página seleccionada no contiene elementos. Podés volver a la primera página para ver los resultados.
         </p>
         <Button asChild variant="outline" size="sm">
-          <Link href={`/admin/accounts?size=${size}`}>Volver a la primera página</Link>
+          <Link href={`/accounts?size=${size}`}>Volver a la primera página</Link>
         </Button>
       </div>
     );
@@ -61,7 +61,7 @@ export function PlatformAccountsEmptyState({ data, search, enabled, size }: Plat
         Comenzá creando un nuevo administrador para empezar a gestionar la plataforma.
       </p>
       <Button asChild size="lg">
-        <ReturnToLink href="/admin/accounts/new">
+        <ReturnToLink href="/accounts/new">
           <PlusIcon className="mr-2 size-4" />
           Nuevo administrador
         </ReturnToLink>

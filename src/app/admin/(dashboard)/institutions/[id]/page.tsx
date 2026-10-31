@@ -38,7 +38,7 @@ export const metadata: Metadata = {
 export default async function InstitutionDetailPage({ params, searchParams }: InstitutionDetailPageProps): Promise<ReactElement> {
   const [{ id }, { returnTo }] = await Promise.all([params, searchParams]);
 
-  const destination = getSafeReturnTo(returnTo, "/admin/institutions");
+  const destination = getSafeReturnTo(returnTo, "/institutions");
 
   const institution = await fetchInstitution(id);
 
@@ -62,10 +62,10 @@ export default async function InstitutionDetailPage({ params, searchParams }: In
         {institution.active ? (
           <div className="flex w-full flex-wrap justify-start gap-3 md:w-auto md:flex-nowrap md:justify-end">
             <Button asChild variant="outline" size="lg" className="flex-1 md:flex-none">
-              <Link href={`/admin/institutions/${id}/people`}>Administrar usuarios</Link>
+              <Link href={`/institutions/${id}/people`}>Administrar usuarios</Link>
             </Button>
             <Button asChild size="lg" className="w-full sm:w-auto sm:flex-1 md:flex-none">
-              <ReturnToLink href={`/admin/institutions/${id}/edit`} returnTo={destination}>
+              <ReturnToLink href={`/institutions/${id}/edit`} returnTo={destination}>
                 Editar institución
               </ReturnToLink>
             </Button>

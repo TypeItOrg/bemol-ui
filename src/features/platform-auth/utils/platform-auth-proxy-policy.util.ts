@@ -13,7 +13,7 @@ import {
 } from "@features/platform-auth/utils/platform-auth-cookies.util";
 import { getRedirectPath, getSafeNextPath } from "@features/platform-auth/utils/platform-auth-paths.util";
 
-export const PLATFORM_LOGIN_PATH = "/admin/auth/login";
+export const PLATFORM_LOGIN_PATH = "/auth/login";
 export const PLATFORM_REFRESH_PATH = "/api/v1/admin/auth/refresh";
 export const PLATFORM_CURRENT_USER_PATH = "/api/v1/admin/auth/me";
 

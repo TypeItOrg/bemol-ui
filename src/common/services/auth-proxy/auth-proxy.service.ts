@@ -14,7 +14,7 @@ const inFlightRefreshes = new Map<string, Promise<RefreshAttempt>>();
 
 const AUTH_PROXY_REQUEST_TIMEOUT_MS = 15_000;
 
-export async function handleGuestOnlyRoute(request: NextRequest, policy: AuthProxyPolicy): Promise<NextResponse> {
+export async function handleGuestOnlyRoute(request: NextRequest, policy: AuthProxyPolicy, rewriteUrl?: URL): Promise<NextResponse> {
   const accessToken = request.cookies.get(policy.accessTokenCookie)?.value;
 
   if (accessToken) {
@@ -27,14 +27,14 @@ export async function handleGuestOnlyRoute(request: NextRequest, policy: AuthPro
     if (sessionStatus === SessionStatus.UNAVAILABLE) {
       const unavailable = await getApiUnavailableResponse(request);
 
-      return unavailable ?? nextWithRequestHeaders(request);
+      return unavailable ?? nextWithRequestHeaders(request, rewriteUrl);
     }
   }
 
   const refreshToken = request.cookies.get(policy.refreshTokenCookie)?.value;
 
   if (!refreshToken) {
-    const response = nextWithRequestHeaders(request);
+    const response = nextWithRequestHeaders(request, rewriteUrl);
 
     if (accessToken) {
       policy.clearCookies(response);
@@ -63,7 +63,7 @@ export async function handleGuestOnlyRoute(request: NextRequest, policy: AuthPro
     }
   }
 
-  const response = nextWithRequestHeaders(request);
+  const response = nextWithRequestHeaders(request, rewriteUrl);
 
   if (refreshAttempt.status === 401) {
     policy.clearCookies(response);
@@ -72,9 +72,9 @@ export async function handleGuestOnlyRoute(request: NextRequest, policy: AuthPro
   return response;
 }
 
-export async function handleProtectedRoute(request: NextRequest, policy: AuthProxyPolicy): Promise<NextResponse> {
+export async function handleProtectedRoute(request: NextRequest, policy: AuthProxyPolicy, rewriteUrl?: URL): Promise<NextResponse> {
   if (request.cookies.has(policy.accessTokenCookie)) {
-    return nextWithRequestHeaders(request);
+    return nextWithRequestHeaders(request, rewriteUrl);
   }
 
   const refreshToken = request.cookies.get(policy.refreshTokenCookie)?.value;
@@ -88,7 +88,7 @@ export async function handleProtectedRoute(request: NextRequest, policy: AuthPro
   const refreshAttempt = await validateRefreshedSession(sharedRefresh, request, policy);
 
   if (refreshAttempt.tokens) {
-    return createRefreshedSessionResponse(request, policy, refreshAttempt.tokens);
+    return createRefreshedSessionResponse(request, policy, refreshAttempt.tokens, rewriteUrl);
   }
 
   if (refreshAttempt.status === undefined || refreshAttempt.status >= 500) {
@@ -150,7 +150,12 @@ async function performRefresh(refreshPath: string, refreshToken: string): Promis
     const response = await fetch(new URL(refreshPath, getApiUrlOrThrow()), {
       method: "POST",
       // The deduplicated refresh is context-neutral. Each caller validates the rotated session below.
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        ...(refreshPath === "/api/v1/admin/auth/refresh"
+          ? { [INSTITUTIONAL_HOST_HEADER]: new URL(process.env.PLATFORM_PUBLIC_URL || "http://admin.localhost:3000").host }
+          : {}),
+      },
       cache: "no-store",
       body: JSON.stringify({ refreshToken }),
       signal: AbortSignal.timeout(AUTH_PROXY_REQUEST_TIMEOUT_MS),
@@ -209,21 +214,21 @@ function createUnauthenticatedResponse(request: NextRequest, policy: AuthProxyPo
   return response;
 }
 
-function createRefreshedSessionResponse(request: NextRequest, policy: AuthProxyPolicy, tokens: RefreshedTokens): NextResponse {
+function createRefreshedSessionResponse(request: NextRequest, policy: AuthProxyPolicy, tokens: RefreshedTokens, rewriteUrl?: URL): NextResponse {
   request.cookies.set(policy.accessTokenCookie, tokens.accessToken);
   request.cookies.set(policy.refreshTokenCookie, tokens.refreshToken);
 
-  const response = NextResponse.next({
-    request: { headers: new Headers(request.headers) },
-  });
+  const response = nextWithRequestHeaders(request, rewriteUrl);
 
   policy.setRefreshedCookies(response, tokens);
 
   return response;
 }
 
-function nextWithRequestHeaders(request: NextRequest): NextResponse {
-  return NextResponse.next({ request: { headers: new Headers(request.headers) } });
+function nextWithRequestHeaders(request: NextRequest, rewriteUrl?: URL): NextResponse {
+  const init = { request: { headers: new Headers(request.headers) } };
+
+  return rewriteUrl ? NextResponse.rewrite(rewriteUrl, init) : NextResponse.next(init);
 }
 
 function createProxyBackendHeaders(request: NextRequest, initial: HeadersInit): Headers {

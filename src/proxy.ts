@@ -4,7 +4,9 @@ import { NextResponse } from "next/server";
 import { getApiUnavailableResponse } from "@common/services/auth-proxy/api-unavailable-response.util";
 import { INSTITUTIONAL_UNAVAILABLE_PATH, RouteAccess, getRouteAccess } from "@common/services/auth-proxy/auth-proxy-route.util";
 import { handleGuestOnlyRoute, handleProtectedRoute } from "@common/services/auth-proxy/auth-proxy.service";
+import { classifyInstitutionalHost } from "@common/services/institutional-host/classify-institutional-host.util";
 import { InstitutionalHostError } from "@common/services/institutional-host/institutional-host-error";
+import { InstitutionalHostKind } from "@common/services/institutional-host/institutional-host-kind.types";
 import {
   INSTITUTIONAL_HOST_HEADER,
   rebuildInstitutionalHostHeader,
@@ -14,18 +16,21 @@ import {
 import { tryAutoLogin } from "@features/institutional-auth/services/auto-login.service";
 import { institutionalAuthProxyPolicy } from "@features/institutional-auth/utils/institutional-auth-proxy-policy.util";
 import { platformAuthProxyPolicy } from "@features/platform-auth/utils/platform-auth-proxy-policy.util";
+import { toPlatformInternalPath, toPlatformPublicPath } from "@features/platform-auth/utils/platform-route-paths.util";
 
 export async function proxy(request: NextRequest): Promise<NextResponse> {
   // Never accept a client-provided internal tenant header, including on health probes.
   request.headers.delete(INSTITUTIONAL_HOST_HEADER);
 
-  const routeAccess = getRouteAccess(request.nextUrl.pathname, request.nextUrl.searchParams);
+  let routeAccess = getRouteAccess(request.nextUrl.pathname, request.nextUrl.searchParams);
+
+  let platformPageDestination: URL | undefined;
 
   if (routeAccess === RouteAccess.HealthProbe) {
     return NextResponse.next({ request: { headers: new Headers(request.headers) } });
   }
 
-  if (request.nextUrl.pathname === INSTITUTIONAL_UNAVAILABLE_PATH) {
+  if (request.nextUrl.pathname === INSTITUTIONAL_UNAVAILABLE_PATH || request.nextUrl.pathname.startsWith("/_next/")) {
     return NextResponse.next({ request: { headers: new Headers(request.headers) } });
   }
 
@@ -39,14 +44,43 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
 
     rebuildInstitutionalHostHeader(request.headers, request.headers);
 
-    const institution = await resolveRequestInstitution(request.headers);
+    const host = classifyInstitutionalHost(request.headers.get("host"));
 
-    if (institution && (routeAccess === RouteAccess.AdminGuestOnly || routeAccess === RouteAccess.AdminSession)) {
-      return NextResponse.redirect(institutionalAuthProxyPolicy.getLoginRedirect(request), {
-        status: 303,
-        headers: { "Cache-Control": "no-store" },
-      });
+    const pathname = request.nextUrl.pathname;
+
+    if (pathname === "/admin" || pathname.startsWith("/admin/")) {
+      if (["GET", "HEAD"].includes(request.method)) {
+        const destination = new URL(process.env.PLATFORM_PUBLIC_URL || "http://admin.localhost:3000");
+
+        destination.pathname = toPlatformPublicPath(pathname);
+        destination.search = request.nextUrl.search;
+
+        return NextResponse.redirect(destination, { status: 303 });
+      }
+
+      return NextResponse.json({ message: "Acceso no disponible en este dominio." }, { status: 404 });
     }
+
+    if (host.kind === InstitutionalHostKind.PLATFORM && !pathname.startsWith("/api/")) {
+      // NextURL normalizes loopback hosts and can turn this into a self-proxying rewrite.
+      platformPageDestination = new URL(request.url);
+      platformPageDestination.pathname = toPlatformInternalPath(pathname);
+      routeAccess = getRouteAccess(platformPageDestination.pathname, request.nextUrl.searchParams);
+    }
+
+    const adminRoute = routeAccess === RouteAccess.AdminGuestOnly || routeAccess === RouteAccess.AdminSession;
+
+    if (adminRoute && host.kind !== InstitutionalHostKind.PLATFORM) {
+      return NextResponse.json({ message: "Acceso no disponible en este dominio." }, { status: 404 });
+    }
+
+    if (host.kind === InstitutionalHostKind.PLATFORM) {
+      if (routeAccess === RouteAccess.InstitutionalGuestOnly || routeAccess === RouteAccess.InstitutionalSession) {
+        return new NextResponse(null, { status: 404 });
+      }
+    }
+
+    await resolveRequestInstitution(request.headers);
   } catch (error) {
     const status = error instanceof InstitutionalHostError ? error.status : 503;
 
@@ -88,14 +122,15 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
 
   switch (routeAccess) {
     case RouteAccess.AdminGuestOnly:
-      return handleGuestOnlyRoute(request, platformAuthProxyPolicy);
+      return handleGuestOnlyRoute(request, platformAuthProxyPolicy, platformPageDestination);
     case RouteAccess.AdminSession:
-      return handleProtectedRoute(request, platformAuthProxyPolicy);
+      return handleProtectedRoute(request, platformAuthProxyPolicy, platformPageDestination);
     case RouteAccess.InstitutionalGuestOnly:
       return handleGuestOnlyRoute(request, institutionalAuthProxyPolicy);
     case RouteAccess.InstitutionalSession:
       return handleProtectedRoute(request, institutionalAuthProxyPolicy);
     case RouteAccess.Public:
+    case RouteAccess.HealthProbe:
       return NextResponse.next({ request: { headers: new Headers(request.headers) } });
   }
 }

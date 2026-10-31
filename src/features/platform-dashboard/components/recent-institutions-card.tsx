@@ -50,7 +50,7 @@ export function RecentInstitutionsCard({ institutions }: { institutions: RecentI
 export function RecentInstitutionRow({ institution }: { institution: RecentInstitution }): ReactElement {
   return (
     <Link
-      href={`/admin/institutions/${institution.id}`}
+      href={`/institutions/${institution.id}`}
       className="group focus-visible:ring-ring flex min-w-0 items-center gap-3 rounded-lg py-3 outline-none first:pt-0 last:pb-0 focus-visible:ring-2 focus-visible:ring-offset-2"
     >
       <Avatar size="lg" className="rounded-lg after:rounded-lg">

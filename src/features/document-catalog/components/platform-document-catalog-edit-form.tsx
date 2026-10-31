@@ -32,7 +32,7 @@ export function PlatformDocumentCatalogEditForm({
 
   const canChangeInstitution = document.canChangeInstitution === true;
 
-  const copyUrl = appendReturnTo(`/admin/documentation/new?copyFrom=${document.id}&sourceInstitutionId=${document.institutionId}`, returnTo);
+  const copyUrl = appendReturnTo(`/documentation/new?copyFrom=${document.id}&sourceInstitutionId=${document.institutionId}`, returnTo);
 
   return (
     <DocumentCatalogForm

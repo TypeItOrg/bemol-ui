@@ -12,7 +12,7 @@ import { renderWithQueryClient } from "@/../test/utils/render-with-query-client"
 const mockReplace = jest.fn();
 const mockQuery = new URLSearchParams({ page: "2", size: "30", roleType: "CUSTOM", search: "docentes" });
 jest.mock("next/navigation", () => ({
-  usePathname: () => "/admin/roles",
+  usePathname: () => "/roles",
   useRouter: () => ({ push: jest.fn(), replace: mockReplace }),
   useSearchParams: () => mockQuery,
 }));
@@ -52,7 +52,7 @@ it("selects an institution through the real advanced filter and preserves the ba
 
   await waitFor(() => expect(mockReplace).toHaveBeenCalledTimes(1));
   const destination = new URL(mockReplace.mock.calls[0][0], "http://localhost");
-  expect(destination.pathname).toBe("/admin/roles");
+  expect(destination.pathname).toBe("/roles");
   expect(Object.fromEntries(destination.searchParams)).toEqual({
     institutionId: INSTITUTION_ID,
     page: "0",

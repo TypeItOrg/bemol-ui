@@ -48,7 +48,7 @@ export function PlatformRoleDeleteButton({
         return;
       }
 
-      router.replace("/admin/roles");
+      router.replace("/roles");
     });
   }
 

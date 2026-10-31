@@ -42,7 +42,7 @@ export function PeopleTableEmptyState({
           La página seleccionada no contiene elementos. Podés volver a la primera página para ver los resultados.
         </p>
         <Button asChild variant="outline" size="sm">
-          <Link href={PeopleScope.isInstitutional(scope) ? `/people?size=${size}` : `/admin/institutions/${institutionId}/people?size=${size}`}>
+          <Link href={PeopleScope.isInstitutional(scope) ? `/people?size=${size}` : `/institutions/${institutionId}/people?size=${size}`}>
             Volver a la primera página
           </Link>
         </Button>
@@ -70,7 +70,7 @@ export function PeopleTableEmptyState({
         </p>
         {canCreate ? (
           <Button asChild size="lg">
-            <ReturnToLink href={PeopleScope.isInstitutional(scope) ? "/people/new" : `/admin/institutions/${institutionId}/people/new`}>
+            <ReturnToLink href={PeopleScope.isInstitutional(scope) ? "/people/new" : `/institutions/${institutionId}/people/new`}>
               <PlusIcon className="mr-2 size-4" />
               Nuevo usuario
             </ReturnToLink>

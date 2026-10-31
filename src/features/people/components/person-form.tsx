@@ -80,7 +80,7 @@ function PersonFormView({
 
   const isEdit = mode === FORM_MODE.EDIT;
 
-  const platformListPath = institutionId ? `/admin/institutions/${institutionId}/people` : "/admin/people";
+  const platformListPath = institutionId ? `/institutions/${institutionId}/people` : "/people";
 
   const listPath = PeopleScope.isInstitutional(scope) ? "/people" : platformListPath;
 

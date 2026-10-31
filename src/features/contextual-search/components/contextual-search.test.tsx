@@ -36,13 +36,13 @@ const institutionalAccessSections = [
 
 const platformAccessSections = [
   {
-    items: [{ title: "Inicio", url: "/admin", icon: HouseIcon, exact: true }],
+    items: [{ title: "Inicio", url: "/", icon: HouseIcon, exact: true }],
   },
   {
     label: "Menú",
     items: [
-      { title: "Instituciones", url: "/admin/institutions", icon: BuildingIcon },
-      { title: "Usuarios", url: "/admin/people", icon: UsersIcon },
+      { title: "Instituciones", url: "/institutions", icon: BuildingIcon },
+      { title: "Usuarios", url: "/people", icon: UsersIcon },
     ],
   },
 ] satisfies readonly ContextualSearchAccessSection[];

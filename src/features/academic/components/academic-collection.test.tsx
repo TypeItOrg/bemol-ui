@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
@@ -18,7 +20,7 @@ const mockReplace = jest.fn();
 let mockQuery = new URLSearchParams();
 
 jest.mock("next/navigation", () => ({
-  usePathname: () => "/admin/courses",
+  usePathname: () => "/courses",
   useRouter: () => ({ push: mockPush, replace: mockReplace }),
   useSearchParams: () => mockQuery,
 }));
@@ -106,7 +108,7 @@ describe("AcademicCollectionView with its real table and filters", () => {
   it("renders the filtered institution and sends global row links to that institution's administration", async () => {
     const user = userEvent.setup();
     await renderCollection({
-      basePath: "/admin",
+      basePath: "",
       global: true,
       institutionId: undefined,
       institutionName: "Conservatorio",
@@ -120,7 +122,7 @@ describe("AcademicCollectionView with its real table and filters", () => {
     expect(within(table).getByRole("cell", { name: "Conservatorio" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Plan 2026" })).toHaveAttribute(
       "href",
-      "/admin/institutions/" + INSTITUTION_ID + "/academic/study-plans/" + PLAN_ID,
+      "/institutions/" + INSTITUTION_ID + "/academic/study-plans/" + PLAN_ID,
     );
     await user.click(screen.getByRole("button", { name: /Filtros avanzados/ }));
     expect(within(screen.getByRole("dialog")).getByText("Conservatorio")).toBeInTheDocument();
@@ -148,13 +150,13 @@ describe("AcademicCollectionView with its real table and filters", () => {
       search: "piano",
     });
     await renderCollection({
-      basePath: "/admin",
+      basePath: "/",
       global: true,
       scope: AcademicScope.ADMIN,
       resource: AcademicResource.COURSE,
       institutionId: undefined,
       searchParams: Object.fromEntries(mockQuery),
-      createAction: <a href="/admin/courses/new">Nuevo curso</a>,
+      createAction: <Link href="/courses/new">Nuevo curso</Link>,
     });
 
     expect(fetchCourses).toHaveBeenCalledWith(
@@ -188,7 +190,7 @@ describe("AcademicCollectionView with its real table and filters", () => {
 
     expect(mockReplace).toHaveBeenCalledTimes(1);
     const destination = new URL(mockReplace.mock.calls[0][0], "https://bemol.test");
-    expect(destination.pathname).toBe("/admin/courses");
+    expect(destination.pathname).toBe("/courses");
     expect(Object.fromEntries(destination.searchParams)).toEqual({
       page: "0",
       size: "30",

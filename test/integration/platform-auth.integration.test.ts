@@ -8,6 +8,7 @@ import type { PlatformAccount } from "@features/platform-auth/types/platform-acc
 const API_URL = "https://api.example.test";
 const originalEnvironment = {
   BEMOL_API_URL: process.env.BEMOL_API_URL,
+  PLATFORM_PUBLIC_URL: process.env.PLATFORM_PUBLIC_URL,
   FRONTEND_PUBLIC_URL: process.env.FRONTEND_PUBLIC_URL,
   INSTITUTIONAL_BASE_DOMAIN: process.env.INSTITUTIONAL_BASE_DOMAIN,
 };
@@ -20,9 +21,12 @@ const account: PlatformAccount = {
   name: "Ada",
   lastName: "Lovelace",
 };
+const challenge = { loginAttemptId: "11111111-1111-4111-8111-111111111111", setupRequired: false };
 const loginTokens = { accessToken: "login-access", refreshToken: "login-refresh" };
 const refreshedTokens = { accessToken: "refreshed-access", refreshToken: "refreshed-refresh" };
 const cookieValues = new Map<string, string>();
+let mockRequestHost = "admin.example.test";
+let mockPasskeyRequired = true;
 let loginRequests: Request[];
 let accountAuthorizations: (string | null)[];
 let logoutRequests: Request[];
@@ -36,8 +40,9 @@ const server = setupServer(
       return HttpResponse.json({ status: 401, message: "Credenciales inválidas" }, { status: 401 });
     }
 
-    return HttpResponse.json({ account, tokens: loginTokens });
+    return HttpResponse.json(mockPasskeyRequired ? challenge : { account, tokens: loginTokens });
   }),
+  http.post(`${API_URL}/api/v1/admin/auth/passkeys/authentication/verify`, () => HttpResponse.json({ account, tokens: loginTokens })),
   http.post(`${API_URL}/api/v1/admin/auth/refresh`, async ({ request }) => {
     const body = (await request.json()) as { refreshToken?: string };
 
@@ -83,9 +88,12 @@ afterAll(() => {
 });
 beforeEach(() => {
   process.env.BEMOL_API_URL = API_URL;
+  process.env.PLATFORM_PUBLIC_URL = "https://admin.example.test";
   process.env.FRONTEND_PUBLIC_URL = "https://app.example.test";
   process.env.INSTITUTIONAL_BASE_DOMAIN = "example.test";
   cookieValues.clear();
+  mockRequestHost = "admin.example.test";
+  mockPasskeyRequired = true;
   loginRequests = [];
   accountAuthorizations = [];
   logoutRequests = [];
@@ -96,7 +104,7 @@ beforeEach(() => {
       set: (name: string, value: string) => cookieValues.set(name, value),
       delete: (name: string) => cookieValues.delete(name),
     }),
-    headers: async () => new Headers({ host: "app.example.test", "user-agent": "Mozilla/5.0", "x-real-ip": "203.0.113.20" }),
+    headers: async () => new Headers({ host: mockRequestHost, "user-agent": "Mozilla/5.0", "x-real-ip": "203.0.113.20" }),
   }));
   jest.doMock("next/navigation", () => ({
     redirect: (url: string) => {
@@ -108,7 +116,7 @@ beforeEach(() => {
 function loginForm(overrides: Record<string, string> = {}): FormData {
   const form = new FormData();
 
-  for (const [key, value] of Object.entries({ ...credentials, next: "/admin/accounts?page=2", ...overrides })) {
+  for (const [key, value] of Object.entries({ ...credentials, ...overrides })) {
     form.set(key, value);
   }
 
@@ -116,55 +124,72 @@ function loginForm(overrides: Record<string, string> = {}): FormData {
 }
 
 function platformRequest(): NextRequest {
-  return new NextRequest("https://app.example.test/admin", {
-    headers: { host: "app.example.test", cookie: Array.from(cookieValues, ([name, value]) => `${name}=${value}`).join("; ") },
+  return new NextRequest("https://admin.example.test/", {
+    headers: { host: "admin.example.test", cookie: Array.from(cookieValues, ([name, value]) => `${name}=${value}`).join("; ") },
   });
 }
 
 describe("platform authentication over HTTP", () => {
-  it("logs in, loads the account, rotates credentials for the current request and logs out without touching institutional cookies", async () => {
-    cookieValues.set("institutional_access_token", "institutional-access");
-    const { loginPlatform } = await import("@features/platform-auth/actions/platform-login.action");
-    await expect(loginPlatform({}, loginForm())).rejects.toMatchObject({ url: "/admin/accounts?page=2" });
-    expect(cookieValues.get(ACCESS_COOKIE)).toBe(loginTokens.accessToken);
-    expect(cookieValues.get(REFRESH_COOKIE)).toBe(loginTokens.refreshToken);
-    expect(loginRequests).toHaveLength(1);
-    expect(await loginRequests[0].json()).toEqual(credentials);
-    expect(loginRequests[0].cache).toBe("no-store");
-    expect(loginRequests[0].headers.get("user-agent")).toBe("Mozilla/5.0");
-    expect(loginRequests[0].headers.get("x-forwarded-for")).toBe("203.0.113.20");
-    expect(loginRequests[0].headers.get("x-real-ip")).toBe("203.0.113.20");
+  it.each([true, false])(
+    "logs in, rotates credentials and logs out without touching institutional cookies (passkeyRequired=%s)",
+    async (passkeyRequired) => {
+      mockPasskeyRequired = passkeyRequired;
+      cookieValues.set("institutional_access_token", "institutional-access");
+      const { loginPlatform } = await import("@features/platform-auth/actions/platform-login.action");
 
-    const { getPlatformAccount } = await import("@features/platform-auth/services/get-platform-account.service");
-    await expect(getPlatformAccount()).resolves.toEqual(account);
-    expect(accountAuthorizations).toEqual([`Bearer ${loginTokens.accessToken}`]);
+      if (passkeyRequired) {
+        await expect(loginPlatform({}, loginForm())).resolves.toEqual({ challenge });
+        expect(cookieValues.has(ACCESS_COOKIE)).toBe(false);
+        expect(cookieValues.has(REFRESH_COOKIE)).toBe(false);
+        const { finishPlatformPasskey } = await import("@features/platform-auth/actions/platform-passkey.actions");
+        await expect(
+          finishPlatformPasskey("22222222-2222-4222-8222-222222222222", { id: "fixture-credential" }, false, "/accounts?page=2"),
+        ).rejects.toMatchObject({ url: "/accounts?page=2" });
+      } else {
+        await expect(loginPlatform({}, loginForm({ next: "/accounts?page=2" }))).rejects.toMatchObject({ url: "/accounts?page=2" });
+      }
 
-    cookieValues.delete(ACCESS_COOKIE);
-    const { proxy } = await import("../../src/proxy");
-    const response = await proxy(platformRequest());
-    expect(response.headers.get("x-middleware-next")).toBe("1");
-    expect(response.headers.get("x-middleware-request-cookie")).toContain(`${ACCESS_COOKIE}=${refreshedTokens.accessToken}`);
-    expect(response.headers.get("x-middleware-request-cookie")).toContain(`${REFRESH_COOKIE}=${refreshedTokens.refreshToken}`);
+      expect(cookieValues.get(ACCESS_COOKIE)).toBe(loginTokens.accessToken);
+      expect(cookieValues.get(REFRESH_COOKIE)).toBe(loginTokens.refreshToken);
+      expect(loginRequests).toHaveLength(1);
+      expect(await loginRequests[0].json()).toEqual(credentials);
+      expect(loginRequests[0].cache).toBe("no-store");
+      expect(loginRequests[0].headers.get("user-agent")).toBe("Mozilla/5.0");
+      expect(loginRequests[0].headers.get("x-forwarded-for")).toBe("203.0.113.20");
+      expect(loginRequests[0].headers.get("x-real-ip")).toBe("203.0.113.20");
 
-    for (const name of [ACCESS_COOKIE, REFRESH_COOKIE]) {
-      cookieValues.set(name, response.cookies.get(name)!.value);
-    }
+      const { getPlatformAccount } = await import("@features/platform-auth/services/get-platform-account.service");
+      await expect(getPlatformAccount()).resolves.toEqual(account);
+      expect(accountAuthorizations).toEqual([`Bearer ${loginTokens.accessToken}`]);
 
-    expect(cookieValues.get(ACCESS_COOKIE)).toBe(refreshedTokens.accessToken);
-    expect(cookieValues.get(REFRESH_COOKIE)).toBe(refreshedTokens.refreshToken);
-    await expect(getPlatformAccount()).resolves.toEqual(account);
-    expect(accountAuthorizations.at(-1)).toBe(`Bearer ${refreshedTokens.accessToken}`);
+      cookieValues.delete(ACCESS_COOKIE);
+      const { proxy } = await import("../../src/proxy");
+      const response = await proxy(platformRequest());
+      expect(response.headers.get("x-middleware-rewrite")).toBe("https://admin.example.test/admin");
+      expect(response.headers.get("x-middleware-request-cookie")).toContain(`${ACCESS_COOKIE}=${refreshedTokens.accessToken}`);
+      expect(response.headers.get("x-middleware-request-cookie")).toContain(`${REFRESH_COOKIE}=${refreshedTokens.refreshToken}`);
 
-    const { logoutPlatform } = await import("@features/platform-auth/actions/platform-logout.action");
-    await expect(logoutPlatform()).rejects.toMatchObject({ url: "/admin/auth/login" });
-    expect(logoutRequests).toHaveLength(1);
-    expect(logoutRequests[0].method).toBe("POST");
-    expect(logoutRequests[0].headers.get("authorization")).toBe(`Bearer ${refreshedTokens.accessToken}`);
-    expect(logoutRequests[0].cache).toBe("no-store");
-    expect(cookieValues.has(ACCESS_COOKIE)).toBe(false);
-    expect(cookieValues.has(REFRESH_COOKIE)).toBe(false);
-    expect(cookieValues.get("institutional_access_token")).toBe("institutional-access");
-  });
+      for (const name of [ACCESS_COOKIE, REFRESH_COOKIE]) {
+        cookieValues.set(name, response.cookies.get(name)!.value);
+      }
+
+      expect(cookieValues.get(ACCESS_COOKIE)).toBe(refreshedTokens.accessToken);
+      expect(cookieValues.get(REFRESH_COOKIE)).toBe(refreshedTokens.refreshToken);
+      await expect(getPlatformAccount()).resolves.toEqual(account);
+      expect(accountAuthorizations.at(-1)).toBe(`Bearer ${refreshedTokens.accessToken}`);
+
+      const { logoutPlatform } = await import("@features/platform-auth/actions/platform-logout.action");
+      await expect(logoutPlatform()).rejects.toMatchObject({ url: "/auth/login" });
+      expect(logoutRequests).toHaveLength(1);
+      expect(logoutRequests[0].method).toBe("POST");
+      expect(logoutRequests[0].headers.get("X-Institutional-Host")).toBe("admin.example.test");
+      expect(logoutRequests[0].headers.get("authorization")).toBe(`Bearer ${refreshedTokens.accessToken}`);
+      expect(logoutRequests[0].cache).toBe("no-store");
+      expect(cookieValues.has(ACCESS_COOKIE)).toBe(false);
+      expect(cookieValues.has(REFRESH_COOKIE)).toBe(false);
+      expect(cookieValues.get("institutional_access_token")).toBe("institutional-access");
+    },
+  );
 
   it("rejects invalid fields before HTTP and never installs credentials after backend validation or authentication errors", async () => {
     const { loginPlatform } = await import("@features/platform-auth/actions/platform-login.action");
@@ -204,6 +229,16 @@ describe("platform authentication over HTTP", () => {
     },
   );
 
+  it("rejects a platform cookie on the wrong host before making an account request", async () => {
+    mockRequestHost = "app.example.test";
+    cookieValues.set(ACCESS_COOKIE, loginTokens.accessToken);
+
+    const { getPlatformAccount } = await import("@features/platform-auth/services/get-platform-account.service");
+
+    await expect(getPlatformAccount()).rejects.toMatchObject({ url: "/auth/login" });
+    expect(accountAuthorizations).toHaveLength(0);
+  });
+
   it.each(["unauthorized", "unavailable", "malformed", "network"] as const)(
     "distinguishes %s account responses from a valid session",
     async (failure) => {
@@ -238,7 +273,7 @@ describe("platform authentication over HTTP", () => {
     const { proxy } = await import("../../src/proxy");
     const response = await proxy(platformRequest());
     expect(response.status).toBe(307);
-    expect(response.headers.get("location")).toBe("https://app.example.test/admin/auth/login?next=%2Fadmin");
+    expect(response.headers.get("location")).toBe("https://admin.example.test/auth/login?next=%2F");
     expect(response.cookies.get(ACCESS_COOKIE)?.value).toBe("");
     expect(response.cookies.get(REFRESH_COOKIE)?.value).toBe("");
   });

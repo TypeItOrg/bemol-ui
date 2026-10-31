@@ -22,7 +22,12 @@ import { academicApiFetch } from "@features/academic/services/academic-api-fetch
 import type { AcademicActionState } from "@features/academic/types/academic-action-state.types";
 import type { StatusResource } from "@features/academic/types/status-resource.types";
 import { authorizeAcademicAction } from "@features/academic/utils/academic-action-auth.util";
-import { getAcademicApiBase, getAcademicResourceRoute, type AcademicScope as AcademicScopeType } from "@features/academic/utils/academic-scope.util";
+import {
+  getAcademicApiBase,
+  getAcademicResourceRoute,
+  type AcademicScope as AcademicScopeType,
+  getAcademicRevalidationPath,
+} from "@features/academic/utils/academic-scope.util";
 
 export async function updateAcademicStatusAction(
   scope: AcademicScopeType,
@@ -79,6 +84,6 @@ export async function updateAcademicStatusAction(
 
   const fallback = getAcademicResourceRoute(context.data.scope, context.data.institutionId, context.data.resource);
 
-  revalidatePath(fallback);
+  revalidatePath(getAcademicRevalidationPath(context.data.scope, fallback));
   redirect(getSafeReturnTo(context.data.returnTo, fallback));
 }

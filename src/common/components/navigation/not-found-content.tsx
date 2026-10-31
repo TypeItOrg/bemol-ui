@@ -3,7 +3,6 @@
 import type { ReactElement } from "react";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 
 import { HouseIcon, SearchXIcon } from "lucide-react";
 
@@ -12,12 +11,6 @@ import { Card } from "@common/components/ui/card";
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@common/components/ui/empty";
 
 export function NotFoundContent(): ReactElement {
-  const pathname = usePathname();
-
-  const isPlatformAdmin = pathname.startsWith("/admin");
-
-  const homeHref = isPlatformAdmin ? "/admin" : "/";
-
   return (
     <main className="bg-muted flex min-h-dvh flex-1 items-center justify-center p-6">
       <Card className="bg-background w-full max-w-lg p-6 md:p-8">
@@ -32,7 +25,7 @@ export function NotFoundContent(): ReactElement {
 
           <EmptyContent className="flex-row justify-center">
             <Button asChild size="lg">
-              <Link href={homeHref}>
+              <Link href="/">
                 <HouseIcon data-icon="inline-start" />
                 Ir al inicio
               </Link>

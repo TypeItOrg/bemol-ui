@@ -87,7 +87,7 @@ it("keeps the standard full-height empty state and clears to the institutional l
 });
 
 it("preserves the platform table institution column and admin detail path", async () => {
-  mockPath = "/admin/audit-events";
+  mockPath = "/audit-events";
   mockQuery = new URLSearchParams();
   const user = userEvent.setup();
 
@@ -99,5 +99,5 @@ it("preserves the platform table institution column and admin detail path", asyn
 
   expect(screen.getByRole("columnheader", { name: "Institución" })).toBeVisible();
   await user.click(screen.getByRole("button", { name: /Abrir acciones de/ }));
-  expect(screen.getByRole("menuitem", { name: "Ver detalle" })).toHaveAttribute("href", expect.stringContaining(`/admin/audit-events/${event.id}`));
+  expect(screen.getByRole("menuitem", { name: "Ver detalle" })).toHaveAttribute("href", expect.stringContaining(`/audit-events/${event.id}`));
 });

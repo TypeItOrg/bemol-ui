@@ -43,7 +43,7 @@ export function AuditEventsTable({
 }): ReactElement {
   const { isPending, navigate } = useDataTableNavigation();
 
-  const basePath = customBasePath ?? (mailView ? "/admin/emails" : "/admin/audit-events");
+  const basePath = customBasePath ?? (mailView ? "/emails" : "/audit-events");
 
   const noun = mailView ? "correo" : "evento";
 

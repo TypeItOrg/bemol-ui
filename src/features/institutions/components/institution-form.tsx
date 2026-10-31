@@ -34,7 +34,7 @@ import { createInstitutionFormData } from "@features/institutions/utils/institut
 import { getDefaultValues, getInitialLocation, setActionFieldErrors } from "@features/institutions/utils/institution-form.util";
 import { appendInstitutionLogoChange } from "@features/institutions/utils/institution-logo-form.util";
 
-const INSTITUTIONS_PATH = "/admin/institutions";
+const INSTITUTIONS_PATH = "/institutions";
 
 export function InstitutionForm({ mode, institution, returnTo, baseDomain = "" }: InstitutionFormProps): ReactElement {
   const router = useRouter();

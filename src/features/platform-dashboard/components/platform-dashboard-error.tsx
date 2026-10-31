@@ -18,7 +18,7 @@ function PlatformDashboardErrorFallback(_props: Record<string, unknown>, { error
       retry={retry}
       title={PLATFORM_DASHBOARD_ERROR_MESSAGES.DASHBOARD_TITLE}
       description={PLATFORM_DASHBOARD_ERROR_MESSAGES.DASHBOARD_DESCRIPTION}
-      homeHref="/admin"
+      homeHref="/"
     />
   );
 }

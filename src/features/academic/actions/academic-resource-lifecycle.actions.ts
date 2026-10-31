@@ -22,7 +22,12 @@ import type { AcademicActionState } from "@features/academic/types/academic-acti
 import { AcademicResource } from "@features/academic/types/academic-resource.types";
 import type { LifecycleResource } from "@features/academic/types/lifecycle-resource.types";
 import { authorizeAcademicAction } from "@features/academic/utils/academic-action-auth.util";
-import { getAcademicApiBase, getAcademicResourceRoute, type AcademicScope as AcademicScopeType } from "@features/academic/utils/academic-scope.util";
+import {
+  getAcademicApiBase,
+  getAcademicResourceRoute,
+  type AcademicScope as AcademicScopeType,
+  getAcademicRevalidationPath,
+} from "@features/academic/utils/academic-scope.util";
 import { INSTITUTIONAL_PERMISSION } from "@features/institutional-auth/types/institutional-permission.types";
 
 export async function deleteAcademicResourceAction(
@@ -81,7 +86,7 @@ export async function deleteAcademicResourceAction(
 
   const fallback = getAcademicResourceRoute(context.data.scope, context.data.institutionId, context.data.resource);
 
-  revalidatePath(fallback);
+  revalidatePath(getAcademicRevalidationPath(context.data.scope, fallback));
   redirect(getSafeReturnTo(context.data.destination, fallback));
 }
 
@@ -127,6 +132,6 @@ export async function restoreAcademicResourceAction(
 
   const fallback = getAcademicResourceRoute(context.data.scope, context.data.institutionId, context.data.resource);
 
-  revalidatePath(fallback);
+  revalidatePath(getAcademicRevalidationPath(context.data.scope, fallback));
   redirect(getSafeReturnTo(context.data.destination, fallback));
 }

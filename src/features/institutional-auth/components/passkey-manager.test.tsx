@@ -1,6 +1,8 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
+import { TooltipProvider } from "@common/components/ui/tooltip";
+
 import { renamePasskeyAction } from "@features/institutional-auth/actions/passkey-management.actions";
 import { requestPasskeyRegistration, verifyPasskeyRegistrationAction } from "@features/institutional-auth/actions/passkey-registration.actions";
 import { PasskeyManager } from "@features/institutional-auth/components/passkey-manager";
@@ -8,7 +10,9 @@ import { INSTITUTIONAL_AUTH_ERROR_MESSAGES } from "@features/institutional-auth/
 import type { Passkey } from "@features/institutional-auth/types/passkey.types";
 
 jest.mock("next/navigation", () => ({
-  useRouter: () => ({ refresh: jest.fn() }),
+  usePathname: () => "/account/passkeys",
+  useRouter: () => ({ push: jest.fn(), replace: jest.fn(), refresh: jest.fn() }),
+  useSearchParams: () => new URLSearchParams(),
 }));
 
 jest.mock("@features/institutional-auth/actions/passkey-registration.actions", () => ({
@@ -125,14 +129,29 @@ describe("PasskeyManager", () => {
     );
     renderManager([{ id: "1", label: "Mi PC", createdAt: null, lastUsedAt: null }]);
 
-    await user.click(screen.getByRole("button", { name: "Renombrar" }));
-    await user.clear(screen.getByLabelText(/Nombre/));
-    await user.type(screen.getByLabelText(/Nombre/), "Nueva");
+    await user.click(screen.getByRole("button", { name: "Abrir acciones de Mi PC" }));
+    await user.click(screen.getByRole("menuitem", { name: "Renombrar" }));
+    await user.clear(screen.getByRole("textbox", { name: /Nombre/ }));
+    await user.type(screen.getByRole("textbox", { name: /Nombre/ }), "Nueva");
     fireEvent.click(screen.getByRole("button", { name: "Guardar" }));
-    fireEvent.click(screen.getByRole("button", { name: "Guardar" }));
+    fireEvent.click(screen.getByRole("button", { name: "Guardando…" }));
 
     resolveRename({ success: true });
 
     await waitFor(() => expect(renameMock).toHaveBeenCalledTimes(1));
   });
+});
+
+it("reuses the manager for platform accounts without allowing deletion of the final key", async () => {
+  const user = userEvent.setup();
+  render(
+    <TooltipProvider>
+      <PasskeyManager platform initialPasskeys={[{ id: "key", label: "Mi equipo", createdAt: null, lastUsedAt: null }]} maxActivePasskeys={10} />
+    </TooltipProvider>,
+  );
+
+  await user.click(screen.getByRole("button", { name: "Abrir acciones de Mi equipo" }));
+  expect(screen.getByRole("menuitem", { name: "Eliminar" })).toHaveAttribute("aria-disabled", "true");
+  expect(screen.getByText(/La administración requiere al menos una llave/)).toBeInTheDocument();
+  expect(screen.queryByText(/iniciar sesión sin contraseña/)).not.toBeInTheDocument();
 });

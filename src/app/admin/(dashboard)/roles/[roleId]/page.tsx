@@ -31,7 +31,7 @@ export default async function PlatformRoleDetailPage({
 }): Promise<ReactElement> {
   const [{ roleId }, { returnTo }] = await Promise.all([params, searchParams]);
 
-  const destination = getSafeReturnTo(returnTo, "/admin/roles");
+  const destination = getSafeReturnTo(returnTo, "/roles");
 
   const [role, permissionGroups] = await Promise.all([fetchPlatformRole(roleId), fetchPlatformPermissionGroups()]);
 
@@ -55,7 +55,7 @@ export default async function PlatformRoleDetailPage({
           {role.deletable ? <PlatformRoleDeleteButton roleId={role.id} institutionId={role.institution.id} roleName={role.name} /> : null}
           {role.editable ? (
             <Button asChild size="lg">
-              <ReturnToLink href={`/admin/roles/${role.id}/edit`} returnTo={destination}>
+              <ReturnToLink href={`/roles/${role.id}/edit`} returnTo={destination}>
                 Editar rol
               </ReturnToLink>
             </Button>

@@ -11,7 +11,7 @@ import { getSafeReturnTo } from "@common/utils/return-to.util";
 import { academicApiFetch } from "@features/academic/services/academic-api-fetch.service";
 import { authorizeAcademicAction } from "@features/academic/utils/academic-action-auth.util";
 import type { AcademicScope } from "@features/academic/utils/academic-scope.util";
-import { getAcademicApiBase } from "@features/academic/utils/academic-scope.util";
+import { getAcademicApiBase, getAcademicRevalidationPath } from "@features/academic/utils/academic-scope.util";
 import { documentDefinitionSchema } from "@features/document-catalog/schemas/document-catalog.schema";
 import type { DocumentCatalogActionState } from "@features/document-catalog/types/document-catalog-action-state.types";
 import { getDocumentCatalogPageUrl } from "@features/document-catalog/utils/document-catalog-route.util";
@@ -171,11 +171,13 @@ export async function saveDocumentDefinition(
     return { error: "No se pudo confirmar el resultado. Recargá el catálogo.", uncertain: true };
   }
 
-  const catalogPath = scope === "admin" ? "/admin/documentation" : "/documentation";
+  const catalogPath = "/documentation";
 
-  revalidatePath(catalogPath);
-  revalidatePath(`${catalogPath}/${result.document.id}`);
-  revalidatePath(`${catalogPath}/${result.document.id}/edit`);
+  const revalidationPath = getAcademicRevalidationPath(scope, catalogPath);
+
+  revalidatePath(revalidationPath);
+  revalidatePath(`${revalidationPath}/${result.document.id}`);
+  revalidatePath(`${revalidationPath}/${result.document.id}/edit`);
 
   if (destination) {
     if (scope === "admin" && result.document.institutionId !== institutionId) {

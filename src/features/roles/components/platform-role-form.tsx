@@ -35,7 +35,7 @@ type PlatformRoleFormProps = {
 };
 
 export function PlatformRoleForm({ role, permissionGroups, returnTo }: PlatformRoleFormProps): ReactElement {
-  const destination = returnTo ?? (role ? `/admin/roles/${role.id}` : "/admin/roles");
+  const destination = returnTo ?? (role ? `/roles/${role.id}` : "/roles");
 
   const action = savePlatformRoleAction.bind(null, role?.id, role?.institution.id, destination);
 

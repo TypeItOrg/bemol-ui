@@ -8,6 +8,7 @@ import {
   FingerprintIcon,
   GraduationCapIcon,
   HouseIcon,
+  KeyRoundIcon,
   LibraryBigIcon,
   Music2Icon,
   MailIcon,
@@ -21,7 +22,7 @@ import type { NavigationItem } from "@common/utils/navigation.util";
 
 const PRIMARY_NAVIGATION_ITEM = {
   title: "Inicio",
-  url: "/admin",
+  url: "/",
   icon: HouseIcon,
   exact: true,
 } as const satisfies NavigationItem;
@@ -29,56 +30,56 @@ const PRIMARY_NAVIGATION_ITEM = {
 const MANAGEMENT_NAVIGATION_ITEMS = [
   {
     title: "Instituciones",
-    url: "/admin/institutions",
+    url: "/institutions",
     icon: BuildingIcon,
   },
   {
     title: "Usuarios",
-    url: "/admin/people",
+    url: "/people",
     icon: UsersIcon,
   },
   {
     title: "Roles y permisos",
-    url: "/admin/roles",
+    url: "/roles",
     icon: UserLockIcon,
   },
 ] as const satisfies readonly NavigationItem[];
 
 const ACADEMIC_NAVIGATION_ITEMS = [
-  { title: "Documentación", url: "/admin/documentation", icon: FileTextIcon },
+  { title: "Documentación", url: "/documentation", icon: FileTextIcon },
   {
     title: "Ciclos lectivos",
-    url: "/admin/academic-years",
+    url: "/academic-years",
     icon: CalendarRangeIcon,
   },
   {
     title: "Trayectos formativos",
-    url: "/admin/training-paths",
+    url: "/training-paths",
     icon: RouteIcon,
   },
   {
     title: "Planes de estudio",
-    url: "/admin/study-plans",
+    url: "/study-plans",
     icon: BookMarkedIcon,
   },
   {
     title: "Espacios académicos",
-    url: "/admin/academic-spaces",
+    url: "/academic-spaces",
     icon: LibraryBigIcon,
   },
   {
     title: "Instrumentos",
-    url: "/admin/instruments",
+    url: "/instruments",
     icon: Music2Icon,
   },
   {
     title: "Cursos",
-    url: "/admin/courses",
+    url: "/courses",
     icon: GraduationCapIcon,
   },
   {
     title: "Turnos",
-    url: "/admin/shifts",
+    url: "/shifts",
     icon: ClockIcon,
   },
 ] as const satisfies readonly NavigationItem[];
@@ -86,37 +87,43 @@ const ACADEMIC_NAVIGATION_ITEMS = [
 const ENROLLMENT_NAVIGATION_ITEMS = [
   {
     title: "Períodos de inscripción",
-    url: "/admin/enrollment-periods",
+    url: "/enrollment-periods",
     icon: CalendarRangeIcon,
   },
   {
     title: "Solicitudes de inscripción",
-    url: "/admin/enrollment-applications",
+    url: "/enrollment-applications",
     icon: ClipboardListIcon,
   },
   {
     title: "Solicitudes de vinculación",
-    url: "/admin/guardian-links",
+    url: "/guardian-links",
     icon: UsersIcon,
   },
 ] as const satisfies readonly NavigationItem[];
 
 const PLATFORM_NAVIGATION_ITEM = {
   title: "Administradores",
-  url: "/admin/accounts",
+  url: "/accounts",
   icon: FingerprintIcon,
 } as const satisfies NavigationItem;
 
 const PLATFORM_AUDIT_NAVIGATION_ITEM = {
   title: "Auditoría",
-  url: "/admin/audit-events",
+  url: "/audit-events",
   icon: ScrollTextIcon,
 } as const satisfies NavigationItem;
 
 const PLATFORM_EMAIL_NAVIGATION_ITEM = {
   title: "Correos",
-  url: "/admin/emails",
+  url: "/emails",
   icon: MailIcon,
+} as const satisfies NavigationItem;
+
+const PLATFORM_PASSKEYS_NAVIGATION_ITEM = {
+  title: "Llaves de acceso",
+  url: "/account/passkeys",
+  icon: KeyRoundIcon,
 } as const satisfies NavigationItem;
 
 export const PLATFORM_NAVIGATION_ITEMS = [
@@ -127,6 +134,7 @@ export const PLATFORM_NAVIGATION_ITEMS = [
   PLATFORM_NAVIGATION_ITEM,
   PLATFORM_AUDIT_NAVIGATION_ITEM,
   PLATFORM_EMAIL_NAVIGATION_ITEM,
+  PLATFORM_PASSKEYS_NAVIGATION_ITEM,
 ] as const satisfies readonly NavigationItem[];
 
 export const PLATFORM_PRIMARY_NAVIGATION_ITEM = PRIMARY_NAVIGATION_ITEM;
@@ -152,5 +160,9 @@ export const PLATFORM_NAVIGATION_SECTIONS = [
   {
     label: "Plataforma",
     items: [PLATFORM_NAVIGATION_ITEM, PLATFORM_AUDIT_NAVIGATION_ITEM, PLATFORM_EMAIL_NAVIGATION_ITEM],
+  },
+  {
+    label: "Cuenta",
+    items: [PLATFORM_PASSKEYS_NAVIGATION_ITEM],
   },
 ] as const;

@@ -31,7 +31,7 @@ export function PersonDeleteButton({
   const [open, setOpen] = useState(false);
 
   function handleDeleted(): void {
-    router.push(PeopleScope.isInstitutional(scope) ? "/people" : `/admin/institutions/${institutionId}/people`);
+    router.push(PeopleScope.isInstitutional(scope) ? "/people" : `/institutions/${institutionId}/people`);
   }
 
   return (

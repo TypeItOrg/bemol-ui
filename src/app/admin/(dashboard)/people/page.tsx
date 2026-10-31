@@ -43,7 +43,7 @@ export default async function PlatformPeoplePage({ searchParams }: PlatformPeopl
         <Sheet>
           <PlatformCollectionActions className="sm:justify-between">
             <Button asChild size="lg" className="w-full">
-              <ReturnToLink href="/admin/people/new">
+              <ReturnToLink href="/people/new">
                 <PlusIcon data-icon="inline-start" />
                 Nuevo usuario
               </ReturnToLink>

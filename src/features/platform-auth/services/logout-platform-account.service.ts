@@ -1,6 +1,8 @@
 import "server-only";
 
-import { getApiUrlOrThrow } from "@common/utils/get-api-url-or-throw.util";
+import { headers } from "next/headers";
+
+import { authenticatedApiFetch } from "@common/services/authenticated-api-fetch.service";
 
 import { getPlatformAccessToken } from "@features/platform-auth/services/get-platform-access-token.service";
 import { clearPlatformAuthCookies } from "@features/platform-auth/utils/platform-auth-cookies.util";
@@ -13,11 +15,7 @@ export async function logoutPlatformAccount(): Promise<void> {
   }
 
   try {
-    await fetch(new URL("/api/v1/admin/auth/logout", getApiUrlOrThrow()), {
-      method: "POST",
-      headers: { Authorization: `Bearer ${accessToken}` },
-      cache: "no-store",
-    });
+    await authenticatedApiFetch("/api/v1/admin/auth/logout", accessToken, { method: "POST" }, await headers());
   } catch {
     await clearPlatformAuthCookies();
   }

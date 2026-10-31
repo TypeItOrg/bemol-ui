@@ -35,7 +35,7 @@ export default async function PlatformAccountsPage({ searchParams }: PlatformAcc
     <PlatformPageShell title="Administradores" breadcrumb={<PlatformBreadcrumb />} actions={<PlatformPageIcon icon={FingerprintIcon} />}>
       <PlatformCollectionActions className="sm:justify-start">
         <Button asChild size="lg" className="w-full">
-          <ReturnToLink href="/admin/accounts/new">
+          <ReturnToLink href="/accounts/new">
             <PlusIcon data-icon="inline-start" />
             Nuevo administrador
           </ReturnToLink>

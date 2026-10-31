@@ -32,7 +32,7 @@ export const metadata: Metadata = {
 export default async function PlatformAccountDetailPage({ params, searchParams }: PlatformAccountDetailPageProps): Promise<ReactElement> {
   const [{ id }, { returnTo }] = await Promise.all([params, searchParams]);
 
-  const destination = getSafeReturnTo(returnTo, "/admin/accounts");
+  const destination = getSafeReturnTo(returnTo, "/accounts");
 
   const account = await fetchPlatformAccountAdmin(id);
 
@@ -57,7 +57,7 @@ export default async function PlatformAccountDetailPage({ params, searchParams }
         <div className="flex flex-wrap items-center gap-3">
           <PlatformAccountStatusControl account={account} />
           <Button asChild size="lg">
-            <ReturnToLink href={`/admin/accounts/${id}/edit`}>Editar administrador</ReturnToLink>
+            <ReturnToLink href={`/accounts/${id}/edit`}>Editar administrador</ReturnToLink>
           </Button>
         </div>
       </div>

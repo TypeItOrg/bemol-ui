@@ -24,13 +24,13 @@ export function PlatformRoleActions({ role }: { role: PlatformRoleListItem }): R
         <DropdownMenuContent align="start" className="w-48 p-1.5">
           <DropdownMenuGroup>
             <DropdownMenuItem asChild>
-              <Link href={`/admin/roles/${role.id}`} className="px-2.5 py-1.5">
+              <Link href={`/roles/${role.id}`} className="px-2.5 py-1.5">
                 Ver detalle
               </Link>
             </DropdownMenuItem>
             {role.editable ? (
               <DropdownMenuItem asChild>
-                <ReturnToLink href={`/admin/roles/${role.id}/edit`} className="px-2.5 py-1.5">
+                <ReturnToLink href={`/roles/${role.id}/edit`} className="px-2.5 py-1.5">
                   Editar rol
                 </ReturnToLink>
               </DropdownMenuItem>

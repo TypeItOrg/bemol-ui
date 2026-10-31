@@ -57,3 +57,22 @@ it("[A04.untrusted-origin] replaces a forged peer header with the canonical gene
   });
   expect(fetchMock.mock.calls.at(-1)[1].headers.get("X-Institutional-Host")).toBe("testing.typeit.com.ar");
 });
+
+it("preserves context-free public calls when branded mode is disabled", async () => {
+  process.env.INSTITUTIONAL_BASE_DOMAIN = "";
+  jest.mocked(headers).mockClear();
+
+  await publicApiFetch("/api/v1/greeting", { headers: { "X-Institutional-Host": "forged.test" } });
+
+  expect(headers).not.toHaveBeenCalled();
+  expect(fetchMock.mock.calls.at(-1)[1].headers.has("X-Institutional-Host")).toBe(false);
+});
+
+it("still binds platform calls to their host with branded mode disabled", async () => {
+  process.env.INSTITUTIONAL_BASE_DOMAIN = "";
+  process.env.PLATFORM_PUBLIC_URL = "http://admin.localhost:3000";
+
+  await publicApiFetch("/api/v1/admin/auth/login", { method: "POST" }, new Headers({ host: "admin.localhost:3000" }));
+
+  expect(fetchMock.mock.calls.at(-1)[1].headers.get("X-Institutional-Host")).toBe("admin.localhost:3000");
+});

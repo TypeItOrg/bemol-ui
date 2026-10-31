@@ -1,6 +1,6 @@
 "use client";
 
-import { SyntheticEvent, useActionState, useTransition, type ReactElement } from "react";
+import { useActionState, type ReactElement } from "react";
 
 import { AlertCircleIcon, Loader2Icon } from "lucide-react";
 
@@ -13,26 +13,21 @@ import { cn } from "@common/utils/cn.util";
 
 import { InstitutionalBrandIdentity } from "@features/institutional-auth/components/institutional-brand-identity";
 import { loginPlatform } from "@features/platform-auth/actions/platform-login.action";
+import { PlatformPasskeyLogin } from "@features/platform-auth/components/platform-passkey-login";
 import type { PlatformLoginActionState } from "@features/platform-auth/types/platform-login-action-state.types";
 
 const INITIAL_STATE: PlatformLoginActionState = {};
 
 export function PlatformLoginForm({ next }: { next?: string }): ReactElement {
-  const [state, formAction] = useActionState<PlatformLoginActionState, FormData>(loginPlatform, INITIAL_STATE);
+  const [state, formAction, isPending] = useActionState<PlatformLoginActionState, FormData>(loginPlatform, INITIAL_STATE);
 
-  const [isPending, startTransition] = useTransition();
-
-  function handleSubmit(event: SyntheticEvent<HTMLFormElement>) {
-    event.preventDefault();
-
-    const formData = new FormData(event.currentTarget);
-
-    startTransition(() => formAction(formData));
+  if (state.challenge) {
+    return <PlatformPasskeyLogin challenge={state.challenge} next={next} />;
   }
 
   return (
-    <form noValidate onSubmit={handleSubmit} className="flex flex-col justify-center p-6 md:p-8">
-      {next ? <input type="hidden" name="next" value={next} /> : null}
+    <form action={formAction} noValidate className="flex flex-col justify-center p-6 md:p-8">
+      <input type="hidden" name="next" value={next ?? ""} />
       <header className="space-y-1 text-center">
         <InstitutionalBrandIdentity
           className="mb-3 w-full md:hidden"

@@ -28,7 +28,7 @@ export default async function EditInstitutionPage({ params, searchParams }: Edit
 
   const { returnTo } = await searchParams;
 
-  const destination = getSafeReturnTo(returnTo, `/admin/institutions/${id}`);
+  const destination = getSafeReturnTo(returnTo, `/institutions/${id}`);
 
   const institution = await fetchInstitution(id);
 
@@ -43,7 +43,7 @@ export default async function EditInstitutionPage({ params, searchParams }: Edit
         breadcrumb={<PlatformBreadcrumb segmentLabels={{ [id]: institution.name }} />}
         actions={
           <Button asChild variant="outline" size="lg">
-            <Link href={`/admin/institutions/${id}`}>Ver ficha</Link>
+            <Link href={`/institutions/${id}`}>Ver ficha</Link>
           </Button>
         }
       />
@@ -63,7 +63,7 @@ export default async function EditInstitutionPage({ params, searchParams }: Edit
           <Link href={destination}>Volver</Link>
         </Button>
         <Button asChild size="lg">
-          <Link href={`/admin/institutions/${id}/people`}>Administrar usuarios</Link>
+          <Link href={`/institutions/${id}/people`}>Administrar usuarios</Link>
         </Button>
       </div>
       <InstitutionForm mode="edit" institution={institution} returnTo={destination} baseDomain={process.env.INSTITUTIONAL_BASE_DOMAIN ?? ""} />

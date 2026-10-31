@@ -1,5 +1,7 @@
 import "server-only";
 
+import { headers } from "next/headers";
+
 import { authenticatedApiFetch } from "@common/services/authenticated-api-fetch.service";
 
 import { getPlatformAccessToken } from "@features/platform-auth/services/get-platform-access-token.service";
@@ -7,5 +9,5 @@ import { getPlatformAccessToken } from "@features/platform-auth/services/get-pla
 export async function platformApiFetch(path: string, init: RequestInit = {}): Promise<Response> {
   const accessToken = await getPlatformAccessToken();
 
-  return authenticatedApiFetch(path, accessToken, init);
+  return authenticatedApiFetch(path, accessToken, init, await headers());
 }

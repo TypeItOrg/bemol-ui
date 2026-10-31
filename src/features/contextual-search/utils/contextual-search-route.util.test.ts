@@ -14,19 +14,17 @@ const result: ContextualSearchResult = {
 
 describe("contextual search routes", () => {
   it("builds platform detail routes for core entities", () => {
-    expect(getContextualSearchResultHref("platform", "institution", result)).toBe("/admin/institutions/result-1");
-    expect(getContextualSearchResultHref("platform", "platform-account", result)).toBe("/admin/accounts/result-1");
-    expect(getContextualSearchResultHref("platform", "role", result)).toBe("/admin/roles/result-1");
-    expect(getContextualSearchResultHref("platform", "user", result)).toBe("/admin/institutions/institution-1/people/result-1");
+    expect(getContextualSearchResultHref("platform", "institution", result)).toBe("/institutions/result-1");
+    expect(getContextualSearchResultHref("platform", "platform-account", result)).toBe("/accounts/result-1");
+    expect(getContextualSearchResultHref("platform", "role", result)).toBe("/roles/result-1");
+    expect(getContextualSearchResultHref("platform", "user", result)).toBe("/institutions/institution-1/people/result-1");
   });
 
   it.each([
     ["academic-year", "academic-years"],
     ["training-path", "training-paths"],
   ] as const)("builds edit routes for the no-detail %s academic entity", (entityType, resource) => {
-    expect(getContextualSearchResultHref("platform", entityType, result)).toBe(
-      `/admin/institutions/institution-1/academic/${resource}/result-1/edit`,
-    );
+    expect(getContextualSearchResultHref("platform", entityType, result)).toBe(`/institutions/institution-1/academic/${resource}/result-1/edit`);
     expect(getContextualSearchResultHref("institutional", entityType, result)).toBe(`/${resource}/result-1/edit`);
   });
 
@@ -36,7 +34,7 @@ describe("contextual search routes", () => {
     ["instrument", "instruments"],
     ["shift", "shifts"],
   ] as const)("builds detail routes for the %s academic entity", (entityType, resource) => {
-    expect(getContextualSearchResultHref("platform", entityType, result)).toBe(`/admin/institutions/institution-1/academic/${resource}/result-1`);
+    expect(getContextualSearchResultHref("platform", entityType, result)).toBe(`/institutions/institution-1/academic/${resource}/result-1`);
     expect(getContextualSearchResultHref("institutional", entityType, result)).toBe(`/${resource}/result-1`);
   });
 
@@ -54,7 +52,7 @@ describe("contextual search routes", () => {
 
   it("keeps platform academic collections in the global result page", () => {
     expect(getContextualSearchViewAllHref("platform", "academic-space", "Música aplicada")).toBe(
-      "/admin/search?search=M%C3%BAsica+aplicada&type=academic-space",
+      "/search?search=M%C3%BAsica+aplicada&type=academic-space",
     );
     expect(getContextualSearchViewAllHref("institutional", "role", "Preceptor")).toBe("/roles?search=Preceptor");
   });

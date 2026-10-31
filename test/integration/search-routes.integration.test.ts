@@ -7,15 +7,18 @@ import { GET as searchInstitutional } from "@app/api/institutional/search/route"
 const API_URL = "https://api.example.test";
 const institutionId = "019848b9-2e20-7a11-992a-87e71b86ce6b";
 const personId = "22222222-2222-4222-8222-222222222222";
+let mockHost = "app.example.test";
 const mockCookies = new Map<string, string>();
 const requests: Request[] = [];
 const payload = { groups: [{ entityType: "USER", items: [{ id: personId, title: "Matías Delgado" }], hasMore: false }] };
 const originalEnvironment = {
   BEMOL_API_URL: process.env.BEMOL_API_URL,
+  PLATFORM_PUBLIC_URL: process.env.PLATFORM_PUBLIC_URL,
   INSTITUTIONAL_BASE_DOMAIN: process.env.INSTITUTIONAL_BASE_DOMAIN,
 };
 
 jest.mock("next/headers", () => ({
+  headers: async () => new Headers({ host: mockHost }),
   cookies: async () => ({ get: (name: string) => (mockCookies.has(name) ? { value: mockCookies.get(name) } : undefined) }),
 }));
 
@@ -30,6 +33,8 @@ const server = setupServer(
 beforeAll(() => server.listen({ onUnhandledRequest: "error" }));
 beforeEach(() => {
   process.env.BEMOL_API_URL = API_URL;
+  process.env.PLATFORM_PUBLIC_URL = "https://admin.example.test";
+  mockHost = "app.example.test";
   process.env.INSTITUTIONAL_BASE_DOMAIN = "";
   mockCookies.set("platform_access_token", "platform-token");
   mockCookies.set("institutional_access_token", "institutional-token");
@@ -68,9 +73,12 @@ describe.each([
     backendPath: `/api/v1/institutions/${institutionId}/search`,
     token: "institutional-token",
   },
-])("$realm search route and authenticated transport", ({ get, query, invalidQuery, backendPath, token }) => {
+])("$realm search route and authenticated transport", ({ realm, get, query, invalidQuery, backendPath, token }) => {
+  beforeEach(() => {
+    mockHost = realm === "platform" ? "admin.example.test" : "app.example.test";
+  });
   it("validates and encodes the query, uses its own session and streams actual response data", async () => {
-    const response = await get(new Request(`https://app.example.test/api/search?${query}search=Mat%C3%ADas&limit=5`));
+    const response = await get(new Request(`https://${mockHost}/api/search?${query}search=Mat%C3%ADas&limit=5`));
 
     expect(response.status).toBe(200);
     await expect(response.json()).resolves.toEqual(payload);
@@ -82,7 +90,7 @@ describe.each([
   });
 
   it("rejects malformed input before making an HTTP request", async () => {
-    const response = await get(new Request(`https://app.example.test/api/search?${invalidQuery}`));
+    const response = await get(new Request(`https://${mockHost}/api/search?${invalidQuery}`));
 
     expect(response.status).toBe(400);
     expect(requests).toHaveLength(0);
@@ -95,7 +103,7 @@ describe.each([
       ),
     );
 
-    const response = await get(new Request(`https://app.example.test/api/search?${query}search=rol`));
+    const response = await get(new Request(`https://${mockHost}/api/search?${query}search=rol`));
 
     expect(response.status).toBe(401);
     expect(response.headers.get("x-request-id")).toBe("search-request");
@@ -105,7 +113,7 @@ describe.each([
   it("maps a transport outage to service unavailable without exposing diagnostics", async () => {
     server.use(http.get(`${API_URL}/api/v1/*`, () => HttpResponse.error()));
 
-    const response = await get(new Request(`https://app.example.test/api/search?${query}search=rol`));
+    const response = await get(new Request(`https://${mockHost}/api/search?${query}search=rol`));
 
     expect(response.status).toBe(503);
     await expect(response.json()).resolves.toEqual({ message: "El servicio de búsqueda no está disponible." });

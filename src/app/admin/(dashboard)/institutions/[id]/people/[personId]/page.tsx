@@ -42,7 +42,7 @@ export default async function EditPersonPage({ params, searchParams }: EditPerso
 
   const isDetailView = view === "detail";
 
-  const destination = getSafeReturnTo(returnTo, `/admin/institutions/${id}/people`);
+  const destination = getSafeReturnTo(returnTo, `/institutions/${id}/people`);
 
   const [person, assignedRoles] = await Promise.all([fetchPerson(id, personId), fetchPersonRoles(id, personId)]);
 
@@ -67,7 +67,7 @@ export default async function EditPersonPage({ params, searchParams }: EditPerso
       breadcrumb={
         <PlatformBreadcrumb
           segmentHrefs={{
-            [personId]: appendReturnTo(`/admin/institutions/${id}/people/${personId}?view=detail`, destination),
+            [personId]: appendReturnTo(`/institutions/${id}/people/${personId}?view=detail`, destination),
           }}
           segmentLabels={{ [id]: person.institutionName, [personId]: personName }}
           trailingLabel={isDetailView ? undefined : "Editar"}

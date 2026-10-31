@@ -1,25 +1,23 @@
-const DEFAULT_REDIRECT_PATH = "/admin";
+import { getSafeReturnTo } from "@common/utils/return-to.util";
+
+import { toPlatformPublicPath } from "@features/platform-auth/utils/platform-route-paths.util";
 
 export function getSafeNextPath(next: string | null | undefined): string {
-  if (!next || next === "/") {
-    return DEFAULT_REDIRECT_PATH;
-  }
-
-  if (next.startsWith("/") && !next.startsWith("//")) {
-    return next;
+  if (!next) {
+    return "/";
   }
 
   if (next.startsWith("http://") || next.startsWith("https://")) {
     try {
       const parsedUrl = new URL(next);
 
-      const path = parsedUrl.pathname + parsedUrl.search;
-
-      return path === "/" ? DEFAULT_REDIRECT_PATH : path;
-    } catch {}
+      next = parsedUrl.pathname + parsedUrl.search;
+    } catch {
+      return "/";
+    }
   }
 
-  return DEFAULT_REDIRECT_PATH;
+  return getSafeReturnTo(toPlatformPublicPath(getSafeReturnTo(next, "/")), "/");
 }
 
 export function getRedirectPath(to: string, next?: string | null): string {

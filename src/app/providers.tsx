@@ -32,9 +32,7 @@ export function Providers({ children }: { children: ReactNode }): ReactElement {
 
       const currentPath = window.location.pathname + window.location.search;
 
-      const loginPath = window.location.pathname.startsWith("/admin") ? "/admin/auth/login" : "/auth/login";
-
-      window.location.href = getRedirectPath(loginPath, currentPath);
+      window.location.href = getRedirectPath("/auth/login", currentPath);
     }
 
     const client = new QueryClient({

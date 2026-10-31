@@ -19,7 +19,7 @@ export default async function NewPlatformPersonPage({
 }): Promise<ReactElement> {
   const { returnTo } = await searchParams;
 
-  const destination = getSafeReturnTo(returnTo, "/admin/people");
+  const destination = getSafeReturnTo(returnTo, "/people");
 
   return (
     <PlatformPageShell

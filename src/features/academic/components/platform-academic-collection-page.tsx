@@ -30,7 +30,7 @@ export async function PlatformAcademicCollectionPage({
   return (
     <PlatformPageShell title={config.title} breadcrumb={<PlatformBreadcrumb />} actions={<AcademicPageIcon icon={config.createIcon} />}>
       <AcademicCollectionView
-        basePath="/admin"
+        basePath=""
         canChangeStatus={config.canChangeStatus(FULL_ACADEMIC_ACCESS)}
         canReadWaitlist
         canCreate={false}

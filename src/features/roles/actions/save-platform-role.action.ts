@@ -66,7 +66,7 @@ export async function savePlatformRoleAction(
     return error;
   }
 
-  const destination = getSafeReturnTo(returnTo, context.data.roleId ? `/admin/roles/${context.data.roleId}` : "/admin/roles");
+  const destination = getSafeReturnTo(returnTo, context.data.roleId ? `/roles/${context.data.roleId}` : "/roles");
 
   revalidatePath("/admin/roles");
   redirect(destination);

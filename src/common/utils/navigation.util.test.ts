@@ -11,8 +11,8 @@ describe("isNavigationItemActive", () => {
   });
 
   it("supports exact destinations", () => {
-    expect(isNavigationItemActive("/admin", "/admin", true)).toBe(true);
-    expect(isNavigationItemActive("/admin/roles", "/admin", true)).toBe(false);
+    expect(isNavigationItemActive("/", "/", true)).toBe(true);
+    expect(isNavigationItemActive("/roles", "/", true)).toBe(false);
   });
 
   it("highlights only schedules on the teacher schedules route", () => {

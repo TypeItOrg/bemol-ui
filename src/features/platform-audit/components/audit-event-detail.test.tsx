@@ -53,7 +53,7 @@ it("integra valores anteriores y nuevos, horarios de 24 horas y estados sin hist
       ],
     },
   };
-  const props = { returnTo: "/admin/audit-events?page=2", roleLabels: {}, permissionLabels: {} };
+  const props = { returnTo: "/audit-events?page=2", roleLabels: {}, permissionLabels: {} };
   const { rerender, container } = render(<AuditEventDetail event={event} {...props} />);
 
   expect(screen.queryByRole("heading", { name: "Turno actualizado" })).not.toBeInTheDocument();
@@ -172,7 +172,7 @@ it("mantiene roles, permisos, documentación y datos de alta en tablas sin publi
     },
   };
   const props = {
-    returnTo: "/admin/audit-events",
+    returnTo: "/audit-events",
     roleLabels: { APPLICANT: "Postulante" },
     permissionLabels: { COURSE_READ: "Ver cursos", COURSE_WRITE: "Editar cursos" },
   };
@@ -342,7 +342,7 @@ it("compara cupos y horarios sin confundir clases ni inventar estados ni volcar 
     details: { entityName: "Curso QA", changedFields: ["classes"], before: { classCount: 1 }, after: { classCount: 1 } },
     history: { revision: 20, changes: [...original, ...replacement] },
   };
-  const props = { returnTo: "/admin/audit-events", roleLabels: {}, permissionLabels: {} };
+  const props = { returnTo: "/audit-events", roleLabels: {}, permissionLabels: {} };
   const preservedHistory = JSON.stringify(event.history);
   const { rerender, container } = render(<AuditEventDetail event={event} {...props} />);
   const table = screen.getByRole("table", { name: "Cambios" });

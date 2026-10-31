@@ -105,7 +105,7 @@ export async function DocumentCatalogNewPage({
 
   const institution = scope === "admin" && institutionId ? await fetchInstitution(institutionId) : undefined;
 
-  const returnTo = getSafeReturnTo(params.returnTo, institutionId ? getDocumentCatalogPageUrl(scope, institutionId) : "/admin/documentation");
+  const returnTo = getSafeReturnTo(params.returnTo, institutionId ? getDocumentCatalogPageUrl(scope, institutionId) : "/documentation");
 
   const segmentHrefs = { documentation: returnTo };
 

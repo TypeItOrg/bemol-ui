@@ -14,8 +14,7 @@ export async function publicApiFetch(path: string, init: RequestInit = {}, reque
     outgoing.set("Accept", "application/json");
   }
 
-  // Disabled branded mode preserves local development. Proxy still validates the public Host.
-  if (process.env.INSTITUTIONAL_BASE_DOMAIN?.trim()) {
+  if (process.env.INSTITUTIONAL_BASE_DOMAIN?.trim() || requestHeaders || path.startsWith("/api/v1/admin/")) {
     rebuildInstitutionalHostHeader(outgoing, requestHeaders ?? (await getRequestHeaders()));
   }
 

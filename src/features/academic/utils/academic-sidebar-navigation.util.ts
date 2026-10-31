@@ -8,17 +8,15 @@ export function getAcademicSidebarNavigationSections(
   sections: readonly { label?: string; items: readonly NavigationItem[] }[],
   scope: "institutional" | "platform",
 ): SidebarNavigationSection[] {
-  const prefix = scope === "platform" ? "/admin" : "";
-
-  const guardianLinksUrl = `${prefix}/guardian-links`;
+  const guardianLinksUrl = "/guardian-links";
 
   const guardianLinksItem = sections.flatMap((section) => section.items).find((item) => item.url === guardianLinksUrl);
 
   const managementLabel = scope === "platform" ? "Gestión" : "Institución";
 
   const enrollmentTitles: Record<string, string> = {
-    [`${prefix}/enrollment-periods`]: "Períodos",
-    [`${prefix}/enrollment-applications`]: "Solicitudes",
+    ["/enrollment-periods"]: "Períodos",
+    ["/enrollment-applications"]: "Solicitudes",
   };
 
   const sidebarSections = sections.map((section) => ({
@@ -48,7 +46,7 @@ export function getAcademicSidebarNavigationSections(
       id: "academic-enrollments",
       title: "Inscripciones",
       icon: ClipboardListIcon,
-      urls: ["/enrollment-periods", "/enrollment-applications"].map((url) => `${prefix}${url}`),
+      urls: ["/enrollment-periods", "/enrollment-applications"],
     },
   );
 
@@ -57,7 +55,7 @@ export function getAcademicSidebarNavigationSections(
     id: "academic-settings",
     title: "Configuración",
     icon: SettingsIcon,
-    urls: ["/academic-years", "/academic-spaces", "/instruments", "/shifts", "/documentation"].map((url) => `${prefix}${url}`),
+    urls: ["/academic-years", "/academic-spaces", "/instruments", "/shifts", "/documentation"],
   });
 
   return groupSidebarNavigationSection(configuredSections, {
@@ -65,6 +63,6 @@ export function getAcademicSidebarNavigationSections(
     id: `${scope}-activity`,
     title: "Actividad",
     icon: HistoryIcon,
-    urls: [`${prefix}/audit-events`, `${prefix}/emails`],
+    urls: ["/audit-events", "/emails"],
   });
 }

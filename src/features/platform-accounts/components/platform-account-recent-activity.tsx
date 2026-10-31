@@ -35,7 +35,7 @@ export async function PlatformAccountRecentActivity({ accountId }: { accountId: 
         descriptionBreakpoint="sm"
         action={
           <Button asChild variant="outline" size="lg">
-            <Link href={`/admin/audit-events?${params}`}>Ver en Auditoría</Link>
+            <Link href={`/audit-events?${params}`}>Ver en Auditoría</Link>
           </Button>
         }
       />
@@ -53,7 +53,7 @@ export async function PlatformAccountRecentActivity({ accountId }: { accountId: 
               className="bg-background flex min-w-0 flex-col gap-2 rounded-lg border p-4 sm:flex-row sm:items-center sm:justify-between sm:gap-4"
             >
               <div className="min-w-0">
-                <ReturnToLink href={`/admin/audit-events/${event.id}`} className="text-sm font-medium break-words underline-offset-4 hover:underline">
+                <ReturnToLink href={`/audit-events/${event.id}`} className="text-sm font-medium break-words underline-offset-4 hover:underline">
                   {AUDIT_ACTION_LABELS[event.action] ?? event.action}
                 </ReturnToLink>
                 {event.institutionId ? <p className="text-muted-foreground mt-1 text-sm break-words">{auditInstitutionName(event)}</p> : null}

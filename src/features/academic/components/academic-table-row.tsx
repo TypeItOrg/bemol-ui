@@ -133,7 +133,7 @@ export function AcademicTableRow({
           </TableCell>
           {global ? (
             <TableCell>
-              <Link href={`/admin/institutions/${institutionId}`} className="font-medium hover:underline">
+              <Link href={`/institutions/${institutionId}`} className="font-medium hover:underline">
                 {row.institutionName}
               </Link>
             </TableCell>

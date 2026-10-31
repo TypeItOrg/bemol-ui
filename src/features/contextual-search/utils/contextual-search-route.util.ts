@@ -59,26 +59,26 @@ export function getContextualSearchViewAllHref(scope: ContextualSearchScope, ent
 function getPlatformResultHref(entityType: ContextualSearchEntity, item: ContextualSearchResult): string {
   switch (entityType) {
     case "institution":
-      return `/admin/institutions/${item.id}`;
+      return `/institutions/${item.id}`;
     case "platform-account":
-      return `/admin/accounts/${item.id}`;
+      return `/accounts/${item.id}`;
     case "role":
-      return `/admin/roles/${item.id}`;
+      return `/roles/${item.id}`;
     case "user":
-      return `/admin/institutions/${getRequiredInstitutionId(item)}/people/${item.id}`;
+      return `/institutions/${getRequiredInstitutionId(item)}/people/${item.id}`;
     case "guardian-dependent":
     case "enrollment-application":
     case "course-enrollment":
       throw new Error(PLATFORM_SCOPE_ERROR(entityType));
     case "academic-year":
     case "training-path":
-      return `/admin/institutions/${getRequiredInstitutionId(item)}/academic/${getAcademicResource(entityType)}/${item.id}/edit`;
+      return `/institutions/${getRequiredInstitutionId(item)}/academic/${getAcademicResource(entityType)}/${item.id}/edit`;
     case "study-plan":
     case "academic-space":
     case "instrument":
     case "course":
     case "shift":
-      return `/admin/institutions/${getRequiredInstitutionId(item)}/academic/${getAcademicResource(entityType)}/${item.id}`;
+      return `/institutions/${getRequiredInstitutionId(item)}/academic/${getAcademicResource(entityType)}/${item.id}`;
   }
 }
 
@@ -110,17 +110,17 @@ function getInstitutionalResultHref(entityType: ContextualSearchEntity, item: Co
 function getPlatformCollectionHref(entityType: ContextualSearchEntity, searchParams: URLSearchParams): string {
   switch (entityType) {
     case "institution":
-      return `/admin/institutions?${searchParams}`;
+      return `/institutions?${searchParams}`;
     case "platform-account":
-      return `/admin/accounts?${searchParams}`;
+      return `/accounts?${searchParams}`;
     case "user":
-      return `/admin/people?${searchParams}`;
+      return `/people?${searchParams}`;
     case "guardian-dependent":
     case "enrollment-application":
     case "course-enrollment":
       throw new Error(PLATFORM_SCOPE_ERROR(entityType));
     case "role":
-      return `/admin/roles?${searchParams}`;
+      return `/roles?${searchParams}`;
     case "academic-year":
     case "training-path":
     case "study-plan":
@@ -130,7 +130,7 @@ function getPlatformCollectionHref(entityType: ContextualSearchEntity, searchPar
     case "shift":
       searchParams.set("type", entityType);
 
-      return `/admin/search?${searchParams}`;
+      return `/search?${searchParams}`;
   }
 }
 

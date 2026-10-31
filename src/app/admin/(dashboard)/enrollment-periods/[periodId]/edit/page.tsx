@@ -44,7 +44,7 @@ export default async function EditEnrollmentPeriodPage({ params, searchParams }:
     notFound();
   }
 
-  const collectionPath = `/admin/enrollment-periods?institutionId=${encodeURIComponent(institutionId)}`;
+  const collectionPath = `/enrollment-periods?institutionId=${encodeURIComponent(institutionId)}`;
 
   const returnTo = getSafeReturnTo(query.returnTo, collectionPath);
 

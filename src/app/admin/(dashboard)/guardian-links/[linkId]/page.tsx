@@ -35,7 +35,7 @@ export default async function GuardianLinkDetailPage({
     notFound();
   }
 
-  const returnTo = getSafeReturnTo((await searchParams).returnTo, "/admin/guardian-links");
+  const returnTo = getSafeReturnTo((await searchParams).returnTo, "/guardian-links");
 
   return (
     <PlatformPageShell

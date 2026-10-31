@@ -35,7 +35,7 @@ export default async function PlatformEnrollmentApplicationDetailPage({
 }: PlatformEnrollmentApplicationDetailPageProps): Promise<ReactElement> {
   const [{ institutionId, applicationId }, { returnTo }] = await Promise.all([params, searchParams]);
 
-  const destination = getSafeReturnTo(returnTo, "/admin/enrollment-applications");
+  const destination = getSafeReturnTo(returnTo, "/enrollment-applications");
 
   const application = await fetchPlatformEnrollmentApplicationById(institutionId, applicationId);
 

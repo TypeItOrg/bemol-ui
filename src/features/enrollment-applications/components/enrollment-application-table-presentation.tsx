@@ -143,7 +143,7 @@ export function EnrollmentApplicationTablePresentation({
 function getApplicationDetailHref(scope: AcademicScope | undefined, application: EnrollmentApplication): string | undefined {
   switch (scope) {
     case AcademicScope.ADMIN:
-      return `/admin/enrollment-applications/${application.institutionId}/${application.applicationId}`;
+      return `/enrollment-applications/${application.institutionId}/${application.applicationId}`;
     case AcademicScope.INSTITUTIONAL:
       return `/enrollment-applications/${application.applicationId}`;
     default:

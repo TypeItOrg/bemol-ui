@@ -10,5 +10,5 @@ type PlatformErrorProps = {
 };
 
 export default function PlatformError({ error, retry }: PlatformErrorProps): ReactElement {
-  return <BlockingError error={error} retry={retry} homeHref="/admin" />;
+  return <BlockingError error={error} retry={retry} homeHref="/" />;
 }

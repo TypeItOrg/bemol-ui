@@ -167,9 +167,9 @@ function PlatformPersonActions({
 }
 
 function getPersonPath(person: PlatformPersonSummary): string {
-  return `/admin/institutions/${person.institutionId}/people/${person.id}`;
+  return `/institutions/${person.institutionId}/people/${person.id}`;
 }
 
 function getInstitutionPath(person: PlatformPersonSummary): string {
-  return `/admin/institutions/${person.institutionId}`;
+  return `/institutions/${person.institutionId}`;
 }

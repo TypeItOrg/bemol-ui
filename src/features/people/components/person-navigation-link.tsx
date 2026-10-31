@@ -42,7 +42,7 @@ export function getPersonHref(
     return "/account";
   }
 
-  const personPath = PeopleScope.isInstitutional(scope) ? `/people/${personId}` : `/admin/institutions/${institutionId}/people/${personId}`;
+  const personPath = PeopleScope.isInstitutional(scope) ? `/people/${personId}` : `/institutions/${institutionId}/people/${personId}`;
 
   return detailView ? `${personPath}?view=detail` : personPath;
 }

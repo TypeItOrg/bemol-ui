@@ -32,6 +32,7 @@ async function buildFinalJestConfig() {
   const browserTests = [
     "<rootDir>/src/proxy.test.ts",
     "<rootDir>/src/proxy-institutional-host.test.ts",
+    "<rootDir>/src/proxy-platform-host.test.ts",
     "<rootDir>/src/common/hooks/**/*.test.ts",
     "<rootDir>/src/features/institutional-auth/utils/webauthn-capability.util.test.ts",
     "<rootDir>/src/features/institutional-auth/utils/passkey-authentication.util.test.ts",

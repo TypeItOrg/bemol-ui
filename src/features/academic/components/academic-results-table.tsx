@@ -97,7 +97,7 @@ export function AcademicResultsTable({
         {data.items.map((row) => (
           <AcademicTableRow
             key={row.id}
-            basePath={global ? `/admin/institutions/${row.institutionId}/academic` : basePath}
+            basePath={global ? `/institutions/${row.institutionId}/academic` : basePath}
             canChangeStatus={canChangeStatus && (row.scopedActions?.status ?? true)}
             canDelete={canDelete && (row.scopedActions?.delete ?? true)}
             canCreateVersion={canCreateVersion && (row.scopedActions?.createVersion ?? true)}

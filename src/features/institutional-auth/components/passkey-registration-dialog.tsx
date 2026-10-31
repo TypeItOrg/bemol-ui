@@ -2,10 +2,18 @@
 
 import { startTransition, useActionState, useEffect, useRef, useState, type ReactElement, type SyntheticEvent } from "react";
 
-import { Loader2Icon } from "lucide-react";
+import { KeyRoundIcon, Loader2Icon } from "lucide-react";
 
+import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@common/components/ui/alert-dialog";
 import { Button } from "@common/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@common/components/ui/dialog";
 import { Field, FieldError, FieldLabel } from "@common/components/ui/field";
 import { Input } from "@common/components/ui/input";
 
@@ -16,15 +24,23 @@ import { useWebAuthnSupport } from "@features/institutional-auth/hooks/use-webau
 import type { VerifyPasskeyRegistrationState } from "@features/institutional-auth/types/verify-passkey-registration-state.types";
 import { isUserCancelled } from "@features/institutional-auth/utils/passkey-authentication.util";
 import { createPasskeyCredential, toPublicKeyCreationOptions } from "@features/institutional-auth/utils/passkey-registration.util";
+import { requestPlatformPasskeyRegistration, verifyPlatformPasskeyRegistration } from "@features/platform-auth/actions/platform-passkey.actions";
 
 type PasskeyRegistrationDialogProps = {
+  platform?: boolean;
   initialLabel: string;
   onClose: () => void;
   onSuccess: () => void;
   onRequireReauth: (label: string) => void;
 };
 
-export function PasskeyRegistrationDialog({ initialLabel, onClose, onSuccess, onRequireReauth }: PasskeyRegistrationDialogProps): ReactElement {
+export function PasskeyRegistrationDialog({
+  initialLabel,
+  onClose,
+  onSuccess,
+  onRequireReauth,
+  platform = false,
+}: PasskeyRegistrationDialogProps): ReactElement {
   const ceremonyRef = useRef<AbortController | null>(null);
 
   const [verifying, setVerifying] = useState(false);
@@ -53,7 +69,7 @@ export function PasskeyRegistrationDialog({ initialLabel, onClose, onSuccess, on
     ceremonyRef.current = controller;
 
     try {
-      const options = await requestPasskeyRegistration({}, formData);
+      const options = await (platform ? requestPlatformPasskeyRegistration : requestPasskeyRegistration)({}, formData);
 
       if (controller.signal.aborted) {
         return {};
@@ -83,7 +99,7 @@ export function PasskeyRegistrationDialog({ initialLabel, onClose, onSuccess, on
 
       setVerifying(true);
 
-      const result = await verifyPasskeyRegistrationAction(options.ceremonyId, credential);
+      const result = await (platform ? verifyPlatformPasskeyRegistration : verifyPasskeyRegistrationAction)(options.ceremonyId, credential);
 
       if (controller.signal.aborted) {
         return {};
@@ -138,7 +154,7 @@ export function PasskeyRegistrationDialog({ initialLabel, onClose, onSuccess, on
   }
 
   return (
-    <Dialog
+    <AlertDialog
       open
       onOpenChange={(open) => {
         if (!open) {
@@ -146,24 +162,27 @@ export function PasskeyRegistrationDialog({ initialLabel, onClose, onSuccess, on
         }
       }}
     >
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Añadir llave de acceso</DialogTitle>
-          <DialogDescription>Elegí un nombre para reconocer esta llave de acceso en tus dispositivos.</DialogDescription>
-        </DialogHeader>
-        <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
-          <Field data-invalid={!!state.error}>
+      <AlertDialogContent>
+        <form onSubmit={handleSubmit}>
+          <AlertDialogHeader>
+            <div className="bg-primary/10 text-primary mb-1 flex size-12 items-center justify-center rounded-2xl">
+              <KeyRoundIcon aria-hidden="true" className="size-6" />
+            </div>
+            <AlertDialogTitle>Añadir llave de acceso</AlertDialogTitle>
+            <AlertDialogDescription>Elegí un nombre para reconocer esta llave de acceso en tus dispositivos.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <Field className="mt-5" data-invalid={!!state.error}>
             <FieldLabel htmlFor="passkey-label" required>
               Nombre
             </FieldLabel>
-            <Input disabled={isPending} id="passkey-label" name="label" maxLength={100} defaultValue={initialLabel} />
+            <Input disabled={isPending} id="passkey-label" name="label" maxLength={100} defaultValue={initialLabel} placeholder="Mi computadora" />
             <FieldError>{state.error}</FieldError>
           </Field>
-          <DialogFooter>
-            <Button disabled={verifying} onClick={close} type="button" variant="outline">
+          <AlertDialogFooter className="mt-5">
+            <AlertDialogCancel disabled={verifying} size="lg" type="button">
               Cancelar
-            </Button>
-            <Button disabled={isPending} type="submit">
+            </AlertDialogCancel>
+            <Button disabled={isPending} size="lg" type="submit">
               {isPending ? (
                 <>
                   <Loader2Icon aria-hidden="true" className="animate-spin" />
@@ -173,9 +192,9 @@ export function PasskeyRegistrationDialog({ initialLabel, onClose, onSuccess, on
                 "Continuar"
               )}
             </Button>
-          </DialogFooter>
+          </AlertDialogFooter>
         </form>
-      </DialogContent>
-    </Dialog>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }

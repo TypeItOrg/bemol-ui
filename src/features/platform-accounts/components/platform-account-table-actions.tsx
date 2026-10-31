@@ -39,12 +39,12 @@ export function PlatformAccountActions({
         <DropdownMenuContent align="start" className="w-40 p-1.5">
           <DropdownMenuGroup>
             <DropdownMenuItem asChild>
-              <ReturnToLink href={`/admin/accounts/${account.platformAccountId}`} className="px-2.5 py-1.5">
+              <ReturnToLink href={`/accounts/${account.platformAccountId}`} className="px-2.5 py-1.5">
                 Ver detalle
               </ReturnToLink>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
-              <ReturnToLink href={`/admin/accounts/${account.platformAccountId}/edit`} className="px-2.5 py-1.5">
+              <ReturnToLink href={`/accounts/${account.platformAccountId}/edit`} className="px-2.5 py-1.5">
                 Editar
               </ReturnToLink>
             </DropdownMenuItem>

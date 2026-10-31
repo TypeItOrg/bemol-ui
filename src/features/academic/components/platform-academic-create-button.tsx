@@ -12,7 +12,7 @@ import type { AcademicCollectionResource } from "@features/academic/types/academ
 export function PlatformAcademicCreateButton({ label, resource }: { label: string; resource: AcademicCollectionResource }): ReactElement {
   return (
     <Button asChild size="lg" className="w-full">
-      <ReturnToLink href={`/admin/${resource}/new`}>
+      <ReturnToLink href={`/${resource}/new`}>
         <PlusIcon data-icon="inline-start" />
         {label}
       </ReturnToLink>

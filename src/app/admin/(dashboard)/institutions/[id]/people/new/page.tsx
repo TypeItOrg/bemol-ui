@@ -28,7 +28,7 @@ export default async function NewPersonPage({ params, searchParams }: NewPersonP
 
   const { returnTo } = await searchParams;
 
-  const destination = getSafeReturnTo(returnTo, `/admin/institutions/${id}/people`);
+  const destination = getSafeReturnTo(returnTo, `/institutions/${id}/people`);
 
   const institution = await fetchInstitution(id);
 

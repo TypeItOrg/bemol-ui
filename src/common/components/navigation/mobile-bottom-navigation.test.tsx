@@ -11,20 +11,20 @@ jest.mock("next/navigation", () => ({
 
 describe("MobileBottomNavigation", () => {
   it("places the primary destination in the center and keeps it as the only active item", () => {
-    jest.mocked(usePathname).mockReturnValue("/admin/institutions/new");
+    jest.mocked(usePathname).mockReturnValue("/institutions/new");
 
     render(
       <MobileBottomNavigation
         items={[
-          { title: "Inicio", url: "/admin", icon: HouseIcon, exact: true },
-          { title: "Instituciones", url: "/admin/institutions", icon: BuildingIcon },
-          { title: "Usuarios", url: "/admin/people", icon: UsersIcon },
-          { title: "Roles", url: "/admin/roles", icon: UserLockIcon },
+          { title: "Inicio", url: "/", icon: HouseIcon, exact: true },
+          { title: "Instituciones", url: "/institutions", icon: BuildingIcon },
+          { title: "Usuarios", url: "/people", icon: UsersIcon },
+          { title: "Roles", url: "/roles", icon: UserLockIcon },
         ]}
         primaryItem={{
           title: "Crear",
           ariaLabel: "Crear institución",
-          url: "/admin/institutions/new",
+          url: "/institutions/new",
           icon: PlusIcon,
           exact: true,
         }}

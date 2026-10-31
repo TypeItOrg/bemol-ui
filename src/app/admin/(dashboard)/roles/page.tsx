@@ -40,7 +40,7 @@ export default async function PlatformRolesPage({ searchParams }: { searchParams
         <Sheet>
           <PlatformCollectionActions className="sm:justify-between">
             <Button asChild size="lg" className="w-full">
-              <ReturnToLink href="/admin/roles/new">
+              <ReturnToLink href="/roles/new">
                 <PlusIcon data-icon="inline-start" />
                 Nuevo rol
               </ReturnToLink>
