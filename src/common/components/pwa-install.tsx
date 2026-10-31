@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useState, type ReactElement, type ReactNode } from "react";
 
-import { ArrowUpRightIcon } from "lucide-react";
+import { DownloadIcon } from "lucide-react";
 import { toast } from "sonner";
 
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@common/components/ui/sidebar";
@@ -113,7 +113,7 @@ export function PwaInstallCard(): ReactElement | null {
           />
           <span className="relative flex w-full min-w-0 items-center justify-between gap-2 group-data-[collapsible=icon]:hidden">
             <span className="font-semibold">Instalar aplicación</span>
-            <ArrowUpRightIcon aria-hidden="true" className="size-5!" />
+            <DownloadIcon aria-hidden="true" className="size-4!" />
           </span>
         </SidebarMenuButton>
       </SidebarMenuItem>
