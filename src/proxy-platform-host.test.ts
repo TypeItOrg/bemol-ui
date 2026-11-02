@@ -37,7 +37,7 @@ it("renders administrative login at the clean URL without querying an institutio
 
 it.each([
   ["/", "/admin"],
-  ["/account/passkeys", "/admin/account/passkeys"],
+  ["/account/security", "/admin/account/security"],
   ["/institutions?page=2", "/admin/institutions?page=2"],
 ])("renders a protected platform page without exposing its internal prefix: %s", async (visible, internal) => {
   const response = await proxy(request("admin.staging.bemol.com.ar", visible, "GET", true));

@@ -14,7 +14,7 @@ export const metadata: Metadata = {
   description: "Inicia sesión en tu cuenta",
 };
 
-type SearchParams = Promise<{ next?: string }>;
+type SearchParams = Promise<{ next?: string; accountUpdated?: string }>;
 
 export default async function LoginPage({ searchParams }: { searchParams: SearchParams }): Promise<ReactElement> {
   const resolvedSearchParams = await searchParams;
@@ -24,7 +24,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Search
   return (
     <Card className="animate-fade-in-up p-0">
       <CardContent className="grid-cols-2 p-0 md:grid">
-        <PlatformLoginForm next={safeNext} />
+        <PlatformLoginForm next={safeNext} accountUpdated={resolvedSearchParams.accountUpdated === "1"} />
 
         <InstitutionalBrandPanel />
       </CardContent>

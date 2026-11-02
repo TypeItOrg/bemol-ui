@@ -1,6 +1,6 @@
 import type { ReactElement } from "react";
 
-import { KeyRoundIcon } from "lucide-react";
+import { ShieldCheckIcon } from "lucide-react";
 
 import { PasskeyManager } from "@features/institutional-auth/components/passkey-manager";
 import type { PasskeyList } from "@features/institutional-auth/types/passkey-list.types";
@@ -8,29 +8,27 @@ import { buildPasskeyQueryString, parsePasskeyFilterParams, type PasskeySearchPa
 import { PlatformBreadcrumb } from "@features/platform-auth/components/platform-breadcrumb";
 import { PlatformPageIcon } from "@features/platform-auth/components/platform-page-icon";
 import { PlatformPageShell } from "@features/platform-auth/components/platform-page-shell";
+import { PlatformPasswordSettings } from "@features/platform-auth/components/platform-password-settings";
 import { platformPasskeyRequest } from "@features/platform-auth/services/platform-passkeys.service";
 
 export const metadata = {
-  title: "Llaves de acceso",
-  other: { "application-title": "Llaves de acceso" },
-  description: "Gestioná las llaves de acceso que usás para ingresar a la administración.",
+  title: "Seguridad",
+  other: { "application-title": "Seguridad" },
+  description: "Administrá tu contraseña y tus llaves de acceso.",
 };
 
-type PlatformPasskeysPageProps = {
+type PlatformSecurityPageProps = {
   searchParams?: Promise<PasskeySearchParams>;
 };
 
-export default async function PlatformPasskeysPage({ searchParams }: PlatformPasskeysPageProps): Promise<ReactElement> {
+export default async function PlatformSecurityPage({ searchParams }: PlatformSecurityPageProps): Promise<ReactElement> {
   const filters = parsePasskeyFilterParams(searchParams ? await searchParams : {});
 
   const { passkeys, maxActivePasskeys, activePasskeys } = await platformPasskeyRequest<PasskeyList>(buildPasskeyQueryString(filters), "GET");
 
   return (
-    <PlatformPageShell
-      title="Llaves de acceso"
-      breadcrumb={<PlatformBreadcrumb hiddenSegments={["account"]} />}
-      actions={<PlatformPageIcon icon={KeyRoundIcon} />}
-    >
+    <PlatformPageShell title="Seguridad" minViewportHeight breadcrumb={<PlatformBreadcrumb />} actions={<PlatformPageIcon icon={ShieldCheckIcon} />}>
+      <PlatformPasswordSettings />
       <PasskeyManager
         platform
         activePasskeys={activePasskeys}

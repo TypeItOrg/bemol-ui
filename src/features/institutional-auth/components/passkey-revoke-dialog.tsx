@@ -5,16 +5,8 @@ import { startTransition, useActionState, type ReactElement, type SyntheticEvent
 import { CircleAlertIcon, Trash2Icon } from "lucide-react";
 
 import { Alert, AlertDescription } from "@common/components/ui/alert";
-import {
-  AlertDialog,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@common/components/ui/alert-dialog";
 import { Button } from "@common/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@common/components/ui/dialog";
 
 import { revokePasskeyAction } from "@features/institutional-auth/actions/passkey-management.actions";
 import { INSTITUTIONAL_AUTH_ERROR_MESSAGES } from "@features/institutional-auth/constants/error-messages.constants";
@@ -59,7 +51,7 @@ export function PasskeyRevokeDialog({ passkey, onClose, onSuccess, onRequireReau
   }
 
   return (
-    <AlertDialog
+    <Dialog
       open
       onOpenChange={(open) => {
         if (!open && !isPending) {
@@ -67,36 +59,36 @@ export function PasskeyRevokeDialog({ passkey, onClose, onSuccess, onRequireReau
         }
       }}
     >
-      <AlertDialogContent>
+      <DialogContent showCloseButton={false} className="gap-3.5 p-5">
         <form onSubmit={handleSubmit}>
-          <AlertDialogHeader>
+          <DialogHeader className="items-center gap-1.5 text-center">
             <div className="bg-destructive/10 text-destructive mb-1 flex size-12 items-center justify-center rounded-2xl">
               <Trash2Icon aria-hidden="true" className="size-6" />
             </div>
-            <AlertDialogTitle>¿Eliminar llave de acceso?</AlertDialogTitle>
-            <AlertDialogDescription>
+            <DialogTitle className="text-center font-semibold">¿Eliminar llave de acceso?</DialogTitle>
+            <DialogDescription className="text-center text-balance">
               Se eliminará <span className="text-foreground font-semibold">{passkey.label}</span>.{" "}
               {platform
                 ? "Se cerrarán tus sesiones y necesitarás otra llave para volver a ingresar."
                 : "Podrás seguir ingresando con tu contraseña u otras llaves de acceso."}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
+            </DialogDescription>
+          </DialogHeader>
           {state.error ? (
             <Alert className="mt-4" variant="destructive">
               <CircleAlertIcon aria-hidden="true" />
               <AlertDescription>{state.error}</AlertDescription>
             </Alert>
           ) : null}
-          <AlertDialogFooter className="mt-5">
-            <AlertDialogCancel disabled={isPending} size="lg" type="button">
+          <DialogFooter className="-mx-5 mt-5 -mb-5 p-3.5">
+            <Button variant="outline" onClick={onClose} disabled={isPending} size="lg" type="button">
               Cancelar
-            </AlertDialogCancel>
+            </Button>
             <Button disabled={isPending} size="lg" type="submit" variant="destructive">
               {isPending ? "Eliminando…" : "Eliminar"}
             </Button>
-          </AlertDialogFooter>
+          </DialogFooter>
         </form>
-      </AlertDialogContent>
-    </AlertDialog>
+      </DialogContent>
+    </Dialog>
   );
 }

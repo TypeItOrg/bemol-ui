@@ -2,7 +2,7 @@
 
 import { useActionState, type ReactElement } from "react";
 
-import { AlertCircleIcon, Loader2Icon } from "lucide-react";
+import { AlertCircleIcon, CircleCheckIcon, Loader2Icon } from "lucide-react";
 
 import { Alert, AlertDescription, AlertTitle } from "@common/components/ui/alert";
 import { Button } from "@common/components/ui/button";
@@ -18,7 +18,7 @@ import type { PlatformLoginActionState } from "@features/platform-auth/types/pla
 
 const INITIAL_STATE: PlatformLoginActionState = {};
 
-export function PlatformLoginForm({ next }: { next?: string }): ReactElement {
+export function PlatformLoginForm({ next, accountUpdated = false }: { next?: string; accountUpdated?: boolean }): ReactElement {
   const [state, formAction, isPending] = useActionState<PlatformLoginActionState, FormData>(loginPlatform, INITIAL_STATE);
 
   if (state.challenge) {
@@ -42,6 +42,12 @@ export function PlatformLoginForm({ next }: { next?: string }): ReactElement {
       </header>
 
       <div className="mt-6 space-y-6">
+        {accountUpdated ? (
+          <Alert variant="success" role="status">
+            <CircleCheckIcon aria-hidden="true" />
+            <AlertDescription>Tu cuenta se actualizó y se cerraron todas tus sesiones. Ingresá con tus credenciales actuales.</AlertDescription>
+          </Alert>
+        ) : null}
         {state.error ? (
           <Alert variant="destructive">
             <AlertCircleIcon className="size-4" />

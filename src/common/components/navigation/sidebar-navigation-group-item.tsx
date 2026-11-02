@@ -51,7 +51,7 @@ export function SidebarNavigationGroupItem({ group, navigation }: SidebarNavigat
 
   const [expansion, setExpansion] = useState({
     navigationKey,
-    open: groupStates[group.id] ?? Boolean(activeUrl),
+    open: Boolean(activeUrl) || groupStates[group.id] === true,
     animate: false,
   });
 

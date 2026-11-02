@@ -2,7 +2,7 @@ import type { ReactElement } from "react";
 
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
 import { FingerprintIcon } from "lucide-react";
 
@@ -15,6 +15,7 @@ import { fetchPlatformAccountAdmin } from "@features/platform-accounts/services/
 import { PlatformBreadcrumb } from "@features/platform-auth/components/platform-breadcrumb";
 import { PlatformPageIcon } from "@features/platform-auth/components/platform-page-icon";
 import { PlatformPageShell } from "@features/platform-auth/components/platform-page-shell";
+import { requirePlatformAccount } from "@features/platform-auth/services/get-platform-account.service";
 
 type EditPlatformAccountPageProps = {
   params: Promise<{ id: string }>;
@@ -25,6 +26,12 @@ export const metadata: Metadata = { title: "Editar administrador", other: { "app
 
 export default async function EditPlatformAccountPage({ params, searchParams }: EditPlatformAccountPageProps): Promise<ReactElement> {
   const { id } = await params;
+
+  const currentAccount = await requirePlatformAccount();
+
+  if (id === currentAccount.platformAccountId) {
+    redirect("/account/profile");
+  }
 
   const { returnTo } = await searchParams;
 

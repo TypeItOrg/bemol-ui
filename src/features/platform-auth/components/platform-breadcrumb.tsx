@@ -14,6 +14,12 @@ const ROUTE_LABELS: Readonly<Record<string, string>> = {
   documentation: "Documentación",
   institutions: "Instituciones",
   accounts: "Administradores",
+  account: "Mi cuenta",
+  profile: "Perfil",
+  security: "Seguridad",
+  email: "Correo electrónico",
+  password: "Contraseña",
+  confirm: "Confirmar correo",
   "audit-events": "Auditoría",
   emails: "Correos",
   new: "Nuevo",
@@ -94,7 +100,7 @@ function getSegments(
       segments.push({ label: groupLabel });
     }
 
-    segments.push({ label, href: isLast ? undefined : (segmentHrefs[part] ?? accumulatedPath) });
+    segments.push({ label, href: isLast || part === "account" ? undefined : (segmentHrefs[part] ?? accumulatedPath) });
     visiblePartIndex += 1;
   }
 

@@ -8,13 +8,14 @@ import {
   FingerprintIcon,
   GraduationCapIcon,
   HouseIcon,
-  KeyRoundIcon,
   LibraryBigIcon,
   Music2Icon,
   MailIcon,
   RouteIcon,
   ScrollTextIcon,
+  ShieldCheckIcon,
   UserLockIcon,
+  UserRoundIcon,
   UsersIcon,
 } from "lucide-react";
 
@@ -120,11 +121,10 @@ const PLATFORM_EMAIL_NAVIGATION_ITEM = {
   icon: MailIcon,
 } as const satisfies NavigationItem;
 
-const PLATFORM_PASSKEYS_NAVIGATION_ITEM = {
-  title: "Llaves de acceso",
-  url: "/account/passkeys",
-  icon: KeyRoundIcon,
-} as const satisfies NavigationItem;
+const PLATFORM_ACCOUNT_NAVIGATION_ITEMS = [
+  { title: "Perfil", url: "/account/profile", icon: UserRoundIcon },
+  { title: "Seguridad", url: "/account/security", icon: ShieldCheckIcon },
+] as const satisfies readonly NavigationItem[];
 
 export const PLATFORM_NAVIGATION_ITEMS = [
   PRIMARY_NAVIGATION_ITEM,
@@ -134,7 +134,7 @@ export const PLATFORM_NAVIGATION_ITEMS = [
   PLATFORM_NAVIGATION_ITEM,
   PLATFORM_AUDIT_NAVIGATION_ITEM,
   PLATFORM_EMAIL_NAVIGATION_ITEM,
-  PLATFORM_PASSKEYS_NAVIGATION_ITEM,
+  ...PLATFORM_ACCOUNT_NAVIGATION_ITEMS,
 ] as const satisfies readonly NavigationItem[];
 
 export const PLATFORM_PRIMARY_NAVIGATION_ITEM = PRIMARY_NAVIGATION_ITEM;
@@ -159,10 +159,6 @@ export const PLATFORM_NAVIGATION_SECTIONS = [
   },
   {
     label: "Plataforma",
-    items: [PLATFORM_NAVIGATION_ITEM, PLATFORM_AUDIT_NAVIGATION_ITEM, PLATFORM_EMAIL_NAVIGATION_ITEM],
-  },
-  {
-    label: "Cuenta",
-    items: [PLATFORM_PASSKEYS_NAVIGATION_ITEM],
+    items: [PLATFORM_NAVIGATION_ITEM, PLATFORM_AUDIT_NAVIGATION_ITEM, PLATFORM_EMAIL_NAVIGATION_ITEM, ...PLATFORM_ACCOUNT_NAVIGATION_ITEMS],
   },
 ] as const;

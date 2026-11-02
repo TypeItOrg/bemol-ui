@@ -79,7 +79,7 @@ export async function finishPlatformPasskey(ceremonyId: string, credential: unkn
 }
 
 export async function beginPlatformPasskeyReauth(target: string): Promise<PlatformPasskeyOptions> {
-  const parsed = z.union([z.literal("register"), z.string().regex(/^revoke:[a-f0-9-]{36}$/)]).parse(target);
+  const parsed = z.union([z.enum(["register", "email", "password"]), z.string().regex(/^revoke:[a-f0-9-]{36}$/)]).parse(target);
 
   return platformPasskeyRequest("/reauth/options", "POST", { target: parsed });
 }
@@ -118,7 +118,7 @@ export async function verifyPlatformPasskeyRegistration(ceremonyId: string, cred
     return { error: message(error) };
   }
 
-  revalidatePath("/admin/account/passkeys");
+  revalidatePath("/admin/account/security");
 
   return {};
 }
@@ -136,7 +136,7 @@ export async function renamePlatformPasskey(id: string, _previous: RenamePasskey
     return { error: message(error) };
   }
 
-  revalidatePath("/admin/account/passkeys");
+  revalidatePath("/admin/account/security");
 
   return { success: true };
 }

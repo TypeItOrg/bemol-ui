@@ -4,16 +4,8 @@ import { startTransition, useActionState, useEffect, useRef, useState, type Reac
 
 import { KeyRoundIcon, Loader2Icon } from "lucide-react";
 
-import {
-  AlertDialog,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@common/components/ui/alert-dialog";
 import { Button } from "@common/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@common/components/ui/dialog";
 import { Field, FieldError, FieldLabel } from "@common/components/ui/field";
 import { Input } from "@common/components/ui/input";
 
@@ -154,7 +146,7 @@ export function PasskeyRegistrationDialog({
   }
 
   return (
-    <AlertDialog
+    <Dialog
       open
       onOpenChange={(open) => {
         if (!open) {
@@ -162,15 +154,17 @@ export function PasskeyRegistrationDialog({
         }
       }}
     >
-      <AlertDialogContent>
+      <DialogContent showCloseButton={false} className="gap-3.5 p-5">
         <form onSubmit={handleSubmit}>
-          <AlertDialogHeader>
+          <DialogHeader className="items-center gap-1.5 text-center">
             <div className="bg-primary/10 text-primary mb-1 flex size-12 items-center justify-center rounded-2xl">
               <KeyRoundIcon aria-hidden="true" className="size-6" />
             </div>
-            <AlertDialogTitle>Añadir llave de acceso</AlertDialogTitle>
-            <AlertDialogDescription>Elegí un nombre para reconocer esta llave de acceso en tus dispositivos.</AlertDialogDescription>
-          </AlertDialogHeader>
+            <DialogTitle className="text-center font-semibold">Añadir llave de acceso</DialogTitle>
+            <DialogDescription className="text-center text-balance">
+              Elegí un nombre para reconocer esta llave de acceso en tus dispositivos.
+            </DialogDescription>
+          </DialogHeader>
           <Field className="mt-5" data-invalid={!!state.error}>
             <FieldLabel htmlFor="passkey-label" required>
               Nombre
@@ -178,10 +172,10 @@ export function PasskeyRegistrationDialog({
             <Input disabled={isPending} id="passkey-label" name="label" maxLength={100} defaultValue={initialLabel} placeholder="Mi computadora" />
             <FieldError>{state.error}</FieldError>
           </Field>
-          <AlertDialogFooter className="mt-5">
-            <AlertDialogCancel disabled={verifying} size="lg" type="button">
+          <DialogFooter className="-mx-5 mt-5 -mb-5 p-3.5">
+            <Button variant="outline" onClick={close} disabled={verifying} size="lg" type="button">
               Cancelar
-            </AlertDialogCancel>
+            </Button>
             <Button disabled={isPending} size="lg" type="submit">
               {isPending ? (
                 <>
@@ -192,9 +186,9 @@ export function PasskeyRegistrationDialog({
                 "Continuar"
               )}
             </Button>
-          </AlertDialogFooter>
+          </DialogFooter>
         </form>
-      </AlertDialogContent>
-    </AlertDialog>
+      </DialogContent>
+    </Dialog>
   );
 }

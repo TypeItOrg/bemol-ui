@@ -4,10 +4,12 @@ import { useState, type ReactElement } from "react";
 
 import { useRouter } from "next/navigation";
 
-import { PlusIcon } from "lucide-react";
+import { KeyRoundIcon, PlusIcon } from "lucide-react";
 
+import { SectionHeader } from "@common/components/section-header";
 import { Button } from "@common/components/ui/button";
 import { DataTableNavigationProvider } from "@common/components/ui/data-table-navigation";
+import { cn } from "@common/utils/cn.util";
 
 import { revokePasskeyAction } from "@features/institutional-auth/actions/passkey-management.actions";
 import { PasskeyReauthDialog } from "@features/institutional-auth/components/passkey-reauth-dialog";
@@ -79,20 +81,34 @@ export function PasskeyManager({
     return {};
   }
 
+  const addButton = (
+    <Button
+      className="w-full"
+      disabled={activeCount >= maxActivePasskeys || !webauthnSupported}
+      onClick={() => setDialog({ kind: "register", label: "" })}
+      size="lg"
+      type="button"
+    >
+      <PlusIcon data-icon="inline-start" />
+      Añadir llave de acceso
+    </Button>
+  );
+
   return (
-    <div className="flex flex-col gap-4">
-      <PlatformCollectionActions className="sm:justify-start">
-        <Button
-          className="w-full"
-          disabled={activeCount >= maxActivePasskeys || !webauthnSupported}
-          onClick={() => setDialog({ kind: "register", label: "" })}
-          size="lg"
-          type="button"
-        >
-          <PlusIcon data-icon="inline-start" />
-          Añadir llave de acceso
-        </Button>
-      </PlatformCollectionActions>
+    <div className={cn("flex flex-col gap-4", platform && "bg-muted/25 rounded-xl border p-4 sm:p-5")}>
+      {platform ? (
+        <header className="-mx-4 border-b px-4 pb-4 sm:-mx-5 sm:px-5 sm:pb-5">
+          <SectionHeader
+            icon={KeyRoundIcon}
+            title="Llaves de acceso"
+            description="Gestioná las llaves que usás para ingresar."
+            action={addButton}
+            actionClassName="w-full @xl/section-header:w-auto"
+          />
+        </header>
+      ) : (
+        <PlatformCollectionActions className="sm:justify-start">{addButton}</PlatformCollectionActions>
+      )}
 
       <DataTableNavigationProvider>
         <PasskeysTablePresentation

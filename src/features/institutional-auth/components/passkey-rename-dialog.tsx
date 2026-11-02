@@ -4,16 +4,8 @@ import { startTransition, useActionState, type ReactElement, type SyntheticEvent
 
 import { PencilIcon } from "lucide-react";
 
-import {
-  AlertDialog,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@common/components/ui/alert-dialog";
 import { Button } from "@common/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@common/components/ui/dialog";
 import { Field, FieldError, FieldLabel } from "@common/components/ui/field";
 import { Input } from "@common/components/ui/input";
 
@@ -55,7 +47,7 @@ export function PasskeyRenameDialog({ passkey, onClose, onSuccess, platform = fa
   const error = state.fieldErrors?.label ?? state.error;
 
   return (
-    <AlertDialog
+    <Dialog
       open
       onOpenChange={(open) => {
         if (!open && !isPending) {
@@ -63,15 +55,17 @@ export function PasskeyRenameDialog({ passkey, onClose, onSuccess, platform = fa
         }
       }}
     >
-      <AlertDialogContent>
+      <DialogContent showCloseButton={false} className="gap-3.5 p-5">
         <form onSubmit={handleSubmit}>
-          <AlertDialogHeader>
+          <DialogHeader className="items-center gap-1.5 text-center">
             <div className="bg-primary/10 text-primary mb-1 flex size-12 items-center justify-center rounded-2xl">
               <PencilIcon aria-hidden="true" className="size-6" />
             </div>
-            <AlertDialogTitle>Renombrar llave de acceso</AlertDialogTitle>
-            <AlertDialogDescription>Usá un nombre que te ayude a identificar el dispositivo donde la guardaste.</AlertDialogDescription>
-          </AlertDialogHeader>
+            <DialogTitle className="text-center font-semibold">Renombrar llave de acceso</DialogTitle>
+            <DialogDescription className="text-center text-balance">
+              Usá un nombre que te ayude a identificar el dispositivo donde la guardaste.
+            </DialogDescription>
+          </DialogHeader>
           <Field className="mt-5" data-invalid={!!error}>
             <FieldLabel htmlFor="passkey-rename" required>
               Nombre
@@ -79,16 +73,16 @@ export function PasskeyRenameDialog({ passkey, onClose, onSuccess, platform = fa
             <Input disabled={isPending} id="passkey-rename" name="label" maxLength={100} defaultValue={passkey.label} />
             <FieldError>{error}</FieldError>
           </Field>
-          <AlertDialogFooter className="mt-5">
-            <AlertDialogCancel disabled={isPending} size="lg" type="button">
+          <DialogFooter className="-mx-5 mt-5 -mb-5 p-3.5">
+            <Button variant="outline" onClick={onClose} disabled={isPending} size="lg" type="button">
               Cancelar
-            </AlertDialogCancel>
+            </Button>
             <Button disabled={isPending} size="lg" type="submit">
               {isPending ? "Guardando…" : "Guardar"}
             </Button>
-          </AlertDialogFooter>
+          </DialogFooter>
         </form>
-      </AlertDialogContent>
-    </AlertDialog>
+      </DialogContent>
+    </Dialog>
   );
 }
