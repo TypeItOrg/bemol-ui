@@ -34,12 +34,14 @@ export function AuditEventDetail({
         </Button>
       </div>
       <section className="bg-muted/25 space-y-5 rounded-xl border p-4 sm:p-5">
-        <SectionHeader
-          icon={ScrollTextIcon}
-          title="Datos del evento"
-          description="Qué ocurrió, cuándo y quién lo realizó."
-          descriptionBreakpoint="sm"
-        />
+        <header className="-mx-4 border-b px-4 pb-4 sm:-mx-5 sm:px-5 sm:pb-5">
+          <SectionHeader
+            icon={ScrollTextIcon}
+            title="Datos del evento"
+            description="Qué ocurrió, cuándo y quién lo realizó."
+            descriptionBreakpoint="sm"
+          />
+        </header>
         <dl className="grid gap-5 sm:grid-cols-2">
           <DetailItem label="Acción" value={AUDIT_ACTION_LABELS[event.action] ?? "Acción no catalogada"} />
           <DetailItem label="Fecha y hora" value={formatAuditDateTime(event.occurredAt)} />
@@ -53,16 +55,18 @@ export function AuditEventDetail({
       </section>
       {changes ? (
         <section className="bg-muted/25 space-y-5 rounded-xl border p-4 sm:p-5">
-          <SectionHeader
-            icon={AUDIT_ACTION_MODULES[event.action] === "EMAILS" ? MailIcon : ClipboardListIcon}
-            title={AUDIT_ACTION_MODULES[event.action] === "EMAILS" ? "Datos del correo" : "Cambios"}
-            description={
-              AUDIT_ACTION_MODULES[event.action] === "EMAILS"
-                ? "Tipo, destinatario y resultado del envío."
-                : "Campos modificados y sus valores anteriores y nuevos."
-            }
-            descriptionBreakpoint="sm"
-          />
+          <header className="-mx-4 border-b px-4 pb-4 sm:-mx-5 sm:px-5 sm:pb-5">
+            <SectionHeader
+              icon={AUDIT_ACTION_MODULES[event.action] === "EMAILS" ? MailIcon : ClipboardListIcon}
+              title={AUDIT_ACTION_MODULES[event.action] === "EMAILS" ? "Datos del correo" : "Cambios"}
+              description={
+                AUDIT_ACTION_MODULES[event.action] === "EMAILS"
+                  ? "Tipo, destinatario y resultado del envío."
+                  : "Campos modificados y sus valores anteriores y nuevos."
+              }
+              descriptionBreakpoint="sm"
+            />
+          </header>
           {changes}
         </section>
       ) : null}

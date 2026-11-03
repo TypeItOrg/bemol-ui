@@ -142,7 +142,7 @@ export const AUDIT_ENTITY_LABELS: Readonly<Record<string, string>> = {
   COURSE_ENROLLMENT: "Cursada",
   ENROLLMENT_ATTACHMENT: "Adjunto de inscripción",
   PERSON_GUARDIAN_ATTACHMENT: "Adjunto de vinculación",
-  PASSKEY: "Passkey",
+  PASSKEY: "Llave de acceso",
   PERSON: "Persona",
   PERSON_ACCESS_INVITATION: "Invitación de acceso",
   ENROLLMENT_APPLICATION: "Solicitud de inscripción",

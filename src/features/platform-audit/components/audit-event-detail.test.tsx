@@ -4,6 +4,57 @@ import { AuditEventDetail } from "@features/platform-audit/components/audit-even
 import type { AuditEntityChange } from "@features/platform-audit/types/audit-entity-change.types";
 import type { AuditEvent } from "@features/platform-audit/types/audit-event.types";
 
+it.each([
+  { action: "PASSKEY_CREATED", title: "Llave de acceso registrada", before: {}, after: { label: "Equipo personal" } },
+  {
+    action: "PASSKEY_UPDATED",
+    title: "Llave de acceso renombrada",
+    before: { label: "Equipo anterior" },
+    after: { label: "Equipo personal" },
+  },
+  { action: "PASSKEY_DELETED", title: "Llave de acceso revocada", before: { active: true }, after: { active: false } },
+])("muestra los nombres registrados para $title y separa los encabezados de ambas tarjetas", ({ action, title, before, after }) => {
+  const event: AuditEvent = {
+    id: "evento-llave",
+    actorKind: "PLATFORM",
+    actorId: "cuenta",
+    actorName: "Administradora",
+    subjectPersonId: null,
+    subjectName: null,
+    institutionId: null,
+    institutionName: null,
+    action,
+    entityType: "PASSKEY",
+    entityId: "llave",
+    actedOnBehalf: false,
+    requestId: null,
+    origin: "SELF_SERVICE",
+    occurredAt: "2026-11-03T12:00:00Z",
+    details: { entityName: "Equipo personal", changedFields: [action === "PASSKEY_DELETED" ? "active" : "label"], before, after },
+    history: null,
+  };
+  const props = { returnTo: "/audit-events", roleLabels: {}, permissionLabels: {} };
+  const { container, rerender } = render(<AuditEventDetail event={event} {...props} />);
+
+  expect(screen.getByText(title)).toBeInTheDocument();
+  expect(screen.getByText("Llave de acceso")).toBeInTheDocument();
+  const table = screen.getByRole("table", { name: "Cambios" });
+  expect(within(table).getByText(action === "PASSKEY_DELETED" ? "Estado" : "Nombre de la llave de acceso")).toBeInTheDocument();
+  expect(within(table).getByText(action === "PASSKEY_DELETED" ? "Activo" : (before.label ?? "Sin estado registrado"))).toBeInTheDocument();
+  expect(within(table).getByText(action === "PASSKEY_DELETED" ? "Inactivo" : (after.label ?? "Sin estado registrado"))).toBeInTheDocument();
+
+  for (const title of ["Datos del evento", "Cambios"]) {
+    expect(screen.getByRole("heading", { name: title }).closest("header")).toHaveClass("border-b");
+  }
+
+  expect(container.textContent).not.toMatch(/passkey/i);
+
+  rerender(<AuditEventDetail event={{ ...event, details: { changedFields: ["label"] } }} {...props} />);
+  expect(screen.queryByText("Equipo anterior")).not.toBeInTheDocument();
+  expect(screen.queryByText("Equipo personal")).not.toBeInTheDocument();
+  expect(within(screen.getByRole("table", { name: "Cambios" })).getAllByText("No registrado")).toHaveLength(2);
+});
+
 it("integra valores anteriores y nuevos, horarios de 24 horas y estados sin historial sin mostrar secciones vacías", () => {
   const event: AuditEvent = {
     id: "evento-tecnico",

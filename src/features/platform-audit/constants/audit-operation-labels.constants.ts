@@ -1,5 +1,6 @@
 export const OPERATION_FIELD_LABELS: Readonly<Record<string, string>> = {
   name: "Nombre",
+  label: "Nombre de la llave de acceso",
   shortName: "Nombre corto",
   year: "Año",
   startDate: "Desde",
@@ -54,7 +55,6 @@ export const CHANGED_FIELD_LABELS: Readonly<Record<string, string>> = {
   birthCityId: "Ciudad de nacimiento",
   nationalityCountryId: "Nacionalidad",
   address: "Domicilio",
-  label: "Nombre de la passkey",
   academicBackground: "Escolaridad",
   healthInclusion: "Inclusión",
   responsible: "Responsable",
