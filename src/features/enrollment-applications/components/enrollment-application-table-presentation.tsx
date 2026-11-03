@@ -88,7 +88,7 @@ export function EnrollmentApplicationTablePresentation({
                 <span className="sr-only">Acciones</span>
               </TableHead>
               <TableHead>Estudiante</TableHead>
-              <TableHead>Documento</TableHead>
+              <TableHead>Documento Nacional de Identidad</TableHead>
               <TableHead>Trayecto formativo</TableHead>
               <TableHead>Ciclo lectivo</TableHead>
               <TableHead>Fecha de solicitud</TableHead>

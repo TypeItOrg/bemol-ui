@@ -15,12 +15,14 @@ import { PlatformPeopleEmptyState } from "@features/people/components/platform-p
 import { PlatformPeopleTableRow } from "@features/people/components/platform-people-table-row";
 import type { PlatformPersonSummary } from "@features/people/types/platform-person-summary.types";
 import type { SystemRoleCode } from "@features/people/types/system-role-code.types";
+import type { PersonStatus } from "@features/people/utils/person-status.util";
 import type { PlatformPeopleSort, PlatformPeopleSortField } from "@features/people/utils/platform-people-pagination.util";
 
 type PlatformPeopleTablePresentationProps = PaginationParams & {
   data: PaginatedResponse<PlatformPersonSummary>;
   institutionId: string | undefined;
   roleCode: SystemRoleCode | undefined;
+  status?: PersonStatus;
   search: string;
   sort: PlatformPeopleSort;
   canUpdate?: boolean;
@@ -32,6 +34,7 @@ export function PlatformPeopleTablePresentation({
   size,
   institutionId,
   roleCode,
+  status,
   search,
   sort,
   canUpdate = true,
@@ -47,7 +50,7 @@ export function PlatformPeopleTablePresentation({
       <div className="relative h-full" aria-busy={isPending}>
         <PlatformPeopleEmptyState
           data={data}
-          hasFilters={search.trim() !== "" || institutionId !== undefined || roleCode !== undefined}
+          hasFilters={search.trim() !== "" || institutionId !== undefined || roleCode !== undefined || status !== undefined}
           onFirstPage={() => navigate({ page: "0", size: String(size) })}
         />
         {isPending ? (
@@ -69,10 +72,16 @@ export function PlatformPeopleTablePresentation({
                 <span className="sr-only">Acciones</span>
               </TableHead>
               <DataTableSortableHead<PlatformPeopleSortField> field="lastName" label="Nombre" sort={sort} onSortChange={updateSort} />
-              <DataTableSortableHead<PlatformPeopleSortField> field="documentNumber" label="Documento" sort={sort} onSortChange={updateSort} />
+              <DataTableSortableHead<PlatformPeopleSortField>
+                field="documentNumber"
+                label="Documento Nacional de Identidad"
+                sort={sort}
+                onSortChange={updateSort}
+              />
               <DataTableSortableHead<PlatformPeopleSortField> field="institutionName" label="Institución" sort={sort} onSortChange={updateSort} />
               <TableHead>Teléfono</TableHead>
-              <TableHead>Correo</TableHead>
+              <TableHead>Correo electrónico</TableHead>
+              <TableHead>Estado</TableHead>
               <TableHead>Roles</TableHead>
             </TableRow>
           </TableHeader>

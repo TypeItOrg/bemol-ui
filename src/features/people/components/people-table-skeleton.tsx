@@ -26,6 +26,9 @@ export function PeopleTableSkeleton(): ReactElement {
                 <Skeleton className="h-4 w-12" />
               </TableHead>
               <TableHead>
+                <Skeleton className="h-4 w-16" />
+              </TableHead>
+              <TableHead>
                 <Skeleton className="h-4 w-10" />
               </TableHead>
             </TableRow>
@@ -47,6 +50,9 @@ export function PeopleTableSkeleton(): ReactElement {
                 </TableCell>
                 <TableCell>
                   <Skeleton className="h-5 w-52" />
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-6 w-24 rounded-full" />
                 </TableCell>
                 <TableCell>
                   <Skeleton className="h-6 w-24 rounded-full" />

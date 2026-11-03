@@ -33,6 +33,7 @@ export function buildEnrollmentWizardData({
       documentNumber: initial?.personalData?.documentNumber ?? "",
       birthDate: birthDate && isValid(birthDate) ? format(birthDate, "yyyy-MM-dd") : null,
       phoneNumber: initial?.personalData?.phoneNumber ?? "",
+      nationalityCountry: initial?.personalData?.nationalityCountry ?? null,
       email: initial?.personalData?.email ?? "",
     },
     academicBackground: {

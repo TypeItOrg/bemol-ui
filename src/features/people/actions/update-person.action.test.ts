@@ -43,7 +43,8 @@ describe("updatePersonAction", () => {
       lastName: "González",
       documentNumber: "12345678",
       birthDate: "2000-01-01",
-      phoneNumber: "",
+      phoneNumber: "03534100000",
+      nationalityCountryId: "11111111-1111-4111-8111-111111111111",
     });
     expect(revalidatePathMock).toHaveBeenCalledWith(`/admin/institutions/${INSTITUTION_ID}/people`);
   });
@@ -64,7 +65,8 @@ describe("updatePersonAction", () => {
       lastName: "González",
       documentNumber: "12345678",
       birthDate: "2000-01-01",
-      phoneNumber: "",
+      phoneNumber: "03534100000",
+      nationalityCountryId: "11111111-1111-4111-8111-111111111111",
     });
   });
 
@@ -86,7 +88,8 @@ function createFormData(
     email: "maria@boero.edu.ar",
     documentNumber: "12345678",
     birthDate: "2000-01-01",
-    phoneNumber: "",
+    phoneNumber: "03534100000",
+    nationalityCountryId: "11111111-1111-4111-8111-111111111111",
     password: "",
     confirmPassword: "",
     ...overrides,

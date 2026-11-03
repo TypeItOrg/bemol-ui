@@ -1,9 +1,11 @@
 import { z } from "zod";
 
+import { requiredPhoneSchema, requiredNationalitySchema } from "@features/people/schemas/person-form.schema";
+
 export const institutionalProfileSchema = z.object({
-  phoneNumber: z.string().regex(/^[\d-]*$/, "El teléfono solo admite números y guiones."),
+  phoneNumber: requiredPhoneSchema,
   birthCityId: z.string().optional(),
-  nationalityCountryId: z.string().optional(),
+  nationalityCountryId: requiredNationalitySchema,
   address: z
     .object({
       cityId: z.string().min(1, "La ciudad es requerida."),

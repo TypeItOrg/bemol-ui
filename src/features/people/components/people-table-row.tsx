@@ -8,6 +8,7 @@ import { PersonActionsMenu } from "@features/people/components/person-actions-me
 import { PersonNavigationLink, getPersonHref } from "@features/people/components/person-navigation-link";
 import type { PersonSummary } from "@features/people/types/person-summary.types";
 import { PeopleScope, type PeopleScope as PeopleScopeType } from "@features/people/utils/people-scope.util";
+import { getPersonStatusLabel } from "@features/people/utils/person-status.util";
 
 type PeopleTableRowProps = {
   canDelete: boolean;
@@ -58,12 +59,6 @@ export function PeopleTableRow({
 
   const editLabel = canEditPerson ? "Editar" : "Administrar";
 
-  let statusLabel = person.enabled ? "Activo" : "Inactivo";
-
-  if (!person.hasAccount) {
-    statusLabel = person.accessInvitationPending ? "Invitación pendiente" : "Sin cuenta";
-  }
-
   const tableRow = (
     <TableRow className="hover:bg-muted/50 h-11 border-b transition-colors">
       <TableCell className="w-16 pl-4">
@@ -90,12 +85,10 @@ export function PeopleTableRow({
       </TableCell>
       <TableCell>{person.documentNumber}</TableCell>
       <TableCell>{person.phoneNumber ? person.phoneNumber : <span className="text-muted-foreground/60">Sin teléfono</span>}</TableCell>
-      <TableCell>{person.email ? person.email : <span className="text-muted-foreground/60">Sin email</span>}</TableCell>
-      {PeopleScope.isInstitutional(scope) ? (
-        <TableCell>
-          <Badge variant={person.enabled ? "secondary" : "outline"}>{statusLabel}</Badge>
-        </TableCell>
-      ) : null}
+      <TableCell>{person.email ? person.email : <span className="text-muted-foreground/60">Sin correo electrónico</span>}</TableCell>
+      <TableCell>
+        <Badge variant={person.enabled ? "secondary" : "outline"}>{getPersonStatusLabel(person)}</Badge>
+      </TableCell>
       <TableCell>
         {person.roles && person.roles.length > 0 ? (
           <div className="flex flex-wrap gap-1">

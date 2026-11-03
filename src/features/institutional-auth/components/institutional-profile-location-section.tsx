@@ -31,7 +31,7 @@ export function InstitutionalProfileLocationSection({
       </header>
       <div className="mt-4 sm:mt-5">
         <FieldGroup className="flex flex-row flex-wrap items-start gap-4">
-          <DropdownField id="profile-nationality" label="Nacionalidad" error={fieldErrors.nationalityCountryId}>
+          <DropdownField id="profile-nationality" label="Nacionalidad" error={fieldErrors.nationalityCountryId} required>
             <CountryDropdown
               ariaInvalid={Boolean(fieldErrors.nationalityCountryId)}
               id="profile-nationality"
@@ -44,7 +44,6 @@ export function InstitutionalProfileLocationSection({
                     }
                   : undefined
               }
-              optional
             />
           </DropdownField>
           <DropdownField id="profile-birth-city" label="Ciudad natal" error={fieldErrors.birthCityId}>

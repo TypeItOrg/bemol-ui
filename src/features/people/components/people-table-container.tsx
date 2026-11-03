@@ -25,6 +25,8 @@ export async function PeopleTableContainer(props: PeopleTableContainerProps): Pr
     page,
     size,
     search,
+    status,
+    roleId,
     sort,
     scope = PeopleScope.ADMIN,
     selfPersonId,
@@ -46,6 +48,8 @@ export async function PeopleTableContainer(props: PeopleTableContainerProps): Pr
       page={page}
       size={size}
       search={search}
+      status={status}
+      roleId={roleId}
       sort={sort}
       scope={scope}
       selfPersonId={selfPersonId}

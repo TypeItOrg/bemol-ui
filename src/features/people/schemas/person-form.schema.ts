@@ -16,7 +16,14 @@ export const currentPasswordSchema = z
   .min(1, PEOPLE_ERROR_MESSAGES.REQUIRED_CURRENT_PASSWORD)
   .max(255, PEOPLE_ERROR_MESSAGES.PASSWORD_MAX_LENGTH);
 
-const optionalPhone = z.string().regex(/^[\d-]*$/, PEOPLE_ERROR_MESSAGES.INVALID_PHONE);
+export const requiredPhoneSchema = z
+  .string()
+  .trim()
+  .min(1, { message: PEOPLE_ERROR_MESSAGES.REQUIRED_PHONE, abort: true })
+  .max(30, PEOPLE_ERROR_MESSAGES.PHONE_MAX_LENGTH)
+  .regex(/^[\d-]+$/, PEOPLE_ERROR_MESSAGES.INVALID_PHONE);
+
+export const requiredNationalitySchema = z.uuid(PEOPLE_ERROR_MESSAGES.REQUIRED_NATIONALITY);
 
 const identitySchema = z.object({
   firstName: z.string().trim().min(3, PEOPLE_ERROR_MESSAGES.FIRST_NAME_MIN_LENGTH),
@@ -26,7 +33,8 @@ const identitySchema = z.object({
     .string()
     .min(1, { message: PEOPLE_ERROR_MESSAGES.REQUIRED_BIRTH_DATE, abort: true })
     .refine(hasMinimumPersonAge, PEOPLE_ERROR_MESSAGES.MINIMUM_AGE),
-  phoneNumber: optionalPhone,
+  phoneNumber: requiredPhoneSchema,
+  nationalityCountryId: requiredNationalitySchema,
 });
 
 export const createPersonFormSchema = identitySchema.extend({

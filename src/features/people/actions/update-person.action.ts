@@ -50,6 +50,7 @@ async function updatePersonActionInternal(
       documentNumber: formData.get("documentNumber"),
       birthDate: formData.get("birthDate"),
       phoneNumber: formData.get("phoneNumber") || "",
+      nationalityCountryId: formData.get("nationalityCountryId") || "",
     };
 
     const parsed = updatePersonFormSchema.safeParse(payload);
@@ -64,6 +65,7 @@ async function updatePersonActionInternal(
       documentNumber: parsed.data.documentNumber,
       birthDate: parsed.data.birthDate,
       phoneNumber: parsed.data.phoneNumber,
+      nationalityCountryId: parsed.data.nationalityCountryId,
     };
 
     const errorState = await getResponseErrorActionState(

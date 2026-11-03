@@ -6,7 +6,8 @@ const VALUES: PersonFormInput = {
   lastName: "Pérez",
   documentNumber: "12345678",
   email: "ana@example.com",
-  phoneNumber: "",
+  phoneNumber: "03534100000",
+  nationalityCountryId: "11111111-1111-4111-8111-111111111111",
   birthDate: "2000-01-01",
   initialRole: "REPRESENTATIVE",
 };

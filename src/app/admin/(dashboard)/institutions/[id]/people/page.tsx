@@ -35,11 +35,11 @@ export const metadata: Metadata = {
 export default async function InstitutionPeoplePage({ params, searchParams }: PeoplePageProps): Promise<ReactElement> {
   const [{ id }, resolvedSearchParams] = await Promise.all([params, searchParams]);
 
-  const { page, size, search, sort, roleId } = parsePeoplePaginationParams(resolvedSearchParams);
+  const { page, size, search, sort, roleId, status } = parsePeoplePaginationParams(resolvedSearchParams);
 
   const rolesPromise = fetchSystemRoles(id, PeopleScope.ADMIN, roleId ? [roleId] : []);
 
-  const peoplePromise = fetchPeople(id, { page, size, search, sort, roleId });
+  const peoplePromise = fetchPeople(id, { page, size, search, sort, roleId, status });
 
   const [institution, roles] = await Promise.all([fetchInstitution(id), rolesPromise]);
 
@@ -62,10 +62,19 @@ export default async function InstitutionPeoplePage({ params, searchParams }: Pe
         </Button>
       </PlatformCollectionActions>
       <DataTableNavigationProvider>
-        <PeopleSearchForm search={search} size={size} roleId={roleId} roles={roles} institutionId={id} scope={PeopleScope.ADMIN} />
+        <PeopleSearchForm search={search} size={size} roleId={roleId} status={status} roles={roles} institutionId={id} scope={PeopleScope.ADMIN} />
 
         <Suspense fallback={<PeopleTableSkeleton />}>
-          <PeopleTableContainer institutionId={id} page={page} size={size} search={search} sort={sort} roleId={roleId} dataPromise={peoplePromise} />
+          <PeopleTableContainer
+            institutionId={id}
+            page={page}
+            size={size}
+            search={search}
+            sort={sort}
+            roleId={roleId}
+            status={status}
+            dataPromise={peoplePromise}
+          />
         </Suspense>
       </DataTableNavigationProvider>
     </PlatformPageShell>

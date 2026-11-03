@@ -54,6 +54,7 @@ export default async function PlatformPeoplePage({ searchParams }: PlatformPeopl
             institutionId={params.institutionId}
             institutionName={selectedInstitutionName}
             roleCode={params.roleCode}
+            status={params.status}
             roles={roleList.roles}
             search={params.search}
             size={params.size}

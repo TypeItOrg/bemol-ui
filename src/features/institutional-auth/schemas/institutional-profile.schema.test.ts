@@ -6,11 +6,15 @@ const validProfile = {
   birthDate: "1995-05-15",
   email: "matias@example.com",
   phoneNumber: "12345678",
+  nationalityCountryId: "11111111-1111-4111-8111-111111111111",
 };
 
 describe("institutionalProfileSchema", () => {
   it("keeps ordinary contact fields and excludes protected identity fields", () => {
-    expect(institutionalProfileSchema.parse(validProfile)).toEqual({ phoneNumber: "12345678" });
+    expect(institutionalProfileSchema.parse(validProfile)).toEqual({
+      phoneNumber: "12345678",
+      nationalityCountryId: "11111111-1111-4111-8111-111111111111",
+    });
   });
 
   it("reports an invalid phone number", () => {

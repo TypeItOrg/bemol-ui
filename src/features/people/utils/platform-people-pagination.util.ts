@@ -7,6 +7,7 @@ import { parseSortQuery, type Sort, type SortSearchParams } from "@common/utils/
 
 import type { PlatformPersonSummary } from "@features/people/types/platform-person-summary.types";
 import { SYSTEM_ROLE_CODES, type SystemRoleCode } from "@features/people/types/system-role-code.types";
+import { parsePersonStatus, type PersonStatus } from "@features/people/utils/person-status.util";
 
 export const DEFAULT_PLATFORM_PEOPLE_PAGE_SIZE = 10;
 export const PLATFORM_PEOPLE_PAGE_SIZE_OPTIONS = PAGE_SIZE_OPTIONS;
@@ -32,12 +33,14 @@ export type PlatformPeopleSearchParams = PaginationSearchParams &
   SortSearchParams & {
     institutionId?: QueryParamValue;
     roleCode?: QueryParamValue;
+    status?: QueryParamValue;
   };
 
 export type PlatformPeoplePaginationParams = PaginationParams & {
   institutionId: string | undefined;
   roleCode: SystemRoleCode | undefined;
   search: string;
+  status?: PersonStatus;
   sort: PlatformPeopleSort;
 };
 
@@ -51,6 +54,7 @@ export function parsePlatformPeoplePaginationParams(searchParams: PlatformPeople
     page,
     size,
     search,
+    status: parsePersonStatus(searchParams.status),
     institutionId: parseUuidQueryParam(searchParams.institutionId),
     roleCode: parseRoleCode(searchParams.roleCode),
     sort: parseSortQuery(searchParams, platformPeopleSortFields, DEFAULT_PLATFORM_PEOPLE_SORT),

@@ -4,6 +4,7 @@ export type PersonFormInput = {
   documentNumber: string;
   email: string;
   phoneNumber: string;
+  nationalityCountryId: string;
   birthDate: string;
   initialRole: "" | "APPLICANT" | "REPRESENTATIVE";
 };

@@ -14,6 +14,7 @@ import { LOCATION_ERROR_MESSAGES } from "@features/locations/constants/error-mes
 import { PEOPLE_ERROR_MESSAGES } from "@features/people/constants/error-messages.constants";
 import type { SystemRoleCode } from "@features/people/types/system-role-code.types";
 import type { SystemRole } from "@features/people/types/system-role.types";
+import { getPersonStatusFilter, type PersonStatus } from "@features/people/utils/person-status.util";
 
 const INSTITUTION_FILTER_QUERY_KEY = ["platform", "institutions", "people-filter"] as const;
 
@@ -29,6 +30,7 @@ type PlatformPeopleTableFiltersProps = {
   roleCode: SystemRoleCode | undefined;
   roles: SystemRole[];
   search: string;
+  status?: PersonStatus;
   size: number;
 };
 
@@ -38,6 +40,7 @@ export function PlatformPeopleTableFilters({
   roleCode,
   roles,
   search,
+  status,
   size,
 }: PlatformPeopleTableFiltersProps): ReactElement {
   const { navigate } = useDataTableNavigation();
@@ -84,8 +87,8 @@ export function PlatformPeopleTableFilters({
       }
       advancedResetKeys={["institutionId"]}
       search={search}
-      searchPlaceholder="Buscar por nombre, apellido, documento o correo..."
-      selectFilters={[roleFilter]}
+      searchPlaceholder="Buscar por nombre, apellido, Documento Nacional de Identidad o correo electrónico..."
+      selectFilters={[roleFilter, getPersonStatusFilter(status)]}
       size={size}
       triggerPosition="external"
     />

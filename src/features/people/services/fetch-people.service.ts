@@ -14,11 +14,15 @@ export async function fetchPeople(
   params: PeoplePaginationParams,
   scope: PeopleScopeType = PeopleScope.ADMIN,
 ): Promise<PaginatedResponse<PersonSummary>> {
-  const { page, size, search, sort, roleId } = params;
+  const { page, size, search, sort, roleId, status } = params;
 
   const searchParams = buildPaginationSearchParams({ page, size, search });
 
   searchParams.set("sort", serializeSpringSort(sort));
+
+  if (status) {
+    searchParams.set("status", status);
+  }
 
   if (roleId) {
     searchParams.set("roleId", roleId);

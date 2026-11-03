@@ -53,6 +53,8 @@ export function GuardianDependentForm({ institutionId, returnTo }: { institution
     lastName: "",
     documentNumber: "",
     birthDate: "",
+    phoneNumber: "",
+    nationalityCountryId: "",
     relationship: "",
     isPrimaryContact: "false",
     ownAccessRequested: "false",

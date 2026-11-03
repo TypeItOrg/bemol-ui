@@ -15,10 +15,15 @@ export async function fetchPlatformPeople({
   institutionId,
   roleCode,
   sort,
+  status,
 }: PlatformPeoplePaginationParams): Promise<PaginatedResponse<PlatformPersonSummary>> {
   const searchParams = buildPaginationSearchParams({ page, size, search });
 
   searchParams.set("sort", serializeSpringSort(sort));
+
+  if (status) {
+    searchParams.set("status", status);
+  }
 
   if (institutionId) {
     searchParams.set("institutionId", institutionId);

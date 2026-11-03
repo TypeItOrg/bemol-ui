@@ -13,7 +13,7 @@ export function EnrollmentResponsibleSummary({ responsible }: { responsible: Par
       {responsible.fullName ? (
         <dl className="grid gap-4 sm:grid-cols-2">
           <DetailItem className="sm:col-span-2" label="Nombre completo" value={responsible.fullName} />
-          <DetailItem label="Documento" value={responsible.documentNumber} fallback="Sin documento" />
+          <DetailItem label="Documento Nacional de Identidad" value={responsible.documentNumber} fallback="Sin documento" />
           <DetailItem label="Teléfono" value={responsible.phoneNumber} fallback="Sin teléfono" />
           <DetailItem className="sm:col-span-2" label="Correo electrónico" value={responsible.email} fallback="Sin correo electrónico" />
           <DetailItem label="Ocupación" value={responsible.occupation} fallback="Sin ocupación informada" />

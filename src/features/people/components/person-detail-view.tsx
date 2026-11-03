@@ -25,9 +25,10 @@ export function PersonDetailView({ person, assignedRoles }: PersonDetailViewProp
         <dl className="mt-4 grid gap-4 sm:mt-5 sm:grid-cols-2 lg:grid-cols-3">
           <DetailValue fallback="Sin nombre" label="Nombre" value={person.firstName} />
           <DetailValue fallback="Sin apellido" label="Apellido" value={person.lastName} />
-          <DetailValue fallback="Sin documento" label="Documento" value={person.documentNumber} />
+          <DetailValue fallback="Sin documento" label="Documento Nacional de Identidad" value={person.documentNumber} />
           <DetailValue fallback="Sin fecha de nacimiento" label="Fecha de nacimiento" value={formatDate(person.birthDate)} />
           <DetailValue fallback="Sin correo electrónico" label="Correo electrónico" value={person.email} />
+          <DetailValue fallback="Sin nacionalidad" label="Nacionalidad" value={person.nationalityCountry?.name ?? null} />
           <DetailValue fallback="Sin teléfono" label="Teléfono" value={person.phoneNumber} />
         </dl>
       </section>

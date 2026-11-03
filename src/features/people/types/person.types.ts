@@ -1,4 +1,7 @@
+import type { Country } from "@features/locations/types/country.types";
+
 export type Person = {
+  nationalityCountry: Country | null;
   personId: string;
   firstName: string;
   lastName: string;

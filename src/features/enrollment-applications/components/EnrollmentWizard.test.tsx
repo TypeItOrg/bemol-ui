@@ -78,6 +78,7 @@ const COMPLETE_DRAFT: EnrollmentApplicationResponse = {
       documentNumber: "42111222",
       birthDate: "1990-04-10",
       phoneNumber: "3534999888",
+      nationalityCountry: { id: "019e18e4-c93b-7583-90a6-0e9410ce3ad3", name: "Argentina", isoCode: "ARG" },
       email: "lucas@example.com",
     },
     academicBackground: {

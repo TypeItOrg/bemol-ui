@@ -68,6 +68,7 @@ describe("enrollment-application.schema", () => {
         documentNumber: "40123456",
         birthDate: "2000-01-01",
         phoneNumber: "3534123456",
+        nationalityCountry: { id: "11111111-1111-4111-8111-111111111111", name: "Argentina", isoCode: "ARG" },
         email: "juan@example.com",
       };
       expect(personalDataSchema.safeParse(valid).success).toBe(true);
@@ -167,6 +168,7 @@ describe("enrollment-application.schema", () => {
         documentNumber: "35123456",
         birthDate: "1995-05-15",
         phoneNumber: "3514001122",
+        nationalityCountry: { id: "11111111-1111-4111-8111-111111111111", name: "Argentina", isoCode: "ARG" },
         email: "ana@example.com",
       },
       academicBackground: {

@@ -13,7 +13,7 @@ export function PlatformPeopleTableSkeleton(): ReactElement {
               <TableHead className="w-16 pl-4">
                 <span className="sr-only">Acciones</span>
               </TableHead>
-              {Array.from({ length: 6 }).map((_, index) => (
+              {Array.from({ length: 7 }).map((_, index) => (
                 <TableHead key={index}>
                   <Skeleton className="h-4 w-20" />
                 </TableHead>
@@ -40,6 +40,9 @@ export function PlatformPeopleTableSkeleton(): ReactElement {
                 </TableCell>
                 <TableCell>
                   <Skeleton className="h-5 w-52" />
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-5 w-24 rounded-full" />
                 </TableCell>
                 <TableCell>
                   <Skeleton className="h-5 w-24 rounded-full" />

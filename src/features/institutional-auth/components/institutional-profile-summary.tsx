@@ -33,7 +33,7 @@ export function InstitutionalProfileSummary({ person }: InstitutionalProfileSumm
         <div className="mt-4 sm:mt-5">
           <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <ProfileValue fallback="Sin nombre registrado" label="Nombre completo" value={`${person.firstName} ${person.lastName}`} />
-            <ProfileValue fallback="Sin documento" label="Documento" value={person.documentNumber} />
+            <ProfileValue fallback="Sin documento" label="Documento Nacional de Identidad" value={person.documentNumber} />
             <ProfileValue fallback="Sin fecha de nacimiento" label="Fecha de nacimiento" value={formatDate(person.birthDate)} />
             <ProfileValue fallback="Sin correo electrónico" label="Correo electrónico" value={person.email} />
             <ProfileValue fallback="Sin teléfono" label="Teléfono" value={person.phoneNumber} />

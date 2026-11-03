@@ -8,13 +8,15 @@ import { Field, FieldContent, FieldError, FieldGroup, FieldLabel } from "@common
 import { NumericInput } from "@common/components/ui/restricted-input";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@common/components/ui/select";
 
+import { CountryDropdown } from "@features/locations/components/location-dropdowns";
 import { PersonFormCard, PersonFormSectionHeading } from "@features/people/components/person-form-card";
 import { type PersonFormFieldsProps } from "@features/people/types/person-form-fields-props.types";
 import type { PersonFormInput } from "@features/people/types/person-form-input.types";
+import type { Person } from "@features/people/types/person.types";
 import { SystemRoleCode } from "@features/people/types/system-role-code.types";
 import { formatBirthDateInput, getLatestAllowedBirthDate, parseBirthDateInput } from "@features/people/utils/person-birth-date.util";
 
-export function PersonCreateFields({ control, errors, register, isEdit }: PersonCreateFieldsProps): ReactElement {
+export function PersonCreateFields({ control, errors, register, isEdit, person }: PersonCreateFieldsProps): ReactElement {
   return (
     <PersonFormCard>
       <PersonFormSectionHeading
@@ -26,7 +28,7 @@ export function PersonCreateFields({ control, errors, register, isEdit }: Person
         <Field data-invalid={!!errors.documentNumber} className="flex-[1_0_min(200px,100%)]">
           <FieldContent>
             <FieldLabel htmlFor="person-document" required>
-              Documento
+              Documento Nacional de Identidad
             </FieldLabel>
           </FieldContent>
           <NumericInput id="person-document" aria-invalid={!!errors.documentNumber} {...register("documentNumber")} />
@@ -53,6 +55,25 @@ export function PersonCreateFields({ control, errors, register, isEdit }: Person
             )}
           />
           <FieldError errors={[errors.birthDate]} />
+        </Field>
+        <Field data-invalid={!!errors.nationalityCountryId} className="flex-[1_0_min(200px,100%)]">
+          <FieldLabel htmlFor="person-nationality" required>
+            Nacionalidad
+          </FieldLabel>
+          <Controller
+            control={control}
+            name="nationalityCountryId"
+            render={({ field, fieldState }) => (
+              <CountryDropdown
+                id="person-nationality"
+                name={field.name}
+                initialItem={person?.nationalityCountry ?? undefined}
+                ariaInvalid={fieldState.invalid}
+                onValueChange={(value) => field.onChange(value ?? "")}
+              />
+            )}
+          />
+          <FieldError errors={[errors.nationalityCountryId]} />
         </Field>
         {!isEdit && (
           <Field data-invalid={!!errors.initialRole} className="flex-[1_0_min(200px,100%)]">
@@ -91,4 +112,5 @@ export function PersonCreateFields({ control, errors, register, isEdit }: Person
 export type PersonCreateFieldsProps = PersonFormFieldsProps & {
   control: Control<PersonFormInput>;
   isEdit: boolean;
+  person?: Person;
 };

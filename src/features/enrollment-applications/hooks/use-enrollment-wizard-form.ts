@@ -66,6 +66,7 @@ export function useEnrollmentWizardForm(
     birthDate,
     birthDateRequiresProfileUpdate: !birthDate && !readOnly,
     phoneNumber: initialData?.personalData?.phoneNumber ?? "",
+    nationalityCountry: initialData?.personalData?.nationalityCountry ?? null,
     email: initialData?.personalData?.email ?? "",
     schooling,
     dispatchSchooling,

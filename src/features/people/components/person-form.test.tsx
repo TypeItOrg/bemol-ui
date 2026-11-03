@@ -11,6 +11,24 @@ import { PeopleScope } from "@features/people/utils/people-scope.util";
 
 import { renderWithQueryClient } from "@/../test/utils/render-with-query-client";
 
+jest.mock("@features/locations/components/location-dropdowns", () => ({
+  CountryDropdown: ({
+    id,
+    name,
+    initialItem,
+    onValueChange,
+  }: {
+    id: string;
+    name: string;
+    initialItem?: { id: string };
+    onValueChange: (id: string) => void;
+  }) => (
+    <select id={id} name={name} defaultValue={initialItem?.id ?? ""} onChange={(event) => onValueChange(event.target.value)}>
+      <option value="">Seleccionar país</option>
+      <option value="11111111-1111-4111-8111-111111111111">Argentina</option>
+    </select>
+  ),
+}));
 jest.mock("next/navigation", () => ({ useRouter: () => ({ push: jest.fn() }) }));
 jest.mock("@features/people/actions/create-person.action", () => ({
   createInstitutionalPersonAction: jest.fn(),
@@ -74,7 +92,8 @@ describe("person initial role field", () => {
           documentNumber: "12345678",
           birthDate: "2000-01-01",
           email: "ana@example.com",
-          phoneNumber: null,
+          phoneNumber: "03534100000",
+          nationalityCountry: { id: "11111111-1111-4111-8111-111111111111", name: "Argentina", isoCode: "ARG" },
           institutionId: "institution-1",
           institutionName: "Conservatorio",
           deleted: false,
@@ -98,8 +117,10 @@ describe("person initial role field", () => {
 
     await user.type(screen.getByRole("textbox", { name: "Nombre" }), "Ana");
     await user.type(screen.getByRole("textbox", { name: "Apellido" }), "Perez");
+    await user.type(screen.getByRole("textbox", { name: "Teléfono" }), "03534100000");
+    await user.selectOptions(screen.getByRole("combobox", { name: "Nacionalidad" }), "11111111-1111-4111-8111-111111111111");
     await user.type(screen.getByRole("textbox", { name: "Correo electrónico" }), "ana@example.test");
-    await user.type(screen.getByRole("textbox", { name: "Documento" }), "99100003");
+    await user.type(screen.getByRole("textbox", { name: "Documento Nacional de Identidad" }), "99100003");
     await user.type(screen.getByRole("textbox", { name: "Fecha de nacimiento" }), "01/01/2000");
     await user.tab();
     await user.click(screen.getByRole("combobox", { name: "Rol inicial" }));
@@ -108,7 +129,7 @@ describe("person initial role field", () => {
 
     await waitFor(() => expect(createInstitutionalPersonAction).toHaveBeenCalledTimes(1));
     expect(screen.getByRole("textbox", { name: "Nombre" })).toBeDisabled();
-    expect(screen.getByRole("textbox", { name: "Documento" })).toBeDisabled();
+    expect(screen.getByRole("textbox", { name: "Documento Nacional de Identidad" })).toBeDisabled();
     expect(screen.getByRole("combobox", { name: "Rol inicial" })).toBeDisabled();
 
     await act(async () => {

@@ -75,7 +75,7 @@ function InstitutionalProfileFormView({ person, returnTo = "/account" }: Institu
           <FieldGroup className="flex flex-row flex-wrap items-start gap-4">
             <TextField id="profile-first-name" disabled label="Nombre" defaultValue={person.firstName} error={fieldErrors.firstName} required />
             <TextField id="profile-last-name" disabled label="Apellido" defaultValue={person.lastName} error={fieldErrors.lastName} required />
-            <TextField id="profile-document" label="Documento" value={person.documentNumber} disabled />
+            <TextField id="profile-document" label="Documento Nacional de Identidad" value={person.documentNumber} disabled />
             <TextField id="profile-birth-date" label="Fecha de nacimiento" value={formatDisplayDate(person.birthDate)} disabled />
           </FieldGroup>
           <FieldGroup className="mt-4 flex flex-row flex-wrap items-start gap-4">
@@ -89,6 +89,7 @@ function InstitutionalProfileFormView({ person, returnTo = "/account" }: Institu
             />
             <TextField
               id="profile-phone"
+              required
               name="phoneNumber"
               label="Teléfono"
               defaultValue={person.phoneNumber ?? ""}

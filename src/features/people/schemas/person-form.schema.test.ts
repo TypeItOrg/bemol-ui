@@ -5,7 +5,8 @@ const validPerson = {
   lastName: "Pérez",
   documentNumber: "12345678",
   email: "ana@example.com",
-  phoneNumber: "",
+  phoneNumber: "03534100000",
+  nationalityCountryId: "11111111-1111-4111-8111-111111111111",
   birthDate: "2000-01-01",
   initialRole: "APPLICANT",
 };
@@ -18,15 +19,17 @@ describe("person form schemas", () => {
 
   afterEach(() => jest.useRealTimers());
 
-  it.each(["", "353-4619146"])("accepts a supported phone number %s", (phoneNumber) => {
+  it.each(["3534123456", "353-4619146"])("accepts a supported phone number %s", (phoneNumber) => {
     expect(updatePersonFormSchema.parse({ ...validPerson, phoneNumber })).toMatchObject({ phoneNumber });
   });
 
   it.each([
+    ["phoneNumber", "", "El teléfono es requerido."],
+    ["nationalityCountryId", "", "Seleccioná una nacionalidad."],
     ["phoneNumber", "+54 353 4619146", "El teléfono solo admite números y guiones."],
-    ["email", "", "El correo es requerido."],
-    ["email", "   ", "El correo es requerido."],
-    ["email", "not-an-email", "El correo es inválido."],
+    ["email", "", "El correo electrónico es requerido."],
+    ["email", "   ", "El correo electrónico es requerido."],
+    ["email", "not-an-email", "El correo electrónico es inválido."],
     ["documentNumber", "1234A678", "El documento debe tener exactamente 8 dígitos."],
     ["birthDate", "", "La fecha de nacimiento es requerida."],
     ["birthDate", "2023-09-15", "La persona debe tener al menos 3 años."],

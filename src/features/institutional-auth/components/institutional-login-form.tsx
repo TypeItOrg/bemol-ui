@@ -59,7 +59,7 @@ export function InstitutionalLoginForm(props: InstitutionalLoginFormProps): Reac
           error={fieldErrors?.institutionId}
         />
         <Field data-invalid={Boolean(fieldErrors?.documentNumber)}>
-          <FieldLabel htmlFor="document-number">Documento</FieldLabel>
+          <FieldLabel htmlFor="document-number">Documento Nacional de Identidad</FieldLabel>
           <NumericInput
             id="document-number"
             name="documentNumber"

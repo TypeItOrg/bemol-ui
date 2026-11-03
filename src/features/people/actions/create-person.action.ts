@@ -41,6 +41,7 @@ async function createPersonActionInternal(
     documentNumber: formData.get("documentNumber"),
     email: formData.get("email") || "",
     phoneNumber: formData.get("phoneNumber") || "",
+    nationalityCountryId: formData.get("nationalityCountryId") || "",
     birthDate: formData.get("birthDate") || "",
     initialRole: formData.get("initialRole"),
   };
@@ -62,6 +63,7 @@ async function createPersonActionInternal(
       documentNumber: parsed.data.documentNumber,
       email: parsed.data.email,
       phoneNumber: parsed.data.phoneNumber,
+      nationalityCountryId: parsed.data.nationalityCountryId,
       birthDate: parsed.data.birthDate || null,
       initialRole: parsed.data.initialRole,
     }),

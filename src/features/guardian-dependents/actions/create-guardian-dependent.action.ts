@@ -33,6 +33,8 @@ export async function createGuardianDependentAction(
     firstName: formData.get("firstName") ?? "",
     lastName: formData.get("lastName") ?? "",
     birthDate: formData.get("birthDate") ?? "",
+    phoneNumber: formData.get("phoneNumber") ?? "",
+    nationalityCountryId: formData.get("nationalityCountryId") ?? "",
     relationship: formData.get("relationship") ?? "",
     isPrimaryContact: formData.get("isPrimaryContact") ?? "",
     ownAccessRequested: formData.get("ownAccessRequested") ?? "",

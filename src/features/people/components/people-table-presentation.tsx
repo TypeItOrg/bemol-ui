@@ -10,7 +10,6 @@ import { useDataTableNavigation } from "@common/components/ui/data-table-navigat
 import { DataTableSortableHead } from "@common/components/ui/data-table-sortable-head";
 import { Table, TableBody, TableHead, TableHeader, TableRow } from "@common/components/ui/table";
 import type { PaginatedResponse } from "@common/types/paginated-response.types";
-import type { PaginationQuery } from "@common/types/pagination-query.types";
 
 import { PeoplePagination } from "@features/people/components/people-pagination";
 import { PeopleTableEmptyState } from "@features/people/components/people-table-empty-state";
@@ -19,13 +18,12 @@ import { PersonAccessInvitationDialog } from "@features/people/components/person
 import { PersonDeleteDialog } from "@features/people/components/person-delete-dialog";
 import { PersonStatusDialog } from "@features/people/components/person-status-dialog";
 import type { PersonSummary } from "@features/people/types/person-summary.types";
-import type { PeopleSort, PeopleSortField } from "@features/people/utils/people-pagination.util";
+import type { PeoplePaginationParams, PeopleSort, PeopleSortField } from "@features/people/utils/people-pagination.util";
 import { PeopleScope, type PeopleScope as PeopleScopeType } from "@features/people/utils/people-scope.util";
 
-type PeopleTablePresentationProps = PaginationQuery & {
+type PeopleTablePresentationProps = PeoplePaginationParams & {
   data: PaginatedResponse<PersonSummary>;
   institutionId: string;
-  sort: PeopleSort;
   scope?: PeopleScopeType;
   selfPersonId?: string | null;
   canCreate?: boolean;
@@ -42,6 +40,8 @@ export function PeopleTablePresentation({
   page,
   size,
   search,
+  status,
+  roleId,
   sort,
   scope = PeopleScope.ADMIN,
   selfPersonId,
@@ -96,6 +96,7 @@ export function PeopleTablePresentation({
         isNavigating={isNavigating}
         scope={scope}
         search={search}
+        hasFilters={Boolean(status || roleId)}
         size={size}
         totalItems={data.totalItems}
       />
@@ -112,10 +113,15 @@ export function PeopleTablePresentation({
                 <span className="sr-only">Acciones</span>
               </TableHead>
               <DataTableSortableHead<PeopleSortField> field="lastName" label="Nombre" sort={sort} onSortChange={updateSort} />
-              <DataTableSortableHead<PeopleSortField> field="documentNumber" label="Documento" sort={sort} onSortChange={updateSort} />
+              <DataTableSortableHead<PeopleSortField>
+                field="documentNumber"
+                label="Documento Nacional de Identidad"
+                sort={sort}
+                onSortChange={updateSort}
+              />
               <TableHead>Teléfono</TableHead>
               <TableHead>Correo electrónico</TableHead>
-              {PeopleScope.isInstitutional(scope) ? <TableHead>Estado</TableHead> : null}
+              <TableHead>Estado</TableHead>
               <TableHead>Rol</TableHead>
             </TableRow>
           </TableHeader>

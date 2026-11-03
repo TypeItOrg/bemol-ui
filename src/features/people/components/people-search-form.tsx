@@ -11,6 +11,7 @@ import { ROLE_OPTIONS_MESSAGES as M } from "@features/people/constants/role-opti
 import { fetchRoleOptions } from "@features/people/services/fetch-role-options.service";
 import type { AssignableRole } from "@features/people/types/assignable-role.types";
 import { PeopleScope, type PeopleScope as PeopleScopeType } from "@features/people/utils/people-scope.util";
+import { getPersonStatusFilter, type PersonStatus } from "@features/people/utils/person-status.util";
 
 const ALL_ROLES = "all";
 
@@ -18,6 +19,7 @@ type PeopleSearchFormProps = {
   search: string;
   size: number;
   roleId?: string;
+  status?: PersonStatus;
   roles?: AssignableRole[];
   institutionId?: string;
   scope?: PeopleScopeType;
@@ -27,6 +29,7 @@ export function PeopleSearchForm({
   search,
   size,
   roleId,
+  status,
   roles = [],
   institutionId,
   scope = PeopleScope.ADMIN,
@@ -48,8 +51,8 @@ export function PeopleSearchForm({
   return (
     <DataTableFilters
       search={search}
-      searchPlaceholder="Buscar por nombre, apellido o documento..."
-      selectFilters={institutionId ? [] : [roleFilter]}
+      searchPlaceholder="Buscar por nombre, apellido o Documento Nacional de Identidad..."
+      selectFilters={institutionId ? [getPersonStatusFilter(status)] : [roleFilter, getPersonStatusFilter(status)]}
       size={size}
     >
       {institutionId ? (

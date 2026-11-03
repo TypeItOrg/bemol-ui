@@ -1,6 +1,8 @@
 import { z } from "zod";
 
 import { ENROLLMENT_MESSAGES } from "@features/enrollment-applications/constants/enrollment-messages.constants";
+import { PEOPLE_ERROR_MESSAGES } from "@features/people/constants/error-messages.constants";
+import { requiredPhoneSchema } from "@features/people/schemas/person-form.schema";
 
 // Paso 1: Datos Personales y Contacto
 export const personalDataSchema = z.object({
@@ -8,7 +10,8 @@ export const personalDataSchema = z.object({
   lastName: z.string().trim().min(1, ENROLLMENT_MESSAGES.LAST_NAME_REQUIRED),
   documentNumber: z.string().trim().min(1, ENROLLMENT_MESSAGES.DOCUMENT_REQUIRED),
   birthDate: z.string({ error: ENROLLMENT_MESSAGES.BIRTH_DATE_REQUIRED }).trim().min(1, ENROLLMENT_MESSAGES.BIRTH_DATE_REQUIRED),
-  phoneNumber: z.string().trim().nullish(),
+  phoneNumber: requiredPhoneSchema,
+  nationalityCountry: z.object({ id: z.uuid() }, { error: PEOPLE_ERROR_MESSAGES.REQUIRED_NATIONALITY }),
   email: z.string().trim().min(1, ENROLLMENT_MESSAGES.EMAIL_REQUIRED).email(ENROLLMENT_MESSAGES.EMAIL_INVALID),
 });
 

@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { setupServer } from "msw/node";
@@ -10,7 +10,13 @@ import { GUARDIAN_DEPENDENT_MESSAGES } from "@features/guardian-dependents/const
 import { getInstitutionalAccessToken } from "@features/institutional-auth/services/get-institutional-access-token.service";
 import { requireInstitutionalUser } from "@features/institutional-auth/services/get-institutional-user.service";
 
+import { renderWithQueryClient as render } from "@/../test/utils/render-with-query-client";
+
 const mockPush = jest.fn();
+
+jest.mock("@tanstack/react-virtual", () => ({
+  useVirtualizer: jest.requireActual("@/../test/utils/mock-virtualizer").mockVirtualizer,
+}));
 
 jest.mock("next/cache", () => ({ revalidatePath: jest.fn() }));
 jest.mock("next/navigation", () => ({
@@ -38,6 +44,7 @@ const API_URL = "https://guardian-api.example.test";
 const INSTITUTION_ID = "019f9c3a-f891-7bc5-a98d-e65332998127";
 const RETURN_TO = "/my-dependents?page=2&size=20";
 const LINK_ID = "019f9c3a-f891-7bc5-a98d-e65332998128";
+const NATIONALITY_ID = "019e18e4-c93b-7583-90a6-0e9410ce3ad3";
 const BIRTH_YEAR = new Date().getFullYear() - 8;
 const CREATE_URL = `${API_URL}/api/v1/institutions/${INSTITUTION_ID}/representations`;
 const originalEnvironment = {
@@ -50,6 +57,15 @@ const requests: { body: unknown; authorization: string | null }[] = [];
 jest.setTimeout(15_000);
 
 const server = setupServer(
+  http.get("*/api/countries", () =>
+    HttpResponse.json({
+      items: [{ id: NATIONALITY_ID, name: "Argentina", isoCode: "ARG" }],
+      page: 0,
+      size: 20,
+      totalItems: 1,
+      totalPages: 1,
+    }),
+  ),
   http.post(CREATE_URL, async ({ request }) => {
     requests.push({ body: await request.json(), authorization: request.headers.get("authorization") });
 
@@ -62,6 +78,9 @@ async function fillForm(user: ReturnType<typeof userEvent.setup>): Promise<void>
   await user.type(screen.getByLabelText(/^Nombre/), "Mateo");
   await user.type(screen.getByLabelText(/^Apellido/), "Gonzalez");
   await user.type(screen.getByLabelText(/^Documento/), "12345678");
+  await user.type(screen.getByLabelText(/^Teléfono/), "03534100000");
+  await user.click(screen.getByRole("combobox", { name: /Nacionalidad/ }));
+  await user.click(await screen.findByRole("option", { name: "Argentina" }));
   await user.type(screen.getByRole("textbox", { name: /Fecha de nacimiento/ }), `0101${BIRTH_YEAR}`);
   await user.click(screen.getByRole("combobox", { name: /Vínculo/ }));
   await user.click(await screen.findByRole("option", { name: "Madre" }));
@@ -141,6 +160,8 @@ describe("GuardianDependentForm with the real create action and HTTP transport",
           lastName: "Gonzalez",
           documentNumber: "12345678",
           birthDate: `${BIRTH_YEAR}-01-01`,
+          phoneNumber: "03534100000",
+          nationalityCountryId: NATIONALITY_ID,
           relationship: "MOTHER",
           isPrimaryContact: false,
           requestMode: "NEW",

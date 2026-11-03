@@ -30,6 +30,7 @@ import { TableCell, TableRow } from "@common/components/ui/table";
 
 import { PersonDeleteDialog } from "@features/people/components/person-delete-dialog";
 import type { PlatformPersonSummary } from "@features/people/types/platform-person-summary.types";
+import { getPersonStatusLabel } from "@features/people/utils/person-status.util";
 
 export function PlatformPeopleTableRow({ canUpdate, person }: { canUpdate: boolean; person: PlatformPersonSummary }): ReactElement {
   const router = useRouter();
@@ -64,7 +65,10 @@ export function PlatformPeopleTableRow({ canUpdate, person }: { canUpdate: boole
               </Link>
             </TableCell>
             <TableCell>{person.phoneNumber || <span className="text-muted-foreground/60">Sin teléfono</span>}</TableCell>
-            <TableCell>{person.email || <span className="text-muted-foreground/60">Sin email</span>}</TableCell>
+            <TableCell>{person.email || <span className="text-muted-foreground/60">Sin correo electrónico</span>}</TableCell>
+            <TableCell>
+              <Badge variant={person.enabled ? "secondary" : "outline"}>{getPersonStatusLabel(person)}</Badge>
+            </TableCell>
             <TableCell>
               {person.roles.length ? (
                 <div className="flex flex-wrap gap-1">

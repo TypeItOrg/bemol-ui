@@ -6,7 +6,7 @@ import { Badge } from "@common/components/ui/badge";
 import { DatePicker } from "@common/components/ui/date-picker";
 import { Field, FieldError, FieldLabel } from "@common/components/ui/field";
 import { Input } from "@common/components/ui/input";
-import { NumericInput } from "@common/components/ui/restricted-input";
+import { NumericInput, PhoneInput } from "@common/components/ui/restricted-input";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@common/components/ui/select";
 
 import { FormSelect } from "@features/academic/components/academic-form-controls";
@@ -16,6 +16,7 @@ import { GUARDIAN_RELATIONSHIP_LABELS } from "@features/guardian-dependents/cons
 import type { GuardianDependentActionState } from "@features/guardian-dependents/types/guardian-dependent-action-state.types";
 import type { GuardianDependentFieldName } from "@features/guardian-dependents/types/guardian-dependent-field-name.types";
 import { GUARDIAN_RELATIONSHIP } from "@features/guardian-dependents/types/guardian-relationship.types";
+import { CountryDropdown } from "@features/locations/components/location-dropdowns";
 import { formatBirthDateInput, getLatestAllowedBirthDate, parseBirthDateInput } from "@features/people/utils/person-birth-date.util";
 
 const RELATIONSHIP_OPTIONS = Object.values(GUARDIAN_RELATIONSHIP);
@@ -35,6 +36,8 @@ export function GuardianDependentFormFields({
     lastName: string;
     documentNumber: string;
     birthDate: string;
+    phoneNumber: string;
+    nationalityCountryId: string;
     relationship: string;
     isPrimaryContact: string;
     ownAccessRequested: string;
@@ -71,6 +74,37 @@ export function GuardianDependentFormFields({
               <FieldError errors={getErrors("firstName")} />
             </Field>
 
+            <Field data-invalid={!!fieldErrors?.phoneNumber}>
+              <FieldLabel htmlFor="dependent-phone" required>
+                Teléfono
+              </FieldLabel>
+              <PhoneInput
+                id="dependent-phone"
+                name="phoneNumber"
+                value={values.phoneNumber}
+                disabled={disabled}
+                onChange={(event) => onChange("phoneNumber", event.currentTarget.value)}
+                aria-invalid={!!fieldErrors?.phoneNumber}
+                maxLength={30}
+                autoComplete="tel"
+              />
+              <FieldError errors={getErrors("phoneNumber")} />
+            </Field>
+            <fieldset disabled={disabled} className="contents">
+              <Field data-invalid={!!fieldErrors?.nationalityCountryId}>
+                <FieldLabel htmlFor="dependent-nationality" required>
+                  Nacionalidad
+                </FieldLabel>
+                <CountryDropdown
+                  id="dependent-nationality"
+                  name="nationalityCountryId"
+                  ariaInvalid={!!fieldErrors?.nationalityCountryId}
+                  onValueChange={(value) => onChange("nationalityCountryId", value ?? "")}
+                />
+                <FieldError errors={getErrors("nationalityCountryId")} />
+              </Field>
+            </fieldset>
+
             <Field data-invalid={!!fieldErrors?.lastName}>
               <FieldLabel htmlFor="dependent-last-name" required>
                 Apellido
@@ -90,7 +124,7 @@ export function GuardianDependentFormFields({
 
         <Field data-invalid={!!fieldErrors?.documentNumber}>
           <FieldLabel htmlFor="dependent-document-number" required>
-            Documento
+            Documento Nacional de Identidad
           </FieldLabel>
           <NumericInput
             aria-invalid={!!fieldErrors?.documentNumber}

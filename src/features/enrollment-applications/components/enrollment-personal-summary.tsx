@@ -17,8 +17,9 @@ export function EnrollmentPersonalSummary({ personal }: { personal: Partial<Enro
           value={`${personal.firstName || ""} ${personal.lastName || ""}`.trim()}
           fallback="Sin nombre registrado"
         />
-        <DetailItem label="Documento" value={personal.documentNumber} fallback="Sin documento" />
+        <DetailItem label="Documento Nacional de Identidad" value={personal.documentNumber} fallback="Sin documento" />
         <DetailItem label="Fecha de nacimiento" value={formatBusinessDate(personal.birthDate)} fallback="Sin fecha de nacimiento" />
+        <DetailItem label="Nacionalidad" value={personal.nationalityCountry?.name} fallback="Sin nacionalidad" />
         <DetailItem label="Teléfono" value={personal.phoneNumber} fallback="Sin teléfono" />
         <DetailItem className="sm:col-span-2" label="Correo electrónico" value={personal.email} fallback="Sin correo electrónico" />
       </dl>

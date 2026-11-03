@@ -35,7 +35,7 @@ describe("updateInstitutionalProfileAction", () => {
     expect(institutionalApiFetchMock).toHaveBeenCalledWith("/api/v1/person/me", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ phoneNumber: "12345678" }),
+      body: JSON.stringify({ phoneNumber: "12345678", nationalityCountryId: "11111111-1111-4111-8111-111111111111" }),
     });
     expect(JSON.parse(institutionalApiFetchMock.mock.calls[0][1]?.body as string)).not.toHaveProperty("password");
     expect(requireInstitutionalUserMock).toHaveBeenCalled();
@@ -69,6 +69,7 @@ function createFormData(overrides: Partial<Record<"firstName" | "lastName" | "bi
     birthDate: "1995-05-15",
     email: "matias@example.com",
     phoneNumber: "12345678",
+    nationalityCountryId: "11111111-1111-4111-8111-111111111111",
     ...overrides,
   };
 

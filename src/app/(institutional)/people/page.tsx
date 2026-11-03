@@ -38,11 +38,11 @@ export default async function PeoplePage({ searchParams }: { searchParams: Promi
 
   const resolvedSearchParams = await searchParams;
 
-  const { page, size, search, sort, roleId } = parsePeoplePaginationParams(resolvedSearchParams);
+  const { page, size, search, sort, roleId, status } = parsePeoplePaginationParams(resolvedSearchParams);
 
   const rolesPromise = fetchSystemRoles(user.institutionId, PeopleScope.INSTITUTIONAL, roleId ? [roleId] : []);
 
-  const peoplePromise = fetchPeople(user.institutionId, { page, size, search, sort, roleId }, PeopleScope.INSTITUTIONAL);
+  const peoplePromise = fetchPeople(user.institutionId, { page, size, search, sort, roleId, status }, PeopleScope.INSTITUTIONAL);
 
   const [roles, canCreate, canUpdate, canManageRoles] = await Promise.all([
     rolesPromise,
@@ -70,6 +70,7 @@ export default async function PeoplePage({ searchParams }: { searchParams: Promi
           search={search}
           size={size}
           roleId={roleId}
+          status={status}
           roles={roles}
           institutionId={user.institutionId}
           scope={PeopleScope.INSTITUTIONAL}
@@ -82,6 +83,7 @@ export default async function PeoplePage({ searchParams }: { searchParams: Promi
             search={search}
             sort={sort}
             roleId={roleId}
+            status={status}
             scope={PeopleScope.INSTITUTIONAL}
             dataPromise={peoplePromise}
             selfPersonId={user.actorPersonId ?? user.personId}

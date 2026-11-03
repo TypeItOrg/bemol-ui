@@ -3,6 +3,7 @@ export const FIELD_ID_BY_ERROR_PATH: Record<string, string> = {
   "personalData.lastName": "lastName",
   "personalData.documentNumber": "documentNumber",
   "personalData.birthDate": "birthDate-account-link",
+  "personalData.nationalityCountry": "nationalityCountry",
   "personalData.phoneNumber": "phoneNumber",
   "personalData.email": "email",
   "academicBackground.currentlyStudying": "currentlyStudying",

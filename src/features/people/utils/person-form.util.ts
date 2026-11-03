@@ -15,6 +15,7 @@ export const EMPTY_FORM_VALUES: PersonFormInput = {
   documentNumber: "",
   email: "",
   phoneNumber: "",
+  nationalityCountryId: "",
   birthDate: "",
   initialRole: "",
 };
@@ -36,6 +37,7 @@ export function getDefaultValues(person: Person | undefined): PersonFormInput {
     documentNumber: person.documentNumber,
     email: person.email ?? "",
     phoneNumber: person.phoneNumber ?? "",
+    nationalityCountryId: person.nationalityCountry?.id ?? "",
     birthDate: person.birthDate ?? "",
     initialRole: "",
   };
@@ -46,8 +48,8 @@ export function getFormData(values: PersonFormInput, isEdit: boolean, canEdit: b
 
   if (!isEdit || canEdit) {
     const keys: Array<keyof PersonFormInput> = isEdit
-      ? ["firstName", "lastName", "documentNumber", "birthDate", "phoneNumber"]
-      : ["firstName", "lastName", "documentNumber", "email", "phoneNumber", "birthDate", "initialRole"];
+      ? ["firstName", "lastName", "documentNumber", "birthDate", "phoneNumber", "nationalityCountryId"]
+      : ["firstName", "lastName", "documentNumber", "email", "phoneNumber", "birthDate", "initialRole", "nationalityCountryId"];
 
     for (const key of keys) {
       formData.append(key, values[key]);

@@ -61,12 +61,16 @@ export function PersonDetailsFields({ errors, isEdit, person, register }: Person
             {...(isEdit ? {} : register("email"))}
           />
           <FieldError errors={[errors.email]} />
-          {isEdit ? <FieldDescription>El correo se modifica mediante una solicitud verificada en Gestión de acceso.</FieldDescription> : null}
+          {isEdit ? (
+            <FieldDescription>El correo electrónico se modifica mediante una solicitud verificada en Gestión de acceso.</FieldDescription>
+          ) : null}
         </Field>
 
         <Field className="flex-[1_0_min(200px,100%)]">
           <FieldContent>
-            <FieldLabel htmlFor="person-phone">Teléfono</FieldLabel>
+            <FieldLabel htmlFor="person-phone" required>
+              Teléfono
+            </FieldLabel>
           </FieldContent>
           <PhoneInput id="person-phone" aria-invalid={!!errors.phoneNumber} defaultValue={person?.phoneNumber ?? ""} {...register("phoneNumber")} />
           <FieldError errors={[errors.phoneNumber]} />

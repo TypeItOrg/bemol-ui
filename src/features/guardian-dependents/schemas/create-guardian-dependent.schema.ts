@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { GUARDIAN_DEPENDENT_MESSAGES } from "@features/guardian-dependents/constants/guardian-dependent.constants";
 import { GUARDIAN_RELATIONSHIP } from "@features/guardian-dependents/types/guardian-relationship.types";
+import { requiredNationalitySchema, requiredPhoneSchema } from "@features/people/schemas/person-form.schema";
 import { hasMinimumPersonAge } from "@features/people/utils/person-birth-date.util";
 
 const guardianLinkFields = z.object({
@@ -23,6 +24,8 @@ export const createGuardianDependentSchema = z
     guardianLinkFields.extend({ requestMode: z.literal("EXISTING") }),
     guardianLinkFields.extend({
       requestMode: z.literal("NEW"),
+      nationalityCountryId: requiredNationalitySchema,
+      phoneNumber: requiredPhoneSchema,
       firstName: z
         .string()
         .trim()

@@ -30,6 +30,7 @@ type Props = Pick<
   | "birthDate"
   | "birthDateRequiresProfileUpdate"
   | "phoneNumber"
+  | "nationalityCountry"
   | "email"
   | "handleActiveTabChange"
 >;
@@ -46,6 +47,7 @@ export function EnrollmentPersonalStep({
   birthDate,
   birthDateRequiresProfileUpdate,
   phoneNumber,
+  nationalityCountry,
   email,
   handleActiveTabChange,
 }: Props): ReactElement {
@@ -130,9 +132,25 @@ export function EnrollmentPersonalStep({
             />
           </div>
 
+          <Field data-invalid={!!getFieldError(["personalData", "nationalityCountry"])}>
+            <FieldLabel htmlFor="nationalityCountry" required>
+              Nacionalidad
+            </FieldLabel>
+            <Input
+              id="nationalityCountry"
+              value={nationalityCountry?.name ?? ""}
+              readOnly
+              className={READ_ONLY_INPUT_CLASS_NAME}
+              aria-invalid={!!getFieldError(["personalData", "nationalityCountry"])}
+            />
+            <FieldError errors={[{ message: getFieldError(["personalData", "nationalityCountry"]) }]} />
+          </Field>
+
           <div className="grid gap-4 @min-[48rem]:grid-cols-2">
             <Field data-invalid={!!getFieldError(["personalData", "phoneNumber"])}>
-              <FieldLabel htmlFor="phoneNumber">Teléfono de contacto</FieldLabel>
+              <FieldLabel htmlFor="phoneNumber" required>
+                Teléfono de contacto
+              </FieldLabel>
               <PhoneInput
                 id="phoneNumber"
                 value={phoneNumber}

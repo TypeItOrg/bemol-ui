@@ -41,6 +41,7 @@ export function CountryDropdown({
 
   return (
     <AsyncDropdown<Country>
+      aria-required={!optional}
       ariaInvalid={ariaInvalid}
       id={id}
       name={name}

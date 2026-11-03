@@ -68,7 +68,7 @@ export function InstitutionalPasswordRecoveryForm(): ReactElement {
           />
           <Field data-invalid={!!state.fieldErrors?.documentNumber}>
             <FieldLabel htmlFor="document-number" required>
-              Documento
+              Documento Nacional de Identidad
             </FieldLabel>
             <NumericInput
               aria-invalid={!!state.fieldErrors?.documentNumber}

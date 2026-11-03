@@ -186,7 +186,7 @@ function PersonFormView({
       </fieldset>
 
       <fieldset disabled={isPending || (isEdit && !canEdit)} className="contents">
-        <PersonCreateFields control={control} errors={errors} register={register} isEdit={isEdit} />
+        <PersonCreateFields person={person} control={control} errors={errors} register={register} isEdit={isEdit} />
       </fieldset>
 
       {!hideActions && (

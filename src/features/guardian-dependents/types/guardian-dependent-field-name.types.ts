@@ -4,6 +4,8 @@ export type GuardianDependentFieldName =
   | "firstName"
   | "lastName"
   | "birthDate"
+  | "phoneNumber"
+  | "nationalityCountryId"
   | "relationship"
   | "isPrimaryContact"
   | "documents"
@@ -16,6 +18,8 @@ export const GUARDIAN_DEPENDENT_FIELD_NAMES = [
   "firstName",
   "lastName",
   "birthDate",
+  "phoneNumber",
+  "nationalityCountryId",
   "relationship",
   "isPrimaryContact",
   "documents",
