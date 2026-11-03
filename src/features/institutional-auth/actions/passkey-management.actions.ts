@@ -39,7 +39,7 @@ export async function renamePasskeyAction(id: string, _previousState: RenamePass
     return { error: INSTITUTIONAL_AUTH_ERROR_MESSAGES.PASSKEY_RENAME_FAILED };
   }
 
-  revalidatePath("/account/passkeys");
+  revalidatePath("/account/security");
 
   return { success: true };
 }
@@ -61,7 +61,7 @@ export async function revokePasskeyAction(id: string): Promise<RevokePasskeyStat
     return { error: INSTITUTIONAL_AUTH_ERROR_MESSAGES.PASSKEY_REVOKE_FAILED };
   }
 
-  revalidatePath("/account/passkeys");
+  revalidatePath("/account/security");
 
   return { success: true };
 }

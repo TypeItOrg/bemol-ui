@@ -8,9 +8,10 @@ export function groupSidebarNavigationSection(
     sectionLabel: string;
     sourceSectionLabel?: string;
     urls: readonly string[];
+    prepend?: boolean;
   },
 ): SidebarNavigationSection[] {
-  const { sectionLabel, sourceSectionLabel = sectionLabel, urls, ...group } = configuration;
+  const { sectionLabel, sourceSectionLabel = sectionLabel, urls, prepend = false, ...group } = configuration;
 
   const groupedUrls = new Set(urls);
 
@@ -32,9 +33,11 @@ export function groupSidebarNavigationSection(
     const items =
       section.label === sourceSectionLabel ? section.items.filter((item) => !("url" in item && groupedUrls.has(item.url))) : section.items;
 
+    const groupedItems = prepend ? [navigationGroup, ...items] : [...items, navigationGroup];
+
     return {
       ...section,
-      items: section.label === sectionLabel ? [...items, navigationGroup] : items,
+      items: section.label === sectionLabel ? groupedItems : items,
     };
   });
 

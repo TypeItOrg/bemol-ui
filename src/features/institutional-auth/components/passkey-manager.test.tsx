@@ -10,7 +10,7 @@ import { INSTITUTIONAL_AUTH_ERROR_MESSAGES } from "@features/institutional-auth/
 import type { Passkey } from "@features/institutional-auth/types/passkey.types";
 
 jest.mock("next/navigation", () => ({
-  usePathname: () => "/account/passkeys",
+  usePathname: () => "/account/security",
   useRouter: () => ({ push: jest.fn(), replace: jest.fn(), refresh: jest.fn() }),
   useSearchParams: () => new URLSearchParams(),
 }));

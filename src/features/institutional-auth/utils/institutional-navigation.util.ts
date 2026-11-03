@@ -13,6 +13,7 @@ import {
   Music2Icon,
   RouteIcon,
   ScrollTextIcon,
+  ShieldCheckIcon,
   UserLockIcon,
   UserRoundCheckIcon,
   UserRoundIcon,
@@ -139,7 +140,8 @@ export function getInstitutionalNavigationSections(
     {
       label: "Personal",
       items: [
-        { title: "Mi perfil", url: "/account", icon: UserRoundIcon },
+        { title: "Perfil", url: "/account/profile", icon: UserRoundIcon },
+        { title: "Seguridad", url: "/account/security", icon: ShieldCheckIcon },
         ...(canManageDependents(user) ? [{ title: "Personas a cargo", url: GUARDIAN_DEPENDENTS_PAGE_PATH, icon: UsersIcon }] : []),
       ],
     },

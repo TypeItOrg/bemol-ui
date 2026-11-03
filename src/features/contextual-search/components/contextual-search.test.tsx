@@ -30,7 +30,7 @@ const institutionalAccessSections = [
   },
   {
     label: "General",
-    items: [{ title: "Perfil", url: "/account", icon: UserRoundIcon }],
+    items: [{ title: "Perfil", url: "/account/profile", icon: UserRoundIcon }],
   },
 ] satisfies readonly ContextualSearchAccessSection[];
 

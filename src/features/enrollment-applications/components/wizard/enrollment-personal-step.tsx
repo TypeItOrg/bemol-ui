@@ -63,7 +63,7 @@ export function EnrollmentPersonalStep({
             ) : (
               <>
                 Actualizá tus datos desde{" "}
-                <ReturnToLink href="/account/edit" className="underline underline-offset-4">
+                <ReturnToLink href="/account/profile/edit" className="underline underline-offset-4">
                   Mi perfil
                 </ReturnToLink>
                 ; para cambiar el documento, contactá a la institución.

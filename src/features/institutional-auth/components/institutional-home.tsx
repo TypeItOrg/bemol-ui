@@ -55,7 +55,7 @@ async function InstitutionalHomeContent({
   const activityLinks = getInstitutionalActivityHomeLinks(user);
 
   const managementLinks = [
-    ...links.filter((link) => link.href !== "/account"),
+    ...links.filter((link) => link.href !== "/account/profile"),
     ...enrollmentLinks.filter((link) => link.href === GUARDIAN_LINKS_PAGE_PATH),
   ];
 
@@ -90,7 +90,7 @@ async function InstitutionalHomeContent({
         !["/course-enrollments", "/enrollment-applications", GUARDIAN_DEPENDENTS_PAGE_PATH, GUARDIAN_LINKS_PAGE_PATH].includes(link.href) &&
         !link.href.startsWith("/my-teaching"),
     ),
-    ...links.filter((link) => link.href === "/account"),
+    ...links.filter((link) => link.href === "/account/profile"),
     ...enrollmentLinks.filter((link) => link.href === GUARDIAN_DEPENDENTS_PAGE_PATH),
   ];
 

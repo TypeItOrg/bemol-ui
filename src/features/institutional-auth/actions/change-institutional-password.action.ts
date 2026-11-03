@@ -49,7 +49,7 @@ export async function changeInstitutionalPasswordAction(
 
   await setInstitutionalPasswordChangedCookie();
 
-  revalidatePath("/account");
+  revalidatePath("/account/security");
   await logoutInstitutional();
 
   return { success: true };

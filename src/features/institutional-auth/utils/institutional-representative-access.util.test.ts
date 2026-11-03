@@ -62,7 +62,8 @@ describe("Representative access without academic escalation", () => {
     expect(getInstitutionalFormationHomeLinks(user)).toEqual([]);
 
     const navigation = getInstitutionalNavigationSections(user).flatMap(({ items }) => items.map(({ url }) => url));
-    expect(navigation).toContain("/account");
+    expect(navigation).toContain("/account/profile");
+    expect(navigation).toContain("/account/security");
     expect(navigation.includes("/my-dependents")).toBe(canRequest);
 
     for (const url of ownLinks) {

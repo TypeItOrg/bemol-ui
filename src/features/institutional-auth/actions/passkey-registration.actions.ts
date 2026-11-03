@@ -52,7 +52,7 @@ export async function verifyPasskeyRegistrationAction(ceremonyId: string, creden
     return { error: INSTITUTIONAL_AUTH_ERROR_MESSAGES.PASSKEY_REGISTRATION_FAILED };
   }
 
-  revalidatePath("/account/passkeys");
+  revalidatePath("/account/security");
 
   return {};
 }

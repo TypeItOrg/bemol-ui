@@ -40,7 +40,7 @@ describe("updateInstitutionalProfileAction", () => {
     expect(JSON.parse(institutionalApiFetchMock.mock.calls[0][1]?.body as string)).not.toHaveProperty("password");
     expect(requireInstitutionalUserMock).toHaveBeenCalled();
     expect(revalidatePath).toHaveBeenCalledWith("/");
-    expect(revalidatePath).toHaveBeenCalledWith("/account");
+    expect(revalidatePath).toHaveBeenCalledWith("/account/profile");
   });
 
   it("rejects invalid input before calling the API", async () => {

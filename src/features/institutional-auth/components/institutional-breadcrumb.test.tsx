@@ -51,14 +51,14 @@ describe("InstitutionalBreadcrumb", () => {
     expect(screen.getByText("Editar")).toHaveAttribute("aria-current", "page");
   });
 
-  it("labels account pages below Mi perfil", () => {
-    jest.mocked(usePathname).mockReturnValue("/account/password");
+  it("labels account pages below Mi cuenta", () => {
+    jest.mocked(usePathname).mockReturnValue("/account/security");
 
     render(<InstitutionalBreadcrumb />);
 
     expect(screen.getByRole("link", { name: "Inicio" })).toHaveAttribute("href", "/");
-    expect(screen.getByRole("link", { name: "Mi perfil" })).toHaveAttribute("href", "/account");
-    expect(screen.getByText("Contraseña")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Mi cuenta" })).toHaveAttribute("href", "/account");
+    expect(screen.getByText("Seguridad")).toBeInTheDocument();
   });
 
   it("omits non-navigable academic level segments", () => {

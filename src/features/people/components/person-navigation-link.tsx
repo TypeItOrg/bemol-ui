@@ -12,7 +12,7 @@ export const PersonNavigationLink = forwardRef<HTMLAnchorElement, PersonNavigati
 ): ReactElement {
   const hrefString = typeof href === "string" ? href : (href.pathname ?? "");
 
-  if (hrefString === "/account") {
+  if (hrefString === "/account/profile") {
     return (
       <Link ref={ref} href={href} {...props}>
         {children}
@@ -39,7 +39,7 @@ export function getPersonHref(
   detailView = false,
 ): string {
   if (PeopleScope.isInstitutional(scope) && personId === selfPersonId) {
-    return "/account";
+    return "/account/profile";
   }
 
   const personPath = PeopleScope.isInstitutional(scope) ? `/people/${personId}` : `/institutions/${institutionId}/people/${personId}`;

@@ -136,7 +136,7 @@ describe("getInstitutionalNavigationSections", () => {
     expect(sections.find((section) => section.label === "Formación")).toBeUndefined();
   });
 
-  it("lists the dependents page under Personal, after Mi perfil, for users who can manage dependents", () => {
+  it("lists the dependents page under Personal, after the account sections, for users who can manage dependents", () => {
     const sections = getInstitutionalNavigationSections({
       ...USER,
       capabilities: {
@@ -151,7 +151,8 @@ describe("getInstitutionalNavigationSections", () => {
     });
 
     expect(sections.find((section) => section.label === "Personal")?.items).toEqual([
-      expect.objectContaining({ title: "Mi perfil", url: "/account" }),
+      expect.objectContaining({ title: "Perfil", url: "/account/profile" }),
+      expect.objectContaining({ title: "Seguridad", url: "/account/security" }),
       expect.objectContaining({ title: "Personas a cargo", url: "/my-dependents" }),
     ]);
   });
@@ -185,13 +186,16 @@ describe("getInstitutionalNavigationSections", () => {
     expect(sections.map((section) => section.label)).toEqual([undefined, "Personal"]);
   });
 
-  it("links the account area once for every authenticated user", () => {
+  it("links profile and security for every authenticated user", () => {
     const sections = getInstitutionalNavigationSections(USER);
     const personalSection = sections.find((section) => section.label === "Personal");
 
     expect(personalSection).toEqual({
       label: "Personal",
-      items: [expect.objectContaining({ title: "Mi perfil", url: "/account" })],
+      items: [
+        expect.objectContaining({ title: "Perfil", url: "/account/profile" }),
+        expect.objectContaining({ title: "Seguridad", url: "/account/security" }),
+      ],
     });
   });
   it("shows teaching without granting administration and preserves student access for teachers", () => {

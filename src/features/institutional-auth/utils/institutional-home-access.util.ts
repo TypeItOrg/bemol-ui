@@ -37,9 +37,9 @@ export type InstitutionalHomeLink = {
 };
 
 const PERSONAL_LINK: InstitutionalHomeLink = {
-  href: "/account",
-  title: "Mi perfil",
-  description: "Administrá tus datos personales, contraseña y sesiones.",
+  href: "/account/profile",
+  title: "Mi cuenta",
+  description: "Administrá tu perfil y la seguridad de tu cuenta.",
   icon: UserRoundIcon,
 };
 

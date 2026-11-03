@@ -22,7 +22,7 @@ export function InstitutionalProfileSummary({ person }: InstitutionalProfileSumm
           <SectionHeader
             action={
               <Button asChild className="w-full @xl/section-header:w-auto" size="lg">
-                <ReturnToLink href="/account/edit">Editar datos</ReturnToLink>
+                <ReturnToLink href="/account/profile/edit">Editar datos</ReturnToLink>
               </Button>
             }
             description="Información personal registrada en tu institución."
@@ -35,7 +35,6 @@ export function InstitutionalProfileSummary({ person }: InstitutionalProfileSumm
             <ProfileValue fallback="Sin nombre registrado" label="Nombre completo" value={`${person.firstName} ${person.lastName}`} />
             <ProfileValue fallback="Sin documento" label="Documento Nacional de Identidad" value={person.documentNumber} />
             <ProfileValue fallback="Sin fecha de nacimiento" label="Fecha de nacimiento" value={formatDate(person.birthDate)} />
-            <ProfileValue fallback="Sin correo electrónico" label="Correo electrónico" value={person.email} />
             <ProfileValue fallback="Sin teléfono" label="Teléfono" value={person.phoneNumber} />
             <ProfileValue fallback="Sin nacionalidad informada" label="Nacionalidad" value={person.nationalityCountry?.name} />
             <ProfileValue fallback="Sin ciudad natal informada" label="Ciudad natal" value={person.birthCity?.name} />

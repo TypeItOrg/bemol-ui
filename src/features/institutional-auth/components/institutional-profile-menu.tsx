@@ -4,7 +4,7 @@ import { useState, type ReactElement } from "react";
 
 import Link from "next/link";
 
-import { ChevronsUpDownIcon, LogOutIcon, MoonIcon, SunIcon, UserRoundIcon } from "lucide-react";
+import { ChevronsUpDownIcon, LogOutIcon, MoonIcon, ShieldCheckIcon, SunIcon, UserRoundIcon } from "lucide-react";
 import { useTheme } from "next-themes";
 
 import { Badge } from "@common/components/ui/badge";
@@ -76,9 +76,15 @@ export function InstitutionalProfileMenu({ user, onNavigate }: { user: Instituti
           <DropdownMenuLabel>Perfil activo</DropdownMenuLabel>
           <DropdownMenuGroup>
             <DropdownMenuItem asChild className="px-2.5 py-1.5">
-              <Link href="/account" onClick={() => onNavigate("/account")}>
+              <Link href="/account/profile" onClick={() => onNavigate("/account/profile")}>
                 <UserRoundIcon />
-                Mi perfil
+                Perfil
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild className="px-2.5 py-1.5">
+              <Link href="/account/security" onClick={() => onNavigate("/account/security")}>
+                <ShieldCheckIcon />
+                Seguridad
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem

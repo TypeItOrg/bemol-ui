@@ -1,18 +1,17 @@
 "use client";
 
-import type { ReactElement, ReactNode } from "react";
+import type { ReactElement } from "react";
 
 import { usePathname } from "next/navigation";
 
-import { InstitutionalAccountTabs } from "@features/institutional-auth/components/institutional-account-tabs";
+import { ShieldCheckIcon, UserRoundIcon } from "lucide-react";
 
-type InstitutionalAccountHeaderProps = {
-  actions?: ReactNode;
-};
+import { PlatformPageIcon } from "@features/platform-auth/components/platform-page-icon";
 
 const ACCOUNT_PAGE_TITLES: Readonly<Record<string, string>> = {
-  "/account": "Mi perfil",
-  "/account/edit": "Editar perfil",
+  "/account/profile": "Perfil",
+  "/account/profile/edit": "Editar perfil",
+  "/account/security": "Seguridad",
   "/account/email": "Correo electrónico",
   "/account/password": "Contraseña",
   "/account/passkeys": "Llaves de acceso",
@@ -22,14 +21,11 @@ const ACCOUNT_PAGE_TITLES: Readonly<Record<string, string>> = {
 export function InstitutionalAccountTitle(): ReactElement {
   const pathname = usePathname();
 
-  return <>{ACCOUNT_PAGE_TITLES[pathname] ?? "Mi perfil"}</>;
+  return <>{ACCOUNT_PAGE_TITLES[pathname] ?? "Perfil"}</>;
 }
 
-export function InstitutionalAccountHeader({ actions }: InstitutionalAccountHeaderProps): ReactElement {
-  return (
-    <div className="flex flex-wrap items-center justify-between gap-3">
-      <InstitutionalAccountTabs />
-      {actions ? <div className="shrink-0">{actions}</div> : null}
-    </div>
-  );
+export function InstitutionalAccountIcon(): ReactElement {
+  const pathname = usePathname();
+
+  return <PlatformPageIcon icon={pathname.startsWith("/account/security") ? ShieldCheckIcon : UserRoundIcon} />;
 }

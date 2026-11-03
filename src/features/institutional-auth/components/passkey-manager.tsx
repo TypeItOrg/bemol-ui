@@ -9,7 +9,6 @@ import { KeyRoundIcon, PlusIcon } from "lucide-react";
 import { SectionHeader } from "@common/components/section-header";
 import { Button } from "@common/components/ui/button";
 import { DataTableNavigationProvider } from "@common/components/ui/data-table-navigation";
-import { cn } from "@common/utils/cn.util";
 
 import { revokePasskeyAction } from "@features/institutional-auth/actions/passkey-management.actions";
 import { PasskeyReauthDialog } from "@features/institutional-auth/components/passkey-reauth-dialog";
@@ -22,7 +21,6 @@ import type { Passkey } from "@features/institutional-auth/types/passkey.types";
 import type { ReAuthenticateState } from "@features/institutional-auth/types/re-authenticate-state.types";
 import { DEFAULT_PASSKEY_SORT, type PasskeySort } from "@features/institutional-auth/utils/passkey-query.util";
 import { revokePlatformPasskey } from "@features/platform-auth/actions/platform-passkey.actions";
-import { PlatformCollectionActions } from "@features/platform-auth/components/platform-collection-actions";
 
 type PasskeyOperation = { kind: "register"; label: string } | { kind: "revoke"; passkey: Passkey };
 type PasskeyDialog = PasskeyOperation | { kind: "rename"; passkey: Passkey } | { kind: "reauth"; next: PasskeyOperation };
@@ -95,20 +93,16 @@ export function PasskeyManager({
   );
 
   return (
-    <div className={cn("flex flex-col gap-4", platform && "bg-muted/25 rounded-xl border p-4 sm:p-5")}>
-      {platform ? (
-        <header className="-mx-4 border-b px-4 pb-4 sm:-mx-5 sm:px-5 sm:pb-5">
-          <SectionHeader
-            icon={KeyRoundIcon}
-            title="Llaves de acceso"
-            description="Gestioná las llaves que usás para ingresar."
-            action={addButton}
-            actionClassName="w-full @xl/section-header:w-auto"
-          />
-        </header>
-      ) : (
-        <PlatformCollectionActions className="sm:justify-start">{addButton}</PlatformCollectionActions>
-      )}
+    <section id="account-passkeys" className="bg-muted/25 flex scroll-mt-20 flex-col gap-4 rounded-xl border p-4 sm:p-5">
+      <header className="-mx-4 border-b px-4 pb-4 sm:-mx-5 sm:px-5 sm:pb-5">
+        <SectionHeader
+          icon={KeyRoundIcon}
+          title="Llaves de acceso"
+          description="Gestioná las llaves que usás para ingresar."
+          action={addButton}
+          actionClassName="w-full @xl/section-header:w-auto"
+        />
+      </header>
 
       <DataTableNavigationProvider>
         <PasskeysTablePresentation
@@ -152,6 +146,6 @@ export function PasskeyManager({
           onVerified={() => resumeOperation(dialog.next)}
         />
       ) : null}
-    </div>
+    </section>
   );
 }

@@ -12,7 +12,7 @@ describe("institutional home access", () => {
   it("always includes the personal profile", () => {
     const links = getInstitutionalHomeLinks({ permissions: [] });
 
-    expect(links.map(({ href }) => href)).toEqual(["/account"]);
+    expect(links.map(({ href }) => href)).toEqual(["/account/profile"]);
   });
 
   it("includes only the management capabilities granted to the user", () => {
@@ -20,7 +20,7 @@ describe("institutional home access", () => {
       permissions: [INSTITUTIONAL_PERMISSION.INSTITUTION_READ, INSTITUTIONAL_PERMISSION.PERSON_READ_ANY, INSTITUTIONAL_PERMISSION.ROLE_READ],
     });
 
-    expect(links.map(({ href }) => href)).toEqual(["/account", "/institution", "/people", "/roles"]);
+    expect(links.map(({ href }) => href)).toEqual(["/account/profile", "/institution", "/people", "/roles"]);
   });
 
   it("keeps creation tasks separate from navigation links", () => {
@@ -161,6 +161,6 @@ describe("institutional home access", () => {
     const user = { permissions: [INSTITUTIONAL_PERMISSION.ACADEMIC_OFFER_READ] };
 
     expect(getInstitutionalAcademicOfferLink(user)?.href).toBe("/academic-offers");
-    expect(getInstitutionalHomeLinks(user).map(({ href }) => href)).toEqual(["/account"]);
+    expect(getInstitutionalHomeLinks(user).map(({ href }) => href)).toEqual(["/account/profile"]);
   });
 });

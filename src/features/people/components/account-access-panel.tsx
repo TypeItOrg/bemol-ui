@@ -115,7 +115,7 @@ export function AccountAccessPanel({
     </Button>
   );
 
-  if (isOwner) {
+  if (isOwner && !onClose) {
     return (
       <section className="bg-muted/25 rounded-xl border p-4 sm:p-5">
         <header className="-mx-4 border-b px-4 pb-4 sm:-mx-5 sm:px-5 sm:pb-5">
@@ -143,7 +143,9 @@ export function AccountAccessPanel({
     </ActionForm>
   );
 
-  const panelSection = (
+  const panelSection = isOwner ? (
+    fields
+  ) : (
     <section className="bg-muted/25 rounded-xl border p-4 sm:p-5">
       <header className="-mx-4 border-b px-4 pb-4 sm:-mx-5 sm:px-5 sm:pb-5">
         <SectionHeader descriptionBreakpoint="sm" icon={ShieldCheckIcon} title="Gestión de acceso" />
@@ -206,12 +208,12 @@ export function AccountAccessPanel({
           <Button disabled={pending} size="lg" type="button" variant="outline" onClick={onClose}>
             Cancelar
           </Button>
-          {query.isPending ? (
+          {!isOwner && query.isPending ? (
             <Button type="submit" size="lg" disabled>
               {ACCOUNT_ACCESS_OPERATION_LABELS.invite}
             </Button>
           ) : null}
-          {!query.isPending && options.length > 0 ? submitButton : null}
+          {isOwner || (!query.isPending && options.length > 0) ? submitButton : null}
         </AlertDialogFooter>
         {suspendDialog}
       </ActionForm>

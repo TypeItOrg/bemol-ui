@@ -1,36 +1,13 @@
-import { Suspense, type ReactElement } from "react";
+import { redirect } from "next/navigation";
 
-import type { Metadata } from "next";
-
-import { DataTableNavigationProvider } from "@common/components/ui/data-table-navigation";
 import type { PaginationSearchParams } from "@common/types/pagination-search-params.types";
 
-import { InstitutionalAccountHeader } from "@features/institutional-auth/components/institutional-account-header";
-import { InstitutionalSessionsTableContainer } from "@features/institutional-auth/components/institutional-sessions-table-container";
-import { InstitutionalSessionsTableSkeleton } from "@features/institutional-auth/components/institutional-sessions-table-skeleton";
-import { fetchInstitutionalSessions } from "@features/institutional-auth/services/fetch-institutional-sessions.service";
-import { getInstitutionalMetadata } from "@features/institutional-auth/utils/institutional-metadata.util";
 import { parseSessionsPaginationParams } from "@features/institutional-auth/utils/session-pagination.util";
 
-export async function generateMetadata(): Promise<Metadata> {
-  return getInstitutionalMetadata("Sesiones");
-}
+export default async function SessionsPage({ searchParams }: { searchParams: Promise<PaginationSearchParams> }): Promise<never> {
+  const { page, size } = parseSessionsPaginationParams(await searchParams);
 
-export default async function SessionsPage({ searchParams }: { searchParams: Promise<PaginationSearchParams> }): Promise<ReactElement> {
-  const resolvedSearchParams = await searchParams;
+  const query = new URLSearchParams({ page: String(page), size: String(size) });
 
-  const { page, size } = parseSessionsPaginationParams(resolvedSearchParams);
-
-  const sessionsPromise = fetchInstitutionalSessions({ page, size });
-
-  return (
-    <>
-      <InstitutionalAccountHeader />
-      <DataTableNavigationProvider>
-        <Suspense fallback={<InstitutionalSessionsTableSkeleton />}>
-          <InstitutionalSessionsTableContainer dataPromise={sessionsPromise} page={page} size={size} />
-        </Suspense>
-      </DataTableNavigationProvider>
-    </>
-  );
+  redirect(`/account/security?${query}#account-sessions`);
 }

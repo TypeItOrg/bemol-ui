@@ -20,11 +20,12 @@ jest.mock("@features/people/utils/account-access-query.util", () => ({
 
 describe("AccountAccessPanel form conventions", () => {
   beforeEach(() => {
+    mockRefresh.mockReset();
     mockFetchAccess.mockReset().mockResolvedValue({ status: "NO_ACCOUNT", invitation: null });
     jest.mocked(manageAccountAccess).mockReset();
   });
 
-  it("keeps owner email fixed without fetching access and blocks duplicate submits while pending", async () => {
+  it.each([false, true])("keeps owner email fixed without fetching access and blocks duplicate submits with dialog=%s", async (dialog) => {
     const user = userEvent.setup();
     let finish!: (result: ManageAccountAccessState) => void;
     jest.mocked(manageAccountAccess).mockReturnValueOnce(
@@ -32,7 +33,9 @@ describe("AccountAccessPanel form conventions", () => {
         finish = resolve;
       }),
     );
-    const { queryClient } = renderWithQueryClient(<AccountAccessPanel institutionId="institution-1" personId="person-1" />);
+    const { queryClient } = renderWithQueryClient(
+      <AccountAccessPanel institutionId="institution-1" personId="person-1" onClose={dialog ? jest.fn() : undefined} />,
+    );
 
     await act(async () => {
       queryClient.setQueryData(["account-access-test"], { status: "NO_ACCOUNT", invitation: null });

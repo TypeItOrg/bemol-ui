@@ -37,7 +37,7 @@ export async function updateInstitutionalProfileAction(formData: FormData) {
   }
 
   revalidatePath("/");
-  revalidatePath("/account");
+  revalidatePath("/account/profile");
 
   return { success: true } as const;
 }

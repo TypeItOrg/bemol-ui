@@ -28,7 +28,7 @@ export function InstitutionalProfileForm(props: InstitutionalProfileFormProps): 
   return <InstitutionalProfileFormView key={`${props.person.institutionId}:${props.person.personId}`} {...props} />;
 }
 
-function InstitutionalProfileFormView({ person, returnTo = "/account" }: InstitutionalProfileFormProps): ReactElement {
+function InstitutionalProfileFormView({ person, returnTo = "/account/profile" }: InstitutionalProfileFormProps): ReactElement {
   const router = useRouter();
 
   const [state, formAction, isPending] = useActionState(
@@ -68,7 +68,7 @@ function InstitutionalProfileFormView({ person, returnTo = "/account" }: Institu
           <SectionHeader
             icon={UserRoundIcon}
             title="Datos personales"
-            description="Para corregir nombre, documento o fecha de nacimiento, contactá a la institución. El correo se modifica desde la pestaña Correo electrónico."
+            description="Para corregir nombre, documento o fecha de nacimiento, contactá a la institución. El correo se modifica desde Perfil."
           />
         </header>
         <div className="mt-4 sm:mt-5">
