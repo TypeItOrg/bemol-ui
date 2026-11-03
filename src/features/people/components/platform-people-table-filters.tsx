@@ -87,7 +87,7 @@ export function PlatformPeopleTableFilters({
       }
       advancedResetKeys={["institutionId"]}
       search={search}
-      searchPlaceholder="Buscar por nombre, apellido, Documento Nacional de Identidad o correo electrónico..."
+      searchPlaceholder="Buscar por nombre, apellido, documento o correo electrónico..."
       selectFilters={[roleFilter, getPersonStatusFilter(status)]}
       size={size}
       triggerPosition="external"
