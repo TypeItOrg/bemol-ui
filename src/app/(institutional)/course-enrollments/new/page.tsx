@@ -41,7 +41,7 @@ export default async function NewCourseEnrollmentPage({
       breadcrumb={<InstitutionalBreadcrumb segmentLabels={{ new: "Alta manual" }} />}
       actions={<PlatformPageIcon icon={ClipboardPlusIcon} />}
     >
-      <CourseManualEnrollmentForm returnTo={returnTo} />
+      <CourseManualEnrollmentForm institutionId={user.institutionId} userId={user.userId} personId={user.personId ?? null} returnTo={returnTo} />
     </PlatformPageShell>
   );
 }

@@ -11,15 +11,19 @@ import { Field, FieldLabel } from "@common/components/ui/field";
 import type { Course } from "@features/academic/types/course.types";
 import { formatStudyPlanLabel } from "@features/academic/utils/study-plan-label.util";
 import { fetchCatalog } from "@features/course-enrollments/services/course-enrollment-catalog-client.service";
+import type { ManualEnrollmentCacheScope } from "@features/course-enrollments/types/manual-enrollment-cache-scope.types";
 import type { StudentSummary } from "@features/course-enrollments/types/student-summary.types";
 
 export function CourseManualEnrollmentStudentFields({
+  institutionId,
+  userId,
+  personId,
   studentId,
   setStudentId,
   isPending,
   courseId,
   handleCourseChange,
-}: {
+}: ManualEnrollmentCacheScope & {
   studentId: string | undefined;
   setStudentId: Dispatch<SetStateAction<string | undefined>>;
   isPending: boolean;
@@ -50,7 +54,7 @@ export function CourseManualEnrollmentStudentFields({
               setStudentId(id);
             }}
             disabled={isPending}
-            queryKey={["manual-enrollment-students"]}
+            queryKey={["manual-enrollment-students", institutionId, userId, personId]}
             fetchPage={(input) => fetchCatalog<StudentSummary>("students", input)}
             getItemValue={(student) => student.studentId}
             getItemLabel={(student) => `${student.lastName}, ${student.firstName} · ${student.documentNumber}`}
@@ -68,7 +72,7 @@ export function CourseManualEnrollmentStudentFields({
             value={courseId}
             onValueChange={(value) => handleCourseChange(value ?? "")}
             disabled={isPending}
-            queryKey={["manual-enrollment-courses"]}
+            queryKey={["manual-enrollment-courses", institutionId, userId, personId]}
             fetchPage={(input) => fetchCatalog<Course>("course-enrollment-options", input)}
             getItemValue={(course) => course.id}
             getItemLabel={(course) =>

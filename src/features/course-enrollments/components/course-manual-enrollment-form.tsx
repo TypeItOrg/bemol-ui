@@ -17,13 +17,14 @@ import { CourseEnrollmentAssignmentFields } from "@features/course-enrollments/c
 import { CourseManualEnrollmentStudentFields } from "@features/course-enrollments/components/course-manual-enrollment-student-fields";
 import { COURSE_ENROLLMENT_MESSAGES } from "@features/course-enrollments/constants/course-enrollment.constants";
 import { useCourseEnrollmentOptions } from "@features/course-enrollments/hooks/use-course-enrollment-options";
+import type { ManualEnrollmentCacheScope } from "@features/course-enrollments/types/manual-enrollment-cache-scope.types";
 import { validateEnrollmentAssignment } from "@features/course-enrollments/utils/course-enrollment-assignment-validation.util";
 
-type CourseManualEnrollmentFormProps = {
+type CourseManualEnrollmentFormProps = ManualEnrollmentCacheScope & {
   returnTo: string;
 };
 
-export function CourseManualEnrollmentForm({ returnTo }: CourseManualEnrollmentFormProps): ReactElement {
+export function CourseManualEnrollmentForm({ institutionId, userId, personId, returnTo }: CourseManualEnrollmentFormProps): ReactElement {
   const [studentId, setStudentId] = useState<string>();
 
   const [courseId, setCourseId] = useState("");
@@ -58,6 +59,9 @@ export function CourseManualEnrollmentForm({ returnTo }: CourseManualEnrollmentF
       ) : null}
 
       <CourseManualEnrollmentStudentFields
+        institutionId={institutionId}
+        userId={userId}
+        personId={personId}
         studentId={studentId}
         setStudentId={setStudentId}
         isPending={isPending}
