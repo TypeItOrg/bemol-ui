@@ -40,3 +40,23 @@ it.each(["/admin//evil.test", "/\\evil.test", "//evil.test"])("rejects unsafe de
 it("preserves a query on the legacy dashboard destination", () => {
   expect(getSafeNextPath("/admin?tab=activity")).toBe("/?tab=activity");
 });
+
+it.each([
+  "/\\attacker.invalid",
+  "/\\\\attacker.invalid",
+  "//attacker.invalid",
+  "/..//attacker.invalid",
+  "/safe/..//attacker.invalid",
+  "/safe/../\\attacker.invalid",
+  "https://trusted.invalid//attacker.invalid",
+  "https://trusted.invalid/safe/..//attacker.invalid",
+  "/\n/attacker.invalid",
+  "/\t/attacker.invalid",
+])("rejects external destinations after URL normalization: %s", (next) => {
+  expect(getSafeNextPath(next)).toBe("/");
+});
+
+it("preserves idempotent internal normalization with platform public paths", () => {
+  expect(getSafeNextPath("/admin/settings/../orders?page=2#section")).toBe("/orders?page=2#section");
+  expect(getSafeNextPath(getSafeNextPath("/admin/settings/../orders?page=2#section"))).toBe("/orders?page=2#section");
+});

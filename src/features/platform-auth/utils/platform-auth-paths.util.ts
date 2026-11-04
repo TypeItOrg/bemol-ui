@@ -3,7 +3,7 @@ import { getSafeReturnTo } from "@common/utils/return-to.util";
 import { toPlatformPublicPath } from "@features/platform-auth/utils/platform-route-paths.util";
 
 export function getSafeNextPath(next: string | null | undefined): string {
-  if (!next) {
+  if (typeof next !== "string" || !next) {
     return "/";
   }
 
@@ -17,7 +17,13 @@ export function getSafeNextPath(next: string | null | undefined): string {
     }
   }
 
-  return getSafeReturnTo(toPlatformPublicPath(getSafeReturnTo(next, "/")), "/");
+  const safePath = getSafeReturnTo(next, "/");
+
+  const parsedUrl = new URL(safePath, "https://next.invalid");
+
+  const normalizedPath = parsedUrl.pathname + parsedUrl.search + parsedUrl.hash;
+
+  return getSafeReturnTo(toPlatformPublicPath(getSafeReturnTo(normalizedPath, "/")), "/");
 }
 
 export function getRedirectPath(to: string, next?: string | null): string {
