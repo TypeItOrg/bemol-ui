@@ -20,6 +20,7 @@ export function InstitutionalLoginForm(props: InstitutionalLoginFormProps): Reac
     documentNumber,
     rememberMe,
     status,
+    rateLimited,
     notices,
     fieldErrors,
     showNotice,
@@ -75,6 +76,7 @@ export function InstitutionalLoginForm(props: InstitutionalLoginFormProps): Reac
         <InstitutionalPasswordLoginFields
           fieldErrors={fieldErrors}
           status={status}
+          rateLimited={rateLimited}
           rememberMe={rememberMe}
           onRememberMeChange={setRememberMe}
           passkey={passkey}

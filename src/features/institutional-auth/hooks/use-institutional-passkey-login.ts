@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from "react";
 
 import { useRouter } from "next/navigation";
 
+import { RATE_LIMIT_ERROR_MESSAGE } from "@common/constants/rate-limit.constants";
+
 import { beginInstitutionalPasskeyLogin } from "@features/institutional-auth/actions/begin-passkey-login.action";
 import { finishPasskeyLogin } from "@features/institutional-auth/actions/finish-passkey-login.action";
 import { INSTITUTIONAL_AUTH_ERROR_MESSAGES } from "@features/institutional-auth/constants/error-messages.constants";
@@ -19,9 +21,17 @@ type InstitutionalPasskeyLoginProps = {
   rememberMe: boolean;
   onPendingChange: (pending: boolean) => void;
   onError: (message: string | null) => void;
+  onRateLimit: (error: unknown) => boolean;
 };
 
-export function useInstitutionalPasskeyLogin({ input, onFieldErrors, rememberMe, onPendingChange, onError }: InstitutionalPasskeyLoginProps) {
+export function useInstitutionalPasskeyLogin({
+  input,
+  onFieldErrors,
+  rememberMe,
+  onPendingChange,
+  onError,
+  onRateLimit,
+}: InstitutionalPasskeyLoginProps) {
   const router = useRouter();
 
   const [ceremony, setCeremony] = useState<PasskeyCeremonyState>({ phase: "idle" });
@@ -144,7 +154,7 @@ export function useInstitutionalPasskeyLogin({ input, onFieldErrors, rememberMe,
         return;
       }
 
-      onError(INSTITUTIONAL_AUTH_ERROR_MESSAGES.PASSKEY_FAILED);
+      onError(onRateLimit(error) ? RATE_LIMIT_ERROR_MESSAGE : INSTITUTIONAL_AUTH_ERROR_MESSAGES.PASSKEY_FAILED);
     } finally {
       if (isCurrentCeremony(controller)) {
         ceremonyRef.current = null;

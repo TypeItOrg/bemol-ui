@@ -5,6 +5,9 @@ import { startTransition, useActionState, useEffect, useRef, useState, type Synt
 import { isRedirectError } from "next/dist/client/components/redirect-error";
 import { useRouter } from "next/navigation";
 
+import { RATE_LIMIT_ERROR_MESSAGE } from "@common/constants/rate-limit.constants";
+import { useAuthRateLimit } from "@common/hooks/use-auth-rate-limit";
+
 import { consumeInstitutionalLoginFlashes } from "@features/institutional-auth/actions/consume-institutional-login-flashes.action";
 import { institutionalCredentialsLogin } from "@features/institutional-auth/actions/institutional-credentials-login.action";
 import type { InstitutionalInstitution } from "@features/institutional-auth/components/institution-picker";
@@ -16,6 +19,10 @@ export function useInstitutionalLogin({ emailVerified = false, passwordChanged =
   const router = useRouter();
 
   const fixedInstitution = useInstitutionalBrand();
+
+  const rateLimit = useAuthRateLimit();
+
+  const rateLimited = rateLimit.rateLimited;
 
   const [identity, setIdentity] = useState<{
     institution?: InstitutionalInstitution;
@@ -61,6 +68,12 @@ export function useInstitutionalLogin({ emailVerified = false, passwordChanged =
     } catch (error) {
       if (!isRedirectError(error)) {
         setPending(false);
+      }
+
+      if (rateLimit.handleError(error)) {
+        setError(RATE_LIMIT_ERROR_MESSAGE);
+
+        return { revision: submitted.revision };
       }
 
       throw error;
@@ -117,7 +130,7 @@ export function useInstitutionalLogin({ emailVerified = false, passwordChanged =
   function submitPassword(event: SyntheticEvent<HTMLFormElement>): void {
     event.preventDefault();
 
-    if (pendingRef.current || passwordPending || passkey.pending) {
+    if (pendingRef.current || passwordPending || passkey.pending || rateLimited) {
       return;
     }
 
@@ -132,7 +145,9 @@ export function useInstitutionalLogin({ emailVerified = false, passwordChanged =
 
   const fieldErrors = method === "PASSKEY" ? passkeyFieldErrors : currentPasswordErrors;
 
-  const showNotice = !status.pending && !status.error && !Object.keys(fieldErrors ?? {}).length;
+  const displayedError = rateLimit.getErrorMessage(status.error);
+
+  const showNotice = !status.pending && !displayedError && !rateLimited && !Object.keys(fieldErrors ?? {}).length;
 
   const activeInstitution = fixedInstitution ?? institution;
 
@@ -146,10 +161,11 @@ export function useInstitutionalLogin({ emailVerified = false, passwordChanged =
     onPendingChange: setPending,
     onError: setError,
     onFieldErrors: setPasskeyFieldErrors,
+    onRateLimit: rateLimit.handleError,
   });
 
   function loginWithPasskey(): void {
-    if (pendingRef.current || passwordPending) {
+    if (pendingRef.current || passwordPending || rateLimited) {
       return;
     }
 
@@ -161,7 +177,8 @@ export function useInstitutionalLogin({ emailVerified = false, passwordChanged =
     institution,
     documentNumber,
     rememberMe,
-    status,
+    status: { ...status, error: displayedError },
+    rateLimited,
     notices,
     fieldErrors,
     showNotice,

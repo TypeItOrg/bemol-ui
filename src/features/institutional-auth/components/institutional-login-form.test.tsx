@@ -1,5 +1,7 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+
+import { RATE_LIMIT_ERROR_MESSAGE, RATE_LIMIT_RETRY_MESSAGE } from "@common/constants/rate-limit.constants";
 
 import { beginInstitutionalPasskeyLogin } from "@features/institutional-auth/actions/begin-passkey-login.action";
 import { institutionalCredentialsLogin } from "@features/institutional-auth/actions/institutional-credentials-login.action";
@@ -39,6 +41,34 @@ const institution = {
 };
 
 describe("InstitutionalLoginForm", () => {
+  afterEach(() => jest.useRealTimers());
+
+  it.each(["password", "passkey"])("keeps %s edge rejections inside the login form", async (method) => {
+    jest.useFakeTimers();
+
+    if (method === "password") {
+      credentialsMock.mockRejectedValue(new Error(RATE_LIMIT_ERROR_MESSAGE));
+    } else {
+      beginMock.mockRejectedValue(new Error(RATE_LIMIT_ERROR_MESSAGE));
+    }
+
+    render(<InstitutionalLoginForm />);
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: method === "password" ? "Iniciar sesión" : "Usar una llave de acceso" }));
+    });
+    expect(screen.getByText(RATE_LIMIT_RETRY_MESSAGE)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Iniciar sesión" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Usar una llave de acceso" })).toBeDisabled();
+    fireEvent.change(screen.getByLabelText(/Documento/), { target: { value: "12345678" } });
+    expect(screen.getByText(RATE_LIMIT_RETRY_MESSAGE)).toBeInTheDocument();
+    act(() => {
+      jest.advanceTimersByTime(30000);
+    });
+    expect(screen.getByRole("button", { name: "Iniciar sesión" })).toBeEnabled();
+    expect(screen.getByRole("button", { name: "Usar una llave de acceso" })).toBeEnabled();
+    expect(screen.queryByText(RATE_LIMIT_RETRY_MESSAGE)).not.toBeInTheDocument();
+  });
+
   beforeEach(() => {
     credentialsMock.mockReset().mockResolvedValue({});
     beginMock.mockReset().mockResolvedValue({ error: "No se pudo usar la llave." });

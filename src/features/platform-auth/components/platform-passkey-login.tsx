@@ -8,6 +8,8 @@ import { Alert, AlertDescription, AlertTitle } from "@common/components/ui/alert
 import { Button } from "@common/components/ui/button";
 import { Field, FieldGroup, FieldLabel } from "@common/components/ui/field";
 import { Input } from "@common/components/ui/input";
+import { RATE_LIMIT_ERROR_MESSAGE } from "@common/constants/rate-limit.constants";
+import { useAuthRateLimit } from "@common/hooks/use-auth-rate-limit";
 
 import { InstitutionalBrandIdentity } from "@features/institutional-auth/components/institutional-brand-identity";
 import { getPasskeyAssertion, isUserCancelled, toPublicKeyRequestOptions } from "@features/institutional-auth/utils/passkey-authentication.util";
@@ -18,9 +20,15 @@ import type { PlatformLoginChallenge } from "@features/platform-auth/types/platf
 export function PlatformPasskeyLogin({ challenge, next }: { challenge: PlatformLoginChallenge; next?: string }): ReactElement {
   const [setup, setSetup] = useState(challenge.setupRequired);
 
+  const rateLimit = useAuthRateLimit();
+
   const controller = useRef<AbortController | null>(null);
 
   const [error, action, pending] = useActionState<string, FormData>(async (_previous, data) => {
+    if (rateLimit.rateLimited) {
+      return _previous;
+    }
+
     controller.current = new AbortController();
 
     try {
@@ -42,6 +50,10 @@ export function PlatformPasskeyLogin({ challenge, next }: { challenge: PlatformL
 
       return "";
     } catch (cause) {
+      if (rateLimit.handleError(cause)) {
+        return RATE_LIMIT_ERROR_MESSAGE;
+      }
+
       return isUserCancelled(cause)
         ? "No se completó la verificación. Podés intentarlo nuevamente."
         : "No se pudo completar el acceso. Verificá el código o volvé a iniciar sesión si venció el intento.";
@@ -51,6 +63,8 @@ export function PlatformPasskeyLogin({ challenge, next }: { challenge: PlatformL
   useEffect(() => () => controller.current?.abort(), []);
 
   const submitLabel = setup ? "Registrar llave e ingresar" : "Usar llave de acceso";
+
+  const displayedError = rateLimit.getErrorMessage(error);
 
   return (
     <form action={action} className="flex flex-col justify-center p-6 md:p-8">
@@ -69,11 +83,11 @@ export function PlatformPasskeyLogin({ challenge, next }: { challenge: PlatformL
       </header>
 
       <div className="mt-6 space-y-6">
-        {error ? (
+        {displayedError ? (
           <Alert variant="destructive">
             <AlertCircleIcon className="size-4" />
             <AlertTitle>¡Ups! Algo salió mal</AlertTitle>
-            <AlertDescription>{error}</AlertDescription>
+            <AlertDescription>{displayedError}</AlertDescription>
           </Alert>
         ) : null}
 
@@ -105,7 +119,7 @@ export function PlatformPasskeyLogin({ challenge, next }: { challenge: PlatformL
         ) : null}
 
         <footer className="mt-6 flex w-full flex-col gap-2">
-          <Button aria-busy={pending} className="w-full" disabled={pending} size="lg" type="submit">
+          <Button aria-busy={pending} className="w-full" disabled={pending || rateLimit.rateLimited} size="lg" type="submit">
             {pending ? <Loader2Icon aria-hidden="true" className="size-4 animate-spin" /> : null}
             {pending ? "Verificando…" : submitLabel}
           </Button>

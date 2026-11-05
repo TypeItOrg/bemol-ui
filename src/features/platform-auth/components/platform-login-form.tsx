@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, type ReactElement } from "react";
+import { useActionState, useState, type ReactElement } from "react";
 
 import { AlertCircleIcon, CircleCheckIcon, Loader2Icon } from "lucide-react";
 
@@ -9,17 +9,50 @@ import { Button } from "@common/components/ui/button";
 import { Field, FieldError, FieldGroup, FieldLabel } from "@common/components/ui/field";
 import { Input } from "@common/components/ui/input";
 import { PasswordInput } from "@common/components/ui/password-input";
+import { RATE_LIMIT_ERROR_MESSAGE } from "@common/constants/rate-limit.constants";
+import { useAuthRateLimit } from "@common/hooks/use-auth-rate-limit";
+import { getValidationActionState } from "@common/utils/action-state.util";
 import { cn } from "@common/utils/cn.util";
 
 import { InstitutionalBrandIdentity } from "@features/institutional-auth/components/institutional-brand-identity";
 import { loginPlatform } from "@features/platform-auth/actions/platform-login.action";
 import { PlatformPasskeyLogin } from "@features/platform-auth/components/platform-passkey-login";
+import { platformLoginSchema } from "@features/platform-auth/schemas/platform-login.schema";
 import type { PlatformLoginActionState } from "@features/platform-auth/types/platform-login-action-state.types";
+import { PLATFORM_LOGIN_FIELD_NAMES } from "@features/platform-auth/types/platform-login-field-name.types";
 
 const INITIAL_STATE: PlatformLoginActionState = {};
 
 export function PlatformLoginForm({ next, accountUpdated = false }: { next?: string; accountUpdated?: boolean }): ReactElement {
-  const [state, formAction, isPending] = useActionState<PlatformLoginActionState, FormData>(loginPlatform, INITIAL_STATE);
+  const rateLimit = useAuthRateLimit();
+
+  const [email, setEmail] = useState("");
+
+  const [password, setPassword] = useState("");
+
+  const [state, formAction, isPending] = useActionState<PlatformLoginActionState, FormData>(async (previous, data) => {
+    if (rateLimit.rateLimited) {
+      return previous;
+    }
+
+    const parsed = platformLoginSchema.safeParse({ email: data.get("email"), password: data.get("password") });
+
+    if (!parsed.success) {
+      return getValidationActionState(parsed.error.issues, PLATFORM_LOGIN_FIELD_NAMES);
+    }
+
+    try {
+      return await loginPlatform(previous, data);
+    } catch (error) {
+      if (rateLimit.handleError(error)) {
+        return { error: RATE_LIMIT_ERROR_MESSAGE };
+      }
+
+      throw error;
+    }
+  }, INITIAL_STATE);
+
+  const displayedError = rateLimit.getErrorMessage(state.error);
 
   if (state.challenge) {
     return <PlatformPasskeyLogin challenge={state.challenge} next={next} />;
@@ -48,18 +81,26 @@ export function PlatformLoginForm({ next, accountUpdated = false }: { next?: str
             <AlertDescription>Tu cuenta se actualizó y se cerraron todas tus sesiones. Ingresá con tus credenciales actuales.</AlertDescription>
           </Alert>
         ) : null}
-        {state.error ? (
+        {displayedError ? (
           <Alert variant="destructive">
             <AlertCircleIcon className="size-4" />
             <AlertTitle>¡Ups! Algo salió mal</AlertTitle>
-            <AlertDescription>{state.error}</AlertDescription>
+            <AlertDescription>{displayedError}</AlertDescription>
           </Alert>
         ) : null}
 
         <FieldGroup>
           <Field>
             <FieldLabel htmlFor="email">Correo electrónico</FieldLabel>
-            <Input aria-invalid={!!state.fieldErrors?.email} autoComplete="email" id="email" name="email" placeholder="correo@ejemplo.com" />
+            <Input
+              aria-invalid={!!state.fieldErrors?.email}
+              autoComplete="email"
+              id="email"
+              name="email"
+              placeholder="correo@ejemplo.com"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+            />
             <FieldError errors={state.fieldErrors?.email ? [{ message: state.fieldErrors.email }] : undefined} />
           </Field>
         </FieldGroup>
@@ -67,13 +108,27 @@ export function PlatformLoginForm({ next, accountUpdated = false }: { next?: str
         <FieldGroup>
           <Field>
             <FieldLabel htmlFor="password">Contraseña</FieldLabel>
-            <PasswordInput aria-invalid={!!state.fieldErrors?.password} autoComplete="current-password" id="password" name="password" />
+            <PasswordInput
+              aria-invalid={!!state.fieldErrors?.password}
+              autoComplete="current-password"
+              id="password"
+              name="password"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+            />
             <FieldError errors={state.fieldErrors?.password ? [{ message: state.fieldErrors.password }] : undefined} />
           </Field>
         </FieldGroup>
 
         <footer className="mt-6 flex w-full flex-col gap-4">
-          <Button aria-busy={isPending} className="relative w-full" disabled={isPending} size="lg" type="submit" variant="default">
+          <Button
+            aria-busy={isPending}
+            className="relative w-full"
+            disabled={isPending || rateLimit.rateLimited}
+            size="lg"
+            type="submit"
+            variant="default"
+          >
             <span className={cn("inline-flex items-center gap-[inherit] transition-opacity", isPending && "opacity-0")}>Iniciar sesión</span>
             {isPending ? (
               <span className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-[inherit]">

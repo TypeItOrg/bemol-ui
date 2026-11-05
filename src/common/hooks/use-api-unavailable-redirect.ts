@@ -2,8 +2,12 @@
 
 import { useEffect } from "react";
 
-export function useApiUnavailableRedirect(): void {
+export function useApiUnavailableRedirect(enabled = true): void {
   useEffect(() => {
+    if (!enabled) {
+      return;
+    }
+
     const controller = new AbortController();
 
     const checkReadiness = async (): Promise<void> => {
@@ -31,5 +35,5 @@ export function useApiUnavailableRedirect(): void {
     void checkReadiness().catch(() => undefined);
 
     return () => controller.abort();
-  }, []);
+  }, [enabled]);
 }
