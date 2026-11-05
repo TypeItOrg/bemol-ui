@@ -22,7 +22,23 @@ describe("updateInstitutionalProfileAction", () => {
 
   beforeEach(() => {
     institutionalApiFetchMock.mockReset();
-    requireInstitutionalUserMock.mockReset();
+    requireInstitutionalUserMock.mockReset().mockResolvedValue({
+      userId: "user-1",
+      institutionId: "institution-1",
+      name: "Matías",
+      lastName: "Boero",
+      documentNumber: "30123456",
+      roles: [],
+      systemRoleCodes: [],
+      permissions: [],
+      capabilities: {
+        canViewOwnEnrollmentApplications: false,
+        canManageOwnEnrollmentApplications: false,
+        canViewOwnFormation: false,
+        canViewTeaching: false,
+        canUpdateTeachingAcademicStatus: false,
+      },
+    });
   });
 
   it("updates contact data without forwarding protected identity or password fields", async () => {

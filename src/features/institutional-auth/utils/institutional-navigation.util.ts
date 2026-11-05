@@ -32,6 +32,7 @@ import {
   canManageDependents,
   canReviewGuardianLinks,
   canStartEnrollmentApplication,
+  canViewAccountSecurity,
   canViewOwnEnrollmentApplications,
   canViewOwnFormation,
 } from "@features/institutional-auth/utils/institutional-applicant-role.util";
@@ -141,7 +142,7 @@ export function getInstitutionalNavigationSections(
       label: "Personal",
       items: [
         { title: "Perfil", url: "/account/profile", icon: UserRoundIcon },
-        { title: "Seguridad", url: "/account/security", icon: ShieldCheckIcon },
+        ...(canViewAccountSecurity(user) ? [{ title: "Seguridad", url: "/account/security", icon: ShieldCheckIcon }] : []),
         ...(canManageDependents(user) ? [{ title: "Personas a cargo", url: GUARDIAN_DEPENDENTS_PAGE_PATH, icon: UsersIcon }] : []),
       ],
     },

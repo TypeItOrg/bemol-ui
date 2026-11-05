@@ -10,6 +10,14 @@ export function canManageDependents(user: InstitutionalUser): boolean {
   return hasInstitutionalPermission(user, INSTITUTIONAL_PERMISSION.GUARDIAN_LINK_REQUEST);
 }
 
+export function canViewAccountSecurity(user: InstitutionalUser): boolean {
+  return !user.delegated || Boolean(user.userId);
+}
+
+export function canEditContactEmail(user: InstitutionalUser): boolean {
+  return Boolean(user.delegated) && !user.userId;
+}
+
 export function canRequestDependents(user: InstitutionalUser): boolean {
   return canManageDependents(user) && (user.canRequestGuardianLinks ?? !user.delegated);
 }

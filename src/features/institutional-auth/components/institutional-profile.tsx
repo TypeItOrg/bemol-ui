@@ -10,9 +10,10 @@ export { InstitutionalProfileForm };
 type InstitutionalProfileProps = {
   person: InstitutionalPerson;
   canManageEmail: boolean;
+  canEditContactEmail: boolean;
 };
 
-export function InstitutionalProfile({ person, canManageEmail }: InstitutionalProfileProps): ReactElement {
+export function InstitutionalProfile({ person, canManageEmail, canEditContactEmail }: InstitutionalProfileProps): ReactElement {
   return (
     <>
       <InstitutionalProfileSummary person={person} />
@@ -22,6 +23,7 @@ export function InstitutionalProfile({ person, canManageEmail }: InstitutionalPr
         personId={person.personId}
         email={person.email}
         canManageEmail={canManageEmail}
+        canEditContactEmail={canEditContactEmail}
       />
     </>
   );

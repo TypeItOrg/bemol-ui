@@ -1,6 +1,7 @@
 import { Suspense, type ReactElement } from "react";
 
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 
 import { InfoIcon, MonitorIcon } from "lucide-react";
 
@@ -16,6 +17,8 @@ import { PasskeyManager } from "@features/institutional-auth/components/passkey-
 import { fetchInstitutionalSessions } from "@features/institutional-auth/services/fetch-institutional-sessions.service";
 import { fetchPasskeys } from "@features/institutional-auth/services/fetch-passkeys.service";
 import { requireInstitutionalUser } from "@features/institutional-auth/services/get-institutional-user.service";
+import { getCredentialManagementMessage } from "@features/institutional-auth/utils/credential-management-message.util";
+import { canViewAccountSecurity } from "@features/institutional-auth/utils/institutional-applicant-role.util";
 import { getInstitutionalMetadata } from "@features/institutional-auth/utils/institutional-metadata.util";
 import { parsePasskeyFilterParams, type PasskeySearchParams } from "@features/institutional-auth/utils/passkey-query.util";
 import { parseSessionsPaginationParams } from "@features/institutional-auth/utils/session-pagination.util";
@@ -30,6 +33,10 @@ export default async function SecurityPage({
   searchParams: Promise<PasskeySearchParams & PaginationSearchParams>;
 }): Promise<ReactElement> {
   const user = await requireInstitutionalUser();
+
+  if (!canViewAccountSecurity(user)) {
+    redirect("/account/profile");
+  }
 
   const canManageCredentials = Boolean(user.userId) && !user.delegated;
 
@@ -50,7 +57,7 @@ export default async function SecurityPage({
       ) : (
         <Alert>
           <InfoIcon aria-hidden="true" />
-          <AlertDescription>Las credenciales personales solo se gestionan desde la cuenta de su titular.</AlertDescription>
+          <AlertDescription>{getCredentialManagementMessage(user)}</AlertDescription>
         </Alert>
       )}
       {passkeys ? (

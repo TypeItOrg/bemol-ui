@@ -7,7 +7,6 @@ import Link from "next/link";
 import { ChevronsUpDownIcon, LogOutIcon, MoonIcon, ShieldCheckIcon, SunIcon, UserRoundIcon } from "lucide-react";
 import { useTheme } from "next-themes";
 
-import { Badge } from "@common/components/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,7 +23,7 @@ import { GuardianWorkspaceMenuItems } from "@features/guardian-workspace/compone
 import { PersonInitialsAvatar } from "@features/guardian-workspace/components/person-initials-avatar";
 import { InstitutionalLogoutDialog } from "@features/institutional-auth/components/institutional-logout-dialog";
 import type { InstitutionalUser } from "@features/institutional-auth/types/institutional-user.types";
-import { canManageDependents } from "@features/institutional-auth/utils/institutional-applicant-role.util";
+import { canManageDependents, canViewAccountSecurity } from "@features/institutional-auth/utils/institutional-applicant-role.util";
 
 export function InstitutionalProfileMenu({ user, onNavigate }: { user: InstitutionalUser; onNavigate: (url: string) => void }): ReactElement {
   const { resolvedTheme, setTheme } = useTheme();
@@ -81,12 +80,14 @@ export function InstitutionalProfileMenu({ user, onNavigate }: { user: Instituti
                 Perfil
               </Link>
             </DropdownMenuItem>
-            <DropdownMenuItem asChild className="px-2.5 py-1.5">
-              <Link href="/account/security" onClick={() => onNavigate("/account/security")}>
-                <ShieldCheckIcon />
-                Seguridad
-              </Link>
-            </DropdownMenuItem>
+            {canViewAccountSecurity(user) ? (
+              <DropdownMenuItem asChild className="px-2.5 py-1.5">
+                <Link href="/account/security" onClick={() => onNavigate("/account/security")}>
+                  <ShieldCheckIcon />
+                  Seguridad
+                </Link>
+              </DropdownMenuItem>
+            ) : null}
             <DropdownMenuItem
               className="px-2.5 py-1.5"
               onSelect={(event) => {
@@ -126,11 +127,8 @@ function SelectedProfileIdentity(): ReactElement {
         <span className="block truncate text-sm font-semibold" title={name}>
           {name}
         </span>
-        <span className="flex min-w-0 items-center gap-1.5">
-          <span className="text-muted-foreground truncate text-xs" title={activeProfile?.documentNumber}>
-            {activeProfile?.documentNumber ?? "DNI no disponible"}
-          </span>
-          {activeProfile && !activeProfile.self ? <Badge variant="secondary">Activa</Badge> : null}
+        <span className="text-muted-foreground block truncate text-xs" title={activeProfile?.documentNumber}>
+          {activeProfile?.documentNumber ?? "DNI no disponible"}
         </span>
       </span>
     </span>

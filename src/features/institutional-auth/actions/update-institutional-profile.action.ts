@@ -7,9 +7,11 @@ import { getResponseErrorActionState, getValidationActionState } from "@common/u
 import { institutionalProfileSchema } from "@features/institutional-auth/schemas/institutional-profile.schema";
 import { requireInstitutionalUser } from "@features/institutional-auth/services/get-institutional-user.service";
 import { institutionalApiFetch } from "@features/institutional-auth/services/institutional-api-fetch.service";
+import { canEditContactEmail } from "@features/institutional-auth/utils/institutional-applicant-role.util";
 
 export async function updateInstitutionalProfileAction(formData: FormData) {
   const payload = {
+    email: formData.get("email") ?? undefined,
     phoneNumber: formData.get("phoneNumber") || "",
     birthCityId: formData.get("birthCityId") || undefined,
     nationalityCountryId: formData.get("nationalityCountryId") || undefined,
@@ -22,12 +24,14 @@ export async function updateInstitutionalProfileAction(formData: FormData) {
     return getValidationActionState(parsed.error.issues, PROFILE_FIELDS);
   }
 
-  await requireInstitutionalUser();
+  const user = await requireInstitutionalUser();
+
+  const { email, ...profile } = parsed.data;
 
   const response = institutionalApiFetch("/api/v1/person/me", {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(parsed.data),
+    body: JSON.stringify({ ...profile, ...(canEditContactEmail(user) ? { email } : {}) }),
   });
 
   const errorState = await getResponseErrorActionState(response, PROFILE_FIELDS, "No se pudieron actualizar tus datos.");

@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
 import { render, screen } from "@testing-library/react";
 
@@ -17,6 +17,9 @@ import SecurityPage from "@app/(institutional)/account/security/page";
 jest.mock("next/navigation", () => ({
   notFound: jest.fn(() => {
     throw new Error("NOT_FOUND");
+  }),
+  redirect: jest.fn(() => {
+    throw new Error("NEXT_REDIRECT");
   }),
 }));
 jest.mock("@common/components/ui/data-table-navigation", () => ({
@@ -88,13 +91,15 @@ beforeEach(() => {
 
 describe("Institutional profile permissions", () => {
   it("allows email management only for the account holder", async () => {
-    expect(await ProfilePage()).toMatchObject({ props: { person: PERSON, canManageEmail: true } });
+    expect(await ProfilePage()).toMatchObject({ props: { person: PERSON, canManageEmail: true, canEditContactEmail: false } });
   });
 
   it.each(RESTRICTED_IDENTITIES)("keeps the profile visible without email management for restricted identities %#", async (user) => {
     jest.mocked(requireInstitutionalUser).mockResolvedValue(user);
 
-    expect(await ProfilePage()).toMatchObject({ props: { person: PERSON, canManageEmail: false } });
+    expect(await ProfilePage()).toMatchObject({
+      props: { person: PERSON, canManageEmail: false, canEditContactEmail: Boolean(user.delegated) && !user.userId },
+    });
   });
 
   it("does not render a profile when its authorized person is unavailable", async () => {
@@ -116,8 +121,18 @@ describe("Institutional security permissions", () => {
     expect(fetchInstitutionalSessions).toHaveBeenCalledWith({ page: 2, size: 10 });
   });
 
-  it.each(RESTRICTED_IDENTITIES)("does not load credentials but preserves access to sessions for restricted identities %#", async (user) => {
+  it.each(RESTRICTED_IDENTITIES)("hides credentials and redirects represented identities without an account %#", async (user) => {
     jest.mocked(requireInstitutionalUser).mockResolvedValue(user);
+
+    if (user.delegated && !user.userId) {
+      await expect(SecurityPage({ searchParams: Promise.resolve({}) })).rejects.toThrow("NEXT_REDIRECT");
+
+      expect(redirect).toHaveBeenCalledWith("/account/profile");
+      expect(fetchPasskeys).not.toHaveBeenCalled();
+      expect(fetchInstitutionalSessions).not.toHaveBeenCalled();
+
+      return;
+    }
 
     render(await SecurityPage({ searchParams: Promise.resolve({}) }));
 
@@ -126,6 +141,12 @@ describe("Institutional security permissions", () => {
     expect(fetchPasskeys).not.toHaveBeenCalled();
     expect(screen.getByTestId("sessions-table")).toBeInTheDocument();
     expect(fetchInstitutionalSessions).toHaveBeenCalledWith({ page: 0, size: 20 });
-    expect(screen.getByText("Las credenciales personales solo se gestionan desde la cuenta de su titular.")).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        user.userId
+          ? "La contraseña y las llaves de acceso se gestionan desde la cuenta de su titular."
+          : "Sin cuenta propia. Podés editar el correo de contacto desde Perfil.",
+      ),
+    ).toBeInTheDocument();
   });
 });

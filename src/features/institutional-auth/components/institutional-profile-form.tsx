@@ -22,17 +22,26 @@ import type { InstitutionalPerson } from "@features/institutional-auth/types/ins
 type InstitutionalProfileFormProps = {
   person: InstitutionalPerson;
   returnTo?: string;
+  canEditContactEmail?: boolean;
 };
 
 export function InstitutionalProfileForm(props: InstitutionalProfileFormProps): ReactElement {
   return <InstitutionalProfileFormView key={`${props.person.institutionId}:${props.person.personId}`} {...props} />;
 }
 
-function InstitutionalProfileFormView({ person, returnTo = "/account/profile" }: InstitutionalProfileFormProps): ReactElement {
+function InstitutionalProfileFormView({
+  person,
+  returnTo = "/account/profile",
+  canEditContactEmail = false,
+}: InstitutionalProfileFormProps): ReactElement {
   const router = useRouter();
 
   const [state, formAction, isPending] = useActionState(
     async (_previous: Awaited<ReturnType<typeof updateInstitutionalProfileAction>>, formData: FormData) => {
+      if (!person.email && formData.get("email") === "") {
+        formData.delete("email");
+      }
+
       const result = await updateInstitutionalProfileAction(formData);
 
       if (result.success) {
@@ -46,7 +55,7 @@ function InstitutionalProfileFormView({ person, returnTo = "/account/profile" }:
 
   const fieldErrors = "fieldErrors" in state ? (state.fieldErrors ?? {}) : {};
 
-  const error = getFormError("error" in state ? state.error : undefined, "fieldErrors" in state ? state.fieldErrors : undefined);
+  const error = Object.keys(fieldErrors).length === 0 && "error" in state ? state.error : undefined;
 
   const [addressCityId, setAddressCityId] = useState(person.address?.city?.id ?? "");
 
@@ -65,11 +74,7 @@ function InstitutionalProfileFormView({ person, returnTo = "/account/profile" }:
       ) : null}
       <div className="bg-muted/25 rounded-xl border p-4 sm:p-5">
         <header className="-mx-4 border-b px-4 pb-4 sm:-mx-5 sm:px-5 sm:pb-5">
-          <SectionHeader
-            icon={UserRoundIcon}
-            title="Datos personales"
-            description="Para corregir nombre, documento o fecha de nacimiento, contactá a la institución. El correo se modifica desde Perfil."
-          />
+          <SectionHeader icon={UserRoundIcon} title="Datos personales" description="Algunos datos solo puede actualizarlos la institución." />
         </header>
         <div className="mt-4 sm:mt-5">
           <FieldGroup className="flex flex-row flex-wrap items-start gap-4">
@@ -81,8 +86,10 @@ function InstitutionalProfileFormView({ person, returnTo = "/account/profile" }:
           <FieldGroup className="mt-4 flex flex-row flex-wrap items-start gap-4">
             <TextField
               id="profile-email"
-              disabled
-              label="Correo electrónico"
+              name={canEditContactEmail ? "email" : undefined}
+              disabled={!canEditContactEmail}
+              required={canEditContactEmail && Boolean(person.email)}
+              label={canEditContactEmail ? "Correo de contacto" : "Correo electrónico"}
               type="email"
               defaultValue={person.email ?? ""}
               error={fieldErrors.email}
@@ -117,16 +124,4 @@ function InstitutionalProfileFormView({ person, returnTo = "/account/profile" }:
       </div>
     </ActionForm>
   );
-}
-
-function getFormError(error: string | undefined, fieldErrors: Record<string, string> | undefined): string | undefined {
-  if (fieldErrors && Object.keys(fieldErrors).length > 0) {
-    return undefined;
-  }
-
-  if (error) {
-    return error;
-  }
-
-  return undefined;
 }

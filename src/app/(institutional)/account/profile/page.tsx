@@ -6,6 +6,7 @@ import { notFound } from "next/navigation";
 import { InstitutionalProfile } from "@features/institutional-auth/components/institutional-profile";
 import { fetchInstitutionalPerson } from "@features/institutional-auth/services/fetch-institutional-person.service";
 import { requireInstitutionalUser } from "@features/institutional-auth/services/get-institutional-user.service";
+import { canEditContactEmail } from "@features/institutional-auth/utils/institutional-applicant-role.util";
 import { getInstitutionalMetadata } from "@features/institutional-auth/utils/institutional-metadata.util";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -19,5 +20,7 @@ export default async function ProfilePage(): Promise<ReactElement> {
     notFound();
   }
 
-  return <InstitutionalProfile person={person} canManageEmail={Boolean(user.userId) && !user.delegated} />;
+  return (
+    <InstitutionalProfile person={person} canManageEmail={Boolean(user.userId) && !user.delegated} canEditContactEmail={canEditContactEmail(user)} />
+  );
 }

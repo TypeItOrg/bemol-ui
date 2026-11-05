@@ -10,6 +10,8 @@ import { getSafeReturnTo } from "@common/utils/return-to.util";
 
 import { InstitutionalProfileForm } from "@features/institutional-auth/components/institutional-profile";
 import { fetchInstitutionalPerson } from "@features/institutional-auth/services/fetch-institutional-person.service";
+import { requireInstitutionalUser } from "@features/institutional-auth/services/get-institutional-user.service";
+import { canEditContactEmail } from "@features/institutional-auth/utils/institutional-applicant-role.util";
 import { getInstitutionalMetadata } from "@features/institutional-auth/utils/institutional-metadata.util";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -21,7 +23,7 @@ export default async function EditProfilePage({ searchParams }: { searchParams: 
 
   const destination = getSafeReturnTo(returnTo, "/account/profile");
 
-  const person = await fetchInstitutionalPerson();
+  const [user, person] = await Promise.all([requireInstitutionalUser(), fetchInstitutionalPerson()]);
 
   if (!person) {
     notFound();
@@ -34,7 +36,7 @@ export default async function EditProfilePage({ searchParams }: { searchParams: 
           <Link href={destination}>Volver</Link>
         </Button>
       </div>
-      <InstitutionalProfileForm person={person} returnTo={destination} />
+      <InstitutionalProfileForm person={person} returnTo={destination} canEditContactEmail={canEditContactEmail(user)} />
     </>
   );
 }

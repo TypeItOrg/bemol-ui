@@ -186,7 +186,7 @@ describe("getInstitutionalNavigationSections", () => {
     expect(sections.map((section) => section.label)).toEqual([undefined, "Personal"]);
   });
 
-  it("links profile and security for every authenticated user", () => {
+  it("links profile and security for the account holder", () => {
     const sections = getInstitutionalNavigationSections(USER);
     const personalSection = sections.find((section) => section.label === "Personal");
 

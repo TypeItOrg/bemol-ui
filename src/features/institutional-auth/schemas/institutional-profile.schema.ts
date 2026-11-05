@@ -1,8 +1,9 @@
 import { z } from "zod";
 
-import { requiredPhoneSchema, requiredNationalitySchema } from "@features/people/schemas/person-form.schema";
+import { requiredEmailSchema, requiredPhoneSchema, requiredNationalitySchema } from "@features/people/schemas/person-form.schema";
 
 export const institutionalProfileSchema = z.object({
+  email: requiredEmailSchema.optional(),
   phoneNumber: requiredPhoneSchema,
   birthCityId: z.string().optional(),
   nationalityCountryId: requiredNationalitySchema,

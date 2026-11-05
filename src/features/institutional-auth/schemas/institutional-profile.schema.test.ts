@@ -12,6 +12,7 @@ const validProfile = {
 describe("institutionalProfileSchema", () => {
   it("keeps ordinary contact fields and excludes protected identity fields", () => {
     expect(institutionalProfileSchema.parse(validProfile)).toEqual({
+      email: "matias@example.com",
       phoneNumber: "12345678",
       nationalityCountryId: "11111111-1111-4111-8111-111111111111",
     });
