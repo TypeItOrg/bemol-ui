@@ -13,7 +13,7 @@ export function FormCard({
   children,
 }: {
   title: string;
-  description: string;
+  description?: string;
   icon: LucideIcon;
   children: ReactNode;
 }): ReactElement {

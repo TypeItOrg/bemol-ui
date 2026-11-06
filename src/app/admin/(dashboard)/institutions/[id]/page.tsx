@@ -59,20 +59,25 @@ export default async function InstitutionDetailPage({ params, searchParams }: In
         <Button asChild variant="outline" size="lg" className="self-start">
           <Link href={destination}>Volver</Link>
         </Button>
-        {institution.active ? (
-          <div className="flex w-full flex-wrap justify-start gap-3 md:w-auto md:flex-nowrap md:justify-end">
-            <Button asChild variant="outline" size="lg" className="flex-1 md:flex-none">
-              <Link href={`/institutions/${id}/people`}>Administrar usuarios</Link>
-            </Button>
-            <Button asChild size="lg" className="w-full sm:w-auto sm:flex-1 md:flex-none">
-              <ReturnToLink href={`/institutions/${id}/edit`} returnTo={destination}>
-                Editar institución
-              </ReturnToLink>
-            </Button>
-          </div>
-        ) : (
-          <InstitutionReactivateButton institutionId={id} institutionName={institution.name} />
-        )}
+        <div className="flex w-full flex-wrap justify-start gap-3 md:w-auto md:justify-end">
+          <Button asChild variant="outline" size="lg" className="flex-1 md:flex-none">
+            <ReturnToLink href={`/institutions/${id}/enrollment-pdf`}>Planilla de inscripción</ReturnToLink>
+          </Button>
+          {institution.active ? (
+            <>
+              <Button asChild variant="outline" size="lg" className="flex-1 md:flex-none">
+                <Link href={`/institutions/${id}/people`}>Administrar usuarios</Link>
+              </Button>
+              <Button asChild size="lg" className="w-full sm:w-auto sm:flex-1 md:flex-none">
+                <ReturnToLink href={`/institutions/${id}/edit`} returnTo={destination}>
+                  Editar institución
+                </ReturnToLink>
+              </Button>
+            </>
+          ) : (
+            <InstitutionReactivateButton institutionId={id} institutionName={institution.name} />
+          )}
+        </div>
       </div>
 
       <Card className="bg-muted/25 gap-0 p-5 sm:p-6">

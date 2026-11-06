@@ -4,8 +4,6 @@ import { useState, type ReactElement } from "react";
 
 import { useRouter } from "next/navigation";
 
-import { BadgeCheckIcon, BanIcon } from "lucide-react";
-
 import { Button } from "@common/components/ui/button";
 
 import { PlatformEnrollmentApplicationApproveDialog } from "@features/enrollment-applications/components/platform-enrollment-application-approve-dialog";
@@ -46,13 +44,11 @@ export function PlatformEnrollmentApplicationResolvePanel({
       <div className="flex w-full flex-col gap-2 @2xl/page-shell:w-auto @2xl/page-shell:flex-row">
         {application.canApproveProvisionally || application.canConfirm ? (
           <Button type="button" size="lg" className="w-full @2xl/page-shell:w-auto" onClick={() => setShowApproveDialog(true)}>
-            <BadgeCheckIcon aria-hidden="true" />
             {application.canApproveProvisionally ? "Admitir provisoriamente" : "Confirmar inscripción definitiva"}
           </Button>
         ) : null}
         {status === ENROLLMENT_APPLICATION_STATUS.SUBMITTED ? (
           <Button type="button" size="lg" variant="destructive" className="w-full @2xl/page-shell:w-auto" onClick={() => setShowRejectDialog(true)}>
-            <BanIcon aria-hidden="true" />
             Rechazar inscripción
           </Button>
         ) : null}

@@ -21,11 +21,14 @@ export async function GET(request: Request, { params }: { params: Promise<{ pers
   query.delete("scope");
 
   try {
-    const response = await institutionalApiFetch(`${await getSelfServiceEnrollmentApiPath(personId)}/${suffix}?${query}`, { signal: request.signal });
+    const response = await institutionalApiFetch(`${await getSelfServiceEnrollmentApiPath(personId)}/${suffix}?${query}`, {
+      signal: request.signal,
+      headers: { Accept: suffix.endsWith("/pdf") ? "application/pdf, application/json" : "application/json" },
+    });
 
     const headers = new Headers({ "cache-control": "private, no-store", "x-content-type-options": "nosniff" });
 
-    for (const name of ["content-type", "content-disposition", "content-length"]) {
+    for (const name of ["content-type", "content-disposition", "content-length", "retry-after", "x-request-id"]) {
       const value = response.headers.get(name);
 
       if (value) {

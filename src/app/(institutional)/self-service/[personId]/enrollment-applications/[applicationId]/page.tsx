@@ -16,6 +16,7 @@ import {
   fetchEnrollmentApplicationShifts,
 } from "@features/enrollment-applications/services/enrollment-application.service";
 import { ENROLLMENT_APPLICATION_STATUS } from "@features/enrollment-applications/types/enrollment-application-status.types";
+import { EnrollmentPdfExport } from "@features/enrollment-pdf/components/enrollment-pdf-export";
 import { fetchOperatingProfile } from "@features/guardian-workspace/services/operating-profile.service";
 import { InstitutionalAccessDenied } from "@features/institutional-auth/components/institutional-access-denied";
 import { InstitutionalBreadcrumb } from "@features/institutional-auth/components/institutional-breadcrumb";
@@ -87,10 +88,14 @@ export default async function MyEnrollmentApplicationDetailPage({
       actions={<PlatformPageIcon icon={PageIcon} />}
     >
       {!isEditable ? (
-        <div className="flex items-center">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <Button asChild variant="outline" size="lg">
             <Link href={destination}>Volver</Link>
           </Button>
+          <EnrollmentPdfExport
+            href={`/api/institutional/self-service/${personId}/enrollment-applications/${applicationId}/pdf`}
+            status={application.status}
+          />
         </div>
       ) : null}
       <EnrollmentWizard

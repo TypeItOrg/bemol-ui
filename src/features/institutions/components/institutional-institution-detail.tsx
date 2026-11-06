@@ -28,11 +28,16 @@ export function InstitutionalInstitutionDetail({ canUpdate, institution, returnT
           <Link href={returnTo}>Volver</Link>
         </Button>
         {canUpdate ? (
-          <Button asChild size="lg">
-            <ReturnToLink href="/institution/edit" returnTo={returnTo}>
-              Editar
-            </ReturnToLink>
-          </Button>
+          <div className="flex flex-wrap gap-3">
+            <Button asChild variant="outline" size="lg">
+              <ReturnToLink href="/institution/enrollment-pdf">Planilla de inscripción</ReturnToLink>
+            </Button>
+            <Button asChild size="lg">
+              <ReturnToLink href="/institution/edit" returnTo={returnTo}>
+                Editar
+              </ReturnToLink>
+            </Button>
+          </div>
         ) : null}
       </div>
       <InstitutionLogoManager

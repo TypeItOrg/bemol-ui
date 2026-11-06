@@ -15,6 +15,7 @@ import { formatStudyPlanLabel } from "@features/academic/utils/study-plan-label.
 import { EnrollmentStatusCard } from "@features/enrollment-applications/components/EnrollmentStatusCard";
 import { PlatformEnrollmentApplicationResolvePanel } from "@features/enrollment-applications/components/platform-enrollment-application-resolve-panel";
 import { fetchPlatformEnrollmentApplicationById } from "@features/enrollment-applications/services/enrollment-application.service";
+import { EnrollmentPdfExport } from "@features/enrollment-pdf/components/enrollment-pdf-export";
 import { PlatformBreadcrumb } from "@features/platform-auth/components/platform-breadcrumb";
 import { PlatformPageIcon } from "@features/platform-auth/components/platform-page-icon";
 import { PlatformPageShell } from "@features/platform-auth/components/platform-page-shell";
@@ -67,17 +68,20 @@ export default async function PlatformEnrollmentApplicationDetailPage({
           <Link href={destination}>Volver</Link>
         </Button>
 
-        <PlatformEnrollmentApplicationResolvePanel
-          application={{
-            institutionId,
-            applicationId,
-            canApproveProvisionally: application.canApproveProvisionally,
-            canConfirm: application.canConfirm,
-            applicantName,
-            studyPlanName: application.studyPlanName ? formatStudyPlanLabel(application) : "",
-          }}
-          status={application.status}
-        />
+        <div className="flex min-w-0 flex-col gap-3 @2xl/page-shell:flex-row @2xl/page-shell:items-start">
+          <EnrollmentPdfExport href={`/api/admin/enrollment-applications/${institutionId}/${applicationId}/pdf`} status={application.status} />
+          <PlatformEnrollmentApplicationResolvePanel
+            application={{
+              institutionId,
+              applicationId,
+              canApproveProvisionally: application.canApproveProvisionally,
+              canConfirm: application.canConfirm,
+              applicantName,
+              studyPlanName: application.studyPlanName ? formatStudyPlanLabel(application) : "",
+            }}
+            status={application.status}
+          />
+        </div>
       </div>
 
       <EnrollmentStatusCard

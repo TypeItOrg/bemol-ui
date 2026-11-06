@@ -15,6 +15,7 @@ import { formatStudyPlanLabel } from "@features/academic/utils/study-plan-label.
 import { EnrollmentApplicationResolvePanel } from "@features/enrollment-applications/components/enrollment-application-resolve-panel";
 import { EnrollmentStatusCard } from "@features/enrollment-applications/components/EnrollmentStatusCard";
 import { fetchInstitutionalEnrollmentApplicationById } from "@features/enrollment-applications/services/enrollment-application.service";
+import { EnrollmentPdfExport } from "@features/enrollment-pdf/components/enrollment-pdf-export";
 import { InstitutionalAccessDenied } from "@features/institutional-auth/components/institutional-access-denied";
 import { InstitutionalBreadcrumb } from "@features/institutional-auth/components/institutional-breadcrumb";
 import { requireInstitutionalUser } from "@features/institutional-auth/services/get-institutional-user.service";
@@ -80,12 +81,15 @@ export default async function EnrollmentApplicationDetailPage({ params, searchPa
           <Link href={destination}>Volver</Link>
         </Button>
 
-        <EnrollmentApplicationResolvePanel
-          application={reviewSummary}
-          status={application.status}
-          canApprove={hasTrainingPathPermission(user, INSTITUTIONAL_PERMISSION.ENROLLMENT_APPLICATION_APPROVE, application.trainingPathId ?? "")}
-          canReject={hasTrainingPathPermission(user, INSTITUTIONAL_PERMISSION.ENROLLMENT_APPLICATION_REJECT, application.trainingPathId ?? "")}
-        />
+        <div className="flex min-w-0 flex-col gap-3 @2xl/page-shell:flex-row @2xl/page-shell:items-start">
+          <EnrollmentPdfExport href={`/api/institutional/enrollment-applications/${applicationId}/pdf`} status={application.status} />
+          <EnrollmentApplicationResolvePanel
+            application={reviewSummary}
+            status={application.status}
+            canApprove={hasTrainingPathPermission(user, INSTITUTIONAL_PERMISSION.ENROLLMENT_APPLICATION_APPROVE, application.trainingPathId ?? "")}
+            canReject={hasTrainingPathPermission(user, INSTITUTIONAL_PERMISSION.ENROLLMENT_APPLICATION_REJECT, application.trainingPathId ?? "")}
+          />
+        </div>
       </div>
 
       <EnrollmentStatusCard
