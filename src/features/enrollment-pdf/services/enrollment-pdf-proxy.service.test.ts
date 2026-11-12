@@ -42,13 +42,12 @@ beforeEach(() => {
     });
 });
 
-it.each(["institutional", "platform"] as const)("streams PDFs and preserves retry metadata for %s", async (scope) => {
+it.each(["institutional", "platform"] as const)("streams PDF data and preserves retry metadata for %s", async (scope) => {
   const fetcher = scope === "platform" ? platformApiFetch : institutionalApiFetch;
   jest.mocked(fetcher).mockResolvedValue(
-    new Response("%PDF-example", {
+    new Response('{"title":"Solicitud"}', {
       headers: {
-        "content-type": "application/pdf",
-        "content-disposition": "inline; filename=solicitud.pdf",
+        "content-type": "application/json",
         "retry-after": "5",
         "x-request-id": "request",
       },
@@ -57,10 +56,9 @@ it.each(["institutional", "platform"] as const)("streams PDFs and preserves retr
 
   const result = await proxyEnrollmentPdf(new Request("http://localhost/pdf"), scope, "/api/v1/example/pdf");
 
-  expect(await result.text()).toBe("%PDF-example");
+  expect(await result.text()).toBe('{"title":"Solicitud"}');
   expect(result.headers.get("cache-control")).toBe("private, no-store");
-  expect(result.headers.get("content-type")).toBe("application/pdf");
-  expect(result.headers.get("content-disposition")).toBe("inline; filename=solicitud.pdf");
+  expect(result.headers.get("content-type")).toBe("application/json");
   expect(result.headers.get("x-content-type-options")).toBe("nosniff");
   expect(result.headers.get("retry-after")).toBe("5");
   expect(result.headers.get("x-request-id")).toBe("request");
@@ -78,7 +76,7 @@ it("keeps backend business errors and maps transport errors to unavailable", asy
 });
 
 it("validates preview without saving settings", async () => {
-  jest.mocked(institutionalApiFetch).mockResolvedValue(new Response("%PDF-example", { headers: { "content-type": "application/pdf" } }));
+  jest.mocked(institutionalApiFetch).mockResolvedValue(Response.json({ title: "Ejemplo" }));
   const result = await previewEnrollmentPdf(
     new Request("http://localhost/preview", { method: "POST", body: JSON.stringify(payload) }),
     "institutional",
@@ -88,7 +86,7 @@ it("validates preview without saving settings", async () => {
   expect(result.status).toBe(200);
   const outgoing = new Headers(jest.mocked(institutionalApiFetch).mock.calls[0][1]?.headers);
 
-  expect(outgoing.get("Accept")).toBe("application/pdf, application/json");
+  expect(outgoing.get("Accept")).toBe("application/json");
   expect(outgoing.get("Content-Type")).toBe("application/json");
   expect(institutionalApiFetch).toHaveBeenCalledWith(`/api/v1/institutions/${ID}/enrollment-pdf-settings/preview`, {
     method: "POST",

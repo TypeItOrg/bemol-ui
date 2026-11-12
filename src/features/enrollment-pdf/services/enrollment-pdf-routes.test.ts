@@ -25,7 +25,7 @@ beforeEach(() => {
     jest
       .mocked(fetcher)
       .mockReset()
-      .mockImplementation(async () => new Response("%PDF-example", { headers: { "content-type": "application/pdf", "retry-after": "5" } }));
+      .mockImplementation(async () => Response.json({ title: "Solicitud" }, { headers: { "retry-after": "5" } }));
   }
 });
 

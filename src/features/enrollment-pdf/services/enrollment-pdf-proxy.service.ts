@@ -18,7 +18,7 @@ export async function proxyEnrollmentPdf(request: Request, scope: EnrollmentPdfS
 
     const outgoing = new Headers(init.headers);
 
-    outgoing.set("Accept", "application/pdf, application/json");
+    outgoing.set("Accept", "application/json");
 
     const response = await fetcher(path, { ...init, headers: outgoing, signal: request.signal });
 

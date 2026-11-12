@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 
 import { saveEnrollmentPdfSettingsAction } from "@features/enrollment-pdf/actions/save-enrollment-pdf-settings.action";
 import { EnrollmentPdfSettingsForm } from "@features/enrollment-pdf/components/enrollment-pdf-settings-form";
+import { enrollmentPdfDataFixture } from "@features/enrollment-pdf/testing/enrollment-pdf-data.fixture";
 import type { EnrollmentPdfActionState } from "@features/enrollment-pdf/types/enrollment-pdf-action-state.types";
 import type { EnrollmentPdfScope } from "@features/enrollment-pdf/types/enrollment-pdf-scope.types";
 
@@ -10,6 +11,9 @@ const mockPush = jest.fn();
 
 jest.mock("next/navigation", () => ({ useRouter: () => ({ push: mockPush }) }));
 jest.mock("@features/enrollment-pdf/actions/save-enrollment-pdf-settings.action", () => ({ saveEnrollmentPdfSettingsAction: jest.fn() }));
+jest.mock("@features/enrollment-pdf/utils/render-enrollment-pdf.util", () => ({
+  renderEnrollmentPdf: jest.fn(async () => new Blob(["%PDF-example"], { type: "application/pdf" })),
+}));
 jest.mock("@features/enrollment-applications/components/document-pdf-preview", () => ({
   DocumentPdfPreview: ({ src }: { src: string }) => <span data-testid="pdf-example">{src}</span>,
 }));
@@ -44,7 +48,7 @@ function renderForm(scope: EnrollmentPdfScope = "institutional", returnTo = "/in
 it.each<EnrollmentPdfScope>(["institutional", "platform"])(
   "previews edited values in %s without saving, then revokes the URL on unmount",
   async (scope) => {
-    jest.mocked(fetch).mockResolvedValue(new Response("%PDF-example", { headers: { "content-type": "application/pdf" } }));
+    jest.mocked(fetch).mockResolvedValue(Response.json(enrollmentPdfDataFixture));
     const user = userEvent.setup();
     const { unmount } = renderForm(scope);
     await user.clear(screen.getByRole("textbox", { name: "Título del documento" }));
@@ -197,7 +201,7 @@ it("closes a pending preview, aborts the request and ignores its late response",
   await user.type(footer, "Cambio sin guardar.");
 
   await act(async () => {
-    resolvePreview(new Response("%PDF-example", { headers: { "content-type": "application/pdf" } }));
+    resolvePreview(Response.json(enrollmentPdfDataFixture));
   });
 
   expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
@@ -256,7 +260,7 @@ it("retries a failed preview with current edits and preserves them after a save 
   jest
     .mocked(fetch)
     .mockResolvedValueOnce(Response.json({ message: "El generador está ocupado." }, { status: 503 }))
-    .mockResolvedValueOnce(new Response("%PDF-example", { headers: { "content-type": "application/pdf" } }));
+    .mockResolvedValueOnce(Response.json(enrollmentPdfDataFixture));
   jest.mocked(saveEnrollmentPdfSettingsAction).mockResolvedValue({ error: "No se pudo guardar la configuración." });
   const user = userEvent.setup();
   renderForm();
