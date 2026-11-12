@@ -17,9 +17,15 @@ import { EnrollmentStepCardHeader } from "@features/enrollment-applications/comp
 import { EDUCATION_LEVEL_OPTIONS } from "@features/enrollment-applications/constants/enrollment-application.constants";
 import type { EnrollmentWizardModel } from "@features/enrollment-applications/types/enrollment-wizard-model.types";
 
-type Props = Pick<EnrollmentWizardModel, "responsible" | "updateResponsible" | "getFieldError" | "requiresRepresentative" | "handleActiveTabChange">;
+type Props = Pick<
+  EnrollmentWizardModel,
+  "responsible" | "updateResponsible" | "getFieldError" | "requiresRepresentative" | "handleActiveTabChange" | "definition"
+> & { stepTitle?: string; hideNavigation?: boolean };
 
 export function EnrollmentResponsibleStep({
+  stepTitle,
+  definition,
+  hideNavigation = false,
   responsible,
   updateResponsible,
   getFieldError,
@@ -31,7 +37,7 @@ export function EnrollmentResponsibleStep({
       <Card className="bg-muted/25 @container sm:[--card-spacing:--spacing(6)]">
         <EnrollmentStepCardHeader
           icon={UsersRoundIcon}
-          title="4. Representante"
+          title={stepTitle ?? "4. Representante"}
           description="Datos de quien gestiona la inscripción de la persona representada."
           action={<Badge variant="destructive">Obligatorio</Badge>}
         />
@@ -85,7 +91,7 @@ export function EnrollmentResponsibleStep({
 
           <div className="grid gap-4 @min-[48rem]:grid-cols-2">
             <Field data-invalid={!!getFieldError(["responsible", "email"])}>
-              <FieldLabel htmlFor="responsibleEmail" required={requiresRepresentative}>
+              <FieldLabel htmlFor="responsibleEmail" required={requiresRepresentative && !definition}>
                 Correo electrónico
               </FieldLabel>
               <Input
@@ -102,7 +108,7 @@ export function EnrollmentResponsibleStep({
             </Field>
 
             <Field data-invalid={!!getFieldError(["responsible", "occupation"])}>
-              <FieldLabel htmlFor="responsibleOccupation" required={requiresRepresentative}>
+              <FieldLabel htmlFor="responsibleOccupation" required={requiresRepresentative && !definition}>
                 Ocupación / Profesión
               </FieldLabel>
               <Input
@@ -117,11 +123,11 @@ export function EnrollmentResponsibleStep({
           </div>
 
           <Field data-invalid={!!getFieldError(["responsible", "educationLevel"])}>
-            <FieldLabel htmlFor="responsibleEducationLevel" required={requiresRepresentative}>
+            <FieldLabel htmlFor="responsibleEducationLevel" required={requiresRepresentative && !definition}>
               Nivel de Instrucción
             </FieldLabel>
             <Select value={responsible.educationLevel} onValueChange={(value) => updateResponsible("educationLevel", value)}>
-              <SelectTrigger className="w-full" aria-invalid={!!getFieldError(["responsible", "educationLevel"])}>
+              <SelectTrigger id="responsibleEducationLevel" className="w-full" aria-invalid={!!getFieldError(["responsible", "educationLevel"])}>
                 <SelectValue placeholder="Seleccioná el máximo nivel alcanzado" />
               </SelectTrigger>
               <SelectContent>
@@ -135,14 +141,16 @@ export function EnrollmentResponsibleStep({
             <FieldError errors={[{ message: getFieldError(["responsible", "educationLevel"]) }]} />
           </Field>
         </CardContent>
-        <CardFooter className="flex flex-col-reverse items-stretch gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <Button type="button" variant="outline" size="lg" onClick={() => handleActiveTabChange("health")} className="gap-1.5">
-            Atrás
-          </Button>
-          <Button type="button" size="lg" onClick={() => handleActiveTabChange("spaces")} className="gap-1.5">
-            Siguiente: Cursos
-          </Button>
-        </CardFooter>
+        {!hideNavigation ? (
+          <CardFooter className="flex flex-col-reverse items-stretch gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <Button type="button" variant="outline" size="lg" onClick={() => handleActiveTabChange("health")} className="gap-1.5">
+              Atrás
+            </Button>
+            <Button type="button" size="lg" onClick={() => handleActiveTabChange("spaces")} className="gap-1.5">
+              Siguiente: Cursos
+            </Button>
+          </CardFooter>
+        ) : null}
       </Card>
     </TabsContent>
   );

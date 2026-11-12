@@ -4,6 +4,9 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalS
 
 import { useSearchParams } from "next/navigation";
 
+import { ENROLLMENT_NATIVE_TABS } from "@features/enrollment-applications/utils/enrollment-form.util";
+import type { EnrollmentFormDefinition } from "@features/enrollment-forms/types/enrollment-form-definition.types";
+
 function subscribeToHydration(): () => void {
   return () => undefined;
 }
@@ -16,7 +19,12 @@ function getServerHydrationSnapshot(): boolean {
   return false;
 }
 
-export function useEnrollmentWizardNavigation(requiresRepresentative: boolean, hasDocumentsStep: boolean, isSubmitDialogOpen: boolean) {
+export function useEnrollmentWizardNavigation(
+  requiresRepresentative: boolean,
+  hasDocumentsStep: boolean,
+  isSubmitDialogOpen: boolean,
+  definition?: EnrollmentFormDefinition | null,
+) {
   const searchParams = useSearchParams();
 
   const tabTriggerRefs = useRef(new Map<string, HTMLButtonElement>());
@@ -28,29 +36,54 @@ export function useEnrollmentWizardNavigation(requiresRepresentative: boolean, h
   const [activeTab, setActiveTab] = useState<string>(() => {
     const requestedTab = searchParams.get("tab");
 
-    return requestedTab === "training-path" ? "spaces" : requestedTab || "personal";
+    const first = definition?.sections.find(
+      (section) => (section.nativeBlock !== "RESPONSIBLE" || requiresRepresentative) && (section.nativeBlock !== "DOCUMENTATION" || hasDocumentsStep),
+    );
+
+    if (requestedTab) {
+      return requestedTab === "training-path" ? "spaces" : requestedTab;
+    }
+
+    if (first) {
+      return first.nativeBlock ? ENROLLMENT_NATIVE_TABS[first.nativeBlock] : `custom-${first.id}`;
+    }
+
+    return "personal";
   });
 
   const hydrated = useSyncExternalStore(subscribeToHydration, getHydratedSnapshot, getServerHydrationSnapshot);
 
   const visibleTabs = useMemo(() => {
-    const rawTabs = [
-      { id: "personal", label: "Datos Personales" },
-      { id: "education", label: "Escolaridad" },
-      { id: "health", label: "Salud e Inclusión" },
-      ...(requiresRepresentative ? [{ id: "responsible", label: "Representante" }] : []),
-      { id: "spaces", label: "Cursos" },
-      { id: "preferences", label: "Preferencias" },
-      ...(hasDocumentsStep ? [{ id: "documents", label: "Documentación" }] : []),
-    ];
+    const rawTabs = definition
+      ? definition.sections
+          .filter(
+            (section) =>
+              (section.nativeBlock !== "RESPONSIBLE" || requiresRepresentative) && (section.nativeBlock !== "DOCUMENTATION" || hasDocumentsStep),
+          )
+          .map((section) => ({
+            id: section.nativeBlock ? ENROLLMENT_NATIVE_TABS[section.nativeBlock] : `custom-${section.id}`,
+            label: section.title,
+          }))
+      : [
+          { id: "personal", label: "Datos Personales" },
+          { id: "education", label: "Escolaridad" },
+          { id: "health", label: "Salud e Inclusión" },
+          ...(requiresRepresentative ? [{ id: "responsible", label: "Representante" }] : []),
+          { id: "spaces", label: "Cursos" },
+          { id: "preferences", label: "Preferencias" },
+          ...(hasDocumentsStep ? [{ id: "documents", label: "Documentación" }] : []),
+        ];
 
     return rawTabs.map((tab, index) => ({
       ...tab,
       label: `${index + 1}. ${tab.label}`,
     }));
-  }, [requiresRepresentative, hasDocumentsStep]);
+  }, [requiresRepresentative, hasDocumentsStep, definition]);
 
-  const effectiveActiveTab = getEffectiveActiveTab(activeTab, visibleTabs);
+  const effectiveActiveTab =
+    definition && !visibleTabs.some((tab) => tab.id === activeTab)
+      ? (visibleTabs[0]?.id ?? "personal")
+      : getEffectiveActiveTab(activeTab, visibleTabs);
 
   useLayoutEffect(() => {
     if (!hydrated) {

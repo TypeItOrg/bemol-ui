@@ -21,9 +21,10 @@ type Props = Pick<
   | "setIsSubmitDialogOpen"
   | "saving"
   | "documentsBlocked"
->;
+> & { hideNavigation?: boolean };
 
 export function EnrollmentDocumentsStep({
+  hideNavigation = false,
   effectiveActiveTab,
   application,
   visibleTabs,
@@ -45,16 +46,23 @@ export function EnrollmentDocumentsStep({
         disabled={readOnly || isSubmitDialogOpen || isCancelDialogOpen}
         onUploadBlockedChange={changeDocumentBlocked}
         footer={
-          <>
-            <Button type="button" variant="outline" size="lg" onClick={() => handleActiveTabChange("preferences")} className="gap-1.5">
-              Atrás
-            </Button>
-            {!readOnly ? (
-              <Button type="button" size="lg" onClick={() => setIsSubmitDialogOpen(true)} disabled={saving || isCancelDialogOpen || documentsBlocked}>
-                Enviar inscripción
+          hideNavigation ? undefined : (
+            <>
+              <Button type="button" variant="outline" size="lg" onClick={() => handleActiveTabChange("preferences")} className="gap-1.5">
+                Atrás
               </Button>
-            ) : null}
-          </>
+              {!readOnly ? (
+                <Button
+                  type="button"
+                  size="lg"
+                  onClick={() => setIsSubmitDialogOpen(true)}
+                  disabled={saving || isCancelDialogOpen || documentsBlocked}
+                >
+                  Enviar inscripción
+                </Button>
+              ) : null}
+            </>
+          )
         }
       />
     </TabsContent>

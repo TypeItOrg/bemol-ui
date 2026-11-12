@@ -2,4 +2,5 @@ import type { EnrollmentApplicationData } from "@features/enrollment-application
 
 export interface UpdateEnrollmentDraftInput {
   data: EnrollmentApplicationData;
+  expectedRevision?: number;
 }

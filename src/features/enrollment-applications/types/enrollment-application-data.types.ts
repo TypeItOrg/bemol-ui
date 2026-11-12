@@ -16,5 +16,5 @@ export interface EnrollmentApplicationData {
   careerSelection?: EnrollmentCareerSelection;
   courses?: EnrollmentCourseSelection[];
   attachments?: EnrollmentAttachment[];
-  [key: string]: unknown;
+  customAnswers?: Record<string, unknown> | null;
 }

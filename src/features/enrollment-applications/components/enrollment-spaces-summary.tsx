@@ -12,17 +12,14 @@ import type { EnrollmentApplicationSpaceResponse } from "@features/enrollment-ap
 export function EnrollmentSpacesSummary({
   application,
   spaces,
+  title = "Trayecto formativo y espacios académicos",
 }: {
+  title?: string;
   application: EnrollmentApplicationResponse;
   spaces: EnrollmentApplicationSpaceResponse[];
 }): ReactElement {
   return (
-    <DetailCard
-      className="xl:col-span-2"
-      icon={Music2Icon}
-      title="Trayecto formativo y espacios académicos"
-      description="Trayecto y materias seleccionadas para la inscripción."
-    >
+    <DetailCard className="xl:col-span-2" icon={Music2Icon} title={title} description="Trayecto y materias seleccionadas para la inscripción.">
       <dl className="mb-5 grid gap-4 sm:grid-cols-2">
         <DetailItem label="Trayecto formativo" value={application.trainingPathName} fallback="Sin trayecto formativo" />
         <DetailItem

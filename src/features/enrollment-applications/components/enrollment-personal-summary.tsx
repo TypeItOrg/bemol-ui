@@ -8,9 +8,15 @@ import { DetailCard, DetailItem } from "@features/enrollment-applications/compon
 import type { EnrollmentPersonalData } from "@features/enrollment-applications/types/enrollment-personal-data.types";
 import { formatBusinessDate } from "@features/enrollment-applications/utils/enrollment-business-date.util";
 
-export function EnrollmentPersonalSummary({ personal }: { personal: Partial<EnrollmentPersonalData> }): ReactElement {
+export function EnrollmentPersonalSummary({
+  personal,
+  title = "Datos personales y contacto",
+}: {
+  personal: Partial<EnrollmentPersonalData>;
+  title?: string;
+}): ReactElement {
   return (
-    <DetailCard icon={UserRoundIcon} title="Datos personales y contacto" description="Información registrada al enviar la solicitud.">
+    <DetailCard icon={UserRoundIcon} title={title} description="Información registrada al enviar la solicitud.">
       <dl className="grid gap-4 sm:grid-cols-2">
         <DetailItem
           label="Nombre completo"

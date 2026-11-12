@@ -2,9 +2,13 @@ import type { EnrollmentApplicationCourse } from "@features/enrollment-applicati
 import type { EnrollmentApplicationData } from "@features/enrollment-applications/types/enrollment-application-data.types";
 import type { EnrollmentApplicationSpaceResponse } from "@features/enrollment-applications/types/enrollment-application-space-response.types";
 import type { EnrollmentApplicationStatus } from "@features/enrollment-applications/types/enrollment-application-status.types";
+import type { EnrollmentFormDefinition } from "@features/enrollment-forms/types/enrollment-form-definition.types";
 import type { EnrollmentPeriod } from "@features/enrollment-periods/types/enrollment-period.types";
 
 export interface EnrollmentApplicationResponse {
+  formVersionId?: string | null;
+  formDefinition?: EnrollmentFormDefinition | null;
+  draftRevision?: number;
   applicationId: string;
   institutionId: string;
   personId: string;

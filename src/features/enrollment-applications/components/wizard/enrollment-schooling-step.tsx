@@ -15,9 +15,11 @@ import type { EnrollmentWizardModel } from "@features/enrollment-applications/ty
 type Props = Pick<
   EnrollmentWizardModel,
   "getFieldError" | "schooling" | "handleCurrentlyStudyingChange" | "handleEducationLevelChange" | "dispatchSchooling" | "handleActiveTabChange"
->;
+> & { stepTitle?: string; hideNavigation?: boolean };
 
 export function EnrollmentSchoolingStep({
+  stepTitle,
+  hideNavigation = false,
   getFieldError,
   schooling,
   handleCurrentlyStudyingChange,
@@ -30,7 +32,7 @@ export function EnrollmentSchoolingStep({
       <Card className="bg-muted/25 @container sm:[--card-spacing:--spacing(6)]">
         <EnrollmentStepCardHeader
           icon={GraduationCapIcon}
-          title="2. Escolaridad"
+          title={stepTitle ?? "2. Escolaridad"}
           description="Contanos sobre tu escolaridad actual o el máximo nivel que alcanzaste."
         />
         <EnrollmentSchoolingFields
@@ -40,14 +42,16 @@ export function EnrollmentSchoolingStep({
           handleEducationLevelChange={handleEducationLevelChange}
           dispatchSchooling={dispatchSchooling}
         />
-        <CardFooter className="flex flex-col-reverse items-stretch gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <Button type="button" variant="outline" size="lg" onClick={() => handleActiveTabChange("personal")} className="gap-1.5">
-            Atrás
-          </Button>
-          <Button type="button" size="lg" onClick={() => handleActiveTabChange("health")} className="gap-1.5">
-            Siguiente: Salud e Inclusión
-          </Button>
-        </CardFooter>
+        {!hideNavigation ? (
+          <CardFooter className="flex flex-col-reverse items-stretch gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <Button type="button" variant="outline" size="lg" onClick={() => handleActiveTabChange("personal")} className="gap-1.5">
+              Atrás
+            </Button>
+            <Button type="button" size="lg" onClick={() => handleActiveTabChange("health")} className="gap-1.5">
+              Siguiente: Salud e Inclusión
+            </Button>
+          </CardFooter>
+        ) : null}
       </Card>
     </TabsContent>
   );

@@ -13,13 +13,17 @@ import { parseInitialBirthDate } from "@features/enrollment-applications/utils/e
 import { createSchoolingFormState, schoolingFormReducer } from "@features/enrollment-applications/utils/enrollment-schooling-form.util";
 import { getEnrollmentShiftOptions } from "@features/enrollment-applications/utils/enrollment-shift-options.util";
 import { buildEnrollmentWizardData } from "@features/enrollment-applications/utils/enrollment-wizard-data.util";
+import type { EnrollmentFormDefinition } from "@features/enrollment-forms/types/enrollment-form-definition.types";
 
 export function useEnrollmentWizardForm(
   initialData: EnrollmentApplicationResponse["data"],
   initialShifts: readonly Shift[],
   readOnly: boolean,
   selectedCourseIds: string[],
+  definition?: EnrollmentFormDefinition | null,
 ) {
+  const [customAnswers, setCustomAnswers] = useState<Record<string, unknown>>(() => ({ ...initialData?.customAnswers }));
+
   const [schooling, dispatchSchooling] = useReducer(schoolingFormReducer, initialData?.academicBackground, createSchoolingFormState);
 
   const [healthInclusion, setHealthInclusion] = useState<EnrollmentHealthInclusion>(() => ({
@@ -60,6 +64,8 @@ export function useEnrollmentWizardForm(
   }
 
   return {
+    customAnswers,
+    updateCustomAnswer: (id: string, value: unknown) => setCustomAnswers((current) => ({ ...current, [id]: value })),
     firstName: initialData?.personalData?.firstName ?? "",
     lastName: initialData?.personalData?.lastName ?? "",
     documentNumber: initialData?.personalData?.documentNumber ?? "",
@@ -82,6 +88,15 @@ export function useEnrollmentWizardForm(
     shiftOptions: getEnrollmentShiftOptions(initialShifts, preference.preferredShift),
     calculatedAge,
     isMinor: calculatedAge !== null && calculatedAge < 18,
-    structuredData: buildEnrollmentWizardData({ initial: initialData, schooling, healthInclusion, responsible, preference, selectedCourseIds }),
+    structuredData: buildEnrollmentWizardData({
+      initial: initialData,
+      schooling,
+      healthInclusion,
+      responsible,
+      preference,
+      selectedCourseIds,
+      definition,
+      customAnswers,
+    }),
   };
 }

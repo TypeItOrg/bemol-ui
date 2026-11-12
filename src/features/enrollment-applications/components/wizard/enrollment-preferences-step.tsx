@@ -29,9 +29,12 @@ type Props = Pick<
   | "saving"
   | "isCancelDialogOpen"
   | "documentsBlocked"
->;
+> & { stepTitle?: string; hideNavigation?: boolean; shiftOnly?: boolean };
 
 export function EnrollmentPreferencesStep({
+  stepTitle,
+  hideNavigation = false,
+  shiftOnly = false,
   preference,
   updatePreference,
   requiresRepresentative,
@@ -70,8 +73,12 @@ export function EnrollmentPreferencesStep({
       <Card className="bg-muted/25 @container sm:[--card-spacing:--spacing(6)]">
         <EnrollmentStepCardHeader
           icon={SlidersHorizontalIcon}
-          title={requiresRepresentative ? "6. Preferencias y Consentimientos" : "5. Preferencias y Consentimientos"}
-          description="Seleccioná tu turno preferido y manifestá tus autorizaciones institucionales."
+          title={stepTitle ?? (requiresRepresentative ? "6. Preferencias y Consentimientos" : "5. Preferencias y Consentimientos")}
+          description={
+            shiftOnly
+              ? "Seleccioná tu turno preferido para la cursada."
+              : "Seleccioná tu turno preferido y manifestá tus autorizaciones institucionales."
+          }
         />
         <CardContent className="space-y-5">
           <Field data-invalid={!!getFieldError(["preference", "preferredShift"])}>
@@ -101,60 +108,66 @@ export function EnrollmentPreferencesStep({
             <FieldError errors={[{ message: getFieldError(["preference", "preferredShift"]) }]} />
           </Field>
 
-          <div className="flex items-center justify-between gap-4 rounded-lg border p-4">
-            <div className="min-w-0 flex-1 space-y-0.5">
-              <FieldLabel htmlFor="allowsImageUse" className="text-sm font-medium">
-                Autorización para uso de imagen
-              </FieldLabel>
-              <FieldDescription>
-                Autorizo a la institución a registrar y publicar fotografías y videos con fines pedagógicos y difusión cultural.
-              </FieldDescription>
-            </div>
-            <Switch
-              id="allowsImageUse"
-              size="lg"
-              checked={preference.allowsImageUse}
-              onCheckedChange={(value) => updatePreference("allowsImageUse", value)}
-            />
-          </div>
+          {!shiftOnly ? (
+            <>
+              <div className="flex items-center justify-between gap-4 rounded-lg border p-4">
+                <div className="min-w-0 flex-1 space-y-0.5">
+                  <FieldLabel htmlFor="allowsImageUse" className="text-sm font-medium">
+                    Autorización para uso de imagen
+                  </FieldLabel>
+                  <FieldDescription>
+                    Autorizo a la institución a registrar y publicar fotografías y videos con fines pedagógicos y difusión cultural.
+                  </FieldDescription>
+                </div>
+                <Switch
+                  id="allowsImageUse"
+                  size="lg"
+                  checked={preference.allowsImageUse}
+                  onCheckedChange={(value) => updatePreference("allowsImageUse", value)}
+                />
+              </div>
 
-          <div className="flex items-center justify-between gap-4 rounded-lg border p-4">
-            <div className="min-w-0 flex-1 space-y-0.5">
-              <FieldLabel htmlFor="isReenrolling" className="text-sm font-medium">
-                ¿Sos estudiante reingresante?
-              </FieldLabel>
-              <FieldDescription>Indicá si cursaste materias en este conservatorio o instituto en ciclos anteriores.</FieldDescription>
-            </div>
-            <Switch
-              id="isReenrolling"
-              size="lg"
-              checked={preference.isReenrolling}
-              onCheckedChange={(value) => updatePreference("isReenrolling", value)}
-            />
-          </div>
+              <div className="flex items-center justify-between gap-4 rounded-lg border p-4">
+                <div className="min-w-0 flex-1 space-y-0.5">
+                  <FieldLabel htmlFor="isReenrolling" className="text-sm font-medium">
+                    ¿Sos estudiante reingresante?
+                  </FieldLabel>
+                  <FieldDescription>Indicá si cursaste materias en este conservatorio o instituto en ciclos anteriores.</FieldDescription>
+                </div>
+                <Switch
+                  id="isReenrolling"
+                  size="lg"
+                  checked={preference.isReenrolling}
+                  onCheckedChange={(value) => updatePreference("isReenrolling", value)}
+                />
+              </div>
 
-          {preference.isReenrolling && (
-            <Field data-invalid={!!getFieldError(["preference", "previousTeacher"])}>
-              <FieldLabel htmlFor="previousTeacher" required>
-                Docente con quien cursaste previamente
-              </FieldLabel>
-              <Input
-                id="previousTeacher"
-                value={preference.previousTeacher}
-                onChange={(e) => updatePreference("previousTeacher", e.target.value)}
-                placeholder="Profesor/a de instrumento o cátedra"
-                aria-invalid={!!getFieldError(["preference", "previousTeacher"])}
-              />
-              <FieldError errors={[{ message: getFieldError(["preference", "previousTeacher"]) }]} />
-            </Field>
-          )}
+              {preference.isReenrolling && (
+                <Field data-invalid={!!getFieldError(["preference", "previousTeacher"])}>
+                  <FieldLabel htmlFor="previousTeacher" required>
+                    Docente con quien cursaste previamente
+                  </FieldLabel>
+                  <Input
+                    id="previousTeacher"
+                    value={preference.previousTeacher}
+                    onChange={(e) => updatePreference("previousTeacher", e.target.value)}
+                    placeholder="Profesor/a de instrumento o cátedra"
+                    aria-invalid={!!getFieldError(["preference", "previousTeacher"])}
+                  />
+                  <FieldError errors={[{ message: getFieldError(["preference", "previousTeacher"]) }]} />
+                </Field>
+              )}
+            </>
+          ) : null}
         </CardContent>
-        <CardFooter className="flex flex-col-reverse items-stretch gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <Button type="button" variant="outline" size="lg" onClick={() => handleActiveTabChange("spaces")} className="gap-1.5">
-            Atrás
-          </Button>
-          {renderNextAction()}
-        </CardFooter>
+        {!hideNavigation ? (
+          <CardFooter className="flex flex-col-reverse items-stretch gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <Button type="button" variant="outline" size="lg" onClick={() => handleActiveTabChange("spaces")} className="gap-1.5">
+              Atrás
+            </Button>
+            {renderNextAction()}
+          </CardFooter>
+        ) : null}
       </Card>
     </TabsContent>
   );

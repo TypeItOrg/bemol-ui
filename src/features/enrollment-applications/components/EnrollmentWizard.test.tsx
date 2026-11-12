@@ -9,6 +9,12 @@ import {
   cancelEnrollmentApplicationAction,
 } from "@features/enrollment-applications/actions/enrollment-application.actions";
 import { EnrollmentWizard } from "@features/enrollment-applications/components/EnrollmentWizard";
+import {
+  CONFIGURED_APPLICATION,
+  configuredForm,
+  FORM_QUESTIONS,
+  formTestId,
+} from "@features/enrollment-applications/test-utils/enrollment-form-fixtures";
 import type { EnrollmentApplicationResponse } from "@features/enrollment-applications/types/enrollment-application-response.types";
 import type { EnrollmentCourseOption } from "@features/enrollment-applications/types/enrollment-course-option.types";
 
@@ -193,7 +199,7 @@ describe("EnrollmentWizard", () => {
     await userEvent.click(screen.getByRole("tab", { name: /preferencias/i }));
     await confirmSubmission();
 
-    await waitFor(() => expect(submitAction).toHaveBeenCalledWith("app-1", "person-1"));
+    await waitFor(() => expect(submitAction).toHaveBeenCalledWith("app-1", "person-1", 0));
     expect(await screen.findByText("Enviada")).toBeVisible();
     expect(screen.getByText("Lucas Mendoza")).toBeVisible();
     expect(screen.queryByRole("tab", { name: /datos personales/i })).not.toBeInTheDocument();
@@ -375,5 +381,110 @@ describe("EnrollmentWizard", () => {
 
     expect(await screen.findByText("Cancelada")).toBeVisible();
     expect(cancelAction).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe("configured EnrollmentWizard", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    updateAction.mockResolvedValue({ application: { ...CONFIGURED_APPLICATION, draftRevision: 5 } });
+    submitAction.mockResolvedValue({ application: { ...CONFIGURED_APPLICATION, status: "SUBMITTED", draftRevision: 5 } });
+  });
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  it("uses the pinned section order, removes replaced blocks and flushes dynamic answers before submission", async () => {
+    const definition = configuredForm();
+    definition.sections = [definition.sections.at(-1)!, ...definition.sections.slice(0, -1)];
+    renderWizard({ initialApplication: { ...CONFIGURED_APPLICATION, formDefinition: definition } });
+    expect(screen.getAllByRole("tab").map((tab) => tab.textContent)).toEqual([
+      "1. Preguntas de la institución",
+      "2. PERSONAL_DATA",
+      "3. ACADEMIC_SELECTION",
+    ]);
+    expect(screen.getByLabelText(/Instrumento disponible/)).toHaveValue("Guitarra");
+    fireEvent.change(screen.getByLabelText(/Instrumento disponible/), { target: { value: "Piano" } });
+    await userEvent.click(screen.getByRole("tab", { name: /ACADEMIC_SELECTION/ }));
+    await confirmSubmission();
+    await waitFor(() => expect(submitAction).toHaveBeenCalledWith(CONFIGURED_APPLICATION.applicationId, CONFIGURED_APPLICATION.personId, 5));
+    expect(updateAction.mock.calls.at(-1)?.[1]).toMatchObject({ expectedRevision: 4, data: { customAnswers: { [formTestId(101)]: "Piano" } } });
+    const sent = JSON.parse(JSON.stringify(updateAction.mock.calls.at(-1)?.[1].data));
+    expect(sent).not.toHaveProperty("academicBackground");
+    expect(sent).not.toHaveProperty("healthInclusion");
+    expect(sent).not.toHaveProperty("preference");
+  });
+
+  it("hides inactive section wrappers without unmounting the documentation snapshot", async () => {
+    const { container } = renderWizard({
+      initialApplication: {
+        ...CONFIGURED_APPLICATION,
+        canReadAttachments: true,
+        documents: [
+          {
+            id: formTestId(601),
+            name: "Documento solicitado",
+            instructions: "",
+            level: "OPTIONAL",
+            allowedFormats: ["application/pdf"],
+            displayOrder: 0,
+            canUpload: false,
+          },
+        ],
+      },
+    });
+    const wrappers = () => [...container.querySelectorAll("fieldset")].filter((element) => element.querySelector("[role=tabpanel]"));
+    expect(wrappers().filter((element) => !element.hidden)).toHaveLength(1);
+    const documentation = container.querySelector('[role="region"][aria-label="Documentación"]')!;
+    expect(documentation).not.toBeVisible();
+    expect(documentation.closest("fieldset")).toHaveAttribute("hidden");
+
+    await userEvent.click(screen.getByRole("tab", { name: /DOCUMENTATION/ }));
+    expect(screen.getByRole("region", { name: "Documentación" })).toBe(documentation);
+    expect(documentation).toBeVisible();
+    expect(wrappers().filter((element) => !element.hidden)).toHaveLength(1);
+
+    await userEvent.click(screen.getByRole("tab", { name: /Preguntas de la institución/ }));
+    expect(container.querySelector('[role="region"][aria-label="Documentación"]')).toBe(documentation);
+    expect(documentation).not.toBeVisible();
+    expect(documentation.closest("fieldset")).toHaveAttribute("hidden");
+    expect(wrappers().filter((element) => !element.hidden)).toHaveLength(1);
+  });
+
+  it("shows only shift when preferences were replaced with the standalone block", async () => {
+    renderWizard({ initialApplication: { ...CONFIGURED_APPLICATION, formDefinition: configuredForm(FORM_QUESTIONS, ["PREFERRED_SHIFT"]) } });
+    await userEvent.click(screen.getByRole("tab", { name: /PREFERRED_SHIFT/ }));
+    expect(screen.getByRole("combobox", { name: /Turno de preferencia/ })).toBeVisible();
+    expect(screen.queryByText(/Autorizo.*imagen/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/reingresante/)).not.toBeInTheDocument();
+  });
+
+  it("keeps local answers visible and stops autosave after a 409 conflict", async () => {
+    jest.useFakeTimers({ doNotFake: ["queueMicrotask", "nextTick"] });
+    updateAction.mockResolvedValue({ error: "Revisión desactualizada", status: 409 });
+    renderWizard({ initialApplication: CONFIGURED_APPLICATION });
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    await user.click(screen.getByRole("tab", { name: /Preguntas de la institución/ }));
+    const answer = await screen.findByLabelText(/Instrumento disponible/);
+    fireEvent.change(answer, { target: { value: "Mi respuesta local" } });
+    await act(async () => {
+      jest.advanceTimersByTime(800);
+    });
+    expect(await screen.findByText("La inscripción cambió en otra sesión")).toBeVisible();
+    expect(answer).toHaveValue("Mi respuesta local");
+    expect(screen.getByRole("button", { name: "Recargar inscripción" })).toBeVisible();
+    fireEvent.change(answer, { target: { value: "Sigue en pantalla" } });
+    await act(async () => {
+      jest.advanceTimersByTime(800);
+    });
+    expect(updateAction).toHaveBeenCalledTimes(1);
+    expect(screen.getByRole("button", { name: "Enviar inscripción" })).toBeDisabled();
+  });
+
+  it("fails closed without a version definition instead of falling back to BASE", () => {
+    renderWizard({ initialApplication: { ...CONFIGURED_APPLICATION, formDefinition: null } });
+    expect(screen.getByRole("alert")).toHaveTextContent("No se pudo cargar el formulario");
+    expect(screen.queryByRole("tab")).not.toBeInTheDocument();
+    expect(updateAction).not.toHaveBeenCalled();
   });
 });

@@ -6,17 +6,16 @@ import type { z } from "zod";
 
 import { getErrorMessage } from "@common/utils/error-message.util";
 
-import {
-  submitEnrollmentApplicationAction,
-  updateEnrollmentDraftAction,
-} from "@features/enrollment-applications/actions/enrollment-application.actions";
+import { submitEnrollmentApplicationAction } from "@features/enrollment-applications/actions/enrollment-application.actions";
 import { ENROLLMENT_MESSAGES } from "@features/enrollment-applications/constants/enrollment-messages.constants";
 import { FIELD_ID_BY_ERROR_PATH } from "@features/enrollment-applications/constants/enrollment-wizard-fields.constants";
 import { createEnrollmentSubmissionSchema } from "@features/enrollment-applications/schemas/enrollment-application.schema";
 import type { EnrollmentApplicationData } from "@features/enrollment-applications/types/enrollment-application-data.types";
 import type { EnrollmentApplicationResponse } from "@features/enrollment-applications/types/enrollment-application-response.types";
 import type { EnrollmentCourseOption } from "@features/enrollment-applications/types/enrollment-course-option.types";
-import { unwrapEnrollmentResult } from "@features/enrollment-applications/utils/unwrap-enrollment-result.util";
+import { customAnswerFieldId, ENROLLMENT_NATIVE_TABS } from "@features/enrollment-applications/utils/enrollment-form.util";
+import { EnrollmentMutationError, unwrapEnrollmentResult } from "@features/enrollment-applications/utils/unwrap-enrollment-result.util";
+import type { EnrollmentFormDefinition } from "@features/enrollment-forms/types/enrollment-form-definition.types";
 
 export async function submitEnrollmentWizard({
   blockedDocumentsRef,
@@ -34,6 +33,9 @@ export async function submitEnrollmentWizard({
   actingForOtherPerson = false,
   setPendingFocusFieldId,
   draftSaveQueue,
+  persistDraft,
+  onConflict,
+  definition,
   setApplication,
   router,
 }: {
@@ -52,6 +54,9 @@ export async function submitEnrollmentWizard({
   actingForOtherPerson?: boolean;
   setPendingFocusFieldId: Dispatch<SetStateAction<string | null>>;
   draftSaveQueue: RefObject<Promise<void>>;
+  persistDraft: (data: EnrollmentApplicationData) => Promise<EnrollmentApplicationResponse>;
+  onConflict?: () => void;
+  definition?: EnrollmentFormDefinition | null;
   setApplication: Dispatch<SetStateAction<EnrollmentApplicationResponse>>;
   router: ReturnType<typeof useRouter>;
 }): Promise<{ error?: string; issues?: z.ZodIssue[] }> {
@@ -65,7 +70,7 @@ export async function submitEnrollmentWizard({
 
   setInvalidInstrumentGroups([...pendingInstrumentGroups]);
 
-  const parsed = createEnrollmentSubmissionSchema(actingForOtherPerson).safeParse(structuredData);
+  const parsed = createEnrollmentSubmissionSchema(actingForOtherPerson, definition).safeParse(structuredData);
 
   const issues: z.ZodIssue[] = parsed.success ? [] : [...parsed.error.issues];
 
@@ -96,32 +101,7 @@ export async function submitEnrollmentWizard({
   if (issues.length > 0) {
     setValidationIssues(issues);
 
-    // Auto-navigate to the first invalid step and focus its field
-    const firstIssue = issues[0];
-
-    if (firstIssue && firstIssue.path.length > 0) {
-      const section = firstIssue.path[0];
-
-      if (section === "personalData") {
-        handleActiveTabChange("personal");
-      } else if (section === "academicBackground") {
-        handleActiveTabChange("education");
-      } else if (section === "healthInclusion") {
-        handleActiveTabChange("health");
-      } else if (section === "responsible" && (isMinor || actingForOtherPerson)) {
-        handleActiveTabChange("responsible");
-      } else if (section === "careerSelection" || section === "courses") {
-        handleActiveTabChange("spaces");
-      } else if (section === "preference") {
-        handleActiveTabChange("preferences");
-      }
-
-      const fieldId = FIELD_ID_BY_ERROR_PATH[firstIssue.path.join(".")];
-
-      if (fieldId) {
-        setPendingFocusFieldId(fieldId);
-      }
-    }
+    focusEnrollmentIssue(issues[0], definition, handleActiveTabChange, setPendingFocusFieldId, isMinor || actingForOtherPerson);
 
     return { issues };
   }
@@ -129,13 +109,7 @@ export async function submitEnrollmentWizard({
   try {
     await draftSaveQueue.current;
 
-    const savedApplication = await updateEnrollmentDraftAction(
-      application.applicationId,
-      {
-        data: structuredData,
-      },
-      application.personId,
-    ).then(unwrapEnrollmentResult);
+    const savedApplication = await persistDraft(structuredData);
 
     setApplication(savedApplication);
 
@@ -156,13 +130,91 @@ export async function submitEnrollmentWizard({
       return { issues: documentIssues };
     }
 
-    setApplication(await submitEnrollmentApplicationAction(application.applicationId, application.personId).then(unwrapEnrollmentResult));
+    setApplication(
+      await submitEnrollmentApplicationAction(application.applicationId, application.personId, savedApplication.draftRevision ?? 0).then(
+        unwrapEnrollmentResult,
+      ),
+    );
     router.refresh();
 
     return {};
   } catch (error) {
+    if (error instanceof EnrollmentMutationError && error.status === 409) {
+      onConflict?.();
+    }
+
+    if (error instanceof EnrollmentMutationError && error.fieldErrors) {
+      const serverIssues: z.ZodIssue[] = Object.entries(error.fieldErrors).map(([field, message]) => ({
+        code: "custom",
+        path: field.split("."),
+        message,
+      }));
+
+      setValidationIssues(serverIssues);
+      focusEnrollmentIssue(serverIssues[0], definition, handleActiveTabChange, setPendingFocusFieldId, isMinor || actingForOtherPerson);
+
+      return { error: error.message, issues: serverIssues };
+    }
+
     return {
       error: getErrorMessage(error, ENROLLMENT_MESSAGES.SUBMISSION_FAILED),
     };
   }
+}
+
+function focusEnrollmentIssue(
+  issue: z.ZodIssue | undefined,
+  definition: EnrollmentFormDefinition | null | undefined,
+  changeTab: (tab: string) => void,
+  focus: Dispatch<SetStateAction<string | null>>,
+  requiresRepresentative: boolean,
+): void {
+  if (!issue) {
+    return;
+  }
+
+  const section = issue.path[0];
+
+  const tabs: Record<string, string> = {
+    personalData: "personal",
+    academicBackground: "education",
+    healthInclusion: "health",
+    careerSelection: "spaces",
+    courses: "spaces",
+    preference: "preferences",
+    documents: "documents",
+  };
+
+  if (section === "responsible" && requiresRepresentative) {
+    changeTab("responsible");
+  } else if (section === "customAnswers") {
+    const questionId = String(issue.path[1] ?? "");
+
+    const custom = definition?.sections.find((value) => value.questions.some((question) => question.id === questionId));
+
+    if (custom) {
+      changeTab(`custom-${custom.id}`);
+      focus(customAnswerFieldId(questionId));
+
+      return;
+    }
+
+    focus("enrollment-validation-alert");
+
+    return;
+  } else if (typeof section === "string" && tabs[section]) {
+    const tab = tabs[section];
+
+    if (definition && !definition.sections.some((item) => item.nativeBlock && ENROLLMENT_NATIVE_TABS[item.nativeBlock] === tab)) {
+      focus("enrollment-validation-alert");
+
+      return;
+    }
+
+    changeTab(tab);
+  }
+
+  const id = FIELD_ID_BY_ERROR_PATH[issue.path.join(".")];
+
+  focus(id ?? "enrollment-validation-alert");
 }

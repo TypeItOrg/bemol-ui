@@ -23,7 +23,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ pers
   try {
     const response = await institutionalApiFetch(`${await getSelfServiceEnrollmentApiPath(personId)}/${suffix}?${query}`, {
       signal: request.signal,
-      headers: { Accept: suffix.endsWith("/pdf") ? "application/pdf, application/json" : "application/json" },
+      headers: { Accept: "application/json" },
     });
 
     const headers = new Headers({ "cache-control": "private, no-store", "x-content-type-options": "nosniff" });

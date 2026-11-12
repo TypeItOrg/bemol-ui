@@ -33,9 +33,11 @@ type Props = Pick<
   | "nationalityCountry"
   | "email"
   | "handleActiveTabChange"
->;
+> & { stepTitle?: string; hideNavigation?: boolean };
 
 export function EnrollmentPersonalStep({
+  stepTitle,
+  hideNavigation = false,
   actingForOtherPerson,
   getFieldError,
   firstName,
@@ -56,7 +58,7 @@ export function EnrollmentPersonalStep({
       <Card className="bg-muted/25 @container sm:[--card-spacing:--spacing(6)]">
         <EnrollmentStepCardHeader
           icon={UserRoundIcon}
-          title="1. Datos Personales y Contacto"
+          title={stepTitle ?? "1. Datos Personales y Contacto"}
           description={
             actingForOtherPerson ? (
               "Estos datos pertenecen a la persona representada. Para corregirlos, contactá a la institución; tu cuenta personal no modifica este perfil."
@@ -182,11 +184,13 @@ export function EnrollmentPersonalStep({
             </Field>
           </div>
         </CardContent>
-        <CardFooter className="flex flex-col items-stretch sm:flex-row sm:items-center sm:justify-end">
-          <Button type="button" size="lg" onClick={() => handleActiveTabChange("education")} className="w-full gap-1.5 sm:w-auto">
-            Siguiente: Escolaridad
-          </Button>
-        </CardFooter>
+        {!hideNavigation ? (
+          <CardFooter className="flex flex-col items-stretch sm:flex-row sm:items-center sm:justify-end">
+            <Button type="button" size="lg" onClick={() => handleActiveTabChange("education")} className="w-full gap-1.5 sm:w-auto">
+              Siguiente: Escolaridad
+            </Button>
+          </CardFooter>
+        ) : null}
       </Card>
     </TabsContent>
   );

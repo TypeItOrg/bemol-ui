@@ -10,6 +10,7 @@ import { AcademicScope } from "@features/academic/utils/academic-scope.util";
 import { EnrollmentAdmissionHistory } from "@features/enrollment-applications/components/enrollment-admission-history";
 import { EnrollmentApplicationCoursesManagement } from "@features/enrollment-applications/components/enrollment-application-courses-management";
 import { EnrollmentApplicationStatusBadge } from "@features/enrollment-applications/components/enrollment-application-status-badge";
+import { EnrollmentConfiguredSummary } from "@features/enrollment-applications/components/enrollment-configured-summary";
 import { SECTION_CARD_CLASS_NAME } from "@features/enrollment-applications/components/enrollment-detail-card";
 import { EnrollmentDocuments } from "@features/enrollment-applications/components/enrollment-documents";
 import { EnrollmentHealthSummary } from "@features/enrollment-applications/components/enrollment-health-summary";
@@ -124,28 +125,37 @@ export function EnrollmentStatusCard({
       ) : null}
 
       {application.admissionHistory?.length ? <EnrollmentAdmissionHistory application={application} /> : null}
-      <div className="grid gap-4 xl:grid-cols-2">
-        <EnrollmentPersonalSummary personal={personal} />
+      {application.formVersionId ? (
+        <EnrollmentConfiguredSummary
+          application={application}
+          scope={scope}
+          showRequirementChanges={showRequirementChanges}
+          administrativeView={administrativeView}
+        />
+      ) : (
+        <div className="grid gap-4 xl:grid-cols-2">
+          <EnrollmentPersonalSummary personal={personal} />
 
-        <EnrollmentSchoolingSummary academic={academic} />
+          <EnrollmentSchoolingSummary academic={academic} />
 
-        <EnrollmentHealthSummary health={health} />
-        <EnrollmentResponsibleSummary responsible={responsible} />
+          <EnrollmentHealthSummary health={health} />
+          <EnrollmentResponsibleSummary responsible={responsible} />
 
-        {spaces.length > 0 ? <EnrollmentSpacesSummary application={application} spaces={spaces} /> : null}
+          {spaces.length > 0 ? <EnrollmentSpacesSummary application={application} spaces={spaces} /> : null}
 
-        <EnrollmentPreferenceSummary preference={preference} />
+          <EnrollmentPreferenceSummary preference={preference} />
 
-        <div className="xl:col-span-2">
-          <EnrollmentDocuments
-            key={application.updatedAt}
-            application={application}
-            scope={scope}
-            showRequirementChanges={showRequirementChanges}
-            administrativeView={administrativeView}
-          />
+          <div className="xl:col-span-2">
+            <EnrollmentDocuments
+              key={application.updatedAt}
+              application={application}
+              scope={scope}
+              showRequirementChanges={showRequirementChanges}
+              administrativeView={administrativeView}
+            />
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

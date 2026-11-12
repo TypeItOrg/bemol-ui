@@ -1,17 +1,19 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 
 import { useRouter } from "next/navigation";
 
 import type { z } from "zod";
 
+import { ENROLLMENT_MESSAGES } from "@features/enrollment-applications/constants/enrollment-messages.constants";
 import { useEnrollmentDraftAutosave } from "@features/enrollment-applications/hooks/use-enrollment-draft-autosave";
 import { useEnrollmentWizardCourses } from "@features/enrollment-applications/hooks/use-enrollment-wizard-courses";
 import { useEnrollmentWizardForm } from "@features/enrollment-applications/hooks/use-enrollment-wizard-form";
 import { useEnrollmentWizardNavigation } from "@features/enrollment-applications/hooks/use-enrollment-wizard-navigation";
 import type { EnrollmentWizardProps } from "@features/enrollment-applications/types/enrollment-wizard-props.types";
 import { submitEnrollmentWizard } from "@features/enrollment-applications/utils/submit-enrollment-wizard.util";
+import { enrollmentFormDefinitionSchema } from "@features/enrollment-forms/schemas/enrollment-form-definition.schema";
 
 export function useEnrollmentWizard(props: EnrollmentWizardProps) {
   const {
@@ -23,7 +25,23 @@ export function useEnrollmentWizard(props: EnrollmentWizardProps) {
 
   const router = useRouter();
 
-  const readOnly = requestedReadOnly || initialApplication.periodOpen === false;
+  const configuredForm = useMemo(() => {
+    if (!initialApplication.formVersionId) {
+      return { definition: undefined, error: undefined };
+    }
+
+    const parsed = enrollmentFormDefinitionSchema.safeParse(initialApplication.formDefinition);
+
+    if (!parsed.success || !Number.isSafeInteger(initialApplication.draftRevision) || (initialApplication.draftRevision ?? -1) < 0) {
+      return { definition: undefined, error: ENROLLMENT_MESSAGES.FORM_VERSION_LOAD_FAILED };
+    }
+
+    return { definition: parsed.data, error: undefined };
+  }, [initialApplication.formVersionId, initialApplication.formDefinition, initialApplication.draftRevision]);
+
+  const definition = configuredForm.definition;
+
+  const readOnly = requestedReadOnly || initialApplication.periodOpen === false || Boolean(configuredForm.error);
 
   const [application, setApplication] = useState(initialApplication);
 
@@ -43,7 +61,7 @@ export function useEnrollmentWizard(props: EnrollmentWizardProps) {
 
   const courses = useEnrollmentWizardCourses(props, setValidationIssues);
 
-  const form = useEnrollmentWizardForm(initialApplication.data, initialShifts, readOnly, courses.selectedCourseIds);
+  const form = useEnrollmentWizardForm(initialApplication.data, initialShifts, readOnly, courses.selectedCourseIds, definition);
 
   const hasDocumentsStep =
     Boolean(application.canReadAttachments) && (application.documents?.some((requirement) => requirement.active !== false) ?? false);
@@ -52,7 +70,7 @@ export function useEnrollmentWizard(props: EnrollmentWizardProps) {
 
   const requiresRepresentative = actingForOtherPerson || form.isMinor;
 
-  const navigation = useEnrollmentWizardNavigation(requiresRepresentative, hasDocumentsStep, isSubmitDialogOpen);
+  const navigation = useEnrollmentWizardNavigation(requiresRepresentative, hasDocumentsStep, isSubmitDialogOpen, definition);
 
   const autosave = useEnrollmentDraftAutosave({
     application,
@@ -75,6 +93,12 @@ export function useEnrollmentWizard(props: EnrollmentWizardProps) {
   }
 
   function setIsSubmitDialogOpen(open: boolean): void {
+    if (open && autosave.saveConflict) {
+      setSubmissionError(ENROLLMENT_MESSAGES.DRAFT_REVISION_SUBMIT_CONFLICT);
+
+      return;
+    }
+
     if (open) {
       setConfirmation("submit");
 
@@ -114,6 +138,9 @@ export function useEnrollmentWizard(props: EnrollmentWizardProps) {
       actingForOtherPerson,
       setPendingFocusFieldId: navigation.setPendingFocusFieldId,
       draftSaveQueue: autosave.draftSaveQueue,
+      persistDraft: autosave.persistDraft,
+      onConflict: autosave.pauseForConflict,
+      definition,
       setApplication,
       router,
     });
@@ -122,7 +149,7 @@ export function useEnrollmentWizard(props: EnrollmentWizardProps) {
       setSubmissionError(result.error);
       setIsSubmitDialogOpen(false);
 
-      if (result.error || result.issues?.some((issue) => issue.path[0] === "documents")) {
+      if ((result.error && !result.issues?.length) || result.issues?.some((issue) => issue.path[0] === "documents")) {
         navigation.setPendingFocusFieldId("enrollment-validation-alert");
       }
     }
@@ -140,6 +167,8 @@ export function useEnrollmentWizard(props: EnrollmentWizardProps) {
     ...navigation,
     ...autosave,
     application,
+    definition,
+    definitionError: configuredForm.error,
     initialApplication,
     readOnly,
     requestedReadOnly,

@@ -31,6 +31,21 @@ function EnrollmentWizardView(props: EnrollmentWizardProps): ReactElement {
 
   const hasMissingDocuments = validationIssues.some((issue) => issue.path[0] === "documents");
 
+  if (model.definitionError) {
+    return (
+      <Alert variant="destructive">
+        <AlertCircleIcon />
+        <AlertTitle>No se pudo cargar el formulario</AlertTitle>
+        <AlertDescription>
+          {model.definitionError}
+          <Button type="button" variant="outline" onClick={() => window.location.reload()}>
+            Recargar inscripción
+          </Button>
+        </AlertDescription>
+      </Alert>
+    );
+  }
+
   if (application.status !== ENROLLMENT_APPLICATION_STATUS.DRAFT) {
     return <EnrollmentStatusCard application={application} />;
   }
@@ -73,6 +88,18 @@ function EnrollmentWizardView(props: EnrollmentWizardProps): ReactElement {
       ) : null}
 
       <EnrollmentDraftStatus {...model} trainingPathName={application.trainingPathName} academicYear={application.academicYear} />
+      {model.saveConflict ? (
+        <Alert variant="destructive">
+          <AlertTriangleIcon />
+          <AlertTitle>La inscripción cambió en otra sesión</AlertTitle>
+          <AlertDescription>
+            Tus cambios siguen en pantalla y no se sobrescribieron. Copialos antes de recargar para revisar la versión actual.
+            <Button type="button" variant="outline" onClick={() => window.location.reload()}>
+              Recargar inscripción
+            </Button>
+          </AlertDescription>
+        </Alert>
+      ) : null}
       {submissionError || validationIssues.length > 0 ? (
         <Alert variant="destructive" id="enrollment-validation-alert" tabIndex={-1}>
           <AlertCircleIcon />

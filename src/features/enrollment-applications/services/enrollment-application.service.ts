@@ -182,9 +182,14 @@ export async function updateEnrollmentDraft(
   return response.json();
 }
 
-export async function submitEnrollmentApplication(applicationId: string, personId?: string): Promise<EnrollmentApplicationResponse> {
+export async function submitEnrollmentApplication(
+  applicationId: string,
+  personId?: string,
+  expectedRevision?: number,
+): Promise<EnrollmentApplicationResponse> {
   const response = await institutionalApiFetch(`${await getSelfServiceEnrollmentApiPath(personId)}/${applicationId}/submit`, {
     method: "POST",
+    ...(expectedRevision === undefined ? {} : { headers: { "Content-Type": "application/json" }, body: JSON.stringify({ expectedRevision }) }),
   });
 
   if (!response.ok) {

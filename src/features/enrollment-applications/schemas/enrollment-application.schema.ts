@@ -7,8 +7,11 @@ import {
   preferenceSchema,
   responsibleSchema,
 } from "@features/enrollment-applications/schemas/enrollment-applicant-data.schema";
+import { enrollmentCustomAnswersSchema, enrollmentAnswerIssues } from "@features/enrollment-applications/schemas/enrollment-custom-answers.schema";
 import { academicBackgroundSchema, educationLevelSchema } from "@features/enrollment-applications/schemas/enrollment-schooling.schema";
 import { calculateAge } from "@features/enrollment-applications/utils/enrollment-age.util";
+import { hasEnrollmentBlock } from "@features/enrollment-applications/utils/enrollment-form.util";
+import type { EnrollmentFormDefinition } from "@features/enrollment-forms/types/enrollment-form-definition.types";
 
 export const startEnrollmentApplicationSchema = z.object({
   enrollmentPeriodId: z.uuid().optional(),
@@ -38,6 +41,7 @@ const enrollmentCoursesSchema = z.array(z.object({ courseId: z.uuid(), preferred
 
 // Schema para guardar borrador (permite campos incompletos durante el autoguardado)
 export const updateEnrollmentDraftSchema = z.object({
+  expectedRevision: z.number().int().nonnegative().optional(),
   data: z.object({
     academicBackground: z
       .object({
@@ -68,24 +72,34 @@ export const updateEnrollmentDraftSchema = z.object({
       .optional(),
     careerSelection: z.object({ trainingPathId: z.uuid().optional() }).optional(),
     courses: enrollmentCoursesSchema.optional(),
+    customAnswers: enrollmentCustomAnswersSchema.nullable().optional(),
   }),
 });
 
 // Schema completo y estricto para Enviar Inscripción (valida los pasos y reglas condicionales)
-export function createEnrollmentSubmissionSchema(actingForOtherPerson = false) {
+export function createEnrollmentSubmissionSchema(actingForOtherPerson = false, definition?: EnrollmentFormDefinition | null) {
+  const optionalPreference = hasEnrollmentBlock(definition, "PREFERRED_SHIFT")
+    ? preferenceSchema.pick({ preferredShift: true }).strict()
+    : z.undefined().optional();
+
   return z
     .object({
       // Represented people use their representative's contact, regardless of age.
       personalData: personalDataSchema.extend({ email: z.string().trim().nullish() }),
-      academicBackground: academicBackgroundSchema,
-      healthInclusion: healthInclusionSchema,
+      academicBackground: hasEnrollmentBlock(definition, "SCHOOLING") ? academicBackgroundSchema : z.undefined().optional(),
+      healthInclusion: hasEnrollmentBlock(definition, "HEALTH_INCLUSION") ? healthInclusionSchema : z.undefined().optional(),
       responsible: responsibleSchema,
       careerSelection: careerSelectionSchema,
       courses: enrollmentCoursesSchema.min(1, ENROLLMENT_MESSAGES.SPACE_REQUIRED),
-      preference: preferenceSchema,
+      preference: hasEnrollmentBlock(definition, "PREFERENCES") ? preferenceSchema : optionalPreference,
+      customAnswers: enrollmentCustomAnswersSchema.nullable().optional(),
       attachments: z.array(enrollmentAttachmentSchema).default([]),
     })
     .superRefine((data, ctx) => {
+      for (const issue of enrollmentAnswerIssues(definition, data.customAnswers, true)) {
+        ctx.addIssue({ code: "custom", path: issue.path, message: issue.message });
+      }
+
       // 1. Condicional: Si edad < 18, tutor legal obligatorio
       const age = calculateAge(data.personalData.birthDate);
 
@@ -126,13 +140,13 @@ export function createEnrollmentSubmissionSchema(actingForOtherPerson = false) {
           });
         }
 
-        if (!resp?.email || resp.email.trim().length === 0) {
+        if (!definition && (!resp?.email || resp.email.trim().length === 0)) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
             message: ENROLLMENT_MESSAGES.RESPONSIBLE_EMAIL_REQUIRED,
             path: ["responsible", "email"],
           });
-        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(resp.email.trim())) {
+        } else if (resp?.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(resp.email.trim())) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
             message: ENROLLMENT_MESSAGES.RESPONSIBLE_EMAIL_INVALID,
@@ -140,7 +154,7 @@ export function createEnrollmentSubmissionSchema(actingForOtherPerson = false) {
           });
         }
 
-        if (!resp?.occupation || resp.occupation.trim().length === 0) {
+        if (!definition && (!resp?.occupation || resp.occupation.trim().length === 0)) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
             message: ENROLLMENT_MESSAGES.RESPONSIBLE_OCCUPATION_REQUIRED,
@@ -148,7 +162,7 @@ export function createEnrollmentSubmissionSchema(actingForOtherPerson = false) {
           });
         }
 
-        if (!resp?.educationLevel || resp.educationLevel.trim().length === 0) {
+        if (!definition && (!resp?.educationLevel || resp.educationLevel.trim().length === 0)) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
             message: ENROLLMENT_MESSAGES.RESPONSIBLE_EDUCATION_REQUIRED,
@@ -158,7 +172,7 @@ export function createEnrollmentSubmissionSchema(actingForOtherPerson = false) {
       }
 
       // 2. Condicional: Si recibe ajustes razonables, detalle e informe de salud obligatorios
-      if (data.healthInclusion.receivesReasonableAdjustments) {
+      if (data.healthInclusion?.receivesReasonableAdjustments) {
         if (!data.healthInclusion.adjustmentDetails || data.healthInclusion.adjustmentDetails.trim().length === 0) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
@@ -169,8 +183,12 @@ export function createEnrollmentSubmissionSchema(actingForOtherPerson = false) {
       }
 
       // 3. Condicional: Si es reingresante, docente previo obligatorio
-      if (data.preference.isReenrolling) {
-        if (!data.preference.previousTeacher || data.preference.previousTeacher.trim().length === 0) {
+      if (data.preference && "isReenrolling" in data.preference && data.preference.isReenrolling) {
+        if (
+          !("previousTeacher" in data.preference) ||
+          typeof data.preference.previousTeacher !== "string" ||
+          data.preference.previousTeacher.trim().length === 0
+        ) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
             message: ENROLLMENT_MESSAGES.PREVIOUS_TEACHER_REQUIRED,

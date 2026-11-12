@@ -38,9 +38,11 @@ type Props = Pick<
   | "courseOptionsError"
   | "handleActiveTabChange"
   | "setInvalidInstrumentGroups"
->;
+> & { stepTitle?: string; hideNavigation?: boolean };
 
 export function EnrollmentCourseStep({
+  stepTitle,
+  hideNavigation = false,
   requiresRepresentative,
   selectedCourseIds,
   initialApplication,
@@ -67,7 +69,7 @@ export function EnrollmentCourseStep({
       <Card className="bg-muted/25 @container sm:[--card-spacing:--spacing(6)]">
         <EnrollmentStepCardHeader
           icon={LibraryBigIcon}
-          title={requiresRepresentative ? "5. Cursos" : "4. Cursos"}
+          title={stepTitle ?? (requiresRepresentative ? "5. Cursos" : "4. Cursos")}
           description="Marcá los espacios que querés cursar y elegí el instrumento donde corresponda. Solo podés inscribirte si cumplís sus correlatividades."
         />
         <CardContent>
@@ -137,34 +139,36 @@ export function EnrollmentCourseStep({
             </Alert>
           ) : null}
         </CardContent>
-        <CardFooter className="flex flex-col-reverse items-stretch gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <Button
-            type="button"
-            variant="outline"
-            size="lg"
-            onClick={() => handleActiveTabChange(requiresRepresentative ? "responsible" : "health")}
-            className="gap-1.5"
-          >
-            Atrás
-          </Button>
-          <Button
-            type="button"
-            size="lg"
-            onClick={() => {
-              if (pendingInstrumentGroups.length > 0) {
-                setInvalidInstrumentGroups([...pendingInstrumentGroups]);
-                document.getElementById(`instrument-${pendingInstrumentGroups[0]}`)?.focus();
+        {!hideNavigation ? (
+          <CardFooter className="flex flex-col-reverse items-stretch gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <Button
+              type="button"
+              variant="outline"
+              size="lg"
+              onClick={() => handleActiveTabChange(requiresRepresentative ? "responsible" : "health")}
+              className="gap-1.5"
+            >
+              Atrás
+            </Button>
+            <Button
+              type="button"
+              size="lg"
+              onClick={() => {
+                if (pendingInstrumentGroups.length > 0) {
+                  setInvalidInstrumentGroups([...pendingInstrumentGroups]);
+                  document.getElementById(`instrument-${pendingInstrumentGroups[0]}`)?.focus();
 
-                return;
-              }
+                  return;
+                }
 
-              handleActiveTabChange("preferences");
-            }}
-            className="gap-1.5"
-          >
-            Siguiente: Preferencias
-          </Button>
-        </CardFooter>
+                handleActiveTabChange("preferences");
+              }}
+              className="gap-1.5"
+            >
+              Siguiente: Preferencias
+            </Button>
+          </CardFooter>
+        ) : null}
       </Card>
     </TabsContent>
   );

@@ -8,11 +8,17 @@ import { DetailCard, DetailItem } from "@features/enrollment-applications/compon
 import { SCHOOLING_EDUCATION_LEVEL_LABELS } from "@features/enrollment-applications/constants/enrollment-application.constants";
 import type { EnrollmentAcademicBackground } from "@features/enrollment-applications/types/enrollment-academic-background.types";
 
-export function EnrollmentSchoolingSummary({ academic }: { academic: Partial<EnrollmentAcademicBackground> }): ReactElement {
+export function EnrollmentSchoolingSummary({
+  academic,
+  title = "Escolaridad",
+}: {
+  academic: Partial<EnrollmentAcademicBackground>;
+  title?: string;
+}): ReactElement {
   const schooling = getSchoolingLabels(academic.currentlyStudying);
 
   return (
-    <DetailCard icon={GraduationCapIcon} title="Escolaridad" description="Antecedentes educativos informados.">
+    <DetailCard icon={GraduationCapIcon} title={title} description="Antecedentes educativos informados.">
       <dl className="grid gap-4 sm:grid-cols-2">
         <DetailItem label="Asiste actualmente" value={schooling.attendance} fallback="Asistencia no informada" />
         <DetailItem

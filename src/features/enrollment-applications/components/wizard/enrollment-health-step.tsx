@@ -18,9 +18,11 @@ import type { EnrollmentWizardModel } from "@features/enrollment-applications/ty
 type Props = Pick<
   EnrollmentWizardModel,
   "healthInclusion" | "updateHealthInclusion" | "getFieldError" | "handleActiveTabChange" | "requiresRepresentative"
->;
+> & { stepTitle?: string; hideNavigation?: boolean };
 
 export function EnrollmentHealthStep({
+  stepTitle,
+  hideNavigation = false,
   healthInclusion,
   updateHealthInclusion,
   getFieldError,
@@ -32,7 +34,7 @@ export function EnrollmentHealthStep({
       <Card className="bg-muted/25 @container sm:[--card-spacing:--spacing(6)]">
         <EnrollmentStepCardHeader
           icon={HeartHandshakeIcon}
-          title="3. Salud e Inclusión"
+          title={stepTitle ?? "3. Salud e Inclusión"}
           description="Información para garantizar la equidad, accesibilidad y ajustes razonables en tu formación."
         />
         <CardContent className="space-y-5">
@@ -79,19 +81,21 @@ export function EnrollmentHealthStep({
             </div>
           )}
         </CardContent>
-        <CardFooter className="flex flex-col-reverse items-stretch gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <Button type="button" variant="outline" size="lg" onClick={() => handleActiveTabChange("education")} className="gap-1.5">
-            Atrás
-          </Button>
-          <Button
-            type="button"
-            size="lg"
-            onClick={() => handleActiveTabChange(requiresRepresentative ? "responsible" : "spaces")}
-            className="gap-1.5"
-          >
-            {requiresRepresentative ? "Siguiente: Representante" : "Siguiente: Cursos"}
-          </Button>
-        </CardFooter>
+        {!hideNavigation ? (
+          <CardFooter className="flex flex-col-reverse items-stretch gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <Button type="button" variant="outline" size="lg" onClick={() => handleActiveTabChange("education")} className="gap-1.5">
+              Atrás
+            </Button>
+            <Button
+              type="button"
+              size="lg"
+              onClick={() => handleActiveTabChange(requiresRepresentative ? "responsible" : "spaces")}
+              className="gap-1.5"
+            >
+              {requiresRepresentative ? "Siguiente: Representante" : "Siguiente: Cursos"}
+            </Button>
+          </CardFooter>
+        ) : null}
       </Card>
     </TabsContent>
   );

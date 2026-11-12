@@ -45,8 +45,16 @@ export async function updateEnrollmentDraftAction(
   );
 }
 
-export async function submitEnrollmentApplicationAction(applicationId: string, personId?: string): Promise<ChangeEnrollmentCareerResult> {
-  if ((personId !== undefined && !isValidUuid(personId)) || !isValidUuid(applicationId)) {
+export async function submitEnrollmentApplicationAction(
+  applicationId: string,
+  personId?: string,
+  expectedRevision?: number,
+): Promise<ChangeEnrollmentCareerResult> {
+  if (
+    (personId !== undefined && !isValidUuid(personId)) ||
+    !isValidUuid(applicationId) ||
+    (expectedRevision !== undefined && (!Number.isSafeInteger(expectedRevision) || expectedRevision < 0))
+  ) {
     return { error: INVALID_ACTION_ARGUMENTS };
   }
 
@@ -54,6 +62,7 @@ export async function submitEnrollmentApplicationAction(applicationId: string, p
     `${await getSelfServiceEnrollmentApiPath(personId)}/${applicationId}/submit`,
     "POST",
     ENROLLMENT_MESSAGES.SUBMISSION_FAILED,
+    { expectedRevision },
   );
 }
 

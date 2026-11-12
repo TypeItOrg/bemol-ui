@@ -6,6 +6,8 @@ import type { EnrollmentPreference } from "@features/enrollment-applications/typ
 import type { EnrollmentResponsible } from "@features/enrollment-applications/types/enrollment-responsible.types";
 import type { SchoolingFormState } from "@features/enrollment-applications/types/enrollment-schooling-state.types";
 import { parseInitialBirthDate } from "@features/enrollment-applications/utils/enrollment-birth-date.util";
+import { hasEnrollmentBlock } from "@features/enrollment-applications/utils/enrollment-form.util";
+import type { EnrollmentFormDefinition } from "@features/enrollment-forms/types/enrollment-form-definition.types";
 
 export function buildEnrollmentWizardData({
   initial,
@@ -14,6 +16,8 @@ export function buildEnrollmentWizardData({
   responsible,
   preference,
   selectedCourseIds,
+  definition,
+  customAnswers,
 }: {
   initial: EnrollmentApplicationData | undefined;
   schooling: SchoolingFormState;
@@ -21,10 +25,20 @@ export function buildEnrollmentWizardData({
   responsible: EnrollmentResponsible;
   preference: EnrollmentPreference;
   selectedCourseIds: string[];
+  definition?: EnrollmentFormDefinition | null;
+  customAnswers?: Record<string, unknown>;
 }): EnrollmentApplicationData {
   const birthDate = parseInitialBirthDate(initial?.personalData?.birthDate);
 
   const trainingPathId = initial?.careerSelection?.trainingPathId;
+
+  let enabledPreference: Partial<EnrollmentPreference> | undefined;
+
+  if (hasEnrollmentBlock(definition, "PREFERENCES")) {
+    enabledPreference = preference;
+  } else if (hasEnrollmentBlock(definition, "PREFERRED_SHIFT")) {
+    enabledPreference = { preferredShift: preference.preferredShift };
+  }
 
   return {
     personalData: {
@@ -36,21 +50,26 @@ export function buildEnrollmentWizardData({
       nationalityCountry: initial?.personalData?.nationalityCountry ?? null,
       email: initial?.personalData?.email ?? "",
     },
-    academicBackground: {
-      ...schooling,
-      schoolOrigin: schooling.schoolOrigin || null,
-      currentGradeYear: schooling.currentGradeYear || null,
-      levelCompleted:
-        schooling.currentlyStudying === false && schooling.educationLevel === "SECONDARY" ? schooling.secondaryCompleted : schooling.levelCompleted,
-      secondaryDegreeTitle: schooling.secondaryDegreeTitle || null,
-    },
-    healthInclusion,
+    academicBackground: hasEnrollmentBlock(definition, "SCHOOLING")
+      ? {
+          ...schooling,
+          schoolOrigin: schooling.schoolOrigin || null,
+          currentGradeYear: schooling.currentGradeYear || null,
+          levelCompleted:
+            schooling.currentlyStudying === false && schooling.educationLevel === "SECONDARY"
+              ? schooling.secondaryCompleted
+              : schooling.levelCompleted,
+          secondaryDegreeTitle: schooling.secondaryDegreeTitle || null,
+        }
+      : undefined,
+    healthInclusion: hasEnrollmentBlock(definition, "HEALTH_INCLUSION") ? healthInclusion : undefined,
     responsible,
     careerSelection: trainingPathId ? { trainingPathId } : undefined,
     courses: selectedCourseIds.map((courseId) => ({
       courseId,
       preferredTeacherId: initial?.courses?.find((course) => course.courseId === courseId)?.preferredTeacherId ?? null,
     })),
-    preference,
+    preference: enabledPreference,
+    customAnswers: definition ? { ...customAnswers } : undefined,
   };
 }

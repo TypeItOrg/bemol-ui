@@ -7,9 +7,15 @@ import { UsersRoundIcon } from "lucide-react";
 import { DetailCard, DetailItem } from "@features/enrollment-applications/components/enrollment-detail-card";
 import type { EnrollmentResponsible } from "@features/enrollment-applications/types/enrollment-responsible.types";
 
-export function EnrollmentResponsibleSummary({ responsible }: { responsible: Partial<EnrollmentResponsible> }): ReactElement {
+export function EnrollmentResponsibleSummary({
+  responsible,
+  title = "Responsable o tutor legal",
+}: {
+  responsible: Partial<EnrollmentResponsible>;
+  title?: string;
+}): ReactElement {
   return (
-    <DetailCard icon={UsersRoundIcon} title="Responsable o tutor legal" description="Información del responsable, cuando corresponde.">
+    <DetailCard icon={UsersRoundIcon} title={title} description="Información del responsable, cuando corresponde.">
       {responsible.fullName ? (
         <dl className="grid gap-4 sm:grid-cols-2">
           <DetailItem className="sm:col-span-2" label="Nombre completo" value={responsible.fullName} />

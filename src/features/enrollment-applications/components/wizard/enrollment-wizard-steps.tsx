@@ -4,6 +4,7 @@ import type { ReactElement } from "react";
 
 import { Tabs } from "@common/components/ui/tabs";
 
+import { EnrollmentConfiguredSteps } from "@features/enrollment-applications/components/wizard/enrollment-configured-steps";
 import { EnrollmentCourseStep } from "@features/enrollment-applications/components/wizard/enrollment-course-step";
 import { EnrollmentDocumentsStep } from "@features/enrollment-applications/components/wizard/enrollment-documents-step";
 import { EnrollmentHealthStep } from "@features/enrollment-applications/components/wizard/enrollment-health-step";
@@ -22,16 +23,22 @@ export function EnrollmentWizardSteps({ model }: { model: EnrollmentWizardModel 
       className="w-full gap-3 [&_[data-slot=card-footer]_[data-slot=button]]:h-auto [&_[data-slot=card-footer]_[data-slot=button]]:min-h-9 [&_[data-slot=card-footer]_[data-slot=button]]:w-full [&_[data-slot=card-footer]_[data-slot=button]]:max-w-full [&_[data-slot=card-footer]_[data-slot=button]]:py-2 [&_[data-slot=card-footer]_[data-slot=button]]:text-center [&_[data-slot=card-footer]_[data-slot=button]]:whitespace-normal sm:[&_[data-slot=card-footer]_[data-slot=button]]:h-9 sm:[&_[data-slot=card-footer]_[data-slot=button]]:w-auto sm:[&_[data-slot=card-footer]_[data-slot=button]]:whitespace-nowrap"
     >
       <EnrollmentWizardNavigation {...model} />
-      <EnrollmentPersonalStep {...model} />
-      <EnrollmentSchoolingStep {...model} />
-      <EnrollmentHealthStep {...model} />
-      {model.requiresRepresentative ? <EnrollmentResponsibleStep {...model} /> : null}
-      <EnrollmentCourseStep {...model} />
-      <EnrollmentPreferencesStep {...model} />
-      {model.hasDocumentsStep ? (
-        // Keep the document snapshot mounted while navigating between steps.
-        <EnrollmentDocumentsStep {...model} />
-      ) : null}
+      {model.definition ? (
+        <EnrollmentConfiguredSteps model={model} />
+      ) : (
+        <>
+          <EnrollmentPersonalStep {...model} />
+          <EnrollmentSchoolingStep {...model} />
+          <EnrollmentHealthStep {...model} />
+          {model.requiresRepresentative ? <EnrollmentResponsibleStep {...model} /> : null}
+          <EnrollmentCourseStep {...model} />
+          <EnrollmentPreferencesStep {...model} />
+          {model.hasDocumentsStep ? (
+            // Keep the document snapshot mounted while navigating between steps.
+            <EnrollmentDocumentsStep {...model} />
+          ) : null}
+        </>
+      )}
     </Tabs>
   );
 }
