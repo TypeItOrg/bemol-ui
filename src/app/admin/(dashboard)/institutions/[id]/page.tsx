@@ -61,6 +61,9 @@ export default async function InstitutionDetailPage({ params, searchParams }: In
         </Button>
         <div className="flex w-full flex-wrap justify-start gap-3 md:w-auto md:justify-end">
           <Button asChild variant="outline" size="lg" className="flex-1 md:flex-none">
+            <ReturnToLink href={`/institutions/${id}/enrollment-forms`}>Formularios de inscripción</ReturnToLink>
+          </Button>
+          <Button asChild variant="outline" size="lg" className="flex-1 md:flex-none">
             <ReturnToLink href={`/institutions/${id}/enrollment-pdf`}>Planilla de inscripción</ReturnToLink>
           </Button>
           {institution.active ? (
