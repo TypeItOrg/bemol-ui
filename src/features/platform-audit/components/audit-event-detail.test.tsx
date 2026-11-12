@@ -1,7 +1,6 @@
 import { render, screen, within } from "@testing-library/react";
 
 import { AuditEventDetail } from "@features/platform-audit/components/audit-event-detail";
-import type { AuditEntityChange } from "@features/platform-audit/types/audit-entity-change.types";
 import type { AuditEvent } from "@features/platform-audit/types/audit-event.types";
 
 it.each([
@@ -24,16 +23,23 @@ it.each([
     institutionId: null,
     institutionName: null,
     action,
+    actionLabel: title,
     entityType: "PASSKEY",
+    entityLabel: "Llave de acceso",
     entityId: "llave",
     actedOnBehalf: false,
     requestId: null,
     origin: "SELF_SERVICE",
     occurredAt: "2026-11-03T12:00:00Z",
-    details: { entityName: "Equipo personal", changedFields: [action === "PASSKEY_DELETED" ? "active" : "label"], before, after },
-    history: null,
+    details: {
+      fieldLabels: { label: "Nombre de la llave de acceso", active: "Estado" },
+      entityName: "Equipo personal",
+      changedFields: [action === "PASSKEY_DELETED" ? "active" : "label"],
+      before,
+      after,
+    },
   };
-  const props = { returnTo: "/audit-events", roleLabels: {}, permissionLabels: {} };
+  const props = { returnTo: "/audit-events" };
   const { container, rerender } = render(<AuditEventDetail event={event} {...props} />);
 
   expect(screen.getByText(title)).toBeInTheDocument();
@@ -49,13 +55,18 @@ it.each([
 
   expect(container.textContent).not.toMatch(/passkey/i);
 
-  rerender(<AuditEventDetail event={{ ...event, details: { changedFields: ["label"] } }} {...props} />);
+  rerender(
+    <AuditEventDetail
+      event={{ ...event, details: { fieldLabels: { label: "Nombre de la llave de acceso" }, changedFields: ["label"] } }}
+      {...props}
+    />,
+  );
   expect(screen.queryByText("Equipo anterior")).not.toBeInTheDocument();
   expect(screen.queryByText("Equipo personal")).not.toBeInTheDocument();
   expect(within(screen.getByRole("table", { name: "Cambios" })).getAllByText("No registrado")).toHaveLength(2);
 });
 
-it("integra valores anteriores y nuevos, horarios de 24 horas y estados sin historial sin mostrar secciones vacías", () => {
+it("integra snapshots con horarios de 24 horas, fechas, nulos y campos privados sin secciones vacías", () => {
   const event: AuditEvent = {
     id: "evento-tecnico",
     actorKind: "ANONYMOUS",
@@ -66,129 +77,84 @@ it("integra valores anteriores y nuevos, horarios de 24 horas y estados sin hist
     institutionId: null,
     institutionName: null,
     action: "SHIFT_UPDATED",
+    actionLabel: "Turno actualizado",
+    module: "SHIFTS",
+    moduleLabel: "Turnos",
     entityType: "SHIFT",
+    entityLabel: "Turno",
     entityId: "entidad-tecnica",
     actedOnBehalf: false,
     requestId: null,
     origin: "PLATFORM_ADMINISTRATION",
     occurredAt: "2026-10-18T21:00:00Z",
     details: {
-      changedFields: ["name", "description", "allowedFormats", "year"],
-      before: { name: "Registro anterior", active: true, allowedFormats: ["image/png"], year: 2025 },
-      after: { name: "Registro actual", active: true, allowedFormats: ["image/jpeg"], year: 2026 },
-    },
-    history: {
-      revision: 12,
-      changes: [
-        {
-          entity: "Turno",
-          entityId: "entidad-tecnica",
-          operation: "UPDATED",
-          previousKnown: true,
-          fields: [
-            { field: "name", label: "Nombre", valueType: "TEXT", before: "Mañana", after: "Matutino" },
-            { field: "start_time", label: "Hora de inicio", valueType: "TIME", before: "13:00:00", after: "14:30:00" },
-            { field: "active", label: "Activo", valueType: "BOOLEAN", before: "true", after: "false" },
-            { field: "allowed_formats", label: "Formatos permitidos", valueType: "JSON", before: '["application/pdf"]', after: "[]" },
-            { field: "day_of_week", label: "Día de la semana", valueType: "TEXT", before: "MONDAY", after: "TUESDAY" },
-            { field: "deleted_at", label: "Fecha de eliminación", valueType: "DATETIME", before: null, after: "2026-10-18T22:45:30Z" },
-          ],
-        },
-        {
-          entity: "Otro turno",
-          entityId: "sin-baseline",
-          operation: "UPDATED",
-          previousKnown: false,
-          fields: [{ field: "name", label: "Nombre", valueType: "TEXT", before: null, after: "Turno legado" }],
-        },
-      ],
+      fieldLabels: {
+        name: "Nombre",
+        startTime: "Hora de inicio",
+        active: "Activo",
+        allowedFormats: "Formatos permitidos",
+        dayOfWeek: "Día",
+        startDate: "Desde",
+        description: "Descripción",
+        year: "Año",
+        optional: "Opcional",
+      },
+      changedFields: ["name", "startTime", "active", "allowedFormats", "dayOfWeek", "startDate", "description", "year", "optional"],
+      before: {
+        name: "Mañana",
+        startTime: "13:00:00",
+        active: true,
+        allowedFormats: ["application/pdf"],
+        dayOfWeek: { code: "MONDAY", label: "Lunes" },
+        startDate: null,
+        year: 2025,
+      },
+      after: {
+        name: "Matutino",
+        startTime: "14:30:00",
+        active: false,
+        allowedFormats: [],
+        dayOfWeek: { code: "TUESDAY", label: "Martes" },
+        startDate: { type: "DATETIME", value: "2026-10-18T22:45:30Z" },
+        year: 2026,
+        optional: null,
+      },
     },
   };
-  const props = { returnTo: "/audit-events?page=2", roleLabels: {}, permissionLabels: {} };
+  const props = { returnTo: "/audit-events?page=2" };
   const { rerender, container } = render(<AuditEventDetail event={event} {...props} />);
-
-  expect(screen.queryByRole("heading", { name: "Turno actualizado" })).not.toBeInTheDocument();
-  expect(screen.getByText("Acción")).toBeInTheDocument();
+  expect(screen.getByRole("heading", { name: "Datos del evento" })).toBeInTheDocument();
   expect(screen.getByText("Turno actualizado")).toBeInTheDocument();
   expect(screen.getByText("Fecha y hora")).toBeInTheDocument();
-  expect(screen.queryByText("Nombres actuales.")).not.toBeInTheDocument();
-  expect(screen.getByRole("heading", { name: "Datos del evento" })).toBeInTheDocument();
-  expect(screen.getByText("Qué ocurrió, cuándo y quién lo realizó.")).toBeInTheDocument();
-  expect(screen.getByText("Campos modificados y sus valores anteriores y nuevos.")).toBeInTheDocument();
   const table = screen.getByRole("table", { name: "Cambios" });
-  expect(screen.getAllByRole("table")).toHaveLength(1);
-  expect(screen.queryByRole("heading", { name: "Cambios registrados" })).not.toBeInTheDocument();
-  expect(screen.queryByRole("heading", { name: "Detalles de la operación" })).not.toBeInTheDocument();
   expect(
     within(table)
       .getAllByRole("columnheader")
       .map((column) => column.textContent),
   ).toEqual(["Campo", "Valor anterior", "Valor nuevo"]);
-  expect(screen.queryByText("Registro anterior")).not.toBeInTheDocument();
-  expect(screen.queryByText("Registro actual")).not.toBeInTheDocument();
-  expect(within(table).queryByText("image/png")).not.toBeInTheDocument();
-  expect(within(table).queryByText("image/jpeg")).not.toBeInTheDocument();
-  expect(within(table).queryByText("Estado")).not.toBeInTheDocument();
-  expect(within(table).getByText("2025")).toBeInTheDocument();
-  expect(screen.queryByText("evento-tecnico")).not.toBeInTheDocument();
-  expect(screen.queryByText("entidad-tecnica")).not.toBeInTheDocument();
-  expect(screen.queryByRole("heading", { name: "Información técnica" })).not.toBeInTheDocument();
-  expect(screen.queryByRole("button", { name: "Información técnica" })).not.toBeInTheDocument();
-  expect(screen.queryByText("Tipo de actor")).not.toBeInTheDocument();
 
-  expect(screen.getByText("Mañana")).toBeInTheDocument();
-  expect(screen.getByText("Matutino")).toBeInTheDocument();
-  expect(screen.getByText("13:00:00")).toBeInTheDocument();
-  expect(screen.getByText("14:30:00")).toBeInTheDocument();
+  for (const text of ["Mañana", "Matutino", "13:00:00", "14:30:00", "Lunes", "Martes", "application/pdf", "Ninguno", "2025"]) {
+    expect(within(table).getByText(text)).toBeInTheDocument();
+  }
+
   expect(screen.getByText(/19:45:30/)).toBeInTheDocument();
-  expect(screen.getByText("Lunes")).toBeInTheDocument();
-  expect(screen.getByText("Martes")).toBeInTheDocument();
-  expect(screen.getByText("application/pdf")).toBeInTheDocument();
-  expect(screen.getByText("Ninguno")).toBeInTheDocument();
-  expect(screen.getByText("Descripción")).toBeInTheDocument();
-  expect(within(screen.getByText("Turno legado").closest("tr")!).getByText("No registrado")).toBeInTheDocument();
   expect(within(screen.getByText("Descripción").closest("tr")!).getAllByText("No registrado")).toHaveLength(2);
-  expect(screen.getByText("Turno legado")).toBeInTheDocument();
+  expect(within(screen.getByText("Opcional").closest("tr")!).getByText("Sin estado registrado")).toBeInTheDocument();
+  expect(within(screen.getByText("Opcional").closest("tr")!).getByText("Sin especificar")).toBeInTheDocument();
+  expect(screen.getAllByRole("table")).toHaveLength(1);
   expect(screen.getByRole("link", { name: "Volver" })).toHaveAttribute("href", props.returnTo);
-  expect(container.textContent).not.toMatch(/a\.\s?m\.|p\.\s?m\./i);
-
-  rerender(<AuditEventDetail event={{ ...event, history: { revision: 12, changes: [] }, details: {} }} {...props} />);
+  expect(container.textContent).not.toMatch(/evento-tecnico|entidad-tecnica|a\.\s?m\.|p\.\s?m\./i);
+  rerender(<AuditEventDetail event={{ ...event, details: {} }} {...props} />);
   expect(screen.queryByRole("heading", { name: "Cambios" })).not.toBeInTheDocument();
   expect(screen.queryByRole("table")).not.toBeInTheDocument();
-
   rerender(
     <AuditEventDetail
-      event={{ ...event, history: null, details: { before: { name: "Turno anterior" }, after: { name: "Turno nuevo" } } }}
+      event={{ ...event, details: { fieldLabels: { name: "Nombre" }, before: { name: "Turno anterior" }, after: { name: "Turno nuevo" } } }}
       {...props}
     />,
   );
   expect(screen.getByText("Turno anterior")).toBeInTheDocument();
   expect(screen.getByText("Turno nuevo")).toBeInTheDocument();
-
-  rerender(
-    <AuditEventDetail
-      event={{
-        ...event,
-        details: { before: { name: "Nombre anterior conocido" }, after: { name: "Nombre posterior conocido" } },
-        history: {
-          revision: 13,
-          changes: [
-            {
-              entity: "Turno",
-              entityId: event.entityId,
-              operation: "UPDATED",
-              previousKnown: false,
-              fields: [{ field: "name", label: "Nombre", valueType: "TEXT", before: null, after: "Nombre posterior conocido" }],
-            },
-          ],
-        },
-      }}
-      {...props}
-    />,
-  );
-  expect(screen.getAllByRole("table")).toHaveLength(1);
-  expect(screen.getByText("Nombre anterior conocido")).toBeInTheDocument();
-  expect(screen.getAllByText("Nombre posterior conocido")).toHaveLength(1);
 });
 
 it("mantiene roles, permisos, documentación y datos de alta en tablas sin publicar valores privados", () => {
@@ -202,30 +168,46 @@ it("mantiene roles, permisos, documentación y datos de alta en tablas sin publi
     institutionId: null,
     institutionName: null,
     action: "PERSON_ROLES_CHANGED",
+    actionLabel: "Roles de persona modificados",
+    module: "ROLES",
+    moduleLabel: "Roles",
     entityType: "PERSON",
+    entityLabel: "Persona",
     entityId: "persona-tecnica",
     actedOnBehalf: false,
     requestId: "peticion-tecnica",
     origin: "PLATFORM_ADMINISTRATION",
     occurredAt: "2026-10-18T21:00:00Z",
-    history: null,
     details: {
-      before: [
-        {
-          roleId: "rol-anterior",
-          roleName: "Coordinación anterior",
-          accessScope: "TRAINING_PATHS",
-          trainingPathIds: ["trayecto-anterior"],
-          password: "VALOR_PRIVADO",
-        },
-      ],
-      after: [{ roleId: "rol-nuevo", roleName: "Coordinación actual", accessScope: "INSTITUTION", trainingPathIds: [] }],
+      fieldLabels: { roles: "Roles y alcances" },
+      before: {
+        roles: [
+          {
+            fieldLabels: { roleName: "Rol", accessScopeName: "Alcance", trainingPathCount: "Trayectos seleccionados" },
+            roleId: "rol-anterior",
+            roleName: "Coordinación anterior",
+            accessScopeName: "Trayectos seleccionados",
+            trainingPathCount: 1,
+            trainingPathIds: ["trayecto-anterior"],
+            password: "VALOR_PRIVADO",
+          },
+        ],
+      },
+      after: {
+        roles: [
+          {
+            fieldLabels: { roleName: "Rol", accessScopeName: "Alcance" },
+            roleId: "rol-nuevo",
+            roleName: "Coordinación actual",
+            accessScopeName: "Toda la institución",
+            trainingPathIds: [],
+          },
+        ],
+      },
     },
   };
   const props = {
     returnTo: "/audit-events",
-    roleLabels: { APPLICANT: "Postulante" },
-    permissionLabels: { COURSE_READ: "Ver cursos", COURSE_WRITE: "Editar cursos" },
   };
   const { rerender, container } = render(<AuditEventDetail event={event} {...props} />);
   expect(screen.queryByText("Administrador de plataforma")).not.toBeInTheDocument();
@@ -243,21 +225,10 @@ it("mantiene roles, permisos, documentación y datos de alta en tablas sin publi
       event={{
         ...event,
         action: "ROLE_UPDATED",
-        history: {
-          revision: 14,
-          changes: [
-            {
-              entity: "Permiso del rol",
-              entityId: "permiso-tecnico",
-              operation: "CREATED",
-              previousKnown: true,
-              fields: [{ field: "permission_id", label: "Permiso", valueType: "REFERENCE", before: null, after: "referencia-permiso" }],
-            },
-          ],
-        },
         details: {
-          before: { name: "Rol anterior", permissions: ["COURSE_READ"] },
-          after: { name: "Rol actual", permissions: ["COURSE_WRITE"] },
+          fieldLabels: { name: "Nombre", permissions: "Permisos efectivos" },
+          before: { name: "Rol anterior", permissions: [{ code: "COURSE_READ", label: "Ver cursos" }] },
+          after: { name: "Rol actual", permissions: [{ code: "COURSE_WRITE", label: "Editar cursos" }] },
         },
       }}
       {...props}
@@ -275,10 +246,18 @@ it("mantiene roles, permisos, documentación y datos de alta en tablas sin publi
         ...event,
         action: "DOCUMENT_DEFINITION_UPDATED",
         details: {
+          fieldLabels: { requirements: "Asignaciones documentales" },
           before: { requirements: [] },
           after: {
             requirements: [
-              { trainingPathName: "Trayecto musical", level: "BEFORE_CONFIRMATION", displayOrder: 2, active: true, storagePath: "VALOR_PRIVADO" },
+              {
+                fieldLabels: { trainingPathName: "Trayecto formativo", level: "Nivel", displayOrder: "Orden", active: "Estado" },
+                trainingPathName: "Trayecto musical",
+                level: { code: "BEFORE_CONFIRMATION", label: "Obligatorio para confirmar" },
+                displayOrder: 2,
+                active: true,
+                storagePath: "VALOR_PRIVADO",
+              },
             ],
           },
         },
@@ -288,13 +267,22 @@ it("mantiene roles, permisos, documentación y datos de alta en tablas sin publi
   );
   table = screen.getByRole("table", { name: "Cambios" });
   expect(within(table).getByText("Asignaciones documentales")).toBeInTheDocument();
-  expect(within(table).getByText("Sin asignaciones.")).toBeInTheDocument();
+  expect(within(table).getByText("Ninguno")).toBeInTheDocument();
   expect(within(table).getByText("Trayecto musical")).toBeInTheDocument();
+  expect(within(table).getByText("Obligatorio para confirmar")).toBeInTheDocument();
+  expect(within(table).getByText("Orden")).toBeInTheDocument();
   expect(container.textContent).not.toContain("VALOR_PRIVADO");
 
   rerender(
     <AuditEventDetail
-      event={{ ...event, action: "INSTITUTIONAL_ACCOUNT_CREATED", details: { initialRole: "APPLICANT", hasAccount: true } }}
+      event={{
+        ...event,
+        action: "INSTITUTIONAL_ACCOUNT_CREATED",
+        details: {
+          fieldLabels: { initialRole: "Rol inicial", hasAccount: "Cuenta asociada" },
+          after: { initialRole: { code: "APPLICANT", label: "Postulante" }, hasAccount: true },
+        },
+      }}
       {...props}
     />,
   );
@@ -307,17 +295,53 @@ it("mantiene roles, permisos, documentación y datos de alta en tablas sin publi
   expect(within(table).getByText("Postulante")).toBeInTheDocument();
 
   rerender(
-    <AuditEventDetail event={{ ...event, action: "INSTITUTIONAL_ACCESS_CHANGED", details: { previousEnabled: true, enabled: false } }} {...props} />,
+    <AuditEventDetail
+      event={{
+        ...event,
+        action: "INSTITUTIONAL_ACCESS_CHANGED",
+        details: { fieldLabels: { enabled: "Acceso" }, before: { enabled: true }, after: { enabled: false } },
+      }}
+      {...props}
+    />,
   );
   table = screen.getByRole("table", { name: "Cambios" });
   expect(within(table).getByText("Acceso")).toBeInTheDocument();
-  expect(within(table).getByText("Habilitado")).toBeInTheDocument();
-  expect(within(table).getByText("Deshabilitado")).toBeInTheDocument();
+  expect(within(table).getByText("Sí")).toBeInTheDocument();
+  expect(within(table).getByText("No")).toBeInTheDocument();
 
-  rerender(<AuditEventDetail event={{ ...event, action: "PERSON_UPDATED", details: { changedFields: ["firstName"] } }} {...props} />);
+  rerender(
+    <AuditEventDetail
+      event={{ ...event, action: "PERSON_UPDATED", details: { fieldLabels: { firstName: "Nombre" }, changedFields: ["firstName"] } }}
+      {...props}
+    />,
+  );
   table = screen.getByRole("table", { name: "Cambios" });
   expect(within(table).getByText("Nombre")).toBeInTheDocument();
   expect(within(table).getAllByText("No registrado")).toHaveLength(2);
+
+  rerender(
+    <AuditEventDetail
+      event={{
+        ...event,
+        action: "PERSON_UPDATED",
+        details: {
+          fieldLabels: { firstName: "Nombre", phoneNumber: "Teléfono", nationalityCountry: "Nacionalidad" },
+          changedFields: ["firstName", "phoneNumber", "nationalityCountry"],
+          before: { firstName: "Ana", phoneNumber: "3515551212", nationalityCountry: "Argentina" },
+          after: { firstName: "Ana María", phoneNumber: "3515553434", nationalityCountry: "Chile" },
+        },
+      }}
+      {...props}
+    />,
+  );
+  table = screen.getByRole("table", { name: "Cambios" });
+  expect(within(table).getByText("Nombre")).toBeInTheDocument();
+  expect(within(table).getByText("Teléfono")).toBeInTheDocument();
+  expect(within(table).getByText("Nacionalidad")).toBeInTheDocument();
+  expect(within(table).getByText("Ana")).toBeInTheDocument();
+  expect(within(table).getByText("Ana María")).toBeInTheDocument();
+  expect(within(table).getByText("Argentina")).toBeInTheDocument();
+  expect(within(table).getByText("Chile")).toBeInTheDocument();
 
   rerender(
     <AuditEventDetail event={{ ...event, action: "SHIFT_UPDATED", details: { before: { unknown: "VALOR_PRIVADO" }, after: {} } }} {...props} />,
@@ -330,7 +354,11 @@ it("mantiene roles, permisos, documentación y datos de alta en tablas sin publi
       event={{
         ...event,
         action: "EMAIL_SENT",
+        actionLabel: "Correo enviado",
+        module: "EMAILS",
+        moduleLabel: "Correos",
         entityType: "EMAIL",
+        entityLabel: "Correo",
         details: { mailType: "Recuperación de contraseña", recipient: "qa@example.test" },
       }}
       {...props}
@@ -341,39 +369,22 @@ it("mantiene roles, permisos, documentación y datos de alta en tablas sin publi
   expect(screen.getByText("qa@example.test")).toBeInTheDocument();
 });
 
-it("compara cupos y horarios sin confundir clases ni inventar estados ni volcar el historial interno en pantalla", () => {
-  const snapshots = (
-    prefix: string,
-    operation: "CREATED" | "DELETED",
-    number: number,
-    capacity: string,
-    start: string,
-    end: string,
-  ): AuditEntityChange[] => {
-    const snapshot = (entity: string, entityId: string, values: Record<string, string>): AuditEntityChange => ({
-      entity,
-      entityId,
-      operation,
-      previousKnown: true,
-      fields: Object.entries(values).map(([field, value]) => ({
-        field,
-        label: field,
-        valueType: field.endsWith("_id") ? "REFERENCE" : "TEXT",
-        before: operation === "DELETED" ? value : null,
-        after: operation === "CREATED" ? value : null,
-      })),
-    });
-
-    return [
-      snapshot("Clase", `${prefix}-class`, { class_number: String(number), course_id: "curso-qa", institution_id: "institucion-qa" }),
-      snapshot("Docente de clase", `${prefix}-teacher`, { course_class_id: `${prefix}-class`, person_id: "docente-qa" }),
-      snapshot("Día de clase", `${prefix}-day`, { course_class_id: `${prefix}-class`, day_of_week: "MONDAY", capacity }),
-      snapshot("Horario de clase", `${prefix}-schedule`, { course_class_day_id: `${prefix}-day`, start_time: start, end_time: end }),
-    ];
-  };
-
-  const original = snapshots("old", "DELETED", 1, "20", "09:00:00", "10:00:00");
-  const replacement = snapshots("new", "CREATED", 1, "25", "10:30:00", "11:30:00");
+it("compara snapshots de clases sin cruzar cupos ni horarios ni modificar los datos", () => {
+  const courseClass = (number: number, capacity: number, start: string, end: string) => ({
+    fieldLabels: { classNumber: "Clase", teachers: "Docentes", days: "Días" },
+    classNumber: number,
+    teachers: [{ fieldLabels: { personId: "Docente" }, personId: "Docente QA" }],
+    days: [
+      {
+        fieldLabels: { dayOfWeek: "Día", capacity: "Cupo", schedules: "Horarios" },
+        dayOfWeek: "Lunes",
+        capacity,
+        schedules: [{ fieldLabels: { startTime: "Desde", endTime: "Hasta" }, startTime: start, endTime: end }],
+      },
+    ],
+  });
+  const before = [courseClass(1, 20, "09:00:00", "10:00:00"), courseClass(2, 5, "14:00:00", "15:00:00")];
+  const after = [courseClass(1, 25, "10:30:00", "11:30:00"), courseClass(2, 8, "15:00:00", "16:00:00")];
   const event: AuditEvent = {
     id: "evento-curso",
     actorKind: "PLATFORM",
@@ -381,89 +392,92 @@ it("compara cupos y horarios sin confundir clases ni inventar estados ni volcar 
     actorName: "Administradora QA",
     subjectPersonId: null,
     subjectName: null,
-    institutionId: "institucion-qa",
-    institutionName: "Institución QA",
+    institutionId: null,
+    institutionName: null,
     action: "COURSE_CLASSES_CHANGED",
+    actionLabel: "Clases de curso actualizadas",
+    module: "COURSES",
+    moduleLabel: "Cursos",
     entityType: "COURSE",
+    entityLabel: "Curso",
     entityId: "curso-qa",
     actedOnBehalf: false,
     requestId: "peticion-qa",
     origin: "PLATFORM_ADMINISTRATION",
     occurredAt: "2026-10-18T22:18:38Z",
-    details: { entityName: "Curso QA", changedFields: ["classes"], before: { classCount: 1 }, after: { classCount: 1 } },
-    history: { revision: 20, changes: [...original, ...replacement] },
+    details: { fieldLabels: { classes: "Clases del curso" }, changedFields: ["classes"], before: { classes: before }, after: { classes: after } },
   };
-  const props = { returnTo: "/audit-events", roleLabels: {}, permissionLabels: {} };
-  const preservedHistory = JSON.stringify(event.history);
+  const props = { returnTo: "/audit-events" };
+  const preserved = JSON.stringify(event.details);
   const { rerender, container } = render(<AuditEventDetail event={event} {...props} />);
-  const table = screen.getByRole("table", { name: "Cambios" });
-  expect(within(table).getAllByRole("row")).toHaveLength(3);
-  expect(
-    within(within(table).getByRole("row", { name: /Cupo.*Clase 1 · Lunes/ }))
-      .getAllByRole("cell")
-      .map((cell) => cell.textContent),
-  ).toEqual(["20", "25"]);
-  expect(within(table).getByText("09:00:00–10:00:00")).toBeInTheDocument();
-  expect(within(table).getByText("10:30:00–11:30:00")).toBeInTheDocument();
-  expect(container.textContent).not.toMatch(/old-class|new-class|institucion-qa|Creación|Eliminación|No registrado/);
-  expect(screen.queryByRole("table", { name: "Historial técnico" })).not.toBeInTheDocument();
+  const cells = within(screen.getByRole("table", { name: "Cambios" })).getAllByRole("cell");
+
+  for (const text of ["20", "5", "09:00:00", "14:00:00"]) {
+    expect(within(cells[0]).getByText(text)).toBeInTheDocument();
+    expect(within(cells[1]).queryByText(text)).not.toBeInTheDocument();
+  }
+
+  for (const text of ["25", "8", "10:30:00", "16:00:00"]) {
+    expect(within(cells[1]).getByText(text)).toBeInTheDocument();
+    expect(within(cells[0]).queryByText(text)).not.toBeInTheDocument();
+  }
+
+  const previousClasses = within(cells[0]).getAllByText("Clase");
+  expect(previousClasses[0].parentElement?.textContent).toBe("Clase1");
+  expect(previousClasses[1].parentElement?.textContent).toBe("Clase2");
   expect(screen.getAllByRole("table")).toHaveLength(1);
-  expect(screen.queryByText("peticion-qa")).not.toBeInTheDocument();
-  expect(JSON.stringify(event.history)).toBe(preservedHistory);
-
-  rerender(
-    <AuditEventDetail
-      {...props}
-      event={{ ...event, history: { revision: 21, changes: [...original, ...snapshots("same", "CREATED", 1, "20", "09:00:00", "10:00:00")] } }}
-    />,
-  );
+  expect(container.textContent).not.toMatch(/peticion-qa|curso-qa|Creación|Eliminación/);
+  expect(JSON.stringify(event.details)).toBe(preserved);
+  rerender(<AuditEventDetail {...props} event={{ ...event, details: { ...event.details, changedFields: [], after: { classes: before } } }} />);
   expect(screen.queryByRole("table", { name: "Cambios" })).not.toBeInTheDocument();
-
   rerender(
-    <AuditEventDetail
-      {...props}
-      event={{
-        ...event,
-        history: {
-          revision: 22,
-          changes: [
-            ...original,
-            ...replacement,
-            ...snapshots("old2", "DELETED", 2, "5", "14:00:00", "15:00:00"),
-            ...snapshots("new2", "CREATED", 2, "8", "15:00:00", "16:00:00"),
-          ],
-        },
-      }}
-    />,
+    <AuditEventDetail {...props} event={{ ...event, details: { fieldLabels: { classes: "Clases del curso" }, after: { classes: after } } }} />,
   );
-  const multi = screen.getByRole("table", { name: "Cambios" });
-  expect(within(multi).getAllByRole("row")).toHaveLength(5);
-  expect(
-    within(within(multi).getByRole("row", { name: /Cupo.*Clase 2 · Lunes/ }))
-      .getAllByRole("cell")
-      .map((cell) => cell.textContent),
-  ).toEqual(["5", "8"]);
-  expect(within(multi).getByText("14:00:00–15:00:00")).toBeInTheDocument();
+  expect(within(screen.getByRole("table", { name: "Cambios" })).getByText("Sin estado registrado")).toBeInTheDocument();
+});
 
-  rerender(
-    <AuditEventDetail
-      {...props}
-      event={{
-        ...event,
-        history: {
-          revision: 23,
-          changes: [
-            {
-              entity: "Día de clase",
-              entityId: "legacy-day",
-              operation: "UPDATED",
-              previousKnown: false,
-              fields: [{ field: "capacity", label: "Cupo", valueType: "NUMBER", before: null, after: "25" }],
-            },
-          ],
-        },
-      }}
-    />,
-  );
-  expect(within(screen.getByRole("table", { name: "Cambios" })).getByText("No registrado")).toBeInTheDocument();
+it("presenta el rol inicial etiquetado de la entidad junto al contexto de alta", () => {
+  const event: AuditEvent = {
+    id: "alta",
+    actorKind: "PLATFORM",
+    actorId: "actor",
+    actorName: "Administradora",
+    subjectPersonId: null,
+    subjectName: null,
+    institutionId: null,
+    institutionName: null,
+    action: "PERSON_CREATED",
+    actionLabel: "Persona creada",
+    entityType: "PERSON",
+    entityLabel: "Persona",
+    entityId: "persona",
+    actedOnBehalf: false,
+    requestId: null,
+    origin: "PLATFORM_ADMINISTRATION",
+    occurredAt: "2026-11-11T12:00:00Z",
+    details: {
+      fieldLabels: {
+        firstName: "Nombre",
+        initialRole: "Rol inicial",
+        emailVerificationRequired: "Requiere verificación de correo",
+        emailVerificationStatus: "Verificación de correo al crear la cuenta",
+        personCreated: "Persona creada en esta operación",
+      },
+      before: {},
+      after: {
+        firstName: "Ana",
+        initialRole: { code: "APPLICANT", label: "Postulante" },
+        emailVerificationRequired: true,
+        emailVerificationStatus: { code: "PENDING", label: "Pendiente" },
+        personCreated: true,
+      },
+    },
+  };
+  render(<AuditEventDetail event={event} returnTo="/audit-events" />);
+  expect(screen.getByText("Ana")).toBeInTheDocument();
+  expect(screen.getByText("Postulante")).toBeInTheDocument();
+  expect(screen.queryByText("APPLICANT")).not.toBeInTheDocument();
+  expect(screen.getByText("Requiere verificación de correo")).toBeInTheDocument();
+  expect(screen.getByText("Pendiente")).toBeInTheDocument();
+  expect(screen.getAllByText("Rol inicial")).toHaveLength(1);
 });

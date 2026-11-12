@@ -11,9 +11,9 @@ import { Sheet } from "@common/components/ui/sheet";
 import { countActiveAdvancedFilters } from "@common/utils/count-active-advanced-filters.util";
 
 import { AuditEventsAdvancedFilters } from "@features/platform-audit/components/audit-events-advanced-filters";
-import { AUDIT_MODULE_LABELS } from "@features/platform-audit/constants/audit-labels.constants";
 import { fetchAuditPersonOptions } from "@features/platform-audit/services/fetch-audit-people.service";
 import type { AuditFilters } from "@features/platform-audit/types/audit-filters.types";
+import type { AuditModuleOption } from "@features/platform-audit/types/audit-module-option.types";
 import type { AuditPersonOption } from "@features/platform-audit/types/audit-person-option.types";
 import { PlatformCollectionActions } from "@features/platform-auth/components/platform-collection-actions";
 
@@ -22,11 +22,15 @@ export function AuditEventsFilters({
   institutionName,
   selectedActorLabel,
   selectedPersonLabel,
+  modules,
+  selectedActionLabel,
 }: {
   filters: AuditFilters;
   institutionName?: string;
   selectedActorLabel?: string;
   selectedPersonLabel?: string;
+  modules: AuditModuleOption[];
+  selectedActionLabel?: string;
 }): ReactElement {
   const { navigate } = useDataTableNavigation();
 
@@ -71,7 +75,13 @@ export function AuditEventsFilters({
         advancedResetKeys={["action", "actorKind", "actorId", "scope", "institutionId", "requestId"]}
         advancedDescription="Refiná por institución, período o detalles de la operación."
         advancedFilters={
-          <AuditEventsAdvancedFilters filters={filters} institutionName={institutionName} selectedActorLabel={selectedActorLabel} onChange={update} />
+          <AuditEventsAdvancedFilters
+            selectedActionLabel={selectedActionLabel}
+            filters={filters}
+            institutionName={institutionName}
+            selectedActorLabel={selectedActorLabel}
+            onChange={update}
+          />
         }
       >
         <DataTableFilterSelect
@@ -80,12 +90,7 @@ export function AuditEventsFilters({
             label: "Módulo",
             defaultValue: "all",
             value: filters.module ?? "all",
-            options: [
-              { value: "all", label: "Todos los módulos" },
-              ...Object.entries(AUDIT_MODULE_LABELS)
-                .filter(([value]) => value !== "EMAILS")
-                .map(([value, label]) => ({ value, label })),
-            ],
+            options: [{ value: "all", label: "Todos los módulos" }, ...modules.map(({ code, label }) => ({ value: code, label }))],
           }}
           onValueChange={(value) => update({ module: value === "all" ? undefined : value, action: undefined })}
         />

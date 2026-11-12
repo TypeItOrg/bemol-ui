@@ -2,16 +2,10 @@ import { parseDateInput } from "@common/utils/date-input.util";
 import { parsePaginationQuery } from "@common/utils/pagination-query.util";
 import { getQueryParamValue, parseUuidQueryParam } from "@common/utils/query-param.util";
 
-import {
-  AUDIT_ACTION_LABELS,
-  AUDIT_ACTION_MODULES,
-  AUDIT_ACTOR_LABELS,
-  AUDIT_MODULE_LABELS,
-} from "@features/platform-audit/constants/audit-labels.constants";
+import { AUDIT_ACTOR_LABELS } from "@features/platform-audit/constants/audit-labels.constants";
 import { MAIL_RESULT_LABELS, MAIL_TYPE_LABELS } from "@features/platform-audit/constants/mail-labels.constants";
 import type { AuditActorKind } from "@features/platform-audit/types/audit-actor-kind.types";
 import type { AuditFilters } from "@features/platform-audit/types/audit-filters.types";
-import type { AuditModule } from "@features/platform-audit/types/audit-module.types";
 import type { AuditSearchParams } from "@features/platform-audit/types/audit-search-params.types";
 
 export function parseAuditFilters(params: AuditSearchParams): AuditFilters {
@@ -23,9 +17,9 @@ export function parseAuditFilters(params: AuditSearchParams): AuditFilters {
 
   const actorKind = catalogValue(getQueryParamValue(params.actorKind), AUDIT_ACTOR_LABELS) as AuditActorKind | undefined;
 
-  const auditModule = catalogValue(getQueryParamValue(params.module), AUDIT_MODULE_LABELS) as AuditModule | undefined;
+  const auditModule = operationCode(getQueryParamValue(params.module), 40);
 
-  const action = catalogValue(getQueryParamValue(params.action), AUDIT_ACTION_LABELS);
+  const action = operationCode(getQueryParamValue(params.action), 60);
 
   const from = validDate(getQueryParamValue(params.from));
 
@@ -50,8 +44,7 @@ export function parseAuditFilters(params: AuditSearchParams): AuditFilters {
     actorId: actorKind && actorKind !== "ANONYMOUS" ? parseUuidQueryParam(params.actorId) : undefined,
     search: getQueryParamValue(params.search)?.trim().slice(0, 100) || undefined,
     module: auditModule !== "EMAILS" ? auditModule : undefined,
-    action:
-      action && AUDIT_ACTION_MODULES[action] !== "EMAILS" && (!auditModule || AUDIT_ACTION_MODULES[action] === auditModule) ? action : undefined,
+    action: action && action !== "EMAIL_SENT" && action !== "EMAIL_FAILED" ? action : undefined,
     personId: parseUuidQueryParam(params.personId) ?? parseUuidQueryParam(params.subjectPersonId),
     requestId: getQueryParamValue(params.requestId)?.trim().slice(0, 100) || undefined,
     from,
@@ -116,4 +109,8 @@ function validDate(value: string | undefined): string | undefined {
 
 function catalogValue(value: string | undefined, catalog: Readonly<Record<string, string>>): string | undefined {
   return value && Object.hasOwn(catalog, value) ? value : undefined;
+}
+
+function operationCode(value: string | undefined, maxLength: number): string | undefined {
+  return value && value.length <= maxLength && /^[A-Z][A-Z0-9_]*$/.test(value) ? value : undefined;
 }

@@ -7,7 +7,7 @@ import { DataTableFilterSelect } from "@common/components/ui/data-table-filter-s
 
 import { AuditIdentifierFilter } from "@features/platform-audit/components/audit-identifier-filter";
 import { AuditInstitutionFilter } from "@features/platform-audit/components/audit-institution-filter";
-import { AUDIT_ACTION_LABELS, AUDIT_ACTOR_LABELS, AUDIT_MODULE_LABELS } from "@features/platform-audit/constants/audit-labels.constants";
+import { AUDIT_ACTOR_LABELS } from "@features/platform-audit/constants/audit-labels.constants";
 import { fetchAuditActionOptions } from "@features/platform-audit/services/fetch-audit-actions.service";
 import { fetchAuditActorOptions } from "@features/platform-audit/services/fetch-audit-actors.service";
 import type { AuditActionOption } from "@features/platform-audit/types/audit-action-option.types";
@@ -18,11 +18,13 @@ export function AuditEventsAdvancedFilters({
   filters,
   institutionName,
   selectedActorLabel,
+  selectedActionLabel,
   onChange,
 }: {
   filters: AuditFilters;
   institutionName?: string;
   selectedActorLabel?: string;
+  selectedActionLabel?: string;
   onChange: (values: Record<string, string | undefined>) => void;
 }): ReactElement {
   return (
@@ -44,8 +46,7 @@ export function AuditEventsAdvancedFilters({
           defaultOption={{ label: "Todas las acciones", value: undefined }}
           fetchPage={(input) => fetchAuditActionOptions(input, filters.module)}
           getItemLabel={(action) => action.label}
-          getItemGroup={filters.module ? undefined : (action) => AUDIT_MODULE_LABELS[action.module]}
-          groupOrder={Object.values(AUDIT_MODULE_LABELS)}
+          getItemGroup={filters.module ? undefined : (action) => action.moduleLabel}
           getItemValue={(action) => action.action}
           onValueChange={(value) => onChange({ action: value })}
           pageSize={20}
@@ -54,7 +55,7 @@ export function AuditEventsAdvancedFilters({
           emptyMessage="No se encontraron acciones."
           errorMessage="No se pudieron cargar las acciones. Intentá nuevamente."
           queryKey={["platform", "audit-actions", filters.module]}
-          selectedLabel={filters.action ? AUDIT_ACTION_LABELS[filters.action] : undefined}
+          selectedLabel={selectedActionLabel ?? filters.action}
           value={filters.action}
         />
       </div>

@@ -7,10 +7,7 @@ import { MailIcon, ScrollTextIcon } from "lucide-react";
 import { getSafeReturnTo } from "@common/utils/return-to.util";
 import { isValidUuid } from "@common/utils/uuid.util";
 
-import {
-  fetchInstitutionalActivityEvent,
-  fetchInstitutionalActivityLabels,
-} from "@features/institutional-activity/services/institutional-activity.service";
+import { fetchInstitutionalActivityEvent } from "@features/institutional-activity/services/institutional-activity.service";
 import { InstitutionalAccessDenied } from "@features/institutional-auth/components/institutional-access-denied";
 import { InstitutionalBreadcrumb } from "@features/institutional-auth/components/institutional-breadcrumb";
 import { requireInstitutionalUser } from "@features/institutional-auth/services/get-institutional-user.service";
@@ -49,11 +46,6 @@ export async function InstitutionalActivityDetail({
 
   const title = mailView ? "Detalle del correo" : "Detalle de evento";
 
-  const labels =
-    !mailView && (event.action === "PERSON_ROLES_CHANGED" || event.entityType === "ROLE" || typeof event.details.initialRole === "string")
-      ? await fetchInstitutionalActivityLabels(user.institutionId)
-      : { roleLabels: {}, permissionLabels: {} };
-
   return (
     <PlatformPageShell
       title={title}
@@ -62,7 +54,7 @@ export async function InstitutionalActivityDetail({
       }
       actions={<PlatformPageIcon icon={mailView ? MailIcon : ScrollTextIcon} />}
     >
-      <AuditEventDetail event={event} returnTo={returnTo} roleLabels={labels.roleLabels} permissionLabels={labels.permissionLabels} />
+      <AuditEventDetail event={event} returnTo={returnTo} />
     </PlatformPageShell>
   );
 }

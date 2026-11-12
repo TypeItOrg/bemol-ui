@@ -2,6 +2,7 @@
 
 import type { ReactElement } from "react";
 
+import { AsyncDropdown } from "@common/components/ui/async-dropdown";
 import { DataTableAdvancedFiltersTrigger } from "@common/components/ui/data-table-advanced-filters-trigger";
 import { DataTableFilterSelect } from "@common/components/ui/data-table-filter-select";
 import { DataTableFilters } from "@common/components/ui/data-table-filters";
@@ -9,12 +10,24 @@ import { useDataTableNavigation } from "@common/components/ui/data-table-navigat
 import { Sheet } from "@common/components/ui/sheet";
 import { countActiveAdvancedFilters } from "@common/utils/count-active-advanced-filters.util";
 
-import { AUDIT_ACTION_LABELS, AUDIT_ACTION_MODULES, AUDIT_MODULE_LABELS } from "@features/platform-audit/constants/audit-labels.constants";
 import { MAIL_RESULT_LABELS, MAIL_TYPE_LABELS } from "@features/platform-audit/constants/mail-labels.constants";
+import { fetchAuditActionOptions } from "@features/platform-audit/services/fetch-audit-actions.service";
+import type { AuditActionOption } from "@features/platform-audit/types/audit-action-option.types";
 import type { AuditFilters } from "@features/platform-audit/types/audit-filters.types";
+import type { AuditModuleOption } from "@features/platform-audit/types/audit-module-option.types";
 import { PlatformCollectionActions } from "@features/platform-auth/components/platform-collection-actions";
 
-export function InstitutionalActivityFilters({ filters }: { filters: AuditFilters }): ReactElement {
+export function InstitutionalActivityFilters({
+  filters,
+  modules,
+  selectedActionLabel,
+  institutionId,
+}: {
+  filters: AuditFilters;
+  modules: AuditModuleOption[];
+  selectedActionLabel?: string;
+  institutionId: string;
+}): ReactElement {
   const { navigate } = useDataTableNavigation();
 
   const mailView = filters.module === "EMAILS";
@@ -23,19 +36,6 @@ export function InstitutionalActivityFilters({ filters }: { filters: AuditFilter
     { name: "from", label: "Desde", value: filters.from },
     { name: "to", label: "Hasta", value: filters.to },
   ];
-
-  const modules = Object.fromEntries(Object.entries(AUDIT_MODULE_LABELS).filter(([module]) => module !== "EMAILS"));
-
-  const actions = mailView
-    ? MAIL_RESULT_LABELS
-    : Object.fromEntries(
-        Object.entries(AUDIT_ACTION_LABELS).filter(
-          ([action]) =>
-            AUDIT_ACTION_MODULES[action] !== "EMAILS" &&
-            !action.startsWith("PLATFORM_ACCOUNT_") &&
-            (!filters.module || AUDIT_ACTION_MODULES[action] === filters.module),
-        ),
-      );
 
   function update(values: Record<string, string | undefined>): void {
     navigate({ ...values, page: "0", size: String(filters.size) }, { replace: true });
@@ -62,7 +62,9 @@ export function InstitutionalActivityFilters({ filters }: { filters: AuditFilter
             value: (mailView ? filters.mailType : filters.module) ?? "all",
             options: [
               { value: "all", label: mailView ? "Todos los tipos" : "Todos los módulos" },
-              ...Object.entries(mailView ? MAIL_TYPE_LABELS : modules).map(([value, label]) => ({ value, label })),
+              ...(mailView
+                ? Object.entries(MAIL_TYPE_LABELS).map(([value, label]) => ({ value, label }))
+                : modules.map(({ code, label }) => ({ value: code, label }))),
             ],
           }}
           onValueChange={(value) => {
@@ -73,19 +75,46 @@ export function InstitutionalActivityFilters({ filters }: { filters: AuditFilter
             }
           }}
         />
-        <DataTableFilterSelect
-          filter={{
-            name: "action",
-            label: mailView ? "Resultado" : "Acción",
-            defaultValue: "all",
-            value: filters.action ?? "all",
-            options: [
-              { value: "all", label: mailView ? "Todos los resultados" : "Todas las acciones" },
-              ...Object.entries(actions).map(([value, label]) => ({ value, label })),
-            ],
-          }}
-          onValueChange={(value) => update({ action: value === "all" ? undefined : value })}
-        />
+        {mailView ? (
+          <DataTableFilterSelect
+            filter={{
+              name: "action",
+              label: mailView ? "Resultado" : "Acción",
+              defaultValue: "all",
+              value: filters.action ?? "all",
+              options: [
+                { value: "all", label: mailView ? "Todos los resultados" : "Todas las acciones" },
+                ...Object.entries(MAIL_RESULT_LABELS).map(([value, label]) => ({ value, label })),
+              ],
+            }}
+            onValueChange={(value) => update({ action: value === "all" ? undefined : value })}
+          />
+        ) : (
+          <div className="flex min-w-0 flex-col gap-1.5">
+            <label htmlFor="institutional-audit-action" className="text-foreground text-sm font-medium">
+              Acción
+            </label>
+            <AsyncDropdown<AuditActionOption>
+              id="institutional-audit-action"
+              clearable
+              clearLabel="Limpiar acción"
+              defaultOption={{ label: "Todas las acciones", value: undefined }}
+              fetchPage={(input) => fetchAuditActionOptions(input, filters.module, true)}
+              getItemLabel={(action) => action.label}
+              getItemGroup={filters.module ? undefined : (action) => action.moduleLabel}
+              getItemValue={(action) => action.action}
+              onValueChange={(value) => update({ action: value })}
+              pageSize={20}
+              placeholder="Seleccionar acción"
+              searchPlaceholder="Buscar acción…"
+              emptyMessage="No se encontraron acciones."
+              errorMessage="No se pudieron cargar las acciones. Intentá nuevamente."
+              queryKey={["institutional", institutionId, "audit-actions", filters.module]}
+              selectedLabel={selectedActionLabel ?? filters.action}
+              value={filters.action}
+            />
+          </div>
+        )}
       </DataTableFilters>
     </Sheet>
   );

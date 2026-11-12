@@ -23,3 +23,7 @@ export function auditActorName(event: AuditEvent): string {
 export function auditInstitutionName(event: AuditEvent): string {
   return event.institutionId ? (event.institutionName ?? "Institución no disponible") : "Plataforma";
 }
+
+export function auditActionLabel(event: AuditEvent): string {
+  return event.actionLabel ?? event.action;
+}

@@ -1,3 +1,4 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen } from "@testing-library/react";
 
 import { InstitutionalActivityDetail } from "@features/institutional-activity/components/institutional-activity-detail";
@@ -15,7 +16,8 @@ jest.mock("@features/institutional-auth/services/get-institutional-user.service"
 jest.mock("@features/institutional-activity/services/institutional-activity.service", () => ({
   fetchInstitutionalActivity: jest.fn(),
   fetchInstitutionalActivityEvent: jest.fn(),
-  fetchInstitutionalActivityLabels: jest.fn(),
+  fetchInstitutionalAuditModules: jest.fn().mockResolvedValue([]),
+  fetchSelectedInstitutionalAuditAction: jest.fn().mockResolvedValue(undefined),
 }));
 jest.mock("next/navigation", () => ({
   usePathname: () => "/emails/019a1234-1234-7123-8123-123456789abc",
@@ -54,14 +56,17 @@ const event: AuditEvent = {
   institutionId: "institution",
   institutionName: "Conservatorio",
   action: "EMAIL_SENT",
+  actionLabel: "Correo enviado",
+  module: "EMAILS",
+  moduleLabel: "Correos",
   entityType: "EMAIL",
+  entityLabel: "Correo",
   entityId: "email",
   actedOnBehalf: false,
   requestId: null,
   origin: null,
   details: { mailType: "Verificación de correo", recipient: "ana@example.test" },
   occurredAt: "2026-10-26T12:00:00Z",
-  history: null,
 };
 
 it.each([
@@ -85,7 +90,9 @@ it.each([
 it("shows date validation before fetching the institutional list", async () => {
   jest.mocked(requireInstitutionalUser).mockResolvedValue({ ...baseUser, permissions: [INSTITUTIONAL_PERMISSION.AUDIT_READ] });
 
-  render(await InstitutionalActivityPage({ params: { from: "2026-10-26", to: "2026-10-01" }, mailView: false }));
+  const page = await InstitutionalActivityPage({ params: { from: "2026-10-26", to: "2026-10-01" }, mailView: false });
+
+  render(<QueryClientProvider client={new QueryClient()}>{page}</QueryClientProvider>);
 
   expect(screen.getByRole("alert")).toHaveTextContent("La fecha desde no puede ser posterior a la fecha hasta.");
   expect(fetchInstitutionalActivity).not.toHaveBeenCalled();

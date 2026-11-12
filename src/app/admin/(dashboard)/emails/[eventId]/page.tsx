@@ -42,7 +42,7 @@ export default async function MailEventPage({
       breadcrumb={<PlatformBreadcrumb segmentLabels={{ [eventId]: "Detalle del correo" }} segmentHrefs={{ emails: returnTo }} />}
       actions={<PlatformPageIcon icon={MailIcon} />}
     >
-      <AuditEventDetail event={event} returnTo={returnTo} roleLabels={{}} permissionLabels={{}} />
+      <AuditEventDetail event={event} returnTo={returnTo} />
     </PlatformPageShell>
   );
 }

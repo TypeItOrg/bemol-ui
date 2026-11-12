@@ -18,15 +18,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import type { PaginatedResponse } from "@common/types/paginated-response.types";
 import { PAGE_SIZE_OPTIONS } from "@common/utils/pagination-query.util";
 
-import {
-  AUDIT_ACTION_LABELS,
-  AUDIT_ACTION_MODULES,
-  AUDIT_ACTOR_LABELS,
-  AUDIT_MODULE_LABELS,
-} from "@features/platform-audit/constants/audit-labels.constants";
+import { AUDIT_ACTOR_LABELS } from "@features/platform-audit/constants/audit-labels.constants";
 import { MAIL_RESULT_LABELS } from "@features/platform-audit/constants/mail-labels.constants";
 import type { AuditEvent } from "@features/platform-audit/types/audit-event.types";
-import { auditActorName, auditInstitutionName, formatAuditDateTime } from "@features/platform-audit/utils/audit-display.util";
+import { auditActionLabel, auditActorName, auditInstitutionName, formatAuditDateTime } from "@features/platform-audit/utils/audit-display.util";
 
 export function AuditEventsTable({
   data,
@@ -83,7 +78,7 @@ export function AuditEventsTable({
                             <Button
                               variant="ghost"
                               size="icon"
-                              aria-label={`Abrir acciones de ${AUDIT_ACTION_LABELS[event.action] ?? event.action}, ${formatAuditDateTime(event.occurredAt)}`}
+                              aria-label={`Abrir acciones de ${auditActionLabel(event)}, ${formatAuditDateTime(event.occurredAt)}`}
                             >
                               <EllipsisVerticalIcon />
                             </Button>
@@ -118,8 +113,8 @@ export function AuditEventsTable({
                         </>
                       ) : (
                         <>
-                          <TableCell className="max-w-64 whitespace-normal">{AUDIT_ACTION_LABELS[event.action] ?? "Acción no catalogada"}</TableCell>
-                          <TableCell>{AUDIT_MODULE_LABELS[AUDIT_ACTION_MODULES[event.action]] ?? "Módulo no catalogado"}</TableCell>
+                          <TableCell className="max-w-64 whitespace-normal">{auditActionLabel(event)}</TableCell>
+                          <TableCell>{event.moduleLabel ?? "Módulo no disponible"}</TableCell>
                           <TableCell className="max-w-64 whitespace-normal">
                             <div className="font-medium">{auditActorName(event)}</div>
                             {event.actorKind !== "ANONYMOUS" ? (

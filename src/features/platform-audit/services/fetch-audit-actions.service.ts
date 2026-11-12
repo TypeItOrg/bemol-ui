@@ -11,6 +11,7 @@ import type { AuditModule } from "@features/platform-audit/types/audit-module.ty
 export async function fetchAuditActionOptions(
   { page, search, signal, size }: AsyncDropdownFetchPageInput,
   module?: AuditModule,
+  institutional = false,
 ): Promise<AsyncDropdownPage<AuditActionOption>> {
   const params = buildPaginationSearchParams({ page, size, search });
 
@@ -18,7 +19,9 @@ export async function fetchAuditActionOptions(
     params.set("module", module);
   }
 
-  const response = await fetch(`/api/admin/audit-events/actions?${params}`, { signal });
+  const path = institutional ? "/api/institutional/activity/audit-actions" : "/api/admin/audit-events/actions";
+
+  const response = await fetch(`${path}?${params}`, { signal });
 
   const data = await parseHttpResponse<PaginatedResponse<AuditActionOption>>(response, "No se pudieron cargar las acciones.");
 

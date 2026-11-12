@@ -26,14 +26,17 @@ const event: AuditEvent = {
   institutionId: "institution",
   institutionName: "Conservatorio",
   action: "COURSE_CREATED",
+  actionLabel: "Curso creado",
+  module: "COURSES",
+  moduleLabel: "Cursos",
   entityType: "COURSE",
+  entityLabel: "Curso",
   entityId: "course",
   actedOnBehalf: false,
   requestId: null,
   origin: null,
   details: {},
   occurredAt: "2026-10-26T12:00:00Z",
-  history: null,
 };
 
 function page(items: AuditEvent[]): PaginatedResponse<AuditEvent> {

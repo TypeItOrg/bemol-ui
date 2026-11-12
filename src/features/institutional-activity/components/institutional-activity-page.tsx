@@ -6,7 +6,11 @@ import { DataTableNavigationProvider } from "@common/components/ui/data-table-na
 import { Skeleton } from "@common/components/ui/skeleton";
 
 import { InstitutionalActivityFilters } from "@features/institutional-activity/components/institutional-activity-filters";
-import { fetchInstitutionalActivity } from "@features/institutional-activity/services/institutional-activity.service";
+import {
+  fetchInstitutionalActivity,
+  fetchInstitutionalAuditModules,
+  fetchSelectedInstitutionalAuditAction,
+} from "@features/institutional-activity/services/institutional-activity.service";
 import { parseInstitutionalActivityFilters } from "@features/institutional-activity/utils/institutional-activity-query.util";
 import { InstitutionalAccessDenied } from "@features/institutional-auth/components/institutional-access-denied";
 import { InstitutionalBreadcrumb } from "@features/institutional-auth/components/institutional-breadcrumb";
@@ -28,6 +32,13 @@ export async function InstitutionalActivityPage({ params, mailView }: { params: 
 
   const filters = parseInstitutionalActivityFilters(params, mailView);
 
+  const [modules, selectedAction] = mailView
+    ? [[], undefined]
+    : await Promise.all([
+        fetchInstitutionalAuditModules(user.institutionId),
+        fetchSelectedInstitutionalAuditAction(user.institutionId, filters.action),
+      ]);
+
   const title = mailView ? "Correos" : "Auditoría";
 
   return (
@@ -37,7 +48,12 @@ export async function InstitutionalActivityPage({ params, mailView }: { params: 
       actions={<PlatformPageIcon icon={mailView ? MailIcon : ScrollTextIcon} />}
     >
       <DataTableNavigationProvider>
-        <InstitutionalActivityFilters filters={filters} />
+        <InstitutionalActivityFilters
+          filters={filters}
+          modules={modules}
+          selectedActionLabel={selectedAction?.label}
+          institutionId={user.institutionId}
+        />
         {filters.dateError ? (
           <p className="text-destructive text-sm" role="alert">
             {filters.dateError}

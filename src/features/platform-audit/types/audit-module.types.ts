@@ -1,18 +1,1 @@
-export type AuditModule =
-  | "USERS"
-  | "ROLES"
-  | "GUARDIAN_LINKS"
-  | "ENROLLMENTS"
-  | "INSTITUTIONS"
-  | "COURSES"
-  | "STUDY_PLANS"
-  | "DOCUMENTATION"
-  | "EMAILS"
-  | "TRAINING_PATHS"
-  | "ACADEMIC_YEARS"
-  | "ACADEMIC_SPACES"
-  | "INSTRUMENTS"
-  | "SHIFTS"
-  | "ENROLLMENT_PERIODS"
-  | "COURSE_ENROLLMENTS"
-  | "SECURITY";
+export type AuditModule = string;

@@ -4,4 +4,5 @@ export type AuditActionOption = {
   action: string;
   label: string;
   module: AuditModule;
+  moduleLabel: string;
 };

@@ -8,10 +8,9 @@ import { ReturnToLink } from "@common/components/navigation/return-to-link";
 import { SectionHeader } from "@common/components/section-header";
 import { Button } from "@common/components/ui/button";
 
-import { AUDIT_ACTION_LABELS } from "@features/platform-audit/constants/audit-labels.constants";
 import { fetchAuditEvents } from "@features/platform-audit/services/fetch-audit-events.service";
 import type { AuditEvent } from "@features/platform-audit/types/audit-event.types";
-import { auditInstitutionName, formatAuditDateTime } from "@features/platform-audit/utils/audit-display.util";
+import { auditActionLabel, auditInstitutionName, formatAuditDateTime } from "@features/platform-audit/utils/audit-display.util";
 
 export async function PlatformAccountRecentActivity({ accountId }: { accountId: string }): Promise<ReactElement> {
   const params = new URLSearchParams({ actorKind: "PLATFORM", actorId: accountId });
@@ -54,7 +53,7 @@ export async function PlatformAccountRecentActivity({ accountId }: { accountId: 
             >
               <div className="min-w-0">
                 <ReturnToLink href={`/audit-events/${event.id}`} className="text-sm font-medium break-words underline-offset-4 hover:underline">
-                  {AUDIT_ACTION_LABELS[event.action] ?? event.action}
+                  {auditActionLabel(event)}
                 </ReturnToLink>
                 {event.institutionId ? <p className="text-muted-foreground mt-1 text-sm break-words">{auditInstitutionName(event)}</p> : null}
               </div>

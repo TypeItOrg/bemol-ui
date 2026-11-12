@@ -11,7 +11,12 @@ import { getQueryParamValue } from "@common/utils/query-param.util";
 import { fetchInstitution } from "@features/institutions/services/fetch-institution.service";
 import { AuditEventsFilters } from "@features/platform-audit/components/audit-events-filters";
 import { AuditEventsTableContainer } from "@features/platform-audit/components/audit-events-table-container";
-import { fetchAuditEvents, fetchSelectedAuditPerson } from "@features/platform-audit/services/fetch-audit-events.service";
+import {
+  fetchAuditEvents,
+  fetchSelectedAuditPerson,
+  fetchAuditModules,
+  fetchSelectedAuditAction,
+} from "@features/platform-audit/services/fetch-audit-events.service";
 import type { AuditFilters } from "@features/platform-audit/types/audit-filters.types";
 import type { AuditSearchParams } from "@features/platform-audit/types/audit-search-params.types";
 import { parseAuditFilters } from "@features/platform-audit/utils/audit-query.util";
@@ -44,10 +49,12 @@ export default async function AuditEventsPage({ searchParams }: { searchParams: 
 
   const filters = parseAuditFilters(params);
 
-  const [institution, selectedActorLabel, person] = await Promise.all([
+  const [institution, selectedActorLabel, person, modules, selectedAction] = await Promise.all([
     filters.institutionId ? fetchInstitution(filters.institutionId) : null,
     getSelectedActorLabel(filters),
     fetchSelectedAuditPerson(filters),
+    fetchAuditModules(),
+    fetchSelectedAuditAction(filters),
   ]);
 
   return (
@@ -55,6 +62,8 @@ export default async function AuditEventsPage({ searchParams }: { searchParams: 
       <DataTableNavigationProvider>
         <AuditEventsFilters
           filters={filters}
+          modules={modules}
+          selectedActionLabel={selectedAction?.label}
           institutionName={institution?.name}
           selectedActorLabel={selectedActorLabel}
           selectedPersonLabel={person?.label}
