@@ -18,7 +18,6 @@ import { EnrollmentPersonalSummary } from "@features/enrollment-applications/com
 import { EnrollmentPreferenceSummary } from "@features/enrollment-applications/components/enrollment-preference-summary";
 import { EnrollmentResponsibleSummary } from "@features/enrollment-applications/components/enrollment-responsible-summary";
 import { EnrollmentSchoolingSummary } from "@features/enrollment-applications/components/enrollment-schooling-summary";
-import { EnrollmentSpacesSummary } from "@features/enrollment-applications/components/enrollment-spaces-summary";
 import type { EnrollmentApplicationResponse } from "@features/enrollment-applications/types/enrollment-application-response.types";
 import { ENROLLMENT_APPLICATION_STATUS } from "@features/enrollment-applications/types/enrollment-application-status.types";
 import { formatEnrollmentApplicationDateTime } from "@features/enrollment-applications/utils/enrollment-application-date.util";
@@ -64,8 +63,6 @@ export function EnrollmentStatusCard({
   const responsible = data.responsible || {};
 
   const preference = data.preference || {};
-
-  const spaces = application.spaces || [];
 
   const canManageApplicationCourses =
     canManageCourses &&
@@ -140,8 +137,6 @@ export function EnrollmentStatusCard({
 
           <EnrollmentHealthSummary health={health} />
           <EnrollmentResponsibleSummary responsible={responsible} />
-
-          {spaces.length > 0 ? <EnrollmentSpacesSummary application={application} spaces={spaces} /> : null}
 
           <EnrollmentPreferenceSummary preference={preference} />
 

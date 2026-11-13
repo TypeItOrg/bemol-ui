@@ -44,7 +44,6 @@ describe("EnrollmentStatusCard", () => {
     applicationId: "019183ab-0000-7000-8000-000000000001",
     institutionId: "019183ab-0000-7000-8000-000000000002",
     personId: "019183ab-0000-7000-8000-000000000003",
-    studyPlanId: "019183ab-0000-7000-8000-000000000004",
     academicYearId: "019183ab-0000-7000-8000-000000000005",
     enrollmentPeriodId: "019183ab-0000-7000-8000-000000000006",
     status: "SUBMITTED",
@@ -130,29 +129,6 @@ describe("EnrollmentStatusCard", () => {
     expect(screen.getByText("42111222")).toBeInTheDocument();
     expect(screen.getByText("Colegio Nacional")).toBeInTheDocument();
     expect(screen.getByText("dni-frente.png")).toBeInTheDocument();
-  });
-
-  it("hides the legacy spaces card when the application has no spaces", () => {
-    render(<EnrollmentStatusCard application={baseApp} />);
-    expect(screen.queryByText("Trayecto formativo y espacios académicos")).not.toBeInTheDocument();
-  });
-
-  it("keeps the legacy spaces card for applications with spaces", () => {
-    const legacyApp = {
-      ...baseApp,
-      spaces: [
-        {
-          studyPlanSpaceId: "space-1",
-          spaceName: "Lenguaje Musical",
-          academicLevelName: "Nivel 1",
-          instrumentId: null,
-          instrumentName: null,
-        },
-      ],
-    };
-    render(<EnrollmentStatusCard application={legacyApp} />);
-    expect(screen.getByText("Trayecto formativo y espacios académicos")).toBeInTheDocument();
-    expect(screen.getByText("Lenguaje Musical")).toBeInTheDocument();
   });
 
   it("shows selected courses read-only to reviewers before approval", () => {

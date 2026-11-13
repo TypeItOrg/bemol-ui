@@ -11,7 +11,6 @@ import { Table, TableBody, TableHead, TableHeader, TableRow } from "@common/comp
 import type { PaginatedResponse } from "@common/types/paginated-response.types";
 
 import { AcademicScope } from "@features/academic/utils/academic-scope.util";
-import { formatStudyPlanLabel } from "@features/academic/utils/study-plan-label.util";
 import { EnrollmentApplicationApproveDialog } from "@features/enrollment-applications/components/enrollment-application-approve-dialog";
 import { EnrollmentApplicationEmptyState } from "@features/enrollment-applications/components/enrollment-application-empty-state";
 import { EnrollmentApplicationPagination } from "@features/enrollment-applications/components/enrollment-application-pagination";
@@ -158,6 +157,5 @@ function getReviewSummary(application: EnrollmentApplication): EnrollmentApplica
     canApproveProvisionally: application.canApproveProvisionally,
     canConfirm: application.canConfirm,
     applicantName: `${application.applicantFirstName} ${application.applicantLastName}`,
-    studyPlanName: application.studyPlanName ? formatStudyPlanLabel(application) : application.trainingPathName || "Sin trayecto formativo",
   };
 }

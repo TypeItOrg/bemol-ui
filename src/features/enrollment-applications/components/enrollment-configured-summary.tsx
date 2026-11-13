@@ -2,7 +2,7 @@
 
 import type { ReactElement } from "react";
 
-import { ClipboardListIcon, SlidersHorizontalIcon } from "lucide-react";
+import { ClipboardListIcon, Music2Icon, SlidersHorizontalIcon } from "lucide-react";
 
 import { Alert, AlertDescription } from "@common/components/ui/alert";
 
@@ -14,7 +14,6 @@ import { EnrollmentPersonalSummary } from "@features/enrollment-applications/com
 import { EnrollmentPreferenceSummary } from "@features/enrollment-applications/components/enrollment-preference-summary";
 import { EnrollmentResponsibleSummary } from "@features/enrollment-applications/components/enrollment-responsible-summary";
 import { EnrollmentSchoolingSummary } from "@features/enrollment-applications/components/enrollment-schooling-summary";
-import { EnrollmentSpacesSummary } from "@features/enrollment-applications/components/enrollment-spaces-summary";
 import type { EnrollmentApplicationResponse } from "@features/enrollment-applications/types/enrollment-application-response.types";
 import { formatEnrollmentAnswer } from "@features/enrollment-applications/utils/enrollment-form.util";
 import { enrollmentFormDefinitionSchema } from "@features/enrollment-forms/schemas/enrollment-form-definition.schema";
@@ -57,7 +56,13 @@ export function EnrollmentConfiguredSummary({
           case "RESPONSIBLE":
             return data.responsible?.fullName ? <EnrollmentResponsibleSummary key={section.id} {...props} responsible={data.responsible} /> : null;
           case "ACADEMIC_SELECTION":
-            return <EnrollmentSpacesSummary key={section.id} {...props} application={application} spaces={application.spaces ?? []} />;
+            return (
+              <DetailCard key={section.id} {...props} icon={Music2Icon} description="Trayecto elegido para la inscripción.">
+                <dl>
+                  <DetailItem label="Trayecto formativo" value={application.trainingPathName} fallback="Sin trayecto formativo" />
+                </dl>
+              </DetailCard>
+            );
           case "PREFERENCES":
             return <EnrollmentPreferenceSummary key={section.id} {...props} preference={data.preference ?? {}} />;
           case "PREFERRED_SHIFT":

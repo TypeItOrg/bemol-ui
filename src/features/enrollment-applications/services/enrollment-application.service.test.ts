@@ -15,7 +15,6 @@ const MOCK_APPLICATION: EnrollmentApplicationResponse = {
   applicationId: "app-456",
   institutionId: INSTITUTION_ID,
   personId: PERSON_ID,
-  studyPlanId: "plan-1",
   academicYearId: "year-1",
   enrollmentPeriodId: "period-1",
   status: "SUBMITTED",
@@ -61,39 +60,6 @@ describe("enrollment-application.service self-service queries", () => {
 
       await expect(fetchEnrollmentApplicationById("app-456", "invalid-person")).rejects.toThrow("La persona seleccionada no es válida.");
       expect(institutionalApiFetchMock).not.toHaveBeenCalled();
-    });
-  });
-
-  describe("submitEnrollmentApplication", () => {
-    it("returns the parsed response when the backend confirms submission", async () => {
-      institutionalApiFetchMock.mockResolvedValue(Response.json(MOCK_APPLICATION));
-      const { submitEnrollmentApplication } = await importService();
-
-      const result = await submitEnrollmentApplication("app-456");
-
-      expect(institutionalApiFetchMock).toHaveBeenCalledWith(`${SELF_SERVICE_API_PATH}/app-456/submit`, { method: "POST" });
-      expect(result).toEqual(MOCK_APPLICATION);
-    });
-
-    it("propagates the error instead of fabricating a submitted response on 404", async () => {
-      institutionalApiFetchMock.mockResolvedValue(new Response(JSON.stringify({ message: "No encontrada" }), { status: 404 }));
-      const { submitEnrollmentApplication } = await importService();
-
-      await expect(submitEnrollmentApplication("app-456")).rejects.toThrow("No encontrada");
-    });
-
-    it("propagates the error instead of fabricating a submitted response on 405", async () => {
-      institutionalApiFetchMock.mockResolvedValue(new Response(JSON.stringify({ message: "Método no permitido" }), { status: 405 }));
-      const { submitEnrollmentApplication } = await importService();
-
-      await expect(submitEnrollmentApplication("app-456")).rejects.toThrow("Método no permitido");
-    });
-
-    it("propagates the error on a server failure", async () => {
-      institutionalApiFetchMock.mockResolvedValue(new Response(JSON.stringify({ message: "Error del servidor" }), { status: 500 }));
-      const { submitEnrollmentApplication } = await importService();
-
-      await expect(submitEnrollmentApplication("app-456")).rejects.toThrow("Error del servidor");
     });
   });
 

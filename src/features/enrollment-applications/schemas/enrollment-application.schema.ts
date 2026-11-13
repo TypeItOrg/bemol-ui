@@ -41,7 +41,7 @@ const enrollmentCoursesSchema = z.array(z.object({ courseId: z.uuid(), preferred
 
 // Schema para guardar borrador (permite campos incompletos durante el autoguardado)
 export const updateEnrollmentDraftSchema = z.object({
-  expectedRevision: z.number().int().nonnegative().optional(),
+  expectedRevision: z.number().int().nonnegative(),
   data: z.object({
     academicBackground: z
       .object({

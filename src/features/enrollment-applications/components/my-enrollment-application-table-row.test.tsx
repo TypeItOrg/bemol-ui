@@ -20,8 +20,6 @@ function application(status: EnrollmentApplication["status"], rejectionReason?: 
     applicantFirstName: "Ana",
     applicantLastName: "Garcia",
     applicantDocumentNumber: "12345678",
-    studyPlanId: "00000000-0000-4000-8000-000000000004",
-    studyPlanName: "Plan Básico",
     trainingPathId: "00000000-0000-4000-8000-000000000007",
     trainingPathName: "CAV Básico",
     academicYearId: "00000000-0000-4000-8000-000000000005",

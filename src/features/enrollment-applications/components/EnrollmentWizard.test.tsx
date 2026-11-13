@@ -63,7 +63,6 @@ const BASE: EnrollmentApplicationResponse = {
   applicationId: "app-1",
   institutionId: "inst-1",
   personId: "person-1",
-  studyPlanId: "plan-1",
   academicYearId: "year-1",
   enrollmentPeriodId: "period-1",
   status: "DRAFT",

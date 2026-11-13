@@ -28,7 +28,6 @@ const PROPS: EnrollmentWizardProps = {
     applicationId: "application-a",
     institutionId: "institution-a",
     personId: "person-a",
-    studyPlanId: "plan-a",
     academicYearId: "year-a",
     enrollmentPeriodId: "period-a",
     status: "DRAFT",

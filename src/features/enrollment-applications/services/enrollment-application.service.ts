@@ -182,25 +182,6 @@ export async function updateEnrollmentDraft(
   return response.json();
 }
 
-export async function submitEnrollmentApplication(
-  applicationId: string,
-  personId?: string,
-  expectedRevision?: number,
-): Promise<EnrollmentApplicationResponse> {
-  const response = await institutionalApiFetch(`${await getSelfServiceEnrollmentApiPath(personId)}/${applicationId}/submit`, {
-    method: "POST",
-    ...(expectedRevision === undefined ? {} : { headers: { "Content-Type": "application/json" }, body: JSON.stringify({ expectedRevision }) }),
-  });
-
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-
-    throw new Error(errorData.message || ENROLLMENT_MESSAGES.SUBMIT_APPLICATION_FAILED);
-  }
-
-  return response.json();
-}
-
 export async function cancelEnrollmentApplication(applicationId: string, personId?: string): Promise<EnrollmentApplicationResponse> {
   const response = await institutionalApiFetch(`${await getSelfServiceEnrollmentApiPath(personId)}/${applicationId}/cancel`, {
     method: "POST",

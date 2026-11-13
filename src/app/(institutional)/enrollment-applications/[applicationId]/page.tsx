@@ -11,7 +11,6 @@ import type { QueryParamValue } from "@common/types/query-param.types";
 import { getSafeReturnTo } from "@common/utils/return-to.util";
 
 import { AcademicScope } from "@features/academic/utils/academic-scope.util";
-import { formatStudyPlanLabel } from "@features/academic/utils/study-plan-label.util";
 import { EnrollmentApplicationResolvePanel } from "@features/enrollment-applications/components/enrollment-application-resolve-panel";
 import { EnrollmentStatusCard } from "@features/enrollment-applications/components/EnrollmentStatusCard";
 import { fetchInstitutionalEnrollmentApplicationById } from "@features/enrollment-applications/services/enrollment-application.service";
@@ -61,7 +60,6 @@ export default async function EnrollmentApplicationDetailPage({ params, searchPa
     canApproveProvisionally: application.canApproveProvisionally,
     canConfirm: application.canConfirm,
     applicantName,
-    studyPlanName: application.studyPlanName ? formatStudyPlanLabel(application) : "Sin plan de estudio",
   };
 
   return (

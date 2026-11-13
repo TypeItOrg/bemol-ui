@@ -63,7 +63,6 @@ export const CONFIGURED_APPLICATION: EnrollmentApplicationResponse = {
   applicationId: formTestId(501),
   institutionId: formTestId(502),
   personId: formTestId(503),
-  studyPlanId: formTestId(504),
   academicYearId: formTestId(505),
   enrollmentPeriodId: formTestId(506),
   formVersionId: formTestId(507),

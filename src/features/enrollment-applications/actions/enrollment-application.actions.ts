@@ -47,13 +47,14 @@ export async function updateEnrollmentDraftAction(
 
 export async function submitEnrollmentApplicationAction(
   applicationId: string,
-  personId?: string,
-  expectedRevision?: number,
+  personId: string | undefined,
+  expectedRevision: number,
 ): Promise<ChangeEnrollmentCareerResult> {
   if (
     (personId !== undefined && !isValidUuid(personId)) ||
     !isValidUuid(applicationId) ||
-    (expectedRevision !== undefined && (!Number.isSafeInteger(expectedRevision) || expectedRevision < 0))
+    !Number.isSafeInteger(expectedRevision) ||
+    expectedRevision < 0
   ) {
     return { error: INVALID_ACTION_ARGUMENTS };
   }
