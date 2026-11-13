@@ -4,6 +4,7 @@ import { FileTextIcon } from "lucide-react";
 
 import { SectionHeader } from "@common/components/section-header";
 import { Badge } from "@common/components/ui/badge";
+import { DataTableIconLabel } from "@common/components/ui/data-table-icon-badge";
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@common/components/ui/empty";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@common/components/ui/table";
 
@@ -80,13 +81,15 @@ export function TrainingPathDocuments({ requirements }: { requirements: Document
 
 function RequirementName({ item }: { item: DocumentRequirement }): ReactElement {
   return (
-    <div className="space-y-1">
-      <div className="flex min-w-0 items-center gap-1">
-        <h3 className="text-sm font-medium whitespace-nowrap">{item.name}</h3>
-        <TrainingPathDocumentInstructions name={item.name} instructions={item.instructions} specificInstructions={item.specificInstructions} />
+    <DataTableIconLabel icon={FileTextIcon}>
+      <div className="space-y-1">
+        <div className="flex min-w-0 items-center gap-1">
+          <h3 className="text-sm font-medium whitespace-nowrap">{item.name}</h3>
+          <TrainingPathDocumentInstructions name={item.name} instructions={item.instructions} specificInstructions={item.specificInstructions} />
+        </div>
+        {item.documentActive === false ? <p className="text-muted-foreground text-sm">Documento inactivo en el catálogo</p> : null}
       </div>
-      {item.documentActive === false ? <p className="text-muted-foreground text-sm">Documento inactivo en el catálogo</p> : null}
-    </div>
+    </DataTableIconLabel>
   );
 }
 

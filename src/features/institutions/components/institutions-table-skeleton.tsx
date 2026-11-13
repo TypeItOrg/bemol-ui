@@ -40,16 +40,28 @@ export function InstitutionsTableSkeleton(): ReactElement {
                   <Skeleton className="size-8" />
                 </TableCell>
                 <TableCell>
-                  <Skeleton className="h-5 w-64" />
+                  <div className="flex items-center gap-2.5">
+                    <Skeleton className="size-8 shrink-0 rounded-full" />
+                    <Skeleton className="h-5 w-56" />
+                  </div>
                 </TableCell>
                 <TableCell>
-                  <Skeleton className="h-5 w-24" />
+                  <div className="flex items-center gap-2.5">
+                    <Skeleton className="size-8 shrink-0 rounded-full" />
+                    <Skeleton className="h-5 w-24" />
+                  </div>
                 </TableCell>
                 <TableCell>
-                  <Skeleton className="h-5 w-28" />
+                  <div className="flex items-center gap-2.5">
+                    <Skeleton className="size-8 shrink-0 rounded-full" />
+                    <Skeleton className="h-5 w-28" />
+                  </div>
                 </TableCell>
                 <TableCell>
-                  <Skeleton className="h-5 w-24" />
+                  <div className="flex items-center gap-2.5">
+                    <Skeleton className="size-8 shrink-0 rounded-full" />
+                    <Skeleton className="h-5 w-24" />
+                  </div>
                 </TableCell>
                 <TableCell>
                   <Skeleton className="h-6 w-20 rounded-full" />

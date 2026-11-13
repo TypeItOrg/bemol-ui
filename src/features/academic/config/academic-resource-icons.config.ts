@@ -1,6 +1,7 @@
 import {
   BookMarkedIcon,
   BookPlusIcon,
+  CalendarIcon,
   CalendarRangeIcon,
   ClockIcon,
   GitBranchPlusIcon,
@@ -25,4 +26,16 @@ export const ACADEMIC_RESOURCE_ICONS: Readonly<Record<AcademicResource, LucideIc
   [AcademicResource.INSTRUMENT]: Music2Icon,
   [AcademicResource.COURSE]: GraduationCapIcon,
   [AcademicResource.SHIFT]: ClockIcon,
+};
+
+export const ACADEMIC_DETAIL_COLUMN_ICONS: Readonly<Partial<Record<string, LucideIcon>>> = {
+  "Ciclo lectivo": CalendarRangeIcon,
+  "Fecha de finalización": CalendarIcon,
+  "Fecha de inicio": CalendarIcon,
+  Instrumento: Music2Icon,
+  Nivel: Layers3Icon,
+  "Plan de estudio": BookMarkedIcon,
+  "Trayecto formativo": RouteIcon,
+  "Vigente desde": CalendarIcon,
+  "Vigente hasta": CalendarIcon,
 };

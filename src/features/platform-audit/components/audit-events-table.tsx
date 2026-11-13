@@ -4,12 +4,13 @@ import type { ReactElement } from "react";
 
 import Link from "next/link";
 
-import { EllipsisVerticalIcon, Loader2Icon, MailIcon, ScrollTextIcon, SearchIcon } from "lucide-react";
+import { BuildingIcon, CalendarIcon, EllipsisVerticalIcon, Loader2Icon, MailIcon, ScrollTextIcon, SearchIcon, UserRoundIcon } from "lucide-react";
 
 import { ReturnToLink } from "@common/components/navigation/return-to-link";
 import { Badge } from "@common/components/ui/badge";
 import { Button } from "@common/components/ui/button";
 import { ContextMenu, ContextMenuContent, ContextMenuGroup, ContextMenuItem, ContextMenuTrigger } from "@common/components/ui/context-menu";
+import { DataTableIconLabel } from "@common/components/ui/data-table-icon-badge";
 import { useDataTableNavigation } from "@common/components/ui/data-table-navigation";
 import { DataTablePagination } from "@common/components/ui/data-table-pagination";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger } from "@common/components/ui/dropdown-menu";
@@ -95,15 +96,21 @@ export function AuditEventsTable({
                         </DropdownMenu>
                       </TableCell>
                       <TableCell className="tabular-nums">
-                        <time dateTime={event.occurredAt}>{formatAuditDateTime(event.occurredAt)}</time>
+                        <DataTableIconLabel icon={CalendarIcon}>
+                          <time dateTime={event.occurredAt}>{formatAuditDateTime(event.occurredAt)}</time>
+                        </DataTableIconLabel>
                       </TableCell>
                       {mailView ? (
                         <>
                           <TableCell className="max-w-64 whitespace-normal">
-                            {typeof event.details.mailType === "string" ? event.details.mailType : "No registrado"}
+                            <DataTableIconLabel icon={MailIcon}>
+                              <span>{typeof event.details.mailType === "string" ? event.details.mailType : "No registrado"}</span>
+                            </DataTableIconLabel>
                           </TableCell>
                           <TableCell className="max-w-64 break-all whitespace-normal">
-                            {typeof event.details.recipient === "string" ? event.details.recipient : "No registrado"}
+                            <DataTableIconLabel icon={UserRoundIcon}>
+                              <span>{typeof event.details.recipient === "string" ? event.details.recipient : "No registrado"}</span>
+                            </DataTableIconLabel>
                           </TableCell>
                           <TableCell>
                             <Badge variant={event.action === "EMAIL_FAILED" ? "destructive" : "success"}>
@@ -113,17 +120,31 @@ export function AuditEventsTable({
                         </>
                       ) : (
                         <>
-                          <TableCell className="max-w-64 whitespace-normal">{auditActionLabel(event)}</TableCell>
+                          <TableCell className="max-w-64 whitespace-normal">
+                            <DataTableIconLabel icon={ScrollTextIcon}>
+                              <span>{auditActionLabel(event)}</span>
+                            </DataTableIconLabel>
+                          </TableCell>
                           <TableCell>{event.moduleLabel ?? "Módulo no disponible"}</TableCell>
                           <TableCell className="max-w-64 whitespace-normal">
-                            <div className="font-medium">{auditActorName(event)}</div>
-                            {event.actorKind !== "ANONYMOUS" ? (
-                              <div className="text-muted-foreground text-xs">{AUDIT_ACTOR_LABELS[event.actorKind]}</div>
-                            ) : null}
+                            <DataTableIconLabel icon={UserRoundIcon}>
+                              <div>
+                                <div className="font-medium">{auditActorName(event)}</div>
+                                {event.actorKind !== "ANONYMOUS" ? (
+                                  <div className="text-muted-foreground text-xs">{AUDIT_ACTOR_LABELS[event.actorKind]}</div>
+                                ) : null}
+                              </div>
+                            </DataTableIconLabel>
                           </TableCell>
                         </>
                       )}
-                      {showInstitution ? <TableCell className="max-w-64 whitespace-normal">{auditInstitutionName(event)}</TableCell> : null}
+                      {showInstitution ? (
+                        <TableCell className="max-w-64 whitespace-normal">
+                          <DataTableIconLabel icon={BuildingIcon}>
+                            <span>{auditInstitutionName(event)}</span>
+                          </DataTableIconLabel>
+                        </TableCell>
+                      ) : null}
                     </TableRow>
                   </ContextMenuTrigger>
                   <ContextMenuContent className="w-40 p-1.5">

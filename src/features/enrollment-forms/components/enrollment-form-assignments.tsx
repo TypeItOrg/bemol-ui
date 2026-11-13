@@ -4,13 +4,14 @@ import { useState, type ReactElement } from "react";
 
 import { usePathname, useSearchParams } from "next/navigation";
 
-import { EllipsisVerticalIcon, RouteIcon, UnlinkIcon } from "lucide-react";
+import { CalendarRangeIcon, EllipsisVerticalIcon, FileTextIcon, RouteIcon, UnlinkIcon } from "lucide-react";
 
 import { ReturnToLink } from "@common/components/navigation/return-to-link";
 import { SectionHeader } from "@common/components/section-header";
 import { Badge } from "@common/components/ui/badge";
 import { Button } from "@common/components/ui/button";
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuSeparator, ContextMenuTrigger } from "@common/components/ui/context-menu";
+import { DataTableIconLabel } from "@common/components/ui/data-table-icon-badge";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@common/components/ui/dropdown-menu";
 import { Skeleton } from "@common/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@common/components/ui/table";
@@ -124,12 +125,18 @@ export function EnrollmentFormAssignments({ context }: { context: EnrollmentForm
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </TableCell>
-                      <TableCell className="font-medium">{item.trainingPathName}</TableCell>
-                      <TableCell>{item.academicYear}</TableCell>
+                      <TableCell className="font-medium">
+                        <DataTableIconLabel icon={RouteIcon}>{item.trainingPathName}</DataTableIconLabel>
+                      </TableCell>
                       <TableCell>
-                        <ReturnToLink href={`${pathname}/${item.formId}?versionId=${item.formVersionId}`} className="hover:underline">
-                          {item.formName}
-                        </ReturnToLink>
+                        <DataTableIconLabel icon={CalendarRangeIcon}>{item.academicYear}</DataTableIconLabel>
+                      </TableCell>
+                      <TableCell>
+                        <DataTableIconLabel icon={FileTextIcon}>
+                          <ReturnToLink href={`${pathname}/${item.formId}?versionId=${item.formVersionId}`} className="hover:underline">
+                            {item.formName}
+                          </ReturnToLink>
+                        </DataTableIconLabel>
                       </TableCell>
                       <TableCell>
                         <Badge variant="secondary">{getEnrollmentFormVersionLabel(item.versionNumber)}</Badge>

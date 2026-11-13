@@ -1,7 +1,10 @@
 import type { ReactElement } from "react";
 
+import { IdCardIcon, MailIcon, PhoneIcon, UserRoundIcon } from "lucide-react";
+
 import { Badge } from "@common/components/ui/badge";
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuSeparator, ContextMenuTrigger } from "@common/components/ui/context-menu";
+import { DataTableIconLabel } from "@common/components/ui/data-table-icon-badge";
 import { TableCell, TableRow } from "@common/components/ui/table";
 
 import { PersonActionsMenu } from "@features/people/components/person-actions-menu";
@@ -87,13 +90,25 @@ export function PeopleTableRow({
         />
       </TableCell>
       <TableCell className="font-medium">
-        <PersonNavigationLink className="hover:underline" href={personDetailHref}>
-          {person.lastName}, {person.firstName}
-        </PersonNavigationLink>
+        <DataTableIconLabel icon={UserRoundIcon}>
+          <PersonNavigationLink className="hover:underline" href={personDetailHref}>
+            {person.lastName}, {person.firstName}
+          </PersonNavigationLink>
+        </DataTableIconLabel>
       </TableCell>
-      <TableCell>{person.documentNumber}</TableCell>
-      <TableCell>{person.phoneNumber ? person.phoneNumber : <span className="text-muted-foreground/60">Sin teléfono</span>}</TableCell>
-      <TableCell>{person.email ? person.email : <span className="text-muted-foreground/60">Sin correo electrónico</span>}</TableCell>
+      <TableCell>
+        <DataTableIconLabel icon={IdCardIcon}>{person.documentNumber}</DataTableIconLabel>
+      </TableCell>
+      <TableCell>
+        <DataTableIconLabel icon={PhoneIcon}>
+          {person.phoneNumber ? person.phoneNumber : <span className="text-muted-foreground/60">Sin teléfono</span>}
+        </DataTableIconLabel>
+      </TableCell>
+      <TableCell>
+        <DataTableIconLabel icon={MailIcon}>
+          {person.email ? person.email : <span className="text-muted-foreground/60">Sin correo electrónico</span>}
+        </DataTableIconLabel>
+      </TableCell>
       <TableCell>
         <Badge variant={person.enabled ? "secondary" : "outline"}>{getPersonStatusLabel(person)}</Badge>
       </TableCell>

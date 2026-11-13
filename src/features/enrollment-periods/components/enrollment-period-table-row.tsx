@@ -2,8 +2,11 @@
 
 import type { Dispatch, ReactElement, SetStateAction } from "react";
 
+import { CalendarIcon, CalendarRangeIcon } from "lucide-react";
+
 import { Badge } from "@common/components/ui/badge";
 import { ContextMenu, ContextMenuTrigger } from "@common/components/ui/context-menu";
+import { DataTableIconLabel } from "@common/components/ui/data-table-icon-badge";
 import { TableCell, TableRow } from "@common/components/ui/table";
 
 import { EnrollmentPeriodContextActions } from "@features/enrollment-periods/components/enrollment-period-context-actions";
@@ -64,9 +67,15 @@ export function EnrollmentPeriodTableRow({
           <TableCell className="font-medium">
             <EnrollmentPeriodNameCell period={period} />
           </TableCell>
-          <TableCell>Ciclo {period.academicYearNumber}</TableCell>
-          <TableCell>{formatEnrollmentPeriodDateTime(period.startDate)}</TableCell>
-          <TableCell>{formatEnrollmentPeriodDateTime(period.endDate)}</TableCell>
+          <TableCell>
+            <DataTableIconLabel icon={CalendarRangeIcon}>Ciclo {period.academicYearNumber}</DataTableIconLabel>
+          </TableCell>
+          <TableCell>
+            <DataTableIconLabel icon={CalendarIcon}>{formatEnrollmentPeriodDateTime(period.startDate)}</DataTableIconLabel>
+          </TableCell>
+          <TableCell>
+            <DataTableIconLabel icon={CalendarIcon}>{formatEnrollmentPeriodDateTime(period.endDate)}</DataTableIconLabel>
+          </TableCell>
           <TableCell>
             <Badge variant={statusInfo.variant}>{statusInfo.label}</Badge>
           </TableCell>

@@ -2,13 +2,14 @@ import type { ReactElement } from "react";
 
 import Link from "next/link";
 
-import { EllipsisVerticalIcon, UserIcon } from "lucide-react";
+import { BuildingIcon, EllipsisVerticalIcon, GlobeIcon, MapPinIcon, MapPinnedIcon, UserIcon } from "lucide-react";
 
 import { ReturnToLink } from "@common/components/navigation/return-to-link";
 import { Avatar, AvatarFallback, AvatarGroup, AvatarGroupCount } from "@common/components/ui/avatar";
 import { Badge } from "@common/components/ui/badge";
 import { Button } from "@common/components/ui/button";
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuSeparator, ContextMenuTrigger } from "@common/components/ui/context-menu";
+import { DataTableIconLabel } from "@common/components/ui/data-table-icon-badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -43,13 +44,21 @@ export function InstitutionsTableRow({ institution, onStatusChange }: Institutio
             <InstitutionActionsMenu institution={institution} onStatusChange={() => onStatusChange(institution)} />
           </TableCell>
           <TableCell className="font-medium">
-            <Link className="hover:underline" href={`/institutions/${institution.id}`}>
-              {institution.name}
-            </Link>
+            <DataTableIconLabel icon={BuildingIcon}>
+              <Link className="hover:underline" href={`/institutions/${institution.id}`}>
+                {institution.name}
+              </Link>
+            </DataTableIconLabel>
           </TableCell>
-          <TableCell>{institution.country.name}</TableCell>
-          <TableCell>{institution.province}</TableCell>
-          <TableCell>{institution.city}</TableCell>
+          <TableCell>
+            <DataTableIconLabel icon={GlobeIcon}>{institution.country.name}</DataTableIconLabel>
+          </TableCell>
+          <TableCell>
+            <DataTableIconLabel icon={MapPinIcon}>{institution.province}</DataTableIconLabel>
+          </TableCell>
+          <TableCell>
+            <DataTableIconLabel icon={MapPinnedIcon}>{institution.city}</DataTableIconLabel>
+          </TableCell>
           <TableCell>
             <InstitutionUsersCell institution={institution} />
           </TableCell>

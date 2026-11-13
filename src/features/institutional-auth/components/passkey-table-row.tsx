@@ -2,7 +2,7 @@
 
 import type { ReactElement } from "react";
 
-import { EllipsisVerticalIcon, KeyRoundIcon } from "lucide-react";
+import { CalendarIcon, ClockIcon, EllipsisVerticalIcon, KeyRoundIcon } from "lucide-react";
 
 import { Badge } from "@common/components/ui/badge";
 import { Button } from "@common/components/ui/button";
@@ -14,6 +14,7 @@ import {
   ContextMenuSeparator,
   ContextMenuTrigger,
 } from "@common/components/ui/context-menu";
+import { DataTableIconBadge, DataTableIconLabel } from "@common/components/ui/data-table-icon-badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -63,17 +64,19 @@ export function PasskeyTableRow({ passkey, revokeDisabled, onRename, onRevoke }:
             </DropdownMenu>
           </TableCell>
           <TableCell>
-            <span className="flex min-w-0 items-center gap-3">
-              <span className="bg-primary/10 text-primary flex size-8 shrink-0 items-center justify-center rounded-lg">
-                <KeyRoundIcon aria-hidden="true" className="size-4" />
-              </span>
+            <span className="flex min-w-0 items-center gap-2.5">
+              <DataTableIconBadge icon={KeyRoundIcon} />
               <span className="truncate font-medium">{passkey.label}</span>
             </span>
           </TableCell>
-          <TableCell className="text-muted-foreground tabular-nums">{formatDate(passkey.createdAt)}</TableCell>
+          <TableCell className="text-muted-foreground tabular-nums">
+            <DataTableIconLabel icon={CalendarIcon}>{formatDate(passkey.createdAt)}</DataTableIconLabel>
+          </TableCell>
           <TableCell>
             {passkey.lastUsedAt ? (
-              <span className="text-muted-foreground">{formatRelative(passkey.lastUsedAt)}</span>
+              <DataTableIconLabel icon={ClockIcon}>
+                <span className="text-muted-foreground">{formatRelative(passkey.lastUsedAt)}</span>
+              </DataTableIconLabel>
             ) : (
               <Badge variant="secondary">Sin usar</Badge>
             )}

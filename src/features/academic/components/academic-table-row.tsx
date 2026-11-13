@@ -2,13 +2,17 @@ import type { ReactElement } from "react";
 
 import Link from "next/link";
 
+import { BuildingIcon } from "lucide-react";
+
 import { OptionalValue } from "@common/components/optional-value";
 import { Badge } from "@common/components/ui/badge";
 import { ContextMenu, ContextMenuContent, ContextMenuTrigger } from "@common/components/ui/context-menu";
+import { DataTableIconBadge, DataTableIconLabel } from "@common/components/ui/data-table-icon-badge";
 import { TableCell, TableRow } from "@common/components/ui/table";
 
 import { AcademicContextMenuActions, AcademicRowActions } from "@features/academic/components/academic-row-actions";
 import { InstrumentIconBadge } from "@features/academic/components/instrument-icon-badge";
+import { ACADEMIC_DETAIL_COLUMN_ICONS, ACADEMIC_RESOURCE_ICONS } from "@features/academic/config/academic-resource-icons.config";
 import type { AcademicCollectionResource } from "@features/academic/types/academic-collection-resource.types";
 import type { AcademicLifecycleActionKind } from "@features/academic/types/academic-lifecycle-action-kind.types";
 import { AcademicResource } from "@features/academic/types/academic-resource.types";
@@ -135,14 +139,16 @@ export function AcademicTableRow({
           </TableCell>
           {global ? (
             <TableCell>
-              <Link href={`/institutions/${institutionId}`} className="font-medium hover:underline">
-                {row.institutionName}
-              </Link>
+              <DataTableIconLabel icon={BuildingIcon}>
+                <Link href={`/institutions/${institutionId}`} className="font-medium hover:underline">
+                  {row.institutionName}
+                </Link>
+              </DataTableIconLabel>
             </TableCell>
           ) : null}
           <TableCell className="font-medium">
             <span className="inline-flex items-center gap-2.5">
-              {row.icon ? <InstrumentIconBadge icon={row.icon} /> : null}
+              {row.icon ? <InstrumentIconBadge icon={row.icon} /> : <DataTableIconBadge icon={ACADEMIC_RESOURCE_ICONS[resource]} />}
               {!hasAcademicDetailPage(resource) || row.deletedAt ? (
                 row.primaryValue
               ) : (
@@ -152,11 +158,19 @@ export function AcademicTableRow({
               )}
             </span>
           </TableCell>
-          {row.detailValues.map((detail, index) => (
-            <TableCell key={`${row.id}-${columns.detailLabels[index]}`} className="text-muted-foreground max-w-96 truncate">
-              {typeof detail === "string" ? detail : <OptionalValue value={detail.value} fallback={detail.fallback} />}
-            </TableCell>
-          ))}
+          {row.detailValues.map((detail, index) => {
+            const label = columns.detailLabels[index];
+
+            const DetailIcon = ACADEMIC_DETAIL_COLUMN_ICONS[label];
+
+            const content = typeof detail === "string" ? detail : <OptionalValue value={detail.value} fallback={detail.fallback} />;
+
+            return (
+              <TableCell key={`${row.id}-${label}`} className="text-muted-foreground max-w-96 truncate">
+                {DetailIcon ? <DataTableIconLabel icon={DetailIcon}>{content}</DataTableIconLabel> : content}
+              </TableCell>
+            );
+          })}
           <TableCell>
             <Badge variant={statusVariant}>{row.deletedAt ? "Eliminado" : row.status}</Badge>
           </TableCell>

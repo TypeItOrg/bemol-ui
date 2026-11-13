@@ -4,11 +4,12 @@ import type { ReactElement } from "react";
 
 import Link from "next/link";
 
-import { EllipsisVerticalIcon } from "lucide-react";
+import { BuildingIcon, EllipsisVerticalIcon, FileTextIcon } from "lucide-react";
 
 import { Badge } from "@common/components/ui/badge";
 import { Button } from "@common/components/ui/button";
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from "@common/components/ui/context-menu";
+import { DataTableIconLabel } from "@common/components/ui/data-table-icon-badge";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@common/components/ui/dropdown-menu";
 import { TableCell, TableRow } from "@common/components/ui/table";
 
@@ -58,11 +59,17 @@ export function DocumentCatalogTableRow({
             </DropdownMenu>
           </TableCell>
           <TableCell className="font-medium">
-            <Link href={documentHref(item)} className="hover:underline">
-              {item.name}
-            </Link>
+            <DataTableIconLabel icon={FileTextIcon}>
+              <Link href={documentHref(item)} className="hover:underline">
+                {item.name}
+              </Link>
+            </DataTableIconLabel>
           </TableCell>
-          {scope === "admin" && "institutionName" in item ? <TableCell>{item.institutionName}</TableCell> : null}
+          {scope === "admin" && "institutionName" in item ? (
+            <TableCell>
+              <DataTableIconLabel icon={BuildingIcon}>{item.institutionName}</DataTableIconLabel>
+            </TableCell>
+          ) : null}
           <TableCell className="text-muted-foreground">{formatDocumentFileCategories(item.allowedFormats)}</TableCell>
           <TableCell>
             <Badge variant={item.active ? "success" : "secondary"}>{item.active ? "Activo" : "Inactivo"}</Badge>

@@ -4,11 +4,12 @@ import type { ReactElement } from "react";
 
 import Link from "next/link";
 
-import { KeyRoundIcon } from "lucide-react";
+import { BuildingIcon, KeyRoundIcon, UserLockIcon, UsersIcon } from "lucide-react";
 
 import { ReturnToLink } from "@common/components/navigation/return-to-link";
 import { Badge } from "@common/components/ui/badge";
 import { ContextMenu, ContextMenuContent, ContextMenuGroup, ContextMenuItem, ContextMenuTrigger } from "@common/components/ui/context-menu";
+import { DataTableIconLabel } from "@common/components/ui/data-table-icon-badge";
 import { TableCell, TableRow } from "@common/components/ui/table";
 
 import { PlatformRoleActions } from "@features/roles/components/platform-role-table-actions";
@@ -23,29 +24,34 @@ export function PlatformRoleTableRow({ role }: { role: PlatformRoleListItem }): 
             <PlatformRoleActions role={role} />
           </TableCell>
           <TableCell className="font-medium">
-            <Link href={`/roles/${role.id}`} className="hover:underline">
-              {role.name}
-            </Link>
+            <DataTableIconLabel icon={UserLockIcon}>
+              <Link href={`/roles/${role.id}`} className="hover:underline">
+                {role.name}
+              </Link>
+            </DataTableIconLabel>
           </TableCell>
           <TableCell>
-            <Link href={`/institutions/${role.institution.id}`} className="text-muted-foreground font-medium hover:underline">
-              {role.institution.name}
-            </Link>
-            {!role.institution.active ? (
-              <Badge variant="outline" className="ml-2">
-                Inactiva
-              </Badge>
-            ) : null}
+            <DataTableIconLabel icon={BuildingIcon}>
+              <span>
+                <Link href={`/institutions/${role.institution.id}`} className="text-muted-foreground font-medium hover:underline">
+                  {role.institution.name}
+                </Link>
+                {!role.institution.active ? (
+                  <Badge variant="outline" className="ml-2">
+                    Inactiva
+                  </Badge>
+                ) : null}
+              </span>
+            </DataTableIconLabel>
           </TableCell>
           <TableCell>
             <Badge variant={role.technicalCode ? "secondary" : "outline"}>{role.technicalCode ? "Sistema" : "Personalizado"}</Badge>
           </TableCell>
-          <TableCell>{role.assignmentCount}</TableCell>
           <TableCell>
-            <span className="inline-flex items-center gap-1.5">
-              <KeyRoundIcon className="text-muted-foreground size-4" />
-              {role.permissionCount}
-            </span>
+            <DataTableIconLabel icon={UsersIcon}>{role.assignmentCount}</DataTableIconLabel>
+          </TableCell>
+          <TableCell>
+            <DataTableIconLabel icon={KeyRoundIcon}>{role.permissionCount}</DataTableIconLabel>
           </TableCell>
         </TableRow>
       </ContextMenuTrigger>

@@ -2,12 +2,13 @@
 
 import type { ReactElement } from "react";
 
-import { EllipsisVerticalIcon } from "lucide-react";
+import { CalendarIcon, CalendarRangeIcon, EllipsisVerticalIcon, IdCardIcon, RouteIcon, UserRoundIcon } from "lucide-react";
 
 import { ReturnToLink } from "@common/components/navigation/return-to-link";
 import { OptionalValue } from "@common/components/optional-value";
 import { Button } from "@common/components/ui/button";
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuSeparator, ContextMenuTrigger } from "@common/components/ui/context-menu";
+import { DataTableIconLabel } from "@common/components/ui/data-table-icon-badge";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@common/components/ui/dropdown-menu";
 import { TableCell, TableRow } from "@common/components/ui/table";
 
@@ -84,16 +85,28 @@ export function EnrollmentApplicationTableRow({
         ) : null}
       </TableCell>
       <TableCell className="font-medium">
-        {application.applicantLastName}, {application.applicantFirstName}
-      </TableCell>
-      <TableCell>{application.applicantDocumentNumber}</TableCell>
-      <TableCell className="max-w-64 whitespace-normal">
-        <OptionalValue value={application.trainingPathName} fallback="Sin trayecto formativo" />
+        <DataTableIconLabel icon={UserRoundIcon}>
+          <span>
+            {application.applicantLastName}, {application.applicantFirstName}
+          </span>
+        </DataTableIconLabel>
       </TableCell>
       <TableCell>
-        <OptionalValue value={application.academicYear} fallback="Sin ciclo registrado" />
+        <DataTableIconLabel icon={IdCardIcon}>{application.applicantDocumentNumber}</DataTableIconLabel>
       </TableCell>
-      <TableCell className="text-muted-foreground">{formatEnrollmentApplicationDate(application.createdAt)}</TableCell>
+      <TableCell className="max-w-64 whitespace-normal">
+        <DataTableIconLabel icon={RouteIcon}>
+          <OptionalValue value={application.trainingPathName} fallback="Sin trayecto formativo" />
+        </DataTableIconLabel>
+      </TableCell>
+      <TableCell>
+        <DataTableIconLabel icon={CalendarRangeIcon}>
+          <OptionalValue value={application.academicYear} fallback="Sin ciclo registrado" />
+        </DataTableIconLabel>
+      </TableCell>
+      <TableCell className="text-muted-foreground">
+        <DataTableIconLabel icon={CalendarIcon}>{formatEnrollmentApplicationDate(application.createdAt)}</DataTableIconLabel>
+      </TableCell>
       <TableCell>
         <EnrollmentApplicationStatusBadge
           status={application.status}

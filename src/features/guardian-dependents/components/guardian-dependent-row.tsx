@@ -1,11 +1,12 @@
 import type { ReactElement } from "react";
 
-import { CircleQuestionMarkIcon, EllipsisVerticalIcon } from "lucide-react";
+import { CircleQuestionMarkIcon, EllipsisVerticalIcon, IdCardIcon, UserRoundIcon } from "lucide-react";
 
 import { OptionalValue } from "@common/components/optional-value";
 import { Badge } from "@common/components/ui/badge";
 import { Button } from "@common/components/ui/button";
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from "@common/components/ui/context-menu";
+import { DataTableIconLabel } from "@common/components/ui/data-table-icon-badge";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@common/components/ui/dropdown-menu";
 import { Popover, PopoverContent, PopoverDescription, PopoverHeader, PopoverTitle, PopoverTrigger } from "@common/components/ui/popover";
 import { TableCell, TableRow } from "@common/components/ui/table";
@@ -106,12 +107,16 @@ export function GuardianDependentRow({
         )}
       </TableCell>
       <TableCell className="font-medium">
-        <OptionalValue value={dependent.firstName} fallback={isActive ? "Nombre no informado" : "Disponible al aprobar"} />
+        <DataTableIconLabel icon={UserRoundIcon}>
+          <OptionalValue value={dependent.firstName} fallback={isActive ? "Nombre no informado" : "Disponible al aprobar"} />
+        </DataTableIconLabel>
       </TableCell>
       <TableCell className="font-medium">
         <OptionalValue value={dependent.lastName} fallback={isActive ? "Apellido no informado" : "Disponible al aprobar"} />
       </TableCell>
-      <TableCell className="tabular-nums">{dependent.documentNumber}</TableCell>
+      <TableCell className="tabular-nums">
+        <DataTableIconLabel icon={IdCardIcon}>{dependent.documentNumber}</DataTableIconLabel>
+      </TableCell>
       <TableCell className="tabular-nums">
         <OptionalValue
           value={age === null ? null : `${age} ${age === 1 ? "año" : "años"}`}

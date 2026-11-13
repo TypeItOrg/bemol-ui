@@ -8,6 +8,7 @@ import { CircleAlertIcon, RouteIcon } from "lucide-react";
 import { SectionHeader } from "@common/components/section-header";
 import { Alert, AlertDescription, AlertTitle } from "@common/components/ui/alert";
 import { Button } from "@common/components/ui/button";
+import { DataTableIconLabel } from "@common/components/ui/data-table-icon-badge";
 import { DataTableLoadingOverlay } from "@common/components/ui/data-table-loading-overlay";
 import { DataTablePagination } from "@common/components/ui/data-table-pagination";
 import { DataTableSortableHead } from "@common/components/ui/data-table-sortable-head";
@@ -95,8 +96,12 @@ export function DocumentCatalogAssignmentList({
               {query.data.items.map((path) => (
                 <TableRow key={path.trainingPathId}>
                   <TableCell className="py-3 whitespace-normal">
-                    <p className="font-medium break-words">{path.trainingPathName}</p>
-                    {path.specificInstructions ? <AssignmentInstructions instructions={path.specificInstructions} /> : null}
+                    <DataTableIconLabel icon={RouteIcon}>
+                      <div className="min-w-0">
+                        <p className="font-medium break-words">{path.trainingPathName}</p>
+                        {path.specificInstructions ? <AssignmentInstructions instructions={path.specificInstructions} /> : null}
+                      </div>
+                    </DataTableIconLabel>
                   </TableCell>
                   <TableCell className="py-3 whitespace-normal">{DOCUMENT_LEVEL_LABELS[path.level]}</TableCell>
                   <TableCell className="py-3 text-right tabular-nums">{path.displayOrder}</TableCell>

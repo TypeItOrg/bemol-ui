@@ -2,6 +2,8 @@
 
 import { useState, type ReactElement } from "react";
 
+import { CalendarIcon, MailIcon, UserRoundIcon } from "lucide-react";
+
 import { ReturnToLink } from "@common/components/navigation/return-to-link";
 import { Badge } from "@common/components/ui/badge";
 import {
@@ -12,6 +14,7 @@ import {
   ContextMenuSeparator,
   ContextMenuTrigger,
 } from "@common/components/ui/context-menu";
+import { DataTableIconLabel } from "@common/components/ui/data-table-icon-badge";
 import { TableCell, TableRow } from "@common/components/ui/table";
 
 import { PlatformAccountDisableDialog } from "@features/platform-accounts/components/platform-account-disable-dialog";
@@ -35,11 +38,15 @@ export function PlatformAccountTableRow({ account }: { account: PlatformAccountA
               <PlatformAccountActions account={account} disableDisabled={disableDisabled} onDisable={() => setDisableOpen(true)} />
             </TableCell>
             <TableCell className="font-medium">
-              <ReturnToLink className="hover:underline" href={`/accounts/${account.platformAccountId}`}>
-                {account.name} {account.lastName}
-              </ReturnToLink>
+              <DataTableIconLabel icon={UserRoundIcon}>
+                <ReturnToLink className="hover:underline" href={`/accounts/${account.platformAccountId}`}>
+                  {account.name} {account.lastName}
+                </ReturnToLink>
+              </DataTableIconLabel>
             </TableCell>
-            <TableCell className="text-muted-foreground">{account.email}</TableCell>
+            <TableCell className="text-muted-foreground">
+              <DataTableIconLabel icon={MailIcon}>{account.email}</DataTableIconLabel>
+            </TableCell>
             <TableCell>
               <Badge size="lg" variant="secondary">
                 {account.roleName}
@@ -48,7 +55,9 @@ export function PlatformAccountTableRow({ account }: { account: PlatformAccountA
             <TableCell>
               <Badge variant={account.enabled ? "success" : "destructive"}>{account.enabled ? "Habilitado" : "Deshabilitado"}</Badge>
             </TableCell>
-            <TableCell className="text-muted-foreground tabular-nums">{dateFormatter.format(new Date(account.createdAt))}</TableCell>
+            <TableCell className="text-muted-foreground tabular-nums">
+              <DataTableIconLabel icon={CalendarIcon}>{dateFormatter.format(new Date(account.createdAt))}</DataTableIconLabel>
+            </TableCell>
           </TableRow>
         </ContextMenuTrigger>
         <ContextMenuContent className="w-40 p-1.5">

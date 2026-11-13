@@ -25,10 +25,16 @@ export function PlatformAccountsTableSkeleton(): ReactElement {
                   <Skeleton className="size-8" />
                 </TableCell>
                 <TableCell>
-                  <Skeleton className="h-5 w-40" />
+                  <div className="flex items-center gap-2.5">
+                    <Skeleton className="size-8 shrink-0 rounded-full" />
+                    <Skeleton className="h-5 w-32" />
+                  </div>
                 </TableCell>
                 <TableCell>
-                  <Skeleton className="h-5 w-52" />
+                  <div className="flex items-center gap-2.5">
+                    <Skeleton className="size-8 shrink-0 rounded-full" />
+                    <Skeleton className="h-5 w-52" />
+                  </div>
                 </TableCell>
                 <TableCell>
                   <Skeleton className="h-5 w-44 rounded-full" />
@@ -37,7 +43,10 @@ export function PlatformAccountsTableSkeleton(): ReactElement {
                   <Skeleton className="h-5 w-24 rounded-full" />
                 </TableCell>
                 <TableCell>
-                  <Skeleton className="h-5 w-28" />
+                  <div className="flex items-center gap-2.5">
+                    <Skeleton className="size-8 shrink-0 rounded-full" />
+                    <Skeleton className="h-5 w-28" />
+                  </div>
                 </TableCell>
               </TableRow>
             ))}

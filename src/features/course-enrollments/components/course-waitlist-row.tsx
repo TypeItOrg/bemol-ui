@@ -2,12 +2,13 @@
 
 import type { ReactElement } from "react";
 
-import { EllipsisVerticalIcon } from "lucide-react";
+import { CalendarIcon, ClockIcon, EllipsisVerticalIcon, UserRoundIcon } from "lucide-react";
 
 import { OptionalValue } from "@common/components/optional-value";
 import { Badge } from "@common/components/ui/badge";
 import { Button } from "@common/components/ui/button";
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from "@common/components/ui/context-menu";
+import { DataTableIconLabel } from "@common/components/ui/data-table-icon-badge";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@common/components/ui/dropdown-menu";
 import { TableCell, TableRow } from "@common/components/ui/table";
 
@@ -49,10 +50,16 @@ export function CourseWaitlistRow({ entry, canEnroll, isPending, onEnroll }: Cou
       ) : null}
       <TableCell className={canEnroll ? "font-semibold tabular-nums" : "pl-4 font-semibold tabular-nums"}>{entry.waitlistNumber}</TableCell>
       <TableCell>
-        <div className="font-medium">{entry.applicantName}</div>
-        <div className="text-muted-foreground">{entry.applicantDocumentNumber}</div>
+        <DataTableIconLabel icon={UserRoundIcon}>
+          <div>
+            <div className="font-medium">{entry.applicantName}</div>
+            <div className="text-muted-foreground">{entry.applicantDocumentNumber}</div>
+          </div>
+        </DataTableIconLabel>
       </TableCell>
-      <TableCell>{formatEnrollmentApplicationDate(entry.waitlistedAt)}</TableCell>
+      <TableCell>
+        <DataTableIconLabel icon={CalendarIcon}>{formatEnrollmentApplicationDate(entry.waitlistedAt)}</DataTableIconLabel>
+      </TableCell>
       <TableCell>
         <OptionalValue
           value={entry.originalReason ? (WAITLIST_REASON_LABELS[entry.originalReason] ?? entry.originalReason) : null}
@@ -63,7 +70,9 @@ export function CourseWaitlistRow({ entry, canEnroll, isPending, onEnroll }: Cou
         <Badge variant={entry.hasCapacity ? "success" : "secondary"}>{entry.hasCapacity ? "Cupo disponible" : "Sin cupos"}</Badge>
       </TableCell>
       <TableCell>
-        <OptionalValue value={entry.preferredShift} fallback="Sin preferencia de turno" />
+        <DataTableIconLabel icon={ClockIcon}>
+          <OptionalValue value={entry.preferredShift} fallback="Sin preferencia de turno" />
+        </DataTableIconLabel>
       </TableCell>
     </TableRow>
   );

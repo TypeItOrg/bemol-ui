@@ -2,13 +2,14 @@
 
 import type { ReactElement } from "react";
 
-import { EllipsisVerticalIcon } from "lucide-react";
+import { BookMarkedIcon, EllipsisVerticalIcon, GraduationCapIcon, Music2Icon, UserRoundIcon } from "lucide-react";
 
 import { ReturnToLink } from "@common/components/navigation/return-to-link";
 import { OptionalValue } from "@common/components/optional-value";
 import { Badge } from "@common/components/ui/badge";
 import { Button } from "@common/components/ui/button";
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuSeparator, ContextMenuTrigger } from "@common/components/ui/context-menu";
+import { DataTableIconLabel } from "@common/components/ui/data-table-icon-badge";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@common/components/ui/dropdown-menu";
 import { Table, TableBody, TableCell, TableRow } from "@common/components/ui/table";
 
@@ -99,17 +100,29 @@ export function CourseEnrollmentResultsTable({
                   ) : null}
                 </TableCell>
               ) : null}
-              <TableCell className={showActionsColumn ? undefined : "pl-4"}>{enrollment.studentName}</TableCell>
+              <TableCell className={showActionsColumn ? undefined : "pl-4"}>
+                <DataTableIconLabel icon={UserRoundIcon}>{enrollment.studentName}</DataTableIconLabel>
+              </TableCell>
               <TableCell className="font-medium">
-                {enrollment.academicSpaceName}
-                <div className="text-muted-foreground text-sm">{enrollment.courseClassLabel}</div>
+                <DataTableIconLabel icon={GraduationCapIcon}>
+                  <div>
+                    <div>{enrollment.academicSpaceName}</div>
+                    <div className="text-muted-foreground text-sm">{enrollment.courseClassLabel}</div>
+                  </div>
+                </DataTableIconLabel>
               </TableCell>
               <TableCell>
-                <div>{formatStudyPlanLabel(enrollment)}</div>
-                <div className="text-muted-foreground">{enrollment.academicLevelName ?? "Sin nivel"}</div>
+                <DataTableIconLabel icon={BookMarkedIcon}>
+                  <div>
+                    <div>{formatStudyPlanLabel(enrollment)}</div>
+                    <div className="text-muted-foreground">{enrollment.academicLevelName ?? "Sin nivel"}</div>
+                  </div>
+                </DataTableIconLabel>
               </TableCell>
               <TableCell>
-                <OptionalValue value={enrollment.instrumentName} fallback="Sin instrumento" />
+                <DataTableIconLabel icon={Music2Icon}>
+                  <OptionalValue value={enrollment.instrumentName} fallback="Sin instrumento" />
+                </DataTableIconLabel>
               </TableCell>
               <TableCell>
                 <CourseEnrollmentSchedules schedules={enrollment.schedules} />

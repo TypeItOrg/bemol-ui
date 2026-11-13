@@ -1,8 +1,9 @@
 import type { ReactElement } from "react";
 
-import { HistoryIcon } from "lucide-react";
+import { CalendarIcon, HistoryIcon } from "lucide-react";
 
 import { OptionalValue } from "@common/components/optional-value";
+import { DataTableIconLabel } from "@common/components/ui/data-table-icon-badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@common/components/ui/table";
 
 import { SectionHeader } from "@features/course-enrollments/components/course-enrollment-detail-items";
@@ -43,9 +44,15 @@ export function CourseEnrollmentHistorySection({ history }: { history: CourseEnr
                 {history.map((item) => (
                   <TableRow key={item.id} className="h-12">
                     <TableCell className="tabular-nums">
-                      <time dateTime={item.changedAt}>{formatEnrollmentApplicationDateTime(item.changedAt)}</time>
+                      <DataTableIconLabel icon={CalendarIcon}>
+                        <time dateTime={item.changedAt}>{formatEnrollmentApplicationDateTime(item.changedAt)}</time>
+                      </DataTableIconLabel>
                     </TableCell>
-                    <TableCell>{COURSE_ENROLLMENT_OPERATION_LABELS[item.operation] ?? "Actualización de cursada"}</TableCell>
+                    <TableCell>
+                      <DataTableIconLabel icon={HistoryIcon}>
+                        {COURSE_ENROLLMENT_OPERATION_LABELS[item.operation] ?? "Actualización de cursada"}
+                      </DataTableIconLabel>
+                    </TableCell>
                     <TableCell>
                       <HistoryStatus
                         previous={item.previousStatus ? COURSE_ENROLLMENT_STATUS_LABELS[item.previousStatus] : null}

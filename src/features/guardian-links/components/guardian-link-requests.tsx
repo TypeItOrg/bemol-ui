@@ -6,12 +6,13 @@ import { useState, type ReactElement } from "react";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
-import { EllipsisVerticalIcon, Loader2Icon, SearchIcon, UsersIcon } from "lucide-react";
+import { BuildingIcon, CalendarIcon, EllipsisVerticalIcon, FileTextIcon, Loader2Icon, SearchIcon, UsersIcon } from "lucide-react";
 
 import { OptionalValue } from "@common/components/optional-value";
 import { Button } from "@common/components/ui/button";
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuSeparator, ContextMenuTrigger } from "@common/components/ui/context-menu";
 import { DataTableFilters } from "@common/components/ui/data-table-filters";
+import { DataTableIconLabel } from "@common/components/ui/data-table-icon-badge";
 import { useDataTableNavigation } from "@common/components/ui/data-table-navigation";
 import { DataTablePagination } from "@common/components/ui/data-table-pagination";
 import { DataTableSortableHead } from "@common/components/ui/data-table-sortable-head";
@@ -251,7 +252,9 @@ function RequestRow({
       </TableCell>
       {showInstitution ? (
         <TableCell>
-          <OptionalValue value={request.institution?.name} fallback="Sin institución" />
+          <DataTableIconLabel icon={BuildingIcon}>
+            <OptionalValue value={request.institution?.name} fallback="Sin institución" />
+          </DataTableIconLabel>
         </TableCell>
       ) : null}
       <TableCell>
@@ -262,18 +265,22 @@ function RequestRow({
         {approvalError ? <p className="text-muted-foreground mt-1 text-xs">Sin coincidencia registrada</p> : null}
       </TableCell>
       <TableCell>{GUARDIAN_RELATIONSHIP_LABELS[request.relationship]}</TableCell>
-      <TableCell>{formatEnrollmentApplicationDateTime(request.createdAt)}</TableCell>
       <TableCell>
-        <OptionalValue
-          value={
-            request.attachments.length > 0 ? (
-              <p>
-                {request.attachments.length} {request.attachments.length === 1 ? "documento" : "documentos"}
-              </p>
-            ) : null
-          }
-          fallback="Sin documentación"
-        />
+        <DataTableIconLabel icon={CalendarIcon}>{formatEnrollmentApplicationDateTime(request.createdAt)}</DataTableIconLabel>
+      </TableCell>
+      <TableCell>
+        <DataTableIconLabel icon={FileTextIcon}>
+          <OptionalValue
+            value={
+              request.attachments.length > 0 ? (
+                <p>
+                  {request.attachments.length} {request.attachments.length === 1 ? "documento" : "documentos"}
+                </p>
+              ) : null
+            }
+            fallback="Sin documentación"
+          />
+        </DataTableIconLabel>
       </TableCell>
       <TableCell>
         <RequestStatus status={request.status} />

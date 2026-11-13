@@ -5,7 +5,7 @@ import { useRef, useState, type ReactElement, type RefObject } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-import { EllipsisVerticalIcon } from "lucide-react";
+import { BuildingIcon, EllipsisVerticalIcon, IdCardIcon, MailIcon, PhoneIcon, UserRoundIcon } from "lucide-react";
 
 import { ReturnToLink } from "@common/components/navigation/return-to-link";
 import { Badge } from "@common/components/ui/badge";
@@ -18,6 +18,7 @@ import {
   ContextMenuSeparator,
   ContextMenuTrigger,
 } from "@common/components/ui/context-menu";
+import { DataTableIconLabel } from "@common/components/ui/data-table-icon-badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -48,24 +49,38 @@ export function PlatformPeopleTableRow({ canUpdate, person }: { canUpdate: boole
               <PlatformPersonActions person={person} canUpdate={canUpdate} triggerRef={triggerRef} onDelete={() => setDeleteOpen(true)} />
             </TableCell>
             <TableCell className="font-medium">
-              {canUpdate ? (
-                <ReturnToLink className="hover:underline" href={getPersonPath(person)}>
-                  {person.lastName}, {person.firstName}
-                </ReturnToLink>
-              ) : (
-                <span>
-                  {person.lastName}, {person.firstName}
-                </span>
-              )}
+              <DataTableIconLabel icon={UserRoundIcon}>
+                {canUpdate ? (
+                  <ReturnToLink className="hover:underline" href={getPersonPath(person)}>
+                    {person.lastName}, {person.firstName}
+                  </ReturnToLink>
+                ) : (
+                  <span>
+                    {person.lastName}, {person.firstName}
+                  </span>
+                )}
+              </DataTableIconLabel>
             </TableCell>
-            <TableCell>{person.documentNumber}</TableCell>
             <TableCell>
-              <Link className="text-muted-foreground font-medium hover:underline" href={getInstitutionPath(person)}>
-                {person.institutionName}
-              </Link>
+              <DataTableIconLabel icon={IdCardIcon}>{person.documentNumber}</DataTableIconLabel>
             </TableCell>
-            <TableCell>{person.phoneNumber || <span className="text-muted-foreground/60">Sin teléfono</span>}</TableCell>
-            <TableCell>{person.email || <span className="text-muted-foreground/60">Sin correo electrónico</span>}</TableCell>
+            <TableCell>
+              <DataTableIconLabel icon={BuildingIcon}>
+                <Link className="text-muted-foreground font-medium hover:underline" href={getInstitutionPath(person)}>
+                  {person.institutionName}
+                </Link>
+              </DataTableIconLabel>
+            </TableCell>
+            <TableCell>
+              <DataTableIconLabel icon={PhoneIcon}>
+                {person.phoneNumber || <span className="text-muted-foreground/60">Sin teléfono</span>}
+              </DataTableIconLabel>
+            </TableCell>
+            <TableCell>
+              <DataTableIconLabel icon={MailIcon}>
+                {person.email || <span className="text-muted-foreground/60">Sin correo electrónico</span>}
+              </DataTableIconLabel>
+            </TableCell>
             <TableCell>
               <Badge variant={person.enabled ? "secondary" : "outline"}>{getPersonStatusLabel(person)}</Badge>
             </TableCell>

@@ -2,9 +2,10 @@
 
 import type { ReactElement } from "react";
 
-import { Loader2Icon, MonitorIcon } from "lucide-react";
+import { CalendarIcon, GlobeIcon, Loader2Icon, MonitorIcon } from "lucide-react";
 
 import { Badge } from "@common/components/ui/badge";
+import { DataTableIconLabel } from "@common/components/ui/data-table-icon-badge";
 import { useDataTableNavigation } from "@common/components/ui/data-table-navigation";
 import { Empty, EmptyHeader, EmptyMedia, EmptyTitle } from "@common/components/ui/empty";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@common/components/ui/table";
@@ -53,12 +54,18 @@ export function InstitutionalSessionsTablePresentation({ data, page, size }: Ins
           <TableBody>
             {data.items.map((session) => (
               <TableRow key={session.sessionId}>
-                <TableCell className="text-muted-foreground tabular-nums">{formatSessionStartedAt(session.startedAt)}</TableCell>
-                <TableCell className="text-muted-foreground tabular-nums">{session.ipAddress}</TableCell>
+                <TableCell className="text-muted-foreground tabular-nums">
+                  <DataTableIconLabel icon={CalendarIcon}>{formatSessionStartedAt(session.startedAt)}</DataTableIconLabel>
+                </TableCell>
+                <TableCell className="text-muted-foreground tabular-nums">
+                  <DataTableIconLabel icon={GlobeIcon}>{session.ipAddress}</DataTableIconLabel>
+                </TableCell>
                 <TableCell className="max-w-120">
-                  <span className="block truncate" title={session.userAgent}>
-                    {formatUserAgentLabel(session.userAgent)}
-                  </span>
+                  <DataTableIconLabel icon={MonitorIcon} className="max-w-full">
+                    <span className="block truncate" title={session.userAgent}>
+                      {formatUserAgentLabel(session.userAgent)}
+                    </span>
+                  </DataTableIconLabel>
                 </TableCell>
                 <TableCell className="pr-4">{session.currentSession ? <Badge size="lg">Esta sesión</Badge> : null}</TableCell>
               </TableRow>

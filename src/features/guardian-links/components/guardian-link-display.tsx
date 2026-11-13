@@ -1,10 +1,11 @@
 import type { ReactElement } from "react";
 
-import { EyeIcon, FileTextIcon } from "lucide-react";
+import { EyeIcon, FileTextIcon, UserRoundIcon } from "lucide-react";
 
 import { OptionalValue } from "@common/components/optional-value";
 import { Badge } from "@common/components/ui/badge";
 import { Button } from "@common/components/ui/button";
+import { DataTableIconLabel } from "@common/components/ui/data-table-icon-badge";
 import { FileUploadSelection } from "@common/components/ui/file-upload-selection";
 
 import { DocumentFilePreview } from "@features/enrollment-applications/components/document-file-preview";
@@ -108,13 +109,15 @@ export function RequestStatus({ status, className }: { status: GuardianLinkStatu
 
 export function PersonCell({ person }: { person: GuardianLinkPerson }): ReactElement {
   return (
-    <div>
-      <div className="font-medium">{getGuardianDependentName(person)}</div>
-      <div className="text-muted-foreground text-xs">
-        {person.documentNumber}
-        {person.birthDate ? ` · ${formatAge(person.birthDate)}` : null}
+    <DataTableIconLabel icon={UserRoundIcon}>
+      <div>
+        <div className="font-medium">{getGuardianDependentName(person)}</div>
+        <div className="text-muted-foreground text-xs">
+          {person.documentNumber}
+          {person.birthDate ? ` · ${formatAge(person.birthDate)}` : null}
+        </div>
       </div>
-    </div>
+    </DataTableIconLabel>
   );
 }
 

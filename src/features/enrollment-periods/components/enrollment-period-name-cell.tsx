@@ -1,3 +1,7 @@
+import { CalendarRangeIcon } from "lucide-react";
+
+import { DataTableIconLabel } from "@common/components/ui/data-table-icon-badge";
+
 import { formatStudyPlanNameWithPrefix } from "@features/academic/utils/study-plan-label.util";
 import { ENROLLMENT_PERIOD_MESSAGES } from "@features/enrollment-periods/constants/enrollment-period.messages";
 import type { EnrollmentPeriodOffering } from "@features/enrollment-periods/types/enrollment-period-offering.types";
@@ -29,10 +33,12 @@ export function EnrollmentPeriodNameCell({ period }: { period: EnrollmentPeriod 
   const summary = hasOfferings ? getOfferingSummary(period.offerings) : ENROLLMENT_PERIOD_MESSAGES.pendingOffering;
 
   return (
-    <div className="space-y-1 whitespace-nowrap">
-      <div className="font-medium">{period.name}</div>
-      {period.limitedView ? <div className="text-muted-foreground text-xs">{ENROLLMENT_PERIOD_MESSAGES.limitedView}</div> : null}
-      <div className="text-muted-foreground text-xs font-normal">{summary}</div>
-    </div>
+    <DataTableIconLabel icon={CalendarRangeIcon}>
+      <div className="space-y-1 whitespace-nowrap">
+        <div className="font-medium">{period.name}</div>
+        {period.limitedView ? <div className="text-muted-foreground text-xs">{ENROLLMENT_PERIOD_MESSAGES.limitedView}</div> : null}
+        <div className="text-muted-foreground text-xs font-normal">{summary}</div>
+      </div>
+    </DataTableIconLabel>
   );
 }

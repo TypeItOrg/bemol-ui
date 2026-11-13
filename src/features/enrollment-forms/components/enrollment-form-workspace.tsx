@@ -10,6 +10,7 @@ import { ReturnToLink } from "@common/components/navigation/return-to-link";
 import { SectionHeader } from "@common/components/section-header";
 import { Button } from "@common/components/ui/button";
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from "@common/components/ui/context-menu";
+import { DataTableIconLabel } from "@common/components/ui/data-table-icon-badge";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@common/components/ui/dropdown-menu";
 import { Skeleton } from "@common/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@common/components/ui/table";
@@ -115,9 +116,11 @@ export function EnrollmentFormWorkspace({ context, returnTo }: { context: Enroll
                           </DropdownMenu>
                         </TableCell>
                         <TableCell className="font-medium whitespace-normal">
-                          <ReturnToLink href={`${pathname}/${model.id}`} className="hover:underline">
-                            {model.name}
-                          </ReturnToLink>
+                          <DataTableIconLabel icon={FileTextIcon}>
+                            <ReturnToLink href={`${pathname}/${model.id}`} className="hover:underline">
+                              {model.name}
+                            </ReturnToLink>
+                          </DataTableIconLabel>
                         </TableCell>
                       </TableRow>
                     </ContextMenuTrigger>
