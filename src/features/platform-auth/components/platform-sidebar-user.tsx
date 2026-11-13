@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactElement } from "react";
+import { useState, type ReactElement } from "react";
 
 import { ChevronsUpDownIcon, LogOutIcon, MoonIcon, SunIcon } from "lucide-react";
 import { useTheme } from "next-themes";
@@ -17,7 +17,7 @@ import {
 } from "@common/components/ui/dropdown-menu";
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "@common/components/ui/sidebar";
 
-import { useLogoutPlatform } from "@features/platform-auth/hooks/use-logout-platform.hook";
+import { PlatformLogoutDialog } from "@features/platform-auth/components/platform-logout-dialog";
 import type { PlatformAccount } from "@features/platform-auth/types/platform-account.types";
 
 type PlatformSidebarUserProps = {
@@ -29,7 +29,7 @@ export function PlatformSidebarUser({ user }: PlatformSidebarUserProps): ReactEl
 
   const { resolvedTheme, setTheme } = useTheme();
 
-  const logout = useLogoutPlatform();
+  const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false);
 
   return (
     <SidebarMenu>
@@ -88,19 +88,14 @@ export function PlatformSidebarUser({ user }: PlatformSidebarUserProps): ReactEl
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem
-                disabled={logout.isPending}
-                onSelect={(event) => {
-                  event.preventDefault();
-                  logout.mutate();
-                }}
-              >
+              <DropdownMenuItem variant="destructive" onSelect={() => setIsLogoutDialogOpen(true)}>
                 <LogOutIcon />
-                {logout.isPending ? "Cerrando sesión" : "Cerrar sesión"}
+                Cerrar sesión
               </DropdownMenuItem>
             </DropdownMenuGroup>
           </DropdownMenuContent>
         </DropdownMenu>
+        {isLogoutDialogOpen ? <PlatformLogoutDialog onClose={() => setIsLogoutDialogOpen(false)} /> : null}
       </SidebarMenuItem>
     </SidebarMenu>
   );
