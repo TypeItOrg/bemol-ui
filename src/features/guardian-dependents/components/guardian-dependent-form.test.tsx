@@ -3,8 +3,11 @@ import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { setupServer } from "msw/node";
 
+import { putPresignedFile } from "@common/utils/presigned-upload.util";
+
+import { confirmGuardianDependentDocumentAction } from "@features/guardian-dependents/actions/confirm-guardian-dependent-document.action";
 import { finishGuardianDependentRequestAction } from "@features/guardian-dependents/actions/finish-guardian-dependent-request.action";
-import { uploadGuardianDependentDocumentAction } from "@features/guardian-dependents/actions/upload-guardian-dependent-document.action";
+import { presignGuardianDependentDocumentAction } from "@features/guardian-dependents/actions/presign-guardian-dependent-document.action";
 import { GuardianDependentForm } from "@features/guardian-dependents/components/guardian-dependent-form";
 import { GUARDIAN_DEPENDENT_MESSAGES } from "@features/guardian-dependents/constants/guardian-dependent.constants";
 import { getInstitutionalAccessToken } from "@features/institutional-auth/services/get-institutional-access-token.service";
@@ -35,9 +38,16 @@ jest.mock("@features/enrollment-applications/components/document-file-preview", 
 jest.mock("@features/guardian-dependents/actions/finish-guardian-dependent-request.action", () => ({
   finishGuardianDependentRequestAction: jest.fn(),
 }));
-// Multipart encoding belongs to the server runtime; this jsdom integration keeps that action boundary explicit.
-jest.mock("@features/guardian-dependents/actions/upload-guardian-dependent-document.action", () => ({
-  uploadGuardianDependentDocumentAction: jest.fn(),
+// jsdom Files cannot be sent through Node's fetch; keep the storage PUT boundary explicit.
+jest.mock("@common/utils/presigned-upload.util", () => ({
+  ...jest.requireActual("@common/utils/presigned-upload.util"),
+  putPresignedFile: jest.fn(),
+}));
+jest.mock("@features/guardian-dependents/actions/presign-guardian-dependent-document.action", () => ({
+  presignGuardianDependentDocumentAction: jest.fn(),
+}));
+jest.mock("@features/guardian-dependents/actions/confirm-guardian-dependent-document.action", () => ({
+  confirmGuardianDependentDocumentAction: jest.fn(),
 }));
 
 const API_URL = "https://guardian-api.example.test";
@@ -51,6 +61,7 @@ const originalEnvironment = {
   BEMOL_API_URL: process.env.BEMOL_API_URL,
   INSTITUTIONAL_BASE_DOMAIN: process.env.INSTITUTIONAL_BASE_DOMAIN,
 };
+const STORAGE_URL = "https://storage.example.test/upload";
 const requests: { body: unknown; authorization: string | null }[] = [];
 
 // Full date-field and HTTP flows need headroom on constrained CI runners.
@@ -116,7 +127,12 @@ beforeEach(() => {
   });
   jest.mocked(getInstitutionalAccessToken).mockResolvedValue("guardian-access");
   jest.mocked(finishGuardianDependentRequestAction).mockReset().mockResolvedValue({});
-  jest.mocked(uploadGuardianDependentDocumentAction).mockReset().mockResolvedValue({ success: true });
+  jest
+    .mocked(presignGuardianDependentDocumentAction)
+    .mockReset()
+    .mockResolvedValue({ upload: { uploadUrl: STORAGE_URL, headers: { "Content-Type": "application/pdf" }, storageKey: "pending/key" } });
+  jest.mocked(confirmGuardianDependentDocumentAction).mockReset().mockResolvedValue({ success: true });
+  jest.mocked(putPresignedFile).mockReset().mockResolvedValue(true);
   URL.createObjectURL = jest.fn(() => "blob:preview");
   URL.revokeObjectURL = jest.fn();
 });
@@ -169,7 +185,7 @@ describe("GuardianDependentForm with the real create action and HTTP transport",
         },
       },
     ]);
-    expect(uploadGuardianDependentDocumentAction).not.toHaveBeenCalled();
+    expect(presignGuardianDependentDocumentAction).not.toHaveBeenCalled();
   });
 
   it("shows the name validation and focuses the field before sending, then permits a corrected retry", async () => {
@@ -220,13 +236,23 @@ describe("GuardianDependentForm with the real create action and HTTP transport",
     expect(requests).toHaveLength(1);
     expect(requests[0].body).toMatchObject({ isPrimaryContact: true, ownAccessRequested: true, email: "mateo@example.test" });
     expect(requests[0].body).not.toHaveProperty("documents");
-    expect(uploadGuardianDependentDocumentAction).toHaveBeenCalledTimes(2);
+    expect(presignGuardianDependentDocumentAction).toHaveBeenCalledTimes(2);
+    expect(putPresignedFile).toHaveBeenCalledTimes(2);
+    expect(confirmGuardianDependentDocumentAction).toHaveBeenCalledTimes(2);
 
-    jest.mocked(uploadGuardianDependentDocumentAction).mock.calls.forEach(([institutionId, linkId, body], index) => {
-      expect(institutionId).toBe(INSTITUTION_ID);
-      expect(linkId).toBe(LINK_ID);
-      expect(body.getAll("file")).toHaveLength(1);
-      expect(body.get("file")).toMatchObject({ name: files[index].name, size: files[index].size, type: files[index].type });
+    files.forEach((file, index) => {
+      const metadata = { fileName: file.name, contentType: file.type, fileSize: file.size };
+
+      expect(presignGuardianDependentDocumentAction).toHaveBeenNthCalledWith(index + 1, INSTITUTION_ID, LINK_ID, metadata);
+      expect(jest.mocked(putPresignedFile).mock.calls[index]).toEqual([
+        { uploadUrl: STORAGE_URL, headers: { "Content-Type": "application/pdf" }, storageKey: "pending/key" },
+        expect.objectContaining({ name: file.name, size: file.size }),
+      ]);
+
+      expect(confirmGuardianDependentDocumentAction).toHaveBeenNthCalledWith(index + 1, INSTITUTION_ID, LINK_ID, {
+        ...metadata,
+        storageKey: "pending/key",
+      });
     });
   });
 
@@ -281,7 +307,7 @@ describe("GuardianDependentForm with the real create action and HTTP transport",
   });
 
   it("retains documents and blocks duplicate creation after the link succeeds but an upload fails", async () => {
-    jest.mocked(uploadGuardianDependentDocumentAction).mockResolvedValueOnce({ error: "No se pudo subir el archivo" });
+    jest.mocked(confirmGuardianDependentDocumentAction).mockResolvedValueOnce({ error: "No se pudo subir el archivo" });
     const user = userEvent.setup();
     render(<GuardianDependentForm institutionId={INSTITUTION_ID} returnTo={RETURN_TO} />);
     await fillForm(user);
@@ -293,7 +319,11 @@ describe("GuardianDependentForm with the real create action and HTTP transport",
 
     expect(await screen.findByText(GUARDIAN_DEPENDENT_MESSAGES.ATTACHMENTS_FAILED)).toBeVisible();
     expect(requests).toHaveLength(1);
-    expect(uploadGuardianDependentDocumentAction).toHaveBeenCalledWith(INSTITUTION_ID, LINK_ID, expect.any(FormData));
+    expect(confirmGuardianDependentDocumentAction).toHaveBeenCalledWith(
+      INSTITUTION_ID,
+      LINK_ID,
+      expect.objectContaining({ fileName: "partida.pdf" }),
+    );
     expect(screen.getByText("partida.pdf")).toBeVisible();
     expect(screen.getByLabelText(/^Nombre/)).toBeDisabled();
     const submit = screen.getByRole("button", { name: "Solicitar" });

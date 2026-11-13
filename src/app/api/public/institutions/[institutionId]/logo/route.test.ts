@@ -8,6 +8,17 @@ const png = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR
 
 const webp = Buffer.from("UklGRhwAAABXRUJQVlA4TA8AAAAvA8AAEAcQ/Y/+BSKi/wEA", "base64");
 
+const storageUrl = "https://storage.example.test/logo?X-Amz-Signature=abc";
+
+let storageFetch: jest.SpyInstance | undefined;
+
+afterEach(() => storageFetch?.mockRestore());
+
+function serveFromStorage(file: Response): void {
+  jest.mocked(publicApiFetch).mockResolvedValue(Response.json({ url: storageUrl, expiresAt: "2026-11-13T12:00:00Z" }));
+  storageFetch = jest.spyOn(global, "fetch").mockResolvedValue(file);
+}
+
 function get(institutionId = id): Promise<Response> {
   return GET(new Request("https://testing.typeit.com.ar/api/public/logo?v=opaque%2Bversion"), {
     params: Promise.resolve({ institutionId }),
@@ -18,7 +29,7 @@ it.each([
   ["image/png", png],
   ["image/webp", webp],
 ] as const)("streams %s no-store without exposing provider paths", async (type, bytes) => {
-  jest.mocked(publicApiFetch).mockResolvedValue(
+  serveFromStorage(
     new Response(bytes, {
       headers: { "Content-Type": type, "X-Storage-Key": "private/secret" },
     }),
@@ -30,13 +41,14 @@ it.each([
   expect(response.headers.get("X-Storage-Key")).toBeNull();
   expect(Buffer.from(await response.arrayBuffer())).toEqual(bytes);
   expect(publicApiFetch).toHaveBeenCalledWith(`/api/v1/institutions/${id}/logo?v=opaque%2Bversion`);
+  expect(storageFetch).toHaveBeenCalledWith(storageUrl, expect.objectContaining({ cache: "no-store" }));
 });
 it.each(["image/svg+xml", "text/html", "application/octet-stream"])("[L03.real-image-validation] does not serve unsupported %s", async (type) => {
-  jest.mocked(publicApiFetch).mockResolvedValue(new Response(png, { headers: { "Content-Type": type } }));
+  serveFromStorage(new Response(png, { headers: { "Content-Type": type } }));
   expect((await get()).status).toBe(503);
 });
 it("[L03.real-image-validation] rejects MIME-spoofed non-image bytes", async () => {
-  jest.mocked(publicApiFetch).mockResolvedValue(new Response("<svg onload='alert(1)'/>", { headers: { "Content-Type": "image/png" } }));
+  serveFromStorage(new Response("<svg onload='alert(1)'/>", { headers: { "Content-Type": "image/png" } }));
   expect((await get()).status).toBe(503);
 });
 it("[L03.logo-cache-fallback] invalid IDs/missing logo/outage never expose backend response", async () => {
@@ -63,7 +75,7 @@ it("reads a fragmented WebP header before streaming the unchanged image", async 
       controller.enqueue(webp.subarray(offset, ++offset));
     },
   });
-  jest.mocked(publicApiFetch).mockResolvedValue(new Response(body, { headers: { "Content-Type": "image/webp" } }));
+  serveFromStorage(new Response(body, { headers: { "Content-Type": "image/webp" } }));
 
   const response = await get();
   expect(response.status).toBe(200);
@@ -74,7 +86,7 @@ it("reads a fragmented WebP header before streaming the unchanged image", async 
 it.each([Buffer.from("RIFF"), Buffer.from("RIFF0000WAVE"), Buffer.from("<html>invalid</html>")])(
   "rejects incomplete or spoofed WebP signatures",
   async (bytes) => {
-    jest.mocked(publicApiFetch).mockResolvedValue(new Response(bytes, { headers: { "Content-Type": "image/webp" } }));
+    serveFromStorage(new Response(bytes, { headers: { "Content-Type": "image/webp" } }));
     expect((await get()).status).toBe(503);
   },
 );

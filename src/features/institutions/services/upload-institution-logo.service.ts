@@ -1,3 +1,5 @@
+import { putPresignedFile } from "@common/utils/presigned-upload.util";
+
 import { presignInstitutionLogoUploadAction } from "@features/institutions/actions/presign-institution-logo.action";
 import { INSTITUTION_ERROR_MESSAGES } from "@features/institutions/constants/error-messages.constants";
 import type { InstitutionLogoScope, UploadedInstitutionLogo } from "@features/institutions/types/institution-logo-change.types";
@@ -15,17 +17,15 @@ export async function uploadInstitutionLogoFile(
   try {
     const presigned = await presignInstitutionLogoUploadAction(institutionId, scope, file.type, file.size);
 
-    if (!presigned.version || !presigned.uploadUrl) {
-      return { error: presigned.error ?? fallback };
+    if (!presigned.upload) {
+      return { error: presigned.error };
     }
 
-    const response = await fetch(presigned.uploadUrl, { method: "PUT", headers: presigned.headers, body: file });
-
-    if (!response.ok) {
+    if (!(await putPresignedFile(presigned.upload, file))) {
       return { error: fallback };
     }
 
-    return { logo: { version: presigned.version, contentType: file.type, fileSize: file.size } };
+    return { logo: { version: presigned.upload.version, contentType: file.type, fileSize: file.size } };
   } catch {
     return { error: fallback };
   }

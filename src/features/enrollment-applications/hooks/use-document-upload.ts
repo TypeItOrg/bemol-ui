@@ -2,8 +2,8 @@
 
 import { startTransition, useActionState, useEffect, useRef, useState } from "react";
 
-import { mutateDocument } from "@features/enrollment-applications/actions/documentation.actions";
-import { DOCUMENT_MESSAGES } from "@features/enrollment-applications/constants/documentation.constants";
+import { DOCUMENT_MAX_BYTES, DOCUMENT_MESSAGES } from "@features/enrollment-applications/constants/documentation.constants";
+import { uploadEnrollmentDocument } from "@features/enrollment-applications/services/upload-enrollment-document.service";
 import type { DocumentActionState } from "@features/enrollment-applications/types/document-action-state.types";
 import type { DocumentUploadProps } from "@features/enrollment-applications/types/document-upload-props.types";
 import { useOperatingPersonId } from "@features/guardian-workspace/components/guardian-workspace-provider";
@@ -31,7 +31,7 @@ export function useDocumentUpload({
 
   const selectRef = useRef<HTMLButtonElement>(null);
 
-  const [state, action, pending] = useActionState(async (previous: DocumentActionState, form: FormData): Promise<DocumentActionState> => {
+  const [state, action, pending] = useActionState(async (_previous: DocumentActionState, form: FormData): Promise<DocumentActionState> => {
     const file = form.get("file");
 
     if (!(file instanceof File)) {
@@ -43,7 +43,7 @@ export function useDocumentUpload({
     // A failed detail refresh must not upload the already-saved file again.
     if (!committed) {
       try {
-        const result = await mutateDocument(scope, applicationId, "upload", requirement.id, previous, form, personId);
+        const result = await uploadEnrollmentDocument(scope, applicationId, requirement.id, file, personId);
 
         if (!result.success) {
           return result;
@@ -115,7 +115,7 @@ export function useDocumentUpload({
 
     const file = files[0];
 
-    if (!requirement.allowedFormats.includes(file.type) || file.size === 0 || file.size > 10 * 1024 * 1024) {
+    if (!requirement.allowedFormats.includes(file.type) || file.size === 0 || file.size > DOCUMENT_MAX_BYTES) {
       if (!silent) {
         setFileError(DOCUMENT_MESSAGES.file);
       }

@@ -1,3 +1,5 @@
+import { createUploadFileSchema } from "@common/utils/presigned-upload.util";
+
 import {
   GUARDIAN_ATTACHMENT_ACCEPT,
   GUARDIAN_ATTACHMENT_MAX_BYTES,
@@ -6,6 +8,8 @@ import {
 } from "@features/guardian-dependents/constants/guardian-dependent.constants";
 
 const ACCEPTED_TYPES = GUARDIAN_ATTACHMENT_ACCEPT.split(",");
+
+export const guardianDocumentFileSchema = createUploadFileSchema(ACCEPTED_TYPES, GUARDIAN_ATTACHMENT_MAX_BYTES);
 
 export function getGuardianDocuments(formData: FormData): File[] {
   return formData.getAll("documents").filter((entry): entry is File => entry instanceof File && entry.size > 0);

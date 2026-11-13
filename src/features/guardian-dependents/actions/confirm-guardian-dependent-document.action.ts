@@ -2,6 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 
+import { z } from "zod";
+
 import { INVALID_ACTION_ARGUMENTS, isValidUuid } from "@common/utils/action-argument.util";
 import { getResponseErrorActionState } from "@common/utils/action-state.util";
 
@@ -13,28 +15,20 @@ import {
 import type { GuardianDependentActionState } from "@features/guardian-dependents/types/guardian-dependent-action-state.types";
 import { GUARDIAN_DEPENDENT_FIELD_NAMES } from "@features/guardian-dependents/types/guardian-dependent-field-name.types";
 import { authorizeGuardianAction } from "@features/guardian-dependents/utils/authorize-guardian-action.util";
-import { validateGuardianDocuments } from "@features/guardian-dependents/utils/guardian-dependent-documents.util";
+import { guardianDocumentFileSchema } from "@features/guardian-dependents/utils/guardian-dependent-documents.util";
 import { institutionalApiFetch } from "@features/institutional-auth/services/institutional-api-fetch.service";
 
-export async function uploadGuardianDependentDocumentAction(
+const confirmationSchema = guardianDocumentFileSchema.extend({ storageKey: z.string().min(1).max(1024) });
+
+export async function confirmGuardianDependentDocumentAction(
   institutionId: string,
   personGuardianId: string,
-  formData: FormData,
+  upload: unknown,
 ): Promise<GuardianDependentActionState> {
-  if (!isValidUuid(institutionId) || !isValidUuid(personGuardianId) || !(formData instanceof FormData)) {
+  const document = confirmationSchema.safeParse(upload);
+
+  if (!isValidUuid(institutionId) || !isValidUuid(personGuardianId) || !document.success) {
     return { error: INVALID_ACTION_ARGUMENTS };
-  }
-
-  const file = formData.get("file");
-
-  if (!(file instanceof File) || file.size === 0 || formData.getAll("file").length !== 1) {
-    return { fieldErrors: { documents: GUARDIAN_DEPENDENT_MESSAGES.ATTACHMENT_REQUIRED } };
-  }
-
-  const documentsError = validateGuardianDocuments([file]);
-
-  if (documentsError) {
-    return { fieldErrors: { documents: documentsError } };
   }
 
   const authError = await authorizeGuardianAction(institutionId);
@@ -43,13 +37,10 @@ export async function uploadGuardianDependentDocumentAction(
     return authError;
   }
 
-  const body = new FormData();
-
-  body.set("file", file);
-
   const request = institutionalApiFetch(`${getGuardianDependentsApiPath(institutionId)}/${personGuardianId}/attachments`, {
     method: "POST",
-    body,
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(document.data),
   });
 
   const errorState = await getResponseErrorActionState(request, GUARDIAN_DEPENDENT_FIELD_NAMES, GUARDIAN_DEPENDENT_MESSAGES.ATTACHMENTS_FAILED);

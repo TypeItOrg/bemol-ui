@@ -2,6 +2,7 @@ import "server-only";
 
 import { NextResponse } from "next/server";
 
+import { fetchPresignedDownload } from "@common/services/presigned-download.service";
 import { publicApiFetch } from "@common/services/public-api-fetch.service";
 import { isValidUuid } from "@common/utils/uuid.util";
 
@@ -17,10 +18,18 @@ export async function fetchInstitutionLogo(institutionId: string, version: strin
   }
 
   try {
-    const response = await publicApiFetch(`/api/v1/institutions/${institutionId}/logo${version ? `?v=${encodeURIComponent(version)}` : ""}`);
+    const presigned = await publicApiFetch(`/api/v1/institutions/${institutionId}/logo${version ? `?v=${encodeURIComponent(version)}` : ""}`);
+
+    if (!presigned.ok) {
+      return unavailable(presigned.status === 404 ? 404 : 503);
+    }
+
+    const response = await fetchPresignedDownload(presigned);
 
     if (!response.ok) {
-      return unavailable(response.status === 404 ? 404 : 503);
+      await response.body?.cancel();
+
+      return unavailable();
     }
 
     const type = response.headers.get("content-type")?.split(";")[0];

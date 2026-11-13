@@ -1,4 +1,5 @@
 import { isValidUuid } from "@common/utils/action-argument.util";
+import { copyResponseHeaders } from "@common/utils/response-headers.util";
 
 import { getSelfServiceEnrollmentApiPath } from "@features/guardian-workspace/services/operating-profile.service";
 import { institutionalApiFetch } from "@features/institutional-auth/services/institutional-api-fetch.service";
@@ -26,15 +27,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ pers
       headers: { Accept: "application/json" },
     });
 
-    const headers = new Headers({ "cache-control": "private, no-store", "x-content-type-options": "nosniff" });
-
-    for (const name of ["content-type", "content-disposition", "content-length", "retry-after", "x-request-id"]) {
-      const value = response.headers.get(name);
-
-      if (value) {
-        headers.set(name, value);
-      }
-    }
+    const headers = copyResponseHeaders(response, ["content-type", "content-disposition", "content-length", "retry-after", "x-request-id"]);
 
     return new Response(response.body, { status: response.status, headers });
   } catch {

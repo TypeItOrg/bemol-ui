@@ -1,3 +1,4 @@
+import { streamPresignedDownload } from "@common/services/presigned-download.service";
 import { isValidUuid } from "@common/utils/action-argument.util";
 
 import { GUARDIAN_LINK_MESSAGES, getPlatformGuardianLinksApiPath } from "@features/guardian-links/constants/guardian-link.constants";
@@ -25,17 +26,7 @@ export async function GET(
       });
     }
 
-    const headers = new Headers({ "cache-control": "private, no-store" });
-
-    for (const name of ["content-type", "content-disposition", "content-length"]) {
-      const value = response.headers.get(name);
-
-      if (value) {
-        headers.set(name, value);
-      }
-    }
-
-    return new Response(await response.arrayBuffer(), { status: response.status, headers });
+    return await streamPresignedDownload(response, request.signal);
   } catch {
     return Response.json({ message: GUARDIAN_LINK_MESSAGES.DOWNLOAD_FAILED }, { status: 503 });
   }

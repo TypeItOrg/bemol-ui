@@ -1,7 +1,11 @@
 "use server";
 
+import { z } from "zod";
+
+import type { PresignedUploadResult } from "@common/types/presigned-upload-result.types";
 import { INVALID_ACTION_ARGUMENTS, isValidUuid } from "@common/utils/action-argument.util";
 import { getResponseErrorActionState } from "@common/utils/action-state.util";
+import { presignedUploadSchema } from "@common/utils/presigned-upload.util";
 
 import { getInstitutionalUser } from "@features/institutional-auth/services/get-institutional-user.service";
 import { institutionalApiFetch } from "@features/institutional-auth/services/institutional-api-fetch.service";
@@ -12,21 +16,14 @@ import type { InstitutionLogoScope } from "@features/institutions/types/institut
 import { getInstitutionLogoFileError } from "@features/institutions/utils/institution-logo-form.util";
 import { platformApiFetch } from "@features/platform-auth/services/platform-api-fetch.service";
 
-export type PresignedInstitutionLogoUpload = {
-  version?: string;
-  uploadUrl?: string;
-  headers?: Record<string, string>;
-  error?: string;
-};
-
-type PresignedResponse = { version: string; uploadUrl: string; headers: Record<string, string> };
+const presignedResponseSchema = presignedUploadSchema.extend({ version: z.string().min(1) });
 
 export async function presignInstitutionLogoUploadAction(
   institutionId: string,
   scope: InstitutionLogoScope,
   contentType: string,
   fileSize: number,
-): Promise<PresignedInstitutionLogoUpload> {
+): Promise<PresignedUploadResult<{ version: string }>> {
   if (!isValidUuid(institutionId)) {
     return { error: INVALID_ACTION_ARGUMENTS };
   }
@@ -46,13 +43,11 @@ export async function presignInstitutionLogoUploadAction(
   const errorState = await getResponseErrorActionState(response, ["file"], INSTITUTION_ERROR_MESSAGES.LOGO_UPDATE);
 
   if (errorState) {
-    return { error: errorState.fieldErrors?.file ?? errorState.error };
+    return { error: errorState.fieldErrors?.file ?? errorState.error ?? INSTITUTION_ERROR_MESSAGES.LOGO_UPDATE };
   }
 
   try {
-    const { version, uploadUrl, headers } = (await response.json()) as PresignedResponse;
-
-    return { version, uploadUrl, headers };
+    return { upload: presignedResponseSchema.parse(await response.json()) };
   } catch {
     return { error: INSTITUTION_ERROR_MESSAGES.LOGO_UPDATE };
   }

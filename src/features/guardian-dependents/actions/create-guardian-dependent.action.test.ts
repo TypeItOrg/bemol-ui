@@ -100,19 +100,36 @@ describe("createGuardianDependentAction", () => {
     expect(revalidatePath).toHaveBeenCalledWith(GUARDIAN_DEPENDENTS_PAGE_PATH);
   });
 
-  it("uploads each supporting document to the new link after creating it", async () => {
-    apiFetchMock
-      .mockResolvedValueOnce(Response.json({ personGuardianId: LINK_ID }, { status: 201 }))
-      .mockResolvedValue(Response.json({ id: "attachment-id" }, { status: 201 }));
+  it("uploads each supporting document to storage and confirms it on the new link", async () => {
+    const storageFetch = jest.spyOn(global, "fetch").mockResolvedValue(new Response(null, { status: 200 }));
+    apiFetchMock.mockResolvedValueOnce(Response.json({ personGuardianId: LINK_ID }, { status: 201 })).mockImplementation(async (path) =>
+      path.endsWith("/upload-url")
+        ? Response.json({
+            storageKey: "pending/key",
+            uploadUrl: "https://storage.example.test/upload",
+            headers: { "Content-Type": "application/pdf" },
+          })
+        : Response.json({ id: "attachment-id" }, { status: 201 }),
+    );
 
     const result = await submitGuardianDependent(INSTITUTION_ID, {}, createFormWithDocuments(pdf("a.pdf"), pdf("b.pdf")));
 
     expect(result).toEqual({ success: true, personGuardianId: LINK_ID });
-    expect(apiFetchMock).toHaveBeenCalledTimes(3);
-    const [path, request] = apiFetchMock.mock.calls[1];
-    expect(path).toBe(`/api/v1/institutions/${INSTITUTION_ID}/representations/${LINK_ID}/attachments`);
-    expect(request?.method).toBe("POST");
-    expect((request?.body as FormData).get("file")).toBeInstanceOf(File);
+    expect(apiFetchMock).toHaveBeenCalledTimes(5);
+    expect(storageFetch).toHaveBeenCalledTimes(2);
+    expect(storageFetch).toHaveBeenCalledWith("https://storage.example.test/upload", expect.objectContaining({ method: "PUT" }));
+    const [presignPath, presignRequest] = apiFetchMock.mock.calls[1];
+    expect(presignPath).toBe(`/api/v1/institutions/${INSTITUTION_ID}/representations/${LINK_ID}/attachments/upload-url`);
+    expect(JSON.parse(presignRequest?.body as string)).toEqual({ fileName: "a.pdf", contentType: "application/pdf", fileSize: 8 });
+    const [confirmPath, confirmRequest] = apiFetchMock.mock.calls[2];
+    expect(confirmPath).toBe(`/api/v1/institutions/${INSTITUTION_ID}/representations/${LINK_ID}/attachments`);
+    expect(JSON.parse(confirmRequest?.body as string)).toEqual({
+      storageKey: "pending/key",
+      fileName: "a.pdf",
+      contentType: "application/pdf",
+      fileSize: 8,
+    });
+    storageFetch.mockRestore();
   });
 
   it("ignores the empty file a browser sends when no document was chosen", async () => {

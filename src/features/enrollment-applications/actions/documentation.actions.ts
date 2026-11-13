@@ -11,8 +11,8 @@ import { academicApiFetch } from "@features/academic/services/academic-api-fetch
 import { getAcademicApiBase } from "@features/academic/utils/academic-scope.util";
 import { DOCUMENT_MESSAGES } from "@features/enrollment-applications/constants/documentation.constants";
 import { parseDocumentRequirementForm } from "@features/enrollment-applications/schemas/document-requirement.schema";
+import { fetchDocumentAttachments, getDocumentAttachmentsPath } from "@features/enrollment-applications/services/document-attachments-api.service";
 import type { DocumentActionState } from "@features/enrollment-applications/types/document-action-state.types";
-import { getSelfServiceEnrollmentApiPath } from "@features/guardian-workspace/services/operating-profile.service";
 
 const context = z.object({
   scope: z.enum(["admin", "institutional"]),
@@ -29,7 +29,7 @@ export async function mutateDocument(
   personId?: string,
 ): Promise<DocumentActionState> {
   const parsed = context
-    .extend({ operation: z.enum(["upload", "withdraw", "review"]), targetId: z.string().uuid() })
+    .extend({ operation: z.enum(["withdraw", "review"]), targetId: z.string().uuid() })
     .safeParse({ scope, applicationId, operation, targetId });
 
   if (!parsed.success) {
@@ -42,30 +42,11 @@ export async function mutateDocument(
     return { error: DOCUMENT_MESSAGES.invalid };
   }
 
-  let path = personId
-    ? `${await getSelfServiceEnrollmentApiPath(personId)}/${input.applicationId}/attachments`
-    : `/api/v1/enrollment-applications/${input.applicationId}/attachments`;
+  let path = await getDocumentAttachmentsPath(input.applicationId, personId);
 
   let options: RequestInit;
 
-  if (input.operation === "upload") {
-    const file = form.get("file");
-
-    if (
-      !(file instanceof File) ||
-      file.size === 0 ||
-      file.size > 10 * 1024 * 1024 ||
-      !["application/pdf", "image/jpeg", "image/png", "image/webp"].includes(file.type)
-    ) {
-      return { error: DOCUMENT_MESSAGES.file };
-    }
-
-    const body = new FormData();
-
-    body.set("file", file);
-    body.set("requirementId", input.targetId);
-    options = { method: "POST", body };
-  } else if (input.operation === "withdraw") {
+  if (input.operation === "withdraw") {
     path += `/${input.targetId}`;
     options = { method: "DELETE" };
   } else {
@@ -89,15 +70,7 @@ export async function mutateDocument(
     };
   }
 
-  const response = academicApiFetch(input.scope, path, options).then((result) => {
-    if (personId && result.status === 403) {
-      revalidatePath(`/self-service/${personId}`, "layout");
-    }
-
-    return result;
-  });
-
-  const error = await getResponseErrorActionState(response, [], DOCUMENT_MESSAGES.failed);
+  const error = await getResponseErrorActionState(fetchDocumentAttachments(input.scope, path, options, personId), [], DOCUMENT_MESSAGES.failed);
 
   if (error) {
     return error;

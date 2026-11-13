@@ -1,10 +1,11 @@
+import { streamPresignedDownload } from "@common/services/presigned-download.service";
 import { isValidUuid } from "@common/utils/action-argument.util";
 
 import { GUARDIAN_LINK_MESSAGES, getGuardianLinksApiPath } from "@features/guardian-links/constants/guardian-link.constants";
 import { requireInstitutionalUser } from "@features/institutional-auth/services/get-institutional-user.service";
 import { institutionalApiFetch } from "@features/institutional-auth/services/institutional-api-fetch.service";
 
-/** Streams a supporting document through the session, since the API needs the institutional credentials. */
+/** Resolves the presigned download through the session, since the API needs the institutional credentials. */
 export async function GET(request: Request, { params }: { params: Promise<{ linkId: string; attachmentId: string }> }): Promise<Response> {
   const { linkId, attachmentId } = await params;
 
@@ -26,17 +27,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ link
       });
     }
 
-    const headers = new Headers({ "cache-control": "private, no-store" });
-
-    for (const name of ["content-type", "content-disposition", "content-length"]) {
-      const value = response.headers.get(name);
-
-      if (value) {
-        headers.set(name, value);
-      }
-    }
-
-    return new Response(await response.arrayBuffer(), { status: response.status, headers });
+    return await streamPresignedDownload(response, request.signal);
   } catch {
     return Response.json({ message: GUARDIAN_LINK_MESSAGES.DOWNLOAD_FAILED }, { status: 503 });
   }

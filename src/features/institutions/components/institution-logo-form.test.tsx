@@ -64,9 +64,11 @@ beforeEach(() => {
     .mocked(presignInstitutionLogoUploadAction)
     .mockReset()
     .mockResolvedValue({
-      version: "66666666-6666-4666-8666-666666666666",
-      uploadUrl: "https://r2.example/logo",
-      headers: { "Content-Type": "image/png" },
+      upload: {
+        version: "66666666-6666-4666-8666-666666666666",
+        uploadUrl: "https://r2.example/logo",
+        headers: { "Content-Type": "image/png" },
+      },
     });
   global.fetch = jest.fn().mockResolvedValue(new Response(null, { status: 200 }));
   URL.createObjectURL = jest.fn(() => "blob:preview");

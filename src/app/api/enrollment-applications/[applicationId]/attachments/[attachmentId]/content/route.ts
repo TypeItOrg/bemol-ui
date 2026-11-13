@@ -1,3 +1,4 @@
+import { streamPresignedDownload } from "@common/services/presigned-download.service";
 import { isValidUuid } from "@common/utils/action-argument.util";
 
 import { AcademicScope } from "@features/academic/utils/academic-scope.util";
@@ -41,32 +42,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ appl
       });
     }
 
-    const body = await response.arrayBuffer();
-
-    const headers = new Headers({
-      "cache-control": "private, no-store",
-      "x-content-type-options": "nosniff",
-    });
-
-    const contentType = response.headers.get("content-type");
-
-    const contentDisposition = response.headers.get("content-disposition");
-
-    const contentLength = response.headers.get("content-length");
-
-    if (contentType) {
-      headers.set("content-type", contentType);
-    }
-
-    if (contentDisposition) {
-      headers.set("content-disposition", contentDisposition);
-    }
-
-    if (contentLength) {
-      headers.set("content-length", contentLength);
-    }
-
-    return new Response(body, { status: response.status, headers });
+    return await streamPresignedDownload(response, request.signal);
   } catch {
     return Response.json(
       { message: ENROLLMENT_MESSAGES.DOWNLOAD_FAILED },

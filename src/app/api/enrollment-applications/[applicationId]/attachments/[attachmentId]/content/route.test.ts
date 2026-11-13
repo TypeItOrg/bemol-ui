@@ -21,9 +21,10 @@ describe("GET /api/enrollment-applications/[applicationId]/attachments/[attachme
     return { params: Promise.resolve({ applicationId, attachmentId }) };
   }
 
-  it("streams the attachment content with the backend's content type and disposition headers", async () => {
+  it("streams the presigned attachment with the storage content type and disposition headers", async () => {
     const fileBytes = new TextEncoder().encode("%PDF-1.4 fake content");
-    institutionalApiFetchMock.mockResolvedValue(
+    const storageUrl = "https://storage.example.test/dni.pdf?X-Amz-Signature=abc";
+    const storageFetch = jest.spyOn(global, "fetch").mockResolvedValue(
       new Response(fileBytes, {
         status: 200,
         headers: {
@@ -33,6 +34,7 @@ describe("GET /api/enrollment-applications/[applicationId]/attachments/[attachme
         },
       }),
     );
+    institutionalApiFetchMock.mockResolvedValue(Response.json({ url: storageUrl, expiresAt: "2026-11-13T12:00:00Z" }));
 
     const response = await GET(makeRequest(), makeParams());
 
@@ -42,8 +44,10 @@ describe("GET /api/enrollment-applications/[applicationId]/attachments/[attachme
     expect(response.status).toBe(200);
     expect(response.headers.get("content-type")).toBe("application/pdf");
     expect(response.headers.get("content-disposition")).toBe('inline; filename="dni.pdf"');
+    expect(storageFetch).toHaveBeenCalledWith(storageUrl, expect.objectContaining({ cache: "no-store" }));
     const body = await response.arrayBuffer();
     expect(new Uint8Array(body)).toEqual(fileBytes);
+    storageFetch.mockRestore();
   });
 
   it("preserves backend errors instead of masking them as a generic failure", async () => {

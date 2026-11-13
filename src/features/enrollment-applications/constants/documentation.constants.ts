@@ -13,6 +13,8 @@ export const DOCUMENT_FILE_CATEGORIES = [
   { value: "images", label: "Imágenes", formats: ["image/jpeg", "image/png", "image/webp"] },
   { value: "documents", label: "Documentos", formats: ["application/pdf"] },
 ] as const;
+export const DOCUMENT_CONTENT_TYPES: readonly string[] = DOCUMENT_FILE_CATEGORIES.flatMap((category) => category.formats);
+export const DOCUMENT_MAX_BYTES = 10 * 1024 * 1024;
 export const DOCUMENT_MESSAGES = {
   reloadFailed: "No se pudo recargar el detalle. Intentá nuevamente.",
   invalid: "Revisá los datos de la documentación.",
