@@ -25,7 +25,7 @@ describe("AccountAccessPanel form conventions", () => {
     jest.mocked(manageAccountAccess).mockReset();
   });
 
-  it.each([false, true])("keeps owner email fixed without fetching access and blocks duplicate submits with dialog=%s", async (dialog) => {
+  it("keeps owner email fixed without fetching access and blocks duplicate submits", async () => {
     const user = userEvent.setup();
     let finish!: (result: ManageAccountAccessState) => void;
     jest.mocked(manageAccountAccess).mockReturnValueOnce(
@@ -33,9 +33,7 @@ describe("AccountAccessPanel form conventions", () => {
         finish = resolve;
       }),
     );
-    const { queryClient } = renderWithQueryClient(
-      <AccountAccessPanel institutionId="institution-1" personId="person-1" onClose={dialog ? jest.fn() : undefined} />,
-    );
+    const { queryClient } = renderWithQueryClient(<AccountAccessPanel institutionId="institution-1" personId="person-1" onClose={jest.fn()} />);
 
     await act(async () => {
       queryClient.setQueryData(["account-access-test"], { status: "NO_ACCOUNT", invitation: null });
@@ -67,9 +65,7 @@ describe("AccountAccessPanel form conventions", () => {
     const user = userEvent.setup();
     mockFetchAccess.mockResolvedValue({ status: "ENABLED", invitation: null });
     jest.mocked(manageAccountAccess).mockResolvedValue({ success: true });
-    renderWithQueryClient(
-      <AccountAccessPanel institutionId="institution-1" personId="person-1" mode={mode} onClose={mode === "guardian" ? jest.fn() : undefined} />,
-    );
+    renderWithQueryClient(<AccountAccessPanel institutionId="institution-1" personId="person-1" mode={mode} onClose={jest.fn()} />);
 
     await user.click(await screen.findByRole("combobox", { name: "Operación" }));
     await user.click(await screen.findByRole("option", { name: "Suspender acceso personal" }));
@@ -89,7 +85,7 @@ describe("AccountAccessPanel form conventions", () => {
   it("serializes autonomy confirmation as yes only while the shared checkbox is checked", async () => {
     const user = userEvent.setup();
     jest.mocked(manageAccountAccess).mockResolvedValueOnce({ fieldErrors: { confirmed: "Confirmá los efectos de la autonomía." } });
-    renderWithQueryClient(<AccountAccessPanel institutionId="institution-1" personId="person-1" mode="administration" />);
+    renderWithQueryClient(<AccountAccessPanel institutionId="institution-1" personId="person-1" mode="administration" onClose={jest.fn()} />);
 
     await user.click(await screen.findByRole("combobox", { name: "Operación" }));
     await user.click(await screen.findByRole("option", { name: "Otorgar autonomía" }));
@@ -112,9 +108,7 @@ describe("AccountAccessPanel form conventions", () => {
   it.each(["owner", "administration", "guardian"] as const)("focuses the invalid email in %s mode without losing entered values", async (mode) => {
     const user = userEvent.setup();
     jest.mocked(manageAccountAccess).mockResolvedValueOnce({ fieldErrors: { email: "Revisá el correo ingresado." } });
-    renderWithQueryClient(
-      <AccountAccessPanel institutionId="institution-1" personId="person-1" mode={mode} onClose={mode === "guardian" ? jest.fn() : undefined} />,
-    );
+    renderWithQueryClient(<AccountAccessPanel institutionId="institution-1" personId="person-1" mode={mode} onClose={jest.fn()} />);
 
     const email = await screen.findByRole("textbox", { name: mode === "owner" ? "Nuevo correo electrónico" : "Correo electrónico de destino" });
     await user.type(email, "shared@example.test");

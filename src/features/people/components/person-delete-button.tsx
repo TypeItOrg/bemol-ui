@@ -16,6 +16,7 @@ type PersonDeleteButtonProps = {
   scope?: PeopleScopeType;
   label?: string;
   size?: ComponentProps<typeof Button>["size"];
+  className?: string;
 };
 
 export function PersonDeleteButton({
@@ -25,6 +26,7 @@ export function PersonDeleteButton({
   scope = PeopleScope.ADMIN,
   label = "Eliminar",
   size = "lg",
+  className,
 }: PersonDeleteButtonProps): ReactElement {
   const router = useRouter();
 
@@ -44,7 +46,7 @@ export function PersonDeleteButton({
       onDeleted={handleDeleted}
       scope={scope}
       trigger={
-        <Button type="button" variant="destructive" size={size}>
+        <Button type="button" variant="destructive" size={size} className={className}>
           {label}
         </Button>
       }

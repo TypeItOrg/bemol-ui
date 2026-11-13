@@ -14,6 +14,7 @@ import type { PaginatedResponse } from "@common/types/paginated-response.types";
 import { PeoplePagination } from "@features/people/components/people-pagination";
 import { PeopleTableEmptyState } from "@features/people/components/people-table-empty-state";
 import { PeopleTableRow } from "@features/people/components/people-table-row";
+import { PersonAccessDialog } from "@features/people/components/person-access-dialog";
 import { PersonAccessInvitationDialog } from "@features/people/components/person-access-invitation-dialog";
 import { PersonDeleteDialog } from "@features/people/components/person-delete-dialog";
 import { PersonStatusDialog } from "@features/people/components/person-status-dialog";
@@ -32,6 +33,7 @@ type PeopleTablePresentationProps = PeoplePaginationParams & {
   canDelete?: boolean;
   canUpdateStatus?: boolean;
   canInviteAccess?: boolean;
+  canManageAccess?: boolean;
 };
 
 export function PeopleTablePresentation({
@@ -51,12 +53,15 @@ export function PeopleTablePresentation({
   canDelete = true,
   canUpdateStatus = false,
   canInviteAccess = false,
+  canManageAccess = false,
 }: PeopleTablePresentationProps): ReactElement {
   const router = useRouter();
 
   const { isPending: isNavigating, navigate } = useDataTableNavigation();
 
   const [invitationDialog, setInvitationDialog] = useState<{ person: PersonSummary; cancel: boolean }>();
+
+  const [personToManageAccess, setPersonToManageAccess] = useState<PersonSummary>();
 
   const [personToDelete, setPersonToDelete] = useState<PersonSummary>();
 
@@ -134,6 +139,8 @@ export function PeopleTablePresentation({
                 canUpdate={canUpdate}
                 canUpdateStatus={canUpdateStatus}
                 canInviteAccess={canInviteAccess}
+                canManageAccess={canManageAccess}
+                onManageAccess={setPersonToManageAccess}
                 institutionId={institutionId}
                 onInviteAccess={(person) => setInvitationDialog({ person, cancel: false })}
                 onCancelInvitation={(person) => setInvitationDialog({ person, cancel: true })}
@@ -165,6 +172,17 @@ export function PeopleTablePresentation({
           onSuccess={() => {
             setInvitationDialog(undefined);
           }}
+        />
+      ) : null}
+
+      {personToManageAccess ? (
+        <PersonAccessDialog
+          email={personToManageAccess.email}
+          institutionId={institutionId}
+          personId={personToManageAccess.id}
+          personName={`${personToManageAccess.firstName} ${personToManageAccess.lastName}`}
+          scope={scope}
+          onClose={() => setPersonToManageAccess(undefined)}
         />
       ) : null}
 

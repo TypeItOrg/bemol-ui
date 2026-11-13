@@ -15,8 +15,8 @@ import { InstitutionalBreadcrumb } from "@features/institutional-auth/components
 import { requireInstitutionalUser } from "@features/institutional-auth/services/get-institutional-user.service";
 import { INSTITUTIONAL_PERMISSION } from "@features/institutional-auth/types/institutional-permission.types";
 import { getInstitutionalMetadata } from "@features/institutional-auth/utils/institutional-metadata.util";
-import { hasInstitutionalPermission } from "@features/institutional-auth/utils/institutional-permission.util";
-import { AccountAccessPanel } from "@features/people/components/account-access-panel";
+import { hasAllInstitutionalPermissions, hasInstitutionalPermission } from "@features/institutional-auth/utils/institutional-permission.util";
+import { PersonAccessButton } from "@features/people/components/person-access-button";
 import { PersonDeleteButton } from "@features/people/components/person-delete-button";
 import { PersonDetailView } from "@features/people/components/person-detail-view";
 import { PersonEditForm } from "@features/people/components/person-edit-form";
@@ -110,6 +110,27 @@ export default async function PersonPage({
 
   const editBreadcrumbLabel = canUpdate ? "Editar" : "Administrar roles";
 
+  const canManageAccess = hasAllInstitutionalPermissions(user, [
+    INSTITUTIONAL_PERMISSION.PERSON_CREATE,
+    INSTITUTIONAL_PERMISSION.USER_STATUS_UPDATE,
+    INSTITUTIONAL_PERMISSION.ROLE_ASSIGN,
+  ]);
+
+  const showEdit = isDetailView && (canUpdate || canManageRoles);
+
+  const showDelete = !isDetailView && canDelete;
+
+  const accessButton = canManageAccess ? (
+    <PersonAccessButton
+      email={person.email}
+      institutionId={user.institutionId}
+      personId={personId}
+      personName={personName}
+      scope={PeopleScope.INSTITUTIONAL}
+      className="flex-1 md:flex-none"
+    />
+  ) : null;
+
   return (
     <PlatformPageShell
       title={isDetailView ? "Detalle de usuario" : editTitle}
@@ -127,12 +148,28 @@ export default async function PersonPage({
       actionsClassName="self-stretch"
       actions={<PlatformPageIcon icon={UserRoundPenIcon} />}
     >
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <Button asChild variant="outline" size="lg">
+      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        <Button asChild variant="outline" size="lg" className="self-start">
           <Link href={destination}>Volver</Link>
         </Button>
-        {canDelete && !isDetailView ? (
-          <PersonDeleteButton institutionId={user.institutionId} personId={personId} personName={personName} scope={PeopleScope.INSTITUTIONAL} />
+        {accessButton || showEdit || showDelete ? (
+          <div className="flex w-full flex-wrap gap-3 md:w-auto md:justify-end">
+            {accessButton}
+            {showEdit ? (
+              <Button asChild size="lg" className="flex-1 md:flex-none">
+                <Link href={appendReturnTo(`/people/${personId}`, destination)}>{editBreadcrumbLabel}</Link>
+              </Button>
+            ) : null}
+            {showDelete ? (
+              <PersonDeleteButton
+                institutionId={user.institutionId}
+                personId={personId}
+                personName={personName}
+                scope={PeopleScope.INSTITUTIONAL}
+                className="flex-1 md:flex-none"
+              />
+            ) : null}
+          </div>
         ) : null}
       </div>
       {isDetailView ? (
@@ -151,17 +188,6 @@ export default async function PersonPage({
           returnTo={destination}
         />
       )}
-      {hasInstitutionalPermission(user, INSTITUTIONAL_PERMISSION.PERSON_CREATE) &&
-      hasInstitutionalPermission(user, INSTITUTIONAL_PERMISSION.USER_STATUS_UPDATE) &&
-      hasInstitutionalPermission(user, INSTITUTIONAL_PERMISSION.ROLE_ASSIGN) ? (
-        <AccountAccessPanel
-          institutionId={user.institutionId}
-          personId={personId}
-          scope="institutional"
-          mode="administration"
-          email={person.email ?? ""}
-        />
-      ) : null}
     </PlatformPageShell>
   );
 }

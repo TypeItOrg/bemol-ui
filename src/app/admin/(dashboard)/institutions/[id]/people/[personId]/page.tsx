@@ -10,7 +10,7 @@ import { Button } from "@common/components/ui/button";
 import type { QueryParamValue } from "@common/types/query-param.types";
 import { appendReturnTo, getSafeReturnTo } from "@common/utils/return-to.util";
 
-import { AccountAccessPanel } from "@features/people/components/account-access-panel";
+import { PersonAccessButton } from "@features/people/components/person-access-button";
 import { PersonDeleteButton } from "@features/people/components/person-delete-button";
 import { PersonDetailView } from "@features/people/components/person-detail-view";
 import { PersonEditForm } from "@features/people/components/person-edit-form";
@@ -60,6 +60,17 @@ export default async function EditPersonPage({ params, searchParams }: EditPerso
 
   const personName = `${person.firstName} ${person.lastName}`;
 
+  const accessButton = (
+    <PersonAccessButton
+      email={person.email}
+      institutionId={id}
+      personId={personId}
+      personName={personName}
+      scope={PeopleScope.ADMIN}
+      className="flex-1 md:flex-none"
+    />
+  );
+
   return (
     <PlatformPageShell
       title={isDetailView ? "Detalle de usuario" : "Editar usuario"}
@@ -77,11 +88,20 @@ export default async function EditPersonPage({ params, searchParams }: EditPerso
       actionsClassName="self-stretch"
       actions={<PlatformPageIcon icon={UserRoundPenIcon} />}
     >
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <Button asChild variant="outline" size="lg">
+      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        <Button asChild variant="outline" size="lg" className="self-start">
           <Link href={destination}>Volver</Link>
         </Button>
-        {!isDetailView ? <PersonDeleteButton institutionId={id} personId={personId} personName={personName} /> : null}
+        <div className="flex w-full flex-wrap gap-3 md:w-auto md:justify-end">
+          {accessButton}
+          {isDetailView ? (
+            <Button asChild size="lg" className="flex-1 md:flex-none">
+              <Link href={appendReturnTo(`/institutions/${id}/people/${personId}`, destination)}>Editar</Link>
+            </Button>
+          ) : (
+            <PersonDeleteButton institutionId={id} personId={personId} personName={personName} className="flex-1 md:flex-none" />
+          )}
+        </div>
       </div>
 
       {isDetailView ? (
@@ -96,7 +116,6 @@ export default async function EditPersonPage({ params, searchParams }: EditPerso
           returnTo={destination}
         />
       )}
-      {true ? <AccountAccessPanel institutionId={id} personId={personId} scope="admin" mode="administration" email={person.email ?? ""} /> : null}
     </PlatformPageShell>
   );
 }

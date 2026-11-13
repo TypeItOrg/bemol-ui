@@ -12,6 +12,7 @@ import { type PeopleScope as PeopleScopeType } from "@features/people/utils/peop
 export function PersonActionsMenu({
   canDelete,
   canInviteAccess = false,
+  canManageAccess = false,
   canEdit,
   canUpdateStatus,
   editLabel,
@@ -19,6 +20,7 @@ export function PersonActionsMenu({
   isSelf,
   onDelete,
   onInviteAccess,
+  onManageAccess,
   onCancelInvitation,
   onUpdateStatus,
   person,
@@ -47,6 +49,11 @@ export function PersonActionsMenu({
               <PersonNavigationLink href={personHref} className="px-2.5 py-1.5">
                 {editLabel}
               </PersonNavigationLink>
+            </DropdownMenuItem>
+          ) : null}
+          {canManageAccess ? (
+            <DropdownMenuItem className="px-2.5 py-1.5" onSelect={onManageAccess}>
+              Gestionar acceso
             </DropdownMenuItem>
           ) : null}
           {canInviteAccess ? (
@@ -86,6 +93,8 @@ export function PersonActionsMenu({
 export type PersonActionsMenuProps = {
   canDelete: boolean;
   canInviteAccess?: boolean;
+  canManageAccess?: boolean;
+  onManageAccess: () => void;
   onInviteAccess: () => void;
   onCancelInvitation: () => void;
   canEdit: boolean;

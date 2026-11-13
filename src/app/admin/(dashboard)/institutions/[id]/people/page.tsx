@@ -74,6 +74,7 @@ export default async function InstitutionPeoplePage({ params, searchParams }: Pe
             roleId={roleId}
             status={status}
             dataPromise={peoplePromise}
+            canManageAccess
           />
         </Suspense>
       </DataTableNavigationProvider>

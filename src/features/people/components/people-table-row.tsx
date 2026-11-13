@@ -13,6 +13,8 @@ import { getPersonStatusLabel } from "@features/people/utils/person-status.util"
 type PeopleTableRowProps = {
   canDelete: boolean;
   canInviteAccess?: boolean;
+  canManageAccess?: boolean;
+  onManageAccess: (person: PersonSummary) => void;
   onInviteAccess: (person: PersonSummary) => void;
   onCancelInvitation: (person: PersonSummary) => void;
   canManageRoles: boolean;
@@ -29,6 +31,8 @@ type PeopleTableRowProps = {
 export function PeopleTableRow({
   canDelete,
   canInviteAccess = false,
+  canManageAccess = false,
+  onManageAccess,
   onInviteAccess,
   onCancelInvitation,
   canManageRoles,
@@ -55,6 +59,8 @@ export function PeopleTableRow({
 
   const canInvitePerson = canInviteAccess && !isSelf && PeopleScope.isInstitutional(scope) && !person.hasAccount;
 
+  const canManagePersonAccess = canManageAccess && !isSelf;
+
   const canEditOrManage = canEditPerson || (PeopleScope.isInstitutional(scope) && canManageRoles && !isSelf);
 
   const editLabel = canEditPerson ? "Editar" : "Administrar";
@@ -71,6 +77,8 @@ export function PeopleTableRow({
           editLabel={editLabel}
           canDelete={canDeletePerson}
           canInviteAccess={canInvitePerson}
+          canManageAccess={canManagePersonAccess}
+          onManageAccess={() => onManageAccess(person)}
           onInviteAccess={() => onInviteAccess(person)}
           onCancelInvitation={() => onCancelInvitation(person)}
           canUpdateStatus={canUpdatePersonStatus}
@@ -119,6 +127,11 @@ export function PeopleTableRow({
             <PersonNavigationLink href={personHref} className="px-2.5 py-1.5">
               {editLabel}
             </PersonNavigationLink>
+          </ContextMenuItem>
+        ) : null}
+        {canManagePersonAccess ? (
+          <ContextMenuItem className="px-2.5 py-1.5" onSelect={() => onManageAccess(person)}>
+            Gestionar acceso
           </ContextMenuItem>
         ) : null}
         {canInvitePerson ? (

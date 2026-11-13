@@ -62,7 +62,7 @@ export function PersonDetailsFields({ errors, isEdit, person, register }: Person
           />
           <FieldError errors={[errors.email]} />
           {isEdit ? (
-            <FieldDescription>El correo electrónico se modifica mediante una solicitud verificada en Gestión de acceso.</FieldDescription>
+            <FieldDescription>El correo electrónico se modifica mediante una solicitud verificada desde Gestionar acceso.</FieldDescription>
           ) : null}
         </Field>
 
