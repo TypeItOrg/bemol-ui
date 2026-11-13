@@ -1,15 +1,12 @@
 import type { ReactElement } from "react";
 
-import { CalendarDaysIcon, Clock3Icon, GraduationCapIcon } from "lucide-react";
+import { GraduationCapIcon } from "lucide-react";
 
-import { ReturnToLink } from "@common/components/navigation/return-to-link";
-import { Button } from "@common/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@common/components/ui/card";
 import { DataTableNavigationProvider } from "@common/components/ui/data-table-navigation";
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@common/components/ui/empty";
 
-import { courseWeekDayLabels } from "@features/academic/utils/academic-labels.util";
 import { CourseEnrollmentPagination } from "@features/course-enrollments/components/course-enrollment-pagination";
+import { TeacherClassCard } from "@features/course-enrollments/components/teacher-class-card";
 import { fetchTeacherClasses } from "@features/course-enrollments/services/teacher-course.service";
 import {
   COURSE_ENROLLMENT_PAGE_SIZE_OPTIONS,
@@ -49,45 +46,9 @@ export default async function MyTeachingPage({ searchParams }: { searchParams: P
             </EmptyHeader>
           </Empty>
         ) : (
-          <div className="grid items-start gap-4 @4xl/page-shell:grid-cols-2 @7xl/page-shell:grid-cols-3">
+          <div className="grid gap-4 @3xl/page-shell:grid-cols-2 @6xl/page-shell:grid-cols-3">
             {data.items.map((item) => (
-              <Card key={item.courseClass.id} className="h-full gap-0 py-0 transition-shadow hover:shadow-sm">
-                <CardHeader className="bg-muted/35 border-b py-4">
-                  <CardTitle className="text-lg font-semibold">{item.academicSpaceName}</CardTitle>
-                  {item.instrumentName ? <p className="text-muted-foreground text-sm">Instrumento: {item.instrumentName}</p> : null}
-                  <p className="text-foreground text-sm font-medium">{item.classLabel}</p>
-                </CardHeader>
-
-                <CardContent className="flex flex-1 flex-col gap-4 py-4">
-                  <div className="flex flex-col gap-2.5">
-                    <div className="text-muted-foreground flex items-center gap-2 text-xs font-medium tracking-wide uppercase">
-                      <CalendarDaysIcon className="size-4" aria-hidden="true" />
-                      Días y horarios
-                    </div>
-                    <div className="flex flex-col gap-2">
-                      {item.courseClass.days.map((day) => (
-                        <div key={day.dayOfWeek} className="bg-muted/20 flex items-start justify-between gap-4 rounded-lg border px-3 py-2.5">
-                          <span className="font-medium">{courseWeekDayLabels[day.dayOfWeek]}</span>
-                          <div className="text-muted-foreground flex flex-col items-end gap-1 text-sm">
-                            {day.schedules.map((schedule) => (
-                              <span key={`${schedule.startTime}-${schedule.endTime}`} className="inline-flex items-center gap-1.5 tabular-nums">
-                                <Clock3Icon className="size-3.5" aria-hidden="true" />
-                                {schedule.startTime.slice(0, 5)}–{schedule.endTime.slice(0, 5)}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </CardContent>
-
-                <CardFooter className="justify-end bg-transparent p-3">
-                  <Button asChild variant="ghost">
-                    <ReturnToLink href={`/my-teaching/classes/${item.courseClass.id}`}>Ver cursadas</ReturnToLink>
-                  </Button>
-                </CardFooter>
-              </Card>
+              <TeacherClassCard key={item.courseClass.id} item={item} />
             ))}
           </div>
         )}
