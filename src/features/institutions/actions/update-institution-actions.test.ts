@@ -76,6 +76,8 @@ beforeEach(() => {
   jest.mocked(revalidatePath).mockClear();
 });
 
+const LOGO_VERSION = "44444444-4444-4444-8444-444444444444";
+
 describe("platform institution update", () => {
   it.each(["cboero", ""])("keeps public name '%s' in the complete multipart payload", async (publicName) => {
     const data = form();
@@ -87,42 +89,40 @@ describe("platform institution update", () => {
     const [path, options] = jest.mocked(platformApiFetch).mock.calls[0];
     expect(path).toBe("/api/v1/admin/institutions/" + ID);
     expect(options?.method).toBe("PUT");
-    expect(options?.headers).toBeUndefined();
-    const body = options?.body as FormData;
-    expect(Array.from(body.keys())).toEqual(["data"]);
-    const payload = body.get("data") as Blob;
-    expect(payload.type).toBe("application/json");
-    expect(JSON.parse(await payload.text())).toEqual({
+    expect(options?.headers).toEqual({ "Content-Type": "application/json" });
+    expect(JSON.parse(options?.body as string)).toEqual({
       institution: { ...EXPECTED_PROFILE, active: false },
       publicSubdomain: publicName || null,
       logoIntent: "KEEP",
+      logo: null,
     });
     expect(revalidatePath).toHaveBeenCalledWith("/admin/institutions/" + ID);
     expect(revalidatePath).toHaveBeenCalledWith("/auth", "layout");
   });
 
-  it.each(["replace", "remove"])("submits the %s intent with only the corresponding file data", async (intent) => {
+  it.each(["replace", "remove"])("submits the %s intent with only the corresponding logo data", async (intent) => {
     const data = form();
-    const file = new File(["PNG bytes"], "logo.png", { type: "image/png" });
     data.set("logoIntent", intent);
 
     if (intent === "replace") {
-      data.set("logoFile", file);
+      data.set("logoVersion", LOGO_VERSION);
+      data.set("logoContentType", "image/png");
+      data.set("logoFileSize", "9");
     }
 
     await expect(updateInstitutionAction(ID, data)).resolves.toEqual({ success: true });
 
-    const body = jest.mocked(platformApiFetch).mock.calls[0][1]?.body as FormData;
-    expect(JSON.parse(await (body.get("data") as Blob).text()).logoIntent).toBe(intent === "replace" ? "REPLACE" : "REMOVE");
+    const body = JSON.parse(jest.mocked(platformApiFetch).mock.calls[0][1]?.body as string);
+    expect(body.logoIntent).toBe(intent === "replace" ? "REPLACE" : "REMOVE");
+    expect(body.logo).toEqual(intent === "replace" ? { version: LOGO_VERSION, contentType: "image/png", fileSize: 9 } : null);
+  });
 
-    if (intent === "replace") {
-      const sentFile = body.get("file") as File;
-      expect(sentFile.name).toBe("logo.png");
-      expect(sentFile.type).toBe("image/png");
-      expect(await sentFile.text()).toBe("PNG bytes");
-    } else {
-      expect(body.get("file")).toBeNull();
-    }
+  it("rejects a replacement without uploaded logo data before transport", async () => {
+    const data = form();
+    data.set("logoIntent", "replace");
+
+    await expect(updateInstitutionAction(ID, data)).resolves.toEqual({ logoError: INSTITUTION_ERROR_MESSAGES.LOGO_INVALID_CHANGE });
+    expect(platformApiFetch).not.toHaveBeenCalled();
   });
 
   it.each([undefined, "Bad Name", "a.b", "-bad", "bad-", "a".repeat(64)])("rejects invalid public name %s before transport", async (publicName) => {
@@ -186,10 +186,11 @@ describe("institutional institution update with the real logo saving service", (
   it.each(["keep", "replace", "remove"])("updates the profile and applies %s only to its bound institution", async (intent) => {
     const data = form();
     data.set("logoIntent", intent);
-    const file = new File(["PNG bytes"], "logo.png", { type: "image/png" });
 
     if (intent === "replace") {
-      data.set("logoFile", file);
+      data.set("logoVersion", LOGO_VERSION);
+      data.set("logoContentType", "image/png");
+      data.set("logoFileSize", "9");
     }
 
     await expect(updateInstitutionalInstitutionAction(ID, data)).resolves.toEqual({ success: true });
@@ -209,7 +210,7 @@ describe("institutional institution update with the real logo saving service", (
       expect(options?.method).toBe(intent === "replace" ? "PUT" : "DELETE");
 
       if (intent === "replace") {
-        expect((options?.body as FormData).get("file")).toBe(file);
+        expect(JSON.parse(options?.body as string)).toEqual({ version: LOGO_VERSION, contentType: "image/png", fileSize: 9 });
       }
     }
 
@@ -219,7 +220,9 @@ describe("institutional institution update with the real logo saving service", (
   it("reports a partial save when the profile succeeds but its logo replacement fails", async () => {
     const data = form();
     data.set("logoIntent", "replace");
-    data.set("logoFile", new File(["PNG bytes"], "logo.png", { type: "image/png" }));
+    data.set("logoVersion", LOGO_VERSION);
+    data.set("logoContentType", "image/png");
+    data.set("logoFileSize", "9");
     jest
       .mocked(institutionalApiFetch)
       .mockResolvedValueOnce(new Response(null, { status: 204 }))

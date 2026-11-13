@@ -1,6 +1,7 @@
 import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
+import { presignInstitutionLogoUploadAction } from "@features/institutions/actions/presign-institution-logo.action";
 import { updateInstitutionAction } from "@features/institutions/actions/update-institution.action";
 import { updateInstitutionalInstitutionAction } from "@features/institutions/actions/update-institutional-institution.action";
 import { InstitutionForm } from "@features/institutions/components/institution-form";
@@ -22,6 +23,10 @@ jest.mock("@features/institutions/actions/update-institutional-institution.actio
 }));
 jest.mock("@features/institutions/actions/create-institution.action", () => ({
   createInstitutionAction: jest.fn(),
+}));
+
+jest.mock("@features/institutions/actions/presign-institution-logo.action", () => ({
+  presignInstitutionLogoUploadAction: jest.fn(),
 }));
 
 const institution: Institution = {
@@ -55,6 +60,15 @@ beforeEach(() => {
   push.mockReset();
   jest.mocked(updateInstitutionAction).mockReset().mockResolvedValue({ success: true });
   jest.mocked(updateInstitutionalInstitutionAction).mockReset().mockResolvedValue({ success: true });
+  jest
+    .mocked(presignInstitutionLogoUploadAction)
+    .mockReset()
+    .mockResolvedValue({
+      version: "66666666-6666-4666-8666-666666666666",
+      uploadUrl: "https://r2.example/logo",
+      headers: { "Content-Type": "image/png" },
+    });
+  global.fetch = jest.fn().mockResolvedValue(new Response(null, { status: 200 }));
   URL.createObjectURL = jest.fn(() => "blob:preview");
   URL.revokeObjectURL = jest.fn();
 });
@@ -75,7 +89,11 @@ describe.each(["platform", "institutional"] as const)("%s logo form lifecycle", 
     expect(update.mock.calls[0][0]).toBe(institution.id);
     const form = update.mock.calls[0][1];
     expect(form.get("logoIntent")).toBe(INSTITUTION_LOGO_INTENT.REPLACE);
-    expect(form.get("logoFile")).toBe(file);
+    expect(form.get("logoFile")).toBeNull();
+    expect(form.get("logoVersion")).toBe("66666666-6666-4666-8666-666666666666");
+    expect(form.get("logoContentType")).toBe("image/png");
+    expect(form.get("logoFileSize")).toBe(String(file.size));
+    expect(global.fetch).toHaveBeenCalledWith("https://r2.example/logo", { method: "PUT", headers: { "Content-Type": "image/png" }, body: file });
   });
 
   it("submits removal only when saving and allows undo before submission", async () => {

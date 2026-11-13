@@ -27,6 +27,7 @@ import { InstitutionPublicAccessField } from "@features/institutions/components/
 import { INSTITUTION_ERROR_MESSAGES } from "@features/institutions/constants/error-messages.constants";
 import { INSTITUTION_LOGO_INTENT } from "@features/institutions/constants/institution-logo.constants";
 import { institutionFormSchema, type InstitutionFormInput, type InstitutionFormValues } from "@features/institutions/schemas/institution-form.schema";
+import { uploadInstitutionLogoFromFormData } from "@features/institutions/services/upload-institution-logo.service";
 import type { InstitutionActionState } from "@features/institutions/types/institution-action-state.types";
 import { type InstitutionFormProps } from "@features/institutions/types/institution-form-props.types";
 import type { InstitutionLogoChange } from "@features/institutions/types/institution-logo-change.types";
@@ -70,6 +71,14 @@ export function InstitutionForm({ mode, institution, returnTo, baseDomain = "" }
   });
 
   const [state, formAction, isPending] = useActionState<InstitutionActionState, FormData>(async (_previous, formData) => {
+    const uploadError = isEdit ? await uploadInstitutionLogoFromFormData(institution.id, "platform", formData) : undefined;
+
+    if (uploadError) {
+      setError("root.logo", { type: "server", message: uploadError });
+
+      return { logoError: uploadError };
+    }
+
     const request = isEdit ? updateInstitutionAction(institution.id, formData) : createInstitutionAction(formData);
 
     const result = await safelyRunAction(

@@ -58,18 +58,15 @@ export async function updateInstitutionAction(id: string, formData: FormData): P
     institution: { ...parsed.data, active: rawActive === "true" },
     publicSubdomain: publicSubdomain || null,
     logoIntent: INSTITUTION_LOGO_API_INTENT[logoChange.intent],
+    logo: logoChange.intent === INSTITUTION_LOGO_INTENT.REPLACE ? logoChange.logo : null,
   };
 
-  const body = new FormData();
-
-  body.set("data", new Blob([JSON.stringify(data)], { type: "application/json" }));
-
-  if (logoChange.intent === INSTITUTION_LOGO_INTENT.REPLACE) {
-    body.set("file", logoChange.file);
-  }
-
   const errorState = await getResponseErrorActionState(
-    platformApiFetch(`/api/v1/admin/institutions/${id}`, { method: "PUT", body }),
+    platformApiFetch(`/api/v1/admin/institutions/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    }),
     [...INSTITUTION_FORM_FIELD_NAMES.map((field) => `institution.${field}`), "publicSubdomain", "file"],
     INSTITUTION_ERROR_MESSAGES.UPDATE_INSTITUTION,
   );

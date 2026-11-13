@@ -6,17 +6,14 @@ import { removeInstitutionalInstitutionLogo, uploadInstitutionalInstitutionLogo 
 import { INSTITUTION_ERROR_MESSAGES } from "@features/institutions/constants/error-messages.constants";
 import { INSTITUTION_LOGO_INTENT } from "@features/institutions/constants/institution-logo.constants";
 import type { InstitutionActionState } from "@features/institutions/types/institution-action-state.types";
-import type { InstitutionLogoChange } from "@features/institutions/types/institution-logo-change.types";
+import type { InstitutionLogoSubmission } from "@features/institutions/types/institution-logo-change.types";
 
-export async function saveInstitutionLogoChange(institutionId: string, change: InstitutionLogoChange): Promise<InstitutionActionState | undefined> {
+export async function saveInstitutionLogoChange(
+  institutionId: string,
+  change: InstitutionLogoSubmission,
+): Promise<InstitutionActionState | undefined> {
   if (change.intent === INSTITUTION_LOGO_INTENT.KEEP) {
     return undefined;
-  }
-
-  const formData = new FormData();
-
-  if (change.intent === INSTITUTION_LOGO_INTENT.REPLACE) {
-    formData.set("file", change.file);
   }
 
   const fallback =
@@ -24,7 +21,7 @@ export async function saveInstitutionLogoChange(institutionId: string, change: I
 
   const result = await safelyRunAction(
     change.intent === INSTITUTION_LOGO_INTENT.REPLACE
-      ? uploadInstitutionalInstitutionLogo(institutionId, {}, formData)
+      ? uploadInstitutionalInstitutionLogo(institutionId, change.logo)
       : removeInstitutionalInstitutionLogo(institutionId),
     fallback,
   );

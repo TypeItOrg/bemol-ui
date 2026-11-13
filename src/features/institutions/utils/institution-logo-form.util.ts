@@ -4,9 +4,13 @@ import {
   INSTITUTION_LOGO_MIME_TYPES,
   MAX_INSTITUTION_LOGO_BYTES,
 } from "@features/institutions/constants/institution-logo.constants";
-import type { InstitutionLogoChange } from "@features/institutions/types/institution-logo-change.types";
+import type {
+  InstitutionLogoChange,
+  InstitutionLogoSubmission,
+  UploadedInstitutionLogo,
+} from "@features/institutions/types/institution-logo-change.types";
 
-export function getInstitutionLogoFileError(file: File): string | undefined {
+export function getInstitutionLogoFileError(file: Pick<File, "size" | "type">): string | undefined {
   if (file.size > MAX_INSTITUTION_LOGO_BYTES) {
     return INSTITUTION_ERROR_MESSAGES.LOGO_TOO_LARGE;
   }
@@ -27,28 +31,37 @@ export function appendInstitutionLogoChange(formData: FormData, change: Institut
   }
 }
 
-export function parseInstitutionLogoChange(formData: FormData): InstitutionLogoChange | { error: string } {
+export function appendUploadedInstitutionLogo(formData: FormData, logo: UploadedInstitutionLogo): void {
+  formData.delete("logoFile");
+  formData.set("logoVersion", logo.version);
+  formData.set("logoContentType", logo.contentType);
+  formData.set("logoFileSize", String(logo.fileSize));
+}
+
+export function parseInstitutionLogoChange(formData: FormData): InstitutionLogoSubmission | { error: string } {
   const intent = formData.get("logoIntent");
 
-  const file = formData.get("logoFile");
+  const version = formData.get("logoVersion");
 
-  if (formData.getAll("logoFile").length > 1) {
-    return { error: INSTITUTION_ERROR_MESSAGES.LOGO_SINGLE_FILE };
-  }
+  const contentType = formData.get("logoContentType");
 
-  if ((intent === INSTITUTION_LOGO_INTENT.KEEP || intent === INSTITUTION_LOGO_INTENT.REMOVE) && file === null) {
+  const fileSize = Number(formData.get("logoFileSize"));
+
+  const hasUpload = version !== null || contentType !== null || formData.get("logoFileSize") !== null;
+
+  if ((intent === INSTITUTION_LOGO_INTENT.KEEP || intent === INSTITUTION_LOGO_INTENT.REMOVE) && !hasUpload) {
     return { intent };
   }
 
-  if (intent !== INSTITUTION_LOGO_INTENT.REPLACE || !(file instanceof File)) {
+  if (intent !== INSTITUTION_LOGO_INTENT.REPLACE || typeof version !== "string" || typeof contentType !== "string") {
     return { error: INSTITUTION_ERROR_MESSAGES.LOGO_INVALID_CHANGE };
   }
 
-  const error = getInstitutionLogoFileError(file);
+  const error = getInstitutionLogoFileError({ type: contentType, size: fileSize });
 
   if (error) {
     return { error };
   }
 
-  return { intent, file };
+  return { intent, logo: { version, contentType, fileSize } };
 }

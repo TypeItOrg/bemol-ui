@@ -27,6 +27,7 @@ import {
   type InstitutionalInstitutionFormInput,
   type InstitutionalInstitutionFormValues,
 } from "@features/institutions/schemas/institutional-institution-form.schema";
+import { uploadInstitutionLogoFromFormData } from "@features/institutions/services/upload-institution-logo.service";
 import type { InstitutionActionState } from "@features/institutions/types/institution-action-state.types";
 import type { InstitutionLogoChange } from "@features/institutions/types/institution-logo-change.types";
 import type { Institution } from "@features/institutions/types/institution.types";
@@ -65,6 +66,14 @@ export function InstitutionalInstitutionForm({ institution, returnTo = "/institu
   });
 
   const [state, formAction, isPending] = useActionState<InstitutionActionState, FormData>(async (_previous, formData) => {
+    const uploadError = await uploadInstitutionLogoFromFormData(institution.id, "institutional", formData);
+
+    if (uploadError) {
+      setError("root.logo", { type: "server", message: uploadError });
+
+      return { logoError: uploadError };
+    }
+
     const result = await safelyRunAction(
       updateInstitutionalInstitutionAction(institution.id, formData),
       INSTITUTION_ERROR_MESSAGES.UPDATE_INSTITUTION,

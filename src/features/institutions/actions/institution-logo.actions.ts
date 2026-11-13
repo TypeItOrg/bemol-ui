@@ -10,12 +10,13 @@ import { institutionalApiFetch } from "@features/institutional-auth/services/ins
 import { INSTITUTIONAL_PERMISSION } from "@features/institutional-auth/types/institutional-permission.types";
 import { hasInstitutionalPermission } from "@features/institutional-auth/utils/institutional-permission.util";
 import { INSTITUTION_ERROR_MESSAGES } from "@features/institutions/constants/error-messages.constants";
+import type { UploadedInstitutionLogo } from "@features/institutions/types/institution-logo-change.types";
 import type { InstitutionLogoState } from "@features/institutions/types/institution-logo-state.types";
 import type { Institution } from "@features/institutions/types/institution.types";
 import { getInstitutionLogoFileError } from "@features/institutions/utils/institution-logo-form.util";
 import { getInstitutionLogoUrl } from "@features/institutions/utils/institution-logo-url.util";
 
-async function saveLogo(institutionId: string, formData?: FormData): Promise<InstitutionLogoState> {
+async function saveLogo(institutionId: string, logo?: UploadedInstitutionLogo): Promise<InstitutionLogoState> {
   if (!isValidUuid(institutionId)) {
     return { error: INVALID_ACTION_ARGUMENTS };
   }
@@ -26,31 +27,21 @@ async function saveLogo(institutionId: string, formData?: FormData): Promise<Ins
     return { error: INSTITUTION_ERROR_MESSAGES.LOGO_FORBIDDEN };
   }
 
-  let upload: FormData | undefined;
-
-  if (formData) {
-    const file = formData.get("file");
-
-    if (!(file instanceof File)) {
-      return { fieldErrors: { file: INSTITUTION_ERROR_MESSAGES.LOGO_INVALID_FILE } };
-    }
-
-    const fileError = getInstitutionLogoFileError(file);
+  if (logo) {
+    const fileError = getInstitutionLogoFileError({ type: logo.contentType, size: logo.fileSize });
 
     if (fileError) {
       return { fieldErrors: { file: fileError } };
     }
-
-    upload = new FormData();
-    upload.set("file", file);
   }
 
   const responsePromise = institutionalApiFetch(`/api/v1/institutions/${institutionId}/logo`, {
-    method: upload ? "PUT" : "DELETE",
-    body: upload,
+    method: logo ? "PUT" : "DELETE",
+    headers: logo ? { "Content-Type": "application/json" } : undefined,
+    body: logo ? JSON.stringify(logo) : undefined,
   });
 
-  const fallback = upload ? INSTITUTION_ERROR_MESSAGES.LOGO_UPDATE : INSTITUTION_ERROR_MESSAGES.LOGO_REMOVE;
+  const fallback = logo ? INSTITUTION_ERROR_MESSAGES.LOGO_UPDATE : INSTITUTION_ERROR_MESSAGES.LOGO_REMOVE;
 
   const error = await getResponseErrorActionState(responsePromise, ["file"], fallback);
 
@@ -60,7 +51,7 @@ async function saveLogo(institutionId: string, formData?: FormData): Promise<Ins
 
   let logoUrl: string | null = null;
 
-  if (upload) {
+  if (logo) {
     try {
       const institution = (await (await responsePromise).json()) as Institution;
 
@@ -83,12 +74,8 @@ async function saveLogo(institutionId: string, formData?: FormData): Promise<Ins
   return { success: true, logoUrl };
 }
 
-export async function uploadInstitutionalInstitutionLogo(
-  institutionId: string,
-  _previousState: InstitutionLogoState,
-  formData: FormData,
-): Promise<InstitutionLogoState> {
-  return saveLogo(institutionId, formData);
+export async function uploadInstitutionalInstitutionLogo(institutionId: string, logo: UploadedInstitutionLogo): Promise<InstitutionLogoState> {
+  return saveLogo(institutionId, logo);
 }
 
 export async function removeInstitutionalInstitutionLogo(institutionId: string): Promise<InstitutionLogoState> {

@@ -2,6 +2,7 @@ import { getInstitutionalUser } from "@features/institutional-auth/services/get-
 import { institutionalApiFetch } from "@features/institutional-auth/services/institutional-api-fetch.service";
 import { INSTITUTIONAL_PERMISSION } from "@features/institutional-auth/types/institutional-permission.types";
 import { uploadInstitutionalInstitutionLogo, removeInstitutionalInstitutionLogo } from "@features/institutions/actions/institution-logo.actions";
+import type { UploadedInstitutionLogo } from "@features/institutions/types/institution-logo-change.types";
 
 jest.mock("next/cache", () => ({ revalidatePath: jest.fn() }));
 jest.mock("@features/institutional-auth/services/institutional-api-fetch.service", () => ({
@@ -29,11 +30,8 @@ const user = {
   permissions: [INSTITUTIONAL_PERMISSION.INSTITUTION_UPDATE],
 };
 
-function image(type = "image/png", size = 10): FormData {
-  const form = new FormData();
-  form.set("file", new File([new Uint8Array(size)], "logo.png", { type }));
-
-  return form;
+function image(contentType = "image/png", fileSize = 10): UploadedInstitutionLogo {
+  return { version: "44444444-4444-4444-8444-444444444444", contentType, fileSize };
 }
 
 beforeEach(() => {
@@ -44,7 +42,7 @@ beforeEach(() => {
 });
 it("[L02.institution-logo-lifecycle] uploads/replaces/removes only the current institution", async () => {
   for (let replacement = 0; replacement < 2; replacement++) {
-    expect((await uploadInstitutionalInstitutionLogo(institutionId, {}, image())).success).toBe(true);
+    expect((await uploadInstitutionalInstitutionLogo(institutionId, image())).success).toBe(true);
   }
 
   expect(institutionalApiFetch).toHaveBeenCalledWith(`/api/v1/institutions/${institutionId}/logo`, expect.objectContaining({ method: "PUT" }));
@@ -53,9 +51,9 @@ it("[L02.institution-logo-lifecycle] uploads/replaces/removes only the current i
 });
 it("[L02.logo-authorization] rejects missing permission, wrong institution, tampered IDs and absent institutional session", async () => {
   jest.mocked(getInstitutionalUser).mockResolvedValueOnce({ ...user, permissions: [] });
-  expect((await uploadInstitutionalInstitutionLogo(institutionId, {}, image())).error).toMatch(/permiso/);
+  expect((await uploadInstitutionalInstitutionLogo(institutionId, image())).error).toMatch(/permiso/);
   expect((await removeInstitutionalInstitutionLogo("33333333-3333-4333-8333-333333333333")).error).toMatch(/permiso/);
-  expect((await uploadInstitutionalInstitutionLogo("../evil", {}, image())).error).toBeDefined();
+  expect((await uploadInstitutionalInstitutionLogo("../evil", image())).error).toBeDefined();
   jest.mocked(getInstitutionalUser).mockResolvedValueOnce(null);
   expect((await removeInstitutionalInstitutionLogo(institutionId)).error).toMatch(/permiso/);
   expect(institutionalApiFetch).not.toHaveBeenCalled();
@@ -65,24 +63,23 @@ it.each([
   ["image/png", 0],
   ["image/png", 2 * 1024 * 1024 + 1],
 ])("[L03.real-image-validation] rejects unsupported MIME/empty/oversized file %s %s before transport", async (type, size) => {
-  expect((await uploadInstitutionalInstitutionLogo(institutionId, {}, image(String(type), Number(size)))).fieldErrors?.file).toBeDefined();
+  expect((await uploadInstitutionalInstitutionLogo(institutionId, image(String(type), Number(size)))).fieldErrors?.file).toBeDefined();
   expect(institutionalApiFetch).not.toHaveBeenCalled();
 });
 it("[L03.replacement-failure] reports API and network errors without a replacement logo result", async () => {
   jest.mocked(institutionalApiFetch).mockRejectedValueOnce(new Error("offline"));
-  const offline = await uploadInstitutionalInstitutionLogo(institutionId, {}, image());
+  const offline = await uploadInstitutionalInstitutionLogo(institutionId, image());
   expect(offline.error).toMatch(/anterior se conserva/);
   expect(offline.logoUrl).toBeUndefined();
   jest.mocked(institutionalApiFetch).mockResolvedValueOnce(new Response(JSON.stringify({ message: "Imagen inválida" }), { status: 400 }));
-  const invalid = await uploadInstitutionalInstitutionLogo(institutionId, {}, image());
+  const invalid = await uploadInstitutionalInstitutionLogo(institutionId, image());
   expect(invalid.error).toBe("Imagen inválida");
   expect(invalid.logoUrl).toBeUndefined();
 });
 
 it("accepts WebP logo uploads without changing their content type", async () => {
-  const result = await uploadInstitutionalInstitutionLogo(institutionId, {}, image("image/webp"));
+  const result = await uploadInstitutionalInstitutionLogo(institutionId, image("image/webp"));
 
   expect(result.success).toBe(true);
-  const body = jest.mocked(institutionalApiFetch).mock.calls[0][1]?.body as FormData;
-  expect((body.get("file") as File).type).toBe("image/webp");
+  expect(JSON.parse(jest.mocked(institutionalApiFetch).mock.calls[0][1]?.body as string).contentType).toBe("image/webp");
 });
