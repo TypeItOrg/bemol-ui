@@ -37,7 +37,7 @@ export function CourseAcademicSpaceField({
   initialValues: Record<string, FormValue>;
   spaceId: string | undefined;
 }): ReactElement {
-  const error = fieldErrors?.academicSpaceId ?? fieldErrors?.studyPlanSpaceId ?? fieldErrors?.format;
+  const error = fieldErrors?.studyPlanSpaceId ?? fieldErrors?.format;
 
   function renderControl(): ReactElement {
     if (!institutionId || !scope) {
@@ -60,7 +60,7 @@ export function CourseAcademicSpaceField({
         errorMessage="No se pudieron cargar los espacios del plan."
         fetchPage={(input) => fetchCourseSpaceOptions(scope, institutionId, studyPlanId, input)}
         getItemLabel={getAcademicSpaceOptionLabel}
-        getItemValue={(item) => item.studyPlanSpaceId ?? item.id}
+        getItemValue={(item) => item.studyPlanSpaceId}
         id="academicSpaceId"
         key={`space-${institutionId}-${studyPlanId}`}
         name="academicSpaceDisplay"

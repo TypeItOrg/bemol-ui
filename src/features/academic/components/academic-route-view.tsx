@@ -18,7 +18,7 @@ import { ACADEMIC_ROUTE_SEGMENT } from "@features/academic/constants/academic-ro
 import { canReadAcademic, type AcademicAccess } from "@features/academic/types/academic-access.types";
 import type { AcademicBreadcrumbOptions } from "@features/academic/types/academic-breadcrumb-options.types";
 import type { AcademicCollectionResource } from "@features/academic/types/academic-collection-resource.types";
-import { AcademicResource } from "@features/academic/types/academic-resource.types";
+import { hasAcademicDetailPage } from "@features/academic/utils/academic-detail-page.util";
 import type { AcademicScope } from "@features/academic/utils/academic-scope.util";
 import { getAcademicRouteBase } from "@features/academic/utils/academic-scope.util";
 import { parseAcademicCollectionResource } from "@features/academic/utils/parse-academic-collection-resource.util";
@@ -129,7 +129,7 @@ export async function AcademicRouteView({
       });
     }
 
-    if (collectionResource === AcademicResource.ACADEMIC_YEAR && !action) {
+    if (!hasAcademicDetailPage(collectionResource) && !action) {
       notFound();
     }
 

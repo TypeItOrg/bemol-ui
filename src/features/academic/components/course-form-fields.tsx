@@ -26,7 +26,7 @@ function CourseFormFields({ institutionField, institutionId, scope, initialValue
 
   const [selection, setSelection] = useState(() => createCourseFormSelection(initialValues));
 
-  const { studyPlanId, studyPlanSpaceId, academicSpaceId, instrumentId, instrumental, spaceLabel, format } = selection;
+  const { studyPlanId, studyPlanSpaceId, instrumentId, instrumental, spaceLabel, format } = selection;
 
   const [academicYearId, setAcademicYearId] = useState(toOptionalFormString(initialValues.academicYearId));
 
@@ -44,7 +44,6 @@ function CourseFormFields({ institutionField, institutionId, scope, initialValue
     <>
       <input type="hidden" name="studyPlanId" value={studyPlanId ?? ""} />
       <input type="hidden" name="studyPlanSpaceId" value={studyPlanSpaceId ?? ""} />
-      <input type="hidden" name="academicSpaceId" value={academicSpaceId ?? ""} />
       <input type="hidden" name="instrumentId" value={instrumentId ?? ""} />
       <input type="hidden" name="academicYearId" value={academicYearId ?? ""} />
       <input type="hidden" name="format" value={format ?? ""} />

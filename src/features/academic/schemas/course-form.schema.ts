@@ -103,9 +103,8 @@ export const parsedCourseClasses = z
 
 export const courseSchema = z
   .object({
-    studyPlanSpaceId: optionalUuid,
+    studyPlanSpaceId: z.string().uuid("Seleccioná un espacio del plan de estudio."),
     studyPlanId: optionalUuid,
-    academicSpaceId: optionalUuid,
     instrumentId: optionalUuid,
     academicYearId: z.string().uuid("Seleccioná un ciclo lectivo."),
     format: z.enum(ACADEMIC_SPACE_FORMAT, {
@@ -114,14 +113,6 @@ export const courseSchema = z
     classes: parsedCourseClasses,
   })
   .superRefine((value, context) => {
-    if (!value.studyPlanSpaceId && (!value.studyPlanId || !value.academicSpaceId)) {
-      context.addIssue({
-        code: "custom",
-        message: "Seleccioná un espacio del plan de estudio.",
-        path: ["studyPlanSpaceId"],
-      });
-    }
-
     if (value.format !== "INDIVIDUAL") {
       return;
     }

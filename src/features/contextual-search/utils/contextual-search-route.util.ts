@@ -72,10 +72,10 @@ function getPlatformResultHref(entityType: ContextualSearchEntity, item: Context
       throw new Error(PLATFORM_SCOPE_ERROR(entityType));
     case "academic-year":
     case "training-path":
+    case "instrument":
       return `/institutions/${getRequiredInstitutionId(item)}/academic/${getAcademicResource(entityType)}/${item.id}/edit`;
     case "study-plan":
     case "academic-space":
-    case "instrument":
     case "course":
     case "shift":
       return `/institutions/${getRequiredInstitutionId(item)}/academic/${getAcademicResource(entityType)}/${item.id}`;
@@ -92,10 +92,10 @@ function getInstitutionalResultHref(entityType: ContextualSearchEntity, item: Co
       return `/roles/${item.id}`;
     case "academic-year":
     case "training-path":
+    case "instrument":
       return `/${getAcademicResource(entityType)}/${item.id}/edit`;
     case "study-plan":
     case "academic-space":
-    case "instrument":
     case "course":
     case "shift":
       return `/${getAcademicResource(entityType)}/${item.id}`;

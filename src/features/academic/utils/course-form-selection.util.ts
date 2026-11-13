@@ -11,7 +11,6 @@ export function createCourseFormSelection(initial: AcademicFieldsProps["initialV
   return {
     studyPlanId: toOptionalFormString(initial?.studyPlanId),
     studyPlanSpaceId: toOptionalFormString(initial?.studyPlanSpaceId),
-    academicSpaceId: toOptionalFormString(initial?.academicSpaceId),
     instrumentId: toOptionalFormString(initial?.instrumentId),
     instrumental: Boolean(initial?.academicSpaceInstrumental),
     format: format === "INDIVIDUAL" || format === "GRUPAL" ? format : undefined,
@@ -30,7 +29,6 @@ export function changeCourseAcademicSpace(selection: CourseFormSelection, value:
   return {
     ...selection,
     studyPlanSpaceId,
-    academicSpaceId: item?.id,
     instrumentId: instrumental && selection.studyPlanSpaceId === studyPlanSpaceId ? selection.instrumentId : undefined,
     instrumental,
     spaceLabel: item ? getAcademicSpaceOptionLabel(item) : undefined,

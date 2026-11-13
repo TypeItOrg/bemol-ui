@@ -26,4 +26,5 @@ export const ACADEMIC_ACTION_FIELDS = [
   "requiredStudyPlanSpaceId",
   "requirementStage",
   "requiredCondition",
+  "icon",
 ] as const;

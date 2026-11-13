@@ -51,6 +51,7 @@ describe("academic resource actions", () => {
     formData.set("institutionId", INSTITUTION_ID);
     formData.set("name", "Piano");
     formData.set("description", "");
+    formData.set("icon", "PIANO");
 
     await saveAcademicResourceAction(AcademicScope.ADMIN, undefined, AcademicResource.INSTRUMENT, undefined, undefined, "/instruments", {}, formData);
 
@@ -59,7 +60,7 @@ describe("academic resource actions", () => {
       AcademicScope.ADMIN,
       `/api/v1/admin/institutions/${INSTITUTION_ID}/instruments`,
       expect.objectContaining({
-        body: JSON.stringify({ name: "Piano", description: null }),
+        body: JSON.stringify({ name: "Piano", description: null, icon: "PIANO" }),
         method: "POST",
       }),
     );

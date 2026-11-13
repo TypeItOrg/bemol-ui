@@ -1,3 +1,5 @@
+import type { InstrumentIcon } from "@features/academic/types/instrument-icon.types";
+
 export type AcademicTableRow = {
   scopedActions?: {
     update: boolean;
@@ -11,6 +13,7 @@ export type AcademicTableRow = {
   institutionId?: string;
   institutionName?: string;
   primaryValue: string;
+  icon?: InstrumentIcon;
   detailValues: readonly (string | { value: string | null | undefined; fallback: string })[];
   status: string;
   active: boolean;

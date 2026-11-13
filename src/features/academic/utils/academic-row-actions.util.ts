@@ -4,6 +4,7 @@ import { ACADEMIC_ROW_ACTION_KIND } from "@features/academic/types/academic-row-
 import type { AcademicRowAction } from "@features/academic/types/academic-row-action.types";
 import type { AcademicTableRow } from "@features/academic/types/academic-table-row.types";
 import type { ActiveAcademicStatusResource } from "@features/academic/types/active-academic-status-resource.types";
+import { hasAcademicDetailPage } from "@features/academic/utils/academic-detail-page.util";
 import { getAcademicLifecycleCapabilities } from "@features/academic/utils/academic-lifecycle.util";
 
 export function getAcademicRowActions(
@@ -175,7 +176,9 @@ export function getAcademicRowActions(
   }
 
   if (isActiveStatusResource(resource)) {
-    const actions: AcademicRowAction[] = [{ href: detailHref, kind: ACADEMIC_ROW_ACTION_KIND.NAVIGATE, label: "Ver detalle" }];
+    const actions: AcademicRowAction[] = hasAcademicDetailPage(resource)
+      ? [{ href: detailHref, kind: ACADEMIC_ROW_ACTION_KIND.NAVIGATE, label: "Ver detalle" }]
+      : [];
 
     if (canUpdate) {
       actions.push({

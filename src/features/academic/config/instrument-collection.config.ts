@@ -3,9 +3,10 @@ import { Music2Icon } from "lucide-react";
 import { fetchInstrument, fetchInstruments } from "@features/academic/services/academic.service";
 import type { AcademicCollectionConfig } from "@features/academic/types/academic-collection-config.types";
 import { AcademicResource } from "@features/academic/types/academic-resource.types";
+import type { Instrument } from "@features/academic/types/instrument.types";
 import { activeResource } from "@features/academic/utils/academic-collection-filters.util";
 
-export const instrumentCollectionConfig: AcademicCollectionConfig = activeResource({
+const baseConfig: AcademicCollectionConfig = activeResource({
   resource: AcademicResource.INSTRUMENT,
   title: "Instrumentos",
   createLabel: "Nuevo instrumento",
@@ -30,3 +31,8 @@ export const instrumentCollectionConfig: AcademicCollectionConfig = activeResour
     }),
   fetchDetail: fetchInstrument,
 });
+
+export const instrumentCollectionConfig: AcademicCollectionConfig = {
+  ...baseConfig,
+  toRow: (item) => ({ ...baseConfig.toRow(item), icon: (item as Instrument).icon }),
+};

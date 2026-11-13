@@ -131,13 +131,14 @@ describe("academic form schemas", () => {
     const formData = new FormData();
     formData.set("name", "  Piano  ");
     formData.set("description", "");
+    formData.set("icon", "PIANO");
 
     const result = parseAcademicForm(AcademicResource.INSTRUMENT, formData);
 
     expect(result.success).toBe(true);
 
     if (result.success) {
-      expect(result.data).toEqual({ name: "Piano", description: null });
+      expect(result.data).toEqual({ name: "Piano", description: null, icon: "PIANO" });
     }
   });
 

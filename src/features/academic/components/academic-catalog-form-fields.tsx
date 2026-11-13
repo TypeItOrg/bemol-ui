@@ -5,6 +5,7 @@ import type { ReactElement } from "react";
 import { toFormControlValue } from "@common/utils/form-value.util";
 
 import { DescriptionField, FormField, FormSelect, NameField } from "@features/academic/components/academic-form-controls";
+import { InstrumentIconField } from "@features/academic/components/instrument-icon-field";
 import type { AcademicFieldsProps } from "@features/academic/types/academic-fields-props.types";
 import { ACADEMIC_SPACE_FORMAT } from "@features/academic/types/academic-space-format.types";
 import { ACADEMIC_SPACE_TYPE } from "@features/academic/types/academic-space-type.types";
@@ -48,6 +49,7 @@ export function InstrumentFields({ canChangeStatus = true, initialValues = {}, f
     <>
       <NameField initialValues={initialValues} error={fieldErrors?.name} fullWidth={!hasActiveState} />
       {hasActiveState ? <ActiveStatusField error={fieldErrors?.active} initialActive={initialActive} /> : null}
+      <InstrumentIconField defaultValue={initialValues.icon} error={fieldErrors?.icon} />
       <DescriptionField initialValues={initialValues} error={fieldErrors?.description} />
     </>
   );

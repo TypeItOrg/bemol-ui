@@ -12,7 +12,7 @@ export type CourseSpaceOption = {
   name: string;
   type: string;
   format: string;
-  studyPlanSpaceId?: string | null;
+  studyPlanSpaceId: string;
   academicLevelName?: string | null;
   instrumental?: boolean;
 };

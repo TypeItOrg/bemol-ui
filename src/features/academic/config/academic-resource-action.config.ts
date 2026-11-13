@@ -61,8 +61,6 @@ export const RESOURCE_ACTION_CONFIG: Record<AcademicResource, ResourceActionConf
     prepareBody: (data) => ({
       studyPlanSpaceId: data.studyPlanSpaceId,
       instrumentId: data.instrumentId,
-      studyPlanId: data.studyPlanId,
-      academicSpaceId: data.academicSpaceId,
       academicYearId: data.academicYearId,
       classes: data.classes,
     }),

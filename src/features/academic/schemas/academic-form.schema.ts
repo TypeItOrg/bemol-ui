@@ -16,6 +16,7 @@ import { ACADEMIC_SPACE_FORMAT } from "@features/academic/types/academic-space-f
 import { ACADEMIC_SPACE_TYPE } from "@features/academic/types/academic-space-type.types";
 import { ACADEMIC_YEAR_STATUS } from "@features/academic/types/academic-year-status.types";
 import { APPROVAL_MODE } from "@features/academic/types/approval-mode.types";
+import { INSTRUMENT_ICON } from "@features/academic/types/instrument-icon.types";
 import { REQUIRED_CONDITION } from "@features/academic/types/required-condition.types";
 import { REQUIREMENT_STAGE } from "@features/academic/types/requirement-stage.types";
 import { REQUIREMENT_TYPE } from "@features/academic/types/requirement-type.types";
@@ -67,7 +68,7 @@ const academicFormSchemas: Record<AcademicResource, z.ZodType> = {
       path: ["status"],
     }),
   [AcademicResource.TRAINING_PATH]: namedResourceSchema,
-  [AcademicResource.INSTRUMENT]: namedResourceSchema,
+  [AcademicResource.INSTRUMENT]: namedResourceSchema.extend({ icon: z.enum(INSTRUMENT_ICON) }),
   [AcademicResource.SHIFT]: namedResourceSchema,
   [AcademicResource.STUDY_PLAN]: z
     .object({

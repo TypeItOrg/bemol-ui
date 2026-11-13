@@ -8,6 +8,7 @@ import { ContextMenu, ContextMenuContent, ContextMenuTrigger } from "@common/com
 import { TableCell, TableRow } from "@common/components/ui/table";
 
 import { AcademicContextMenuActions, AcademicRowActions } from "@features/academic/components/academic-row-actions";
+import { InstrumentIconBadge } from "@features/academic/components/instrument-icon-badge";
 import type { AcademicCollectionResource } from "@features/academic/types/academic-collection-resource.types";
 import type { AcademicLifecycleActionKind } from "@features/academic/types/academic-lifecycle-action-kind.types";
 import { AcademicResource } from "@features/academic/types/academic-resource.types";
@@ -17,6 +18,7 @@ import type { AcademicStatusSelection } from "@features/academic/types/academic-
 import type { AcademicTableColumns } from "@features/academic/types/academic-table-columns.types";
 import type { AcademicTableRow as AcademicTableRowData } from "@features/academic/types/academic-table-row.types";
 import type { ActiveAcademicStatusResource } from "@features/academic/types/active-academic-status-resource.types";
+import { hasAcademicDetailPage } from "@features/academic/utils/academic-detail-page.util";
 import { getAcademicRowActions } from "@features/academic/utils/academic-row-actions.util";
 
 type AcademicStatusAction = Extract<AcademicRowAction, { kind: typeof ACADEMIC_ROW_ACTION_KIND.STATUS }>;
@@ -139,13 +141,16 @@ export function AcademicTableRow({
             </TableCell>
           ) : null}
           <TableCell className="font-medium">
-            {resource === AcademicResource.ACADEMIC_YEAR || row.deletedAt ? (
-              row.primaryValue
-            ) : (
-              <Link href={detailHref} className="hover:underline">
-                {row.primaryValue}
-              </Link>
-            )}
+            <span className="inline-flex items-center gap-2.5">
+              {row.icon ? <InstrumentIconBadge icon={row.icon} /> : null}
+              {!hasAcademicDetailPage(resource) || row.deletedAt ? (
+                row.primaryValue
+              ) : (
+                <Link href={detailHref} className="hover:underline">
+                  {row.primaryValue}
+                </Link>
+              )}
+            </span>
           </TableCell>
           {row.detailValues.map((detail, index) => (
             <TableCell key={`${row.id}-${columns.detailLabels[index]}`} className="text-muted-foreground max-w-96 truncate">

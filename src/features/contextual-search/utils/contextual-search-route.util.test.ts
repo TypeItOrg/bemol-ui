@@ -23,6 +23,7 @@ describe("contextual search routes", () => {
   it.each([
     ["academic-year", "academic-years"],
     ["training-path", "training-paths"],
+    ["instrument", "instruments"],
   ] as const)("builds edit routes for the no-detail %s academic entity", (entityType, resource) => {
     expect(getContextualSearchResultHref("platform", entityType, result)).toBe(`/institutions/institution-1/academic/${resource}/result-1/edit`);
     expect(getContextualSearchResultHref("institutional", entityType, result)).toBe(`/${resource}/result-1/edit`);
@@ -31,7 +32,6 @@ describe("contextual search routes", () => {
   it.each([
     ["study-plan", "study-plans"],
     ["academic-space", "academic-spaces"],
-    ["instrument", "instruments"],
     ["shift", "shifts"],
   ] as const)("builds detail routes for the %s academic entity", (entityType, resource) => {
     expect(getContextualSearchResultHref("platform", entityType, result)).toBe(`/institutions/institution-1/academic/${resource}/result-1`);

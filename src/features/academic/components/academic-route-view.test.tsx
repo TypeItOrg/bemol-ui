@@ -104,6 +104,7 @@ const INSTRUMENT = {
   institutionId: INSTITUTION_ID,
   name: "Piano",
   description: "Instrumento de teclas.",
+  icon: "PIANO" as const,
   active: true,
 };
 
@@ -246,20 +247,17 @@ describe("AcademicRouteView", () => {
     expect(fetchAcademicSpaceUsage).toHaveBeenCalledWith(AcademicScope.INSTITUTIONAL, INSTITUTION_ID, ACADEMIC_SPACE_ID, { page: 0, size: 10 });
   });
 
-  it("shows the instrument status action without the edit permission", async () => {
-    const result = await AcademicRouteView({
-      access: { ...FULL_ACADEMIC_ACCESS, instrumentUpdate: false, instrumentStatusUpdate: true },
-      institutionId: INSTITUTION_ID,
-      renderBreadcrumb: () => null,
-      scope: AcademicScope.INSTITUTIONAL,
-      segments: [AcademicResource.INSTRUMENT, INSTRUMENT_ID],
-      searchParams: {},
-    });
-
-    render(result);
-
-    expect(screen.getByRole("button", { name: "Desactivar" })).toBeInTheDocument();
-    expect(screen.queryByRole("link", { name: "Editar" })).not.toBeInTheDocument();
+  it("has no detail page for instruments", async () => {
+    await expect(
+      AcademicRouteView({
+        access: FULL_ACADEMIC_ACCESS,
+        institutionId: INSTITUTION_ID,
+        renderBreadcrumb: () => null,
+        scope: AcademicScope.INSTITUTIONAL,
+        segments: [AcademicResource.INSTRUMENT, INSTRUMENT_ID],
+        searchParams: {},
+      }),
+    ).rejects.toThrow("NEXT_HTTP_ERROR_FALLBACK;404");
   });
 
   it("shows the training-path status action without the edit permission", async () => {

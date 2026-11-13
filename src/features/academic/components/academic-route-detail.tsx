@@ -28,6 +28,7 @@ import { type RouteDetailInput } from "@features/academic/types/academic-route-d
 import type { StudyPlan } from "@features/academic/types/study-plan.types";
 import type { TrainingPath } from "@features/academic/types/training-path.types";
 import { getAcademicAccess } from "@features/academic/utils/academic-access.util";
+import { hasAcademicDetailPage } from "@features/academic/utils/academic-detail-page.util";
 import { canEditAcademicResource } from "@features/academic/utils/academic-state.util";
 import { getAcademicTrainingPathId } from "@features/academic/utils/academic-training-path.util";
 import { requireInstitutionalUser } from "@features/institutional-auth/services/get-institutional-user.service";
@@ -84,7 +85,7 @@ export async function renderPrimaryDetail(input: RouteDetailInput): Promise<Reac
 
   const versionReturnTo = getSafeReturnTo(input.searchParams.returnTo, detailPath);
 
-  const isNoDetailResource = input.resource === AcademicResource.ACADEMIC_YEAR;
+  const isNoDetailResource = !hasAcademicDetailPage(input.resource);
 
   const canEdit = config.canUpdate(input.access) && canEditAcademicResource(input.resource, item);
 

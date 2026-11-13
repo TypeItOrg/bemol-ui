@@ -62,7 +62,6 @@ describe("course form dependencies", () => {
     const changed = new FormData(form);
     expect(changed.get("studyPlanId")).toBe("plan-b");
     expect(changed.get("studyPlanSpaceId")).toBe("");
-    expect(changed.get("academicSpaceId")).toBe("");
     expect(changed.get("instrumentId")).toBe("");
     expect(changed.get("format")).toBe("");
     expect(screen.queryByRole("combobox", { name: "Instrumento" })).not.toBeInTheDocument();
@@ -73,7 +72,6 @@ describe("course form dependencies", () => {
 
     const selected = new FormData(form);
     expect(selected.get("studyPlanSpaceId")).toBe("plan-space-b");
-    expect(selected.get("academicSpaceId")).toBe("space-b");
     expect(selected.get("format")).toBe("GRUPAL");
     expect(selected.get("instrumentId")).toBe("");
     expect(requests.every((url) => url.searchParams.get("institutionId") === "institution-a")).toBe(true);

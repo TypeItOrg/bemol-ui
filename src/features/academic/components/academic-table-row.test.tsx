@@ -74,16 +74,21 @@ describe("AcademicTableRow", () => {
     });
   });
 
-  it.each([
-    [AcademicResource.ACADEMIC_SPACE, "Armonía"],
-    [AcademicResource.INSTRUMENT, "Piano"],
-  ] as const)("does not offer status changes for %s without permission", async (resource, primaryValue) => {
+  it("does not offer status changes for academic spaces without permission", async () => {
     const user = userEvent.setup();
-    renderRow({ resource, row: createRow({ primaryValue }) });
+    renderRow({ resource: AcademicResource.ACADEMIC_SPACE, row: createRow({ primaryValue: "Armonía" }) });
 
-    await openActions(user, primaryValue);
+    await openActions(user, "Armonía");
 
     expect(screen.queryByRole("menuitem", { name: "Desactivar" })).not.toBeInTheDocument();
+  });
+
+  it("shows instruments with their icon and without a detail page", () => {
+    renderRow({ resource: AcademicResource.INSTRUMENT, row: createRow({ primaryValue: "Piano", icon: "PIANO" }) });
+
+    expect(screen.getByTitle("Piano")).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Piano" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Abrir acciones de Piano" })).not.toBeInTheDocument();
   });
 
   it.each([
