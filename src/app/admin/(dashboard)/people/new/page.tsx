@@ -26,7 +26,7 @@ export default async function NewPlatformPersonPage({
       backHref={destination}
       title="Nuevo usuario"
       minViewportHeight
-      breadcrumb={<PlatformBreadcrumb />}
+      breadcrumb={<PlatformBreadcrumb segmentLabels={{ new: "Nuevo usuario" }} />}
       headerClassName="flex-row items-center justify-between"
       actionsClassName="self-stretch"
       actions={<PlatformPageIcon icon={UserRoundIcon} />}

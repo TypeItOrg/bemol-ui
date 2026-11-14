@@ -24,7 +24,7 @@ const ROUTE_LABELS: Readonly<Record<string, string>> = {
   emails: "Correos",
   new: "Nuevo",
   people: "Usuarios",
-  roles: "Roles",
+  roles: "Roles y permisos",
   edit: "Editar",
   "academic-years": "Ciclos lectivos",
   "training-paths": "Trayectos formativos",

@@ -39,7 +39,7 @@ export default async function NewRolePage({ searchParams }: { searchParams: Prom
     <PlatformPageShell
       backHref={destination}
       title="Nuevo rol"
-      breadcrumb={<InstitutionalBreadcrumb />}
+      breadcrumb={<InstitutionalBreadcrumb segmentLabels={{ new: "Nuevo rol" }} />}
       headerClassName="flex-row items-center justify-between"
       actionsClassName="self-stretch"
       actions={<PlatformPageIcon icon={UserRoundPlusIcon} />}

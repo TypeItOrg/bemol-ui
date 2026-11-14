@@ -133,7 +133,7 @@ export default async function PersonPage({
 
   return (
     <PlatformPageShell
-      title={isDetailView ? "Detalle de usuario" : editTitle}
+      title={isDetailView ? personName : editTitle}
       minViewportHeight
       breadcrumb={
         <InstitutionalBreadcrumb

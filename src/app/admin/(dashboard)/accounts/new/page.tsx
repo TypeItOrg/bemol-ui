@@ -32,7 +32,7 @@ export default async function NewPlatformAccountPage({
     <PlatformPageShell
       title="Nuevo administrador"
       minViewportHeight
-      breadcrumb={<PlatformBreadcrumb />}
+      breadcrumb={<PlatformBreadcrumb segmentLabels={{ new: "Nuevo administrador" }} />}
       headerClassName="flex-row items-center justify-between"
       actionsClassName="self-stretch"
       actions={<PlatformPageIcon icon={UserPlusIcon} />}

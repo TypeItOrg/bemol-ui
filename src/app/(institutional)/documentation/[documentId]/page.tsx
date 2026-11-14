@@ -1,10 +1,15 @@
 import type { ReactElement } from "react";
 
+import type { Metadata } from "next";
+
 import type { QueryParamValue } from "@common/types/query-param.types";
 
 import { DocumentCatalogDetailPage } from "@features/document-catalog/components/document-catalog-detail-page";
+import { getInstitutionalMetadata } from "@features/institutional-auth/utils/institutional-metadata.util";
 
-export const metadata = { title: "Detalle del documento", other: { "application-title": "Detalle del documento" } };
+export async function generateMetadata(): Promise<Metadata> {
+  return getInstitutionalMetadata("Detalle del documento");
+}
 
 export default function Page({
   params,

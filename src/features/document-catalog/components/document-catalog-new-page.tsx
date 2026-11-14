@@ -109,6 +109,8 @@ export async function DocumentCatalogNewPage({
 
   const segmentHrefs = { documentation: returnTo };
 
+  const segmentLabels = { new: "Nuevo documento" };
+
   function renderForm(): ReactElement | null {
     if (scope === "admin") {
       return (
@@ -133,7 +135,13 @@ export async function DocumentCatalogNewPage({
     <PlatformPageShell
       backHref={returnTo}
       title="Nuevo documento"
-      breadcrumb={scope === "admin" ? <PlatformBreadcrumb segmentHrefs={segmentHrefs} /> : <InstitutionalBreadcrumb segmentHrefs={segmentHrefs} />}
+      breadcrumb={
+        scope === "admin" ? (
+          <PlatformBreadcrumb segmentHrefs={segmentHrefs} segmentLabels={segmentLabels} />
+        ) : (
+          <InstitutionalBreadcrumb segmentHrefs={segmentHrefs} segmentLabels={segmentLabels} />
+        )
+      }
       actions={<PlatformPageIcon icon={FileTextIcon} />}
     >
       {renderForm()}

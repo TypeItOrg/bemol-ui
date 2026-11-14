@@ -20,8 +20,8 @@ import { fetchPlatformRoles } from "@features/roles/services/platform-role.servi
 import { parsePlatformRolesPaginationParams, type PlatformRolesSearchParams } from "@features/roles/utils/platform-role-pagination.util";
 
 export const metadata = {
-  title: "Roles",
-  other: { "application-title": "Roles" },
+  title: "Roles y permisos",
+  other: { "application-title": "Roles y permisos" },
   description: "Consultá y administrá los roles de todas las instituciones.",
 };
 
@@ -35,7 +35,7 @@ export default async function PlatformRolesPage({ searchParams }: { searchParams
   const institutionName = await institutionNamePromise;
 
   return (
-    <PlatformPageShell title="Roles" breadcrumb={<PlatformBreadcrumb />} actions={<PlatformPageIcon icon={UserLockIcon} />}>
+    <PlatformPageShell title="Roles y permisos" breadcrumb={<PlatformBreadcrumb />} actions={<PlatformPageIcon icon={UserLockIcon} />}>
       <DataTableNavigationProvider>
         <Sheet>
           <PlatformCollectionActions className="sm:justify-between">

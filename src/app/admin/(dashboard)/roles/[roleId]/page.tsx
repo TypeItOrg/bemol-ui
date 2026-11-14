@@ -42,7 +42,7 @@ export default async function PlatformRoleDetailPage({
   return (
     <PlatformPageShell
       title={role.name}
-      breadcrumb={<PlatformBreadcrumb segmentLabels={{ roles: "Roles", [roleId]: role.name }} />}
+      breadcrumb={<PlatformBreadcrumb segmentLabels={{ [roleId]: role.name }} />}
       headerClassName="flex-row items-center justify-between"
       actionsClassName="self-stretch"
       actions={<PlatformPageIcon icon={ShieldCheckIcon} />}

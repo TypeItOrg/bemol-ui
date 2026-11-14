@@ -13,10 +13,13 @@ import { getScheduleWeek } from "@features/course-enrollments/utils/schedule-wee
 import { InstitutionalAccessDenied } from "@features/institutional-auth/components/institutional-access-denied";
 import { InstitutionalBreadcrumb } from "@features/institutional-auth/components/institutional-breadcrumb";
 import { requireInstitutionalUser } from "@features/institutional-auth/services/get-institutional-user.service";
+import { getInstitutionalMetadata } from "@features/institutional-auth/utils/institutional-metadata.util";
 import { PlatformPageIcon } from "@features/platform-auth/components/platform-page-icon";
 import { PlatformPageShell } from "@features/platform-auth/components/platform-page-shell";
 
-export const metadata: Metadata = { title: "Mis horarios", other: { "application-title": "Mis horarios" } };
+export async function generateMetadata(): Promise<Metadata> {
+  return getInstitutionalMetadata("Mis horarios");
+}
 
 export default async function TeacherSchedulesPage({ searchParams }: { searchParams: Promise<{ week?: string | string[] }> }): Promise<ReactElement> {
   const user = await requireInstitutionalUser();
@@ -52,7 +55,7 @@ export default async function TeacherSchedulesPage({ searchParams }: { searchPar
     <PlatformPageShell
       minViewportHeight
       title="Mis horarios"
-      breadcrumb={<InstitutionalBreadcrumb />}
+      breadcrumb={<InstitutionalBreadcrumb hiddenSegments={["my-teaching"]} />}
       actions={<PlatformPageIcon icon={CalendarRangeIcon} />}
     >
       <DataTableNavigationProvider>

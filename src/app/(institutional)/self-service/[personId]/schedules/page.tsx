@@ -18,10 +18,13 @@ import { InstitutionalBreadcrumb } from "@features/institutional-auth/components
 import { requireInstitutionalUser } from "@features/institutional-auth/services/get-institutional-user.service";
 import { institutionalApiFetch } from "@features/institutional-auth/services/institutional-api-fetch.service";
 import { canViewOwnFormation } from "@features/institutional-auth/utils/institutional-applicant-role.util";
+import { getInstitutionalMetadata } from "@features/institutional-auth/utils/institutional-metadata.util";
 import { PlatformPageIcon } from "@features/platform-auth/components/platform-page-icon";
 import { PlatformPageShell } from "@features/platform-auth/components/platform-page-shell";
 
-export const metadata: Metadata = { title: "Mis horarios", other: { "application-title": "Mis horarios" } };
+export async function generateMetadata(): Promise<Metadata> {
+  return getInstitutionalMetadata("Mis horarios");
+}
 
 export default async function MySchedulesPage({
   searchParams,

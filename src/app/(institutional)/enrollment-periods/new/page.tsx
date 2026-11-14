@@ -41,7 +41,7 @@ export default async function NewEnrollmentPeriodPage({
     <PlatformPageShell
       backHref={destination}
       title="Nuevo período de inscripción"
-      breadcrumb={<InstitutionalBreadcrumb segmentLabels={{ new: "Nuevo" }} />}
+      breadcrumb={<InstitutionalBreadcrumb segmentLabels={{ new: "Nuevo período de inscripción" }} />}
       minViewportHeight
       headerClassName="flex-row items-center justify-between"
       actionsClassName="self-stretch"

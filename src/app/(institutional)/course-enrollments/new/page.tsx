@@ -38,7 +38,7 @@ export default async function NewCourseEnrollmentPage({
     <PlatformPageShell
       backHref={returnTo}
       title="Alta manual de cursada"
-      breadcrumb={<InstitutionalBreadcrumb segmentLabels={{ new: "Alta manual" }} />}
+      breadcrumb={<InstitutionalBreadcrumb segmentLabels={{ new: "Alta manual de cursada" }} />}
       actions={<PlatformPageIcon icon={ClipboardPlusIcon} />}
     >
       <CourseManualEnrollmentForm institutionId={user.institutionId} userId={user.userId} personId={user.personId ?? null} returnTo={returnTo} />

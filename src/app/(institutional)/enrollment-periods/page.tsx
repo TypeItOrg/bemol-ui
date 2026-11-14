@@ -13,15 +13,17 @@ import { InstitutionalAccessDenied } from "@features/institutional-auth/componen
 import { InstitutionalBreadcrumb } from "@features/institutional-auth/components/institutional-breadcrumb";
 import { requireInstitutionalUser } from "@features/institutional-auth/services/get-institutional-user.service";
 import { INSTITUTIONAL_PERMISSION } from "@features/institutional-auth/types/institutional-permission.types";
+import { getInstitutionalMetadata } from "@features/institutional-auth/utils/institutional-metadata.util";
 import { hasInstitutionalPermission } from "@features/institutional-auth/utils/institutional-permission.util";
 import { PlatformPageIcon } from "@features/platform-auth/components/platform-page-icon";
 import { PlatformPageShell } from "@features/platform-auth/components/platform-page-shell";
 
-export const metadata: Metadata = {
-  title: "Períodos de Inscripción",
-  other: { "application-title": "Períodos de Inscripción" },
-  description: "Gestión de períodos de inscripción anuales de la institución",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  return {
+    ...(await getInstitutionalMetadata("Períodos de inscripción")),
+    description: "Gestión de períodos de inscripción anuales de la institución",
+  };
+}
 
 interface Props {
   searchParams: Promise<{
@@ -57,7 +59,7 @@ export default async function EnrollmentPeriodsPage({ searchParams }: Props) {
 
   return (
     <PlatformPageShell
-      title="Períodos de Inscripción"
+      title="Períodos de inscripción"
       breadcrumb={<InstitutionalBreadcrumb />}
       actions={<PlatformPageIcon icon={CalendarRangeIcon} />}
     >

@@ -26,7 +26,7 @@ export default async function NewInstitutionPage({ searchParams }: { searchParam
       backHref={destination}
       title="Nueva institución"
       minViewportHeight
-      breadcrumb={<PlatformBreadcrumb segmentLabels={{ new: "Nueva" }} />}
+      breadcrumb={<PlatformBreadcrumb segmentLabels={{ new: "Nueva institución" }} />}
       headerClassName="flex-row items-center justify-between"
       actionsClassName="self-stretch"
       actions={<PlatformPageIcon icon={Building2} />}

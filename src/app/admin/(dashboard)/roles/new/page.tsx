@@ -34,7 +34,7 @@ export default async function NewPlatformRolePage({
     <PlatformPageShell
       backHref={destination}
       title="Nuevo rol"
-      breadcrumb={<PlatformBreadcrumb />}
+      breadcrumb={<PlatformBreadcrumb segmentLabels={{ new: "Nuevo rol" }} />}
       headerClassName="flex-row items-center justify-between"
       actionsClassName="self-stretch"
       actions={<PlatformPageIcon icon={UserRoundPlusIcon} />}

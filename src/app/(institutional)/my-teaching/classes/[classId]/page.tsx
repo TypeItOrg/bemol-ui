@@ -1,5 +1,6 @@
 import type { ReactElement } from "react";
 
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -18,9 +19,12 @@ import {
 import { InstitutionalAccessDenied } from "@features/institutional-auth/components/institutional-access-denied";
 import { InstitutionalBreadcrumb } from "@features/institutional-auth/components/institutional-breadcrumb";
 import { requireInstitutionalUser } from "@features/institutional-auth/services/get-institutional-user.service";
+import { getInstitutionalMetadata } from "@features/institutional-auth/utils/institutional-metadata.util";
 import { PlatformPageShell } from "@features/platform-auth/components/platform-page-shell";
 
-export const metadata = { title: "Cursadas", other: { "application-title": "Cursadas" } };
+export async function generateMetadata(): Promise<Metadata> {
+  return getInstitutionalMetadata("Cursadas");
+}
 
 export default async function TeacherClassPage({
   params,

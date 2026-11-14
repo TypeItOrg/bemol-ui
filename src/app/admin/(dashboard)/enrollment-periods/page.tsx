@@ -20,8 +20,8 @@ import { PlatformPageShell } from "@features/platform-auth/components/platform-p
 import { requirePlatformAccount } from "@features/platform-auth/services/get-platform-account.service";
 
 export const metadata: Metadata = {
-  title: "Períodos de Inscripción",
-  other: { "application-title": "Períodos de Inscripción" },
+  title: "Períodos de inscripción",
+  other: { "application-title": "Períodos de inscripción" },
   description: "Gestión global de períodos de inscripción por institución",
 };
 
@@ -57,7 +57,7 @@ export default async function AdminEnrollmentPeriodsPage({ searchParams }: Props
     : [{ items: [], totalPages: 0, totalItems: 0, page: params.page, size: params.size }, null];
 
   return (
-    <PlatformPageShell title="Períodos de Inscripción" breadcrumb={<PlatformBreadcrumb />} actions={<PlatformPageIcon icon={CalendarRangeIcon} />}>
+    <PlatformPageShell title="Períodos de inscripción" breadcrumb={<PlatformBreadcrumb />} actions={<PlatformPageIcon icon={CalendarRangeIcon} />}>
       <main className="flex-1 space-y-6">
         <Suspense fallback={<div className="text-muted-foreground p-4 text-center text-sm">Cargando...</div>}>
           {targetInstitutionId ? (

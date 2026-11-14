@@ -21,11 +21,14 @@ import { InstitutionalAccessDenied } from "@features/institutional-auth/componen
 import { InstitutionalBreadcrumb } from "@features/institutional-auth/components/institutional-breadcrumb";
 import { requireInstitutionalUser } from "@features/institutional-auth/services/get-institutional-user.service";
 import { INSTITUTIONAL_PERMISSION } from "@features/institutional-auth/types/institutional-permission.types";
+import { getInstitutionalMetadata } from "@features/institutional-auth/utils/institutional-metadata.util";
 import { hasInstitutionalPermission } from "@features/institutional-auth/utils/institutional-permission.util";
 import { PlatformPageIcon } from "@features/platform-auth/components/platform-page-icon";
 import { PlatformPageShell } from "@features/platform-auth/components/platform-page-shell";
 
-export const metadata: Metadata = { title: "Cursadas", other: { "application-title": "Cursadas" } };
+export async function generateMetadata(): Promise<Metadata> {
+  return getInstitutionalMetadata("Cursadas");
+}
 
 export default async function CourseEnrollmentsPage({
   searchParams,
