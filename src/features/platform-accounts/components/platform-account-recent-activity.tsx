@@ -7,6 +7,7 @@ import { ScrollTextIcon } from "lucide-react";
 import { ReturnToLink } from "@common/components/navigation/return-to-link";
 import { SectionHeader } from "@common/components/section-header";
 import { Button } from "@common/components/ui/button";
+import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@common/components/ui/empty";
 
 import { fetchAuditEvents } from "@features/platform-audit/services/fetch-audit-events.service";
 import type { AuditEvent } from "@features/platform-audit/types/audit-event.types";
@@ -43,7 +44,17 @@ export async function PlatformAccountRecentActivity({ accountId }: { accountId: 
           No se pudo cargar la actividad reciente. Intentá nuevamente desde Auditoría.
         </p>
       )}
-      {events?.length === 0 && <p className="text-muted-foreground text-sm">Este administrador todavía no tiene actividad registrada.</p>}
+      {events?.length === 0 && (
+        <Empty className="bg-background min-h-56 rounded-lg border border-solid px-4 py-10">
+          <EmptyHeader className="max-w-md">
+            <EmptyMedia variant="icon">
+              <ScrollTextIcon className="size-5" aria-hidden="true" />
+            </EmptyMedia>
+            <EmptyTitle className="mt-2 text-base">Sin actividad reciente</EmptyTitle>
+            <EmptyDescription>Este administrador todavía no tiene actividad registrada.</EmptyDescription>
+          </EmptyHeader>
+        </Empty>
+      )}
       {events !== null && events.length > 0 && (
         <ul className="space-y-3">
           {events.map((event) => (
