@@ -14,6 +14,7 @@ import { AcademicScope } from "@features/academic/utils/academic-scope.util";
 import { EnrollmentApplicationResolvePanel } from "@features/enrollment-applications/components/enrollment-application-resolve-panel";
 import { EnrollmentStatusCard } from "@features/enrollment-applications/components/EnrollmentStatusCard";
 import { fetchInstitutionalEnrollmentApplicationById } from "@features/enrollment-applications/services/enrollment-application.service";
+import { ENROLLMENT_APPLICATION_STATUS } from "@features/enrollment-applications/types/enrollment-application-status.types";
 import { EnrollmentPdfExport } from "@features/enrollment-pdf/components/enrollment-pdf-export";
 import { InstitutionalAccessDenied } from "@features/institutional-auth/components/institutional-access-denied";
 import { InstitutionalBreadcrumb } from "@features/institutional-auth/components/institutional-breadcrumb";
@@ -62,31 +63,63 @@ export default async function EnrollmentApplicationDetailPage({ params, searchPa
     applicantName,
   };
 
+  const canApprove = hasTrainingPathPermission(user, INSTITUTIONAL_PERMISSION.ENROLLMENT_APPLICATION_APPROVE, application.trainingPathId ?? "");
+
+  const canReject = hasTrainingPathPermission(user, INSTITUTIONAL_PERMISSION.ENROLLMENT_APPLICATION_REJECT, application.trainingPathId ?? "");
+
+  const showApproveAction =
+    canApprove &&
+    (application.status === ENROLLMENT_APPLICATION_STATUS.SUBMITTED || application.status === ENROLLMENT_APPLICATION_STATUS.PROVISIONALLY_APPROVED) &&
+    Boolean(application.canApproveProvisionally || application.canConfirm);
+
+  const showRejectAction = canReject && application.status === ENROLLMENT_APPLICATION_STATUS.SUBMITTED;
+
+  const resolveActionCount = Number(showApproveAction) + Number(showRejectAction);
+
+  const actionClassesByCount: Record<number, { row: string; group: string; button: string }> = {
+    2: {
+      row: "flex flex-col gap-3 @2xl/page-shell:flex-row @2xl/page-shell:items-center @2xl/page-shell:justify-between",
+      group: "flex w-full min-w-0 flex-col gap-3 @2xl/page-shell:w-auto @2xl/page-shell:flex-row @2xl/page-shell:items-center",
+      button: "w-full @2xl/page-shell:w-auto",
+    },
+    1: {
+      row: "flex flex-col gap-3 @lg/page-shell:flex-row @lg/page-shell:items-center @lg/page-shell:justify-between",
+      group: "flex w-full min-w-0 flex-col gap-3 @lg/page-shell:w-auto @lg/page-shell:flex-row @lg/page-shell:items-center",
+      button: "w-full @lg/page-shell:w-auto",
+    },
+    0: {
+      row: "flex flex-col gap-3 @xs/page-shell:flex-row @xs/page-shell:items-center @xs/page-shell:justify-between",
+      group: "flex w-full min-w-0 flex-col gap-3 @xs/page-shell:w-auto @xs/page-shell:flex-row @xs/page-shell:items-center",
+      button: "w-full @xs/page-shell:w-auto",
+    },
+  };
+
+  const { row: actionRowClassName, group: actionGroupClassName, button: actionButtonClassName } = actionClassesByCount[resolveActionCount];
+
   return (
     <PlatformPageShell
-      title={applicantName}
+      title="Detalle de solicitud de inscripción"
       breadcrumb={
         <InstitutionalBreadcrumb
           segmentLabels={{
-            [applicationId]: "Detalle",
+            [applicationId]: "Detalle de solicitud de inscripción",
           }}
         />
       }
       actions={<PlatformPageIcon icon={ClipboardListIcon} />}
     >
-      <div className="flex flex-col gap-3 @2xl/page-shell:flex-row @2xl/page-shell:items-center @2xl/page-shell:justify-between">
-        <Button asChild variant="outline" size="lg" className="w-full @2xl/page-shell:w-auto">
+      <div className={actionRowClassName}>
+        <Button asChild variant="outline" size="lg" className={actionButtonClassName}>
           <Link href={destination}>Volver</Link>
         </Button>
 
-        <div className="flex min-w-0 flex-col gap-3 @2xl/page-shell:flex-row @2xl/page-shell:items-start">
-          <EnrollmentPdfExport href={`/api/institutional/enrollment-applications/${applicationId}/pdf`} status={application.status} />
-          <EnrollmentApplicationResolvePanel
-            application={reviewSummary}
+        <div className={actionGroupClassName}>
+          <EnrollmentPdfExport
+            className={actionButtonClassName}
+            href={`/api/institutional/enrollment-applications/${applicationId}/pdf`}
             status={application.status}
-            canApprove={hasTrainingPathPermission(user, INSTITUTIONAL_PERMISSION.ENROLLMENT_APPLICATION_APPROVE, application.trainingPathId ?? "")}
-            canReject={hasTrainingPathPermission(user, INSTITUTIONAL_PERMISSION.ENROLLMENT_APPLICATION_REJECT, application.trainingPathId ?? "")}
           />
+          <EnrollmentApplicationResolvePanel application={reviewSummary} status={application.status} canApprove={canApprove} canReject={canReject} />
         </div>
       </div>
 

@@ -72,14 +72,24 @@ export function EnrollmentStatusCard({
     <div className="flex flex-col gap-4">
       <Card className={SECTION_CARD_CLASS_NAME} role="region" aria-labelledby={statusTitleId}>
         <CardHeader>
-          <div className="grid min-w-0 grid-cols-[auto_minmax(0,1fr)] items-center gap-x-3 gap-y-2 @xl/card-header:grid-cols-[auto_minmax(0,1fr)_auto] @xl/card-header:gap-x-3.5 @xl/card-header:gap-y-0.5">
-            <div className="bg-primary/10 text-primary flex size-10 shrink-0 items-center justify-center rounded-xl @xl/card-header:row-span-2 @xl/card-header:size-11">
-              <ClipboardCheckIcon className="size-5" aria-hidden="true" />
+          <div className="flex w-full min-w-0 flex-col gap-3 @xl/card-header:flex-row @xl/card-header:items-center @xl/card-header:justify-between @xl/card-header:gap-4">
+            <div className="flex min-w-0 items-center gap-3 @xl/card-header:gap-3.5">
+              <div className="bg-primary/10 text-primary flex size-10 shrink-0 items-center justify-center rounded-xl @sm/card-header:size-11">
+                <ClipboardCheckIcon className="size-5" aria-hidden="true" />
+              </div>
+              <div className="min-w-0 space-y-0.5">
+                <h2 id={statusTitleId} className="min-w-0 text-base leading-snug font-semibold text-balance break-words">
+                  Estado de la solicitud
+                </h2>
+                <p className="text-muted-foreground min-w-0 text-sm text-pretty">
+                  Actualizada el{" "}
+                  <time dateTime={application.updatedAt} className="tabular-nums">
+                    {formatEnrollmentApplicationDateTime(application.updatedAt)}
+                  </time>
+                </p>
+              </div>
             </div>
-            <h2 id={statusTitleId} className="font-heading min-w-0 text-base leading-snug font-medium text-balance break-words">
-              Estado de la solicitud
-            </h2>
-            <div className="col-span-2 flex min-w-0 flex-col items-start gap-1 @xl/card-header:col-span-1 @xl/card-header:col-start-3 @xl/card-header:row-span-2 @xl/card-header:row-start-1 @xl/card-header:justify-self-end">
+            <div className="flex min-w-0 flex-col items-start gap-1 @xl/card-header:shrink-0 @xl/card-header:items-end">
               <EnrollmentApplicationStatusBadge
                 status={application.status}
                 rejectionReason={application.rejectionReason}
@@ -87,12 +97,6 @@ export function EnrollmentStatusCard({
                 size="lg"
               />
             </div>
-            <p className="text-muted-foreground col-span-2 min-w-0 text-sm text-pretty @xl/card-header:col-span-1 @xl/card-header:col-start-2 @xl/card-header:row-start-2">
-              Actualizada el{" "}
-              <time dateTime={application.updatedAt} className="tabular-nums">
-                {formatEnrollmentApplicationDateTime(application.updatedAt)}
-              </time>
-            </p>
           </div>
         </CardHeader>
         {statusDescription ? (

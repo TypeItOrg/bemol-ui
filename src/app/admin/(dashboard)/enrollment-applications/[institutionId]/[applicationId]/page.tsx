@@ -14,6 +14,7 @@ import { AcademicScope } from "@features/academic/utils/academic-scope.util";
 import { EnrollmentStatusCard } from "@features/enrollment-applications/components/EnrollmentStatusCard";
 import { PlatformEnrollmentApplicationResolvePanel } from "@features/enrollment-applications/components/platform-enrollment-application-resolve-panel";
 import { fetchPlatformEnrollmentApplicationById } from "@features/enrollment-applications/services/enrollment-application.service";
+import { ENROLLMENT_APPLICATION_STATUS } from "@features/enrollment-applications/types/enrollment-application-status.types";
 import { EnrollmentPdfExport } from "@features/enrollment-pdf/components/enrollment-pdf-export";
 import { PlatformBreadcrumb } from "@features/platform-auth/components/platform-breadcrumb";
 import { PlatformPageIcon } from "@features/platform-auth/components/platform-page-icon";
@@ -49,26 +50,58 @@ export default async function PlatformEnrollmentApplicationDetailPage({
 
   const applicantName = application.applicantName || personalDataName || "Solicitante";
 
+  const showApproveAction =
+    (application.status === ENROLLMENT_APPLICATION_STATUS.SUBMITTED || application.status === ENROLLMENT_APPLICATION_STATUS.PROVISIONALLY_APPROVED) &&
+    Boolean(application.canApproveProvisionally || application.canConfirm);
+
+  const showRejectAction = application.status === ENROLLMENT_APPLICATION_STATUS.SUBMITTED;
+
+  const resolveActionCount = Number(showApproveAction) + Number(showRejectAction);
+
+  const actionClassesByCount: Record<number, { row: string; group: string; button: string }> = {
+    2: {
+      row: "flex flex-col gap-3 @2xl/page-shell:flex-row @2xl/page-shell:items-center @2xl/page-shell:justify-between",
+      group: "flex w-full min-w-0 flex-col gap-3 @2xl/page-shell:w-auto @2xl/page-shell:flex-row @2xl/page-shell:items-center",
+      button: "w-full @2xl/page-shell:w-auto",
+    },
+    1: {
+      row: "flex flex-col gap-3 @lg/page-shell:flex-row @lg/page-shell:items-center @lg/page-shell:justify-between",
+      group: "flex w-full min-w-0 flex-col gap-3 @lg/page-shell:w-auto @lg/page-shell:flex-row @lg/page-shell:items-center",
+      button: "w-full @lg/page-shell:w-auto",
+    },
+    0: {
+      row: "flex flex-col gap-3 @xs/page-shell:flex-row @xs/page-shell:items-center @xs/page-shell:justify-between",
+      group: "flex w-full min-w-0 flex-col gap-3 @xs/page-shell:w-auto @xs/page-shell:flex-row @xs/page-shell:items-center",
+      button: "w-full @xs/page-shell:w-auto",
+    },
+  };
+
+  const { row: actionRowClassName, group: actionGroupClassName, button: actionButtonClassName } = actionClassesByCount[resolveActionCount];
+
   return (
     <PlatformPageShell
-      title={applicantName}
+      title="Detalle de solicitud de inscripción"
       breadcrumb={
         <PlatformBreadcrumb
           hiddenSegments={[institutionId]}
           segmentLabels={{
-            [applicationId]: "Detalle",
+            [applicationId]: "Detalle de solicitud de inscripción",
           }}
         />
       }
       actions={<PlatformPageIcon icon={ClipboardListIcon} />}
     >
-      <div className="flex flex-col gap-3 @2xl/page-shell:flex-row @2xl/page-shell:items-center @2xl/page-shell:justify-between">
-        <Button asChild variant="outline" size="lg" className="w-full @2xl/page-shell:w-auto">
+      <div className={actionRowClassName}>
+        <Button asChild variant="outline" size="lg" className={actionButtonClassName}>
           <Link href={destination}>Volver</Link>
         </Button>
 
-        <div className="flex min-w-0 flex-col gap-3 @2xl/page-shell:flex-row @2xl/page-shell:items-start">
-          <EnrollmentPdfExport href={`/api/admin/enrollment-applications/${institutionId}/${applicationId}/pdf`} status={application.status} />
+        <div className={actionGroupClassName}>
+          <EnrollmentPdfExport
+            className={actionButtonClassName}
+            href={`/api/admin/enrollment-applications/${institutionId}/${applicationId}/pdf`}
+            status={application.status}
+          />
           <PlatformEnrollmentApplicationResolvePanel
             application={{
               institutionId,

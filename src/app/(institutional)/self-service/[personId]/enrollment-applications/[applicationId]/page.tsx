@@ -67,10 +67,6 @@ export default async function MyEnrollmentApplicationDetailPage({
 
   const detailLabel = isEditable ? "Continuar inscripción" : "Detalle de inscripción";
 
-  const detailContext = [application.trainingPathName, application.academicYear].filter(Boolean).join(" ");
-
-  const breadcrumbLabel = !isEditable && detailContext ? detailContext : detailLabel;
-
   const PageIcon = isEditable ? FilePenLineIcon : ClipboardListIcon;
 
   const [shifts, courses] = await Promise.all([
@@ -84,15 +80,16 @@ export default async function MyEnrollmentApplicationDetailPage({
     <PlatformPageShell
       title={detailLabel}
       minViewportHeight
-      breadcrumb={<InstitutionalBreadcrumb segmentLabels={{ [applicationId]: breadcrumbLabel }} />}
+      breadcrumb={<InstitutionalBreadcrumb segmentLabels={{ [applicationId]: detailLabel }} />}
       actions={<PlatformPageIcon icon={PageIcon} />}
     >
       {!isEditable ? (
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-          <Button asChild variant="outline" size="lg">
+        <div className="flex flex-col gap-3 @xs/page-shell:flex-row @xs/page-shell:items-center @xs/page-shell:justify-between">
+          <Button asChild variant="outline" size="lg" className="w-full @xs/page-shell:w-auto">
             <Link href={destination}>Volver</Link>
           </Button>
           <EnrollmentPdfExport
+            className="w-full @xs/page-shell:w-auto"
             href={`/api/institutional/self-service/${personId}/enrollment-applications/${applicationId}/pdf`}
             status={application.status}
           />

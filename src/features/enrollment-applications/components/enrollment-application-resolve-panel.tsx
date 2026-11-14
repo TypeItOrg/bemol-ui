@@ -39,23 +39,34 @@ export function EnrollmentApplicationResolvePanel({
     router.refresh();
   }
 
-  if (
-    (status !== ENROLLMENT_APPLICATION_STATUS.SUBMITTED && status !== ENROLLMENT_APPLICATION_STATUS.PROVISIONALLY_APPROVED) ||
-    (!canApprove && !canReject)
-  ) {
+  const showApprove =
+    canApprove &&
+    (status === ENROLLMENT_APPLICATION_STATUS.SUBMITTED || status === ENROLLMENT_APPLICATION_STATUS.PROVISIONALLY_APPROVED) &&
+    Boolean(application.canApproveProvisionally || application.canConfirm);
+
+  const showReject = canReject && status === ENROLLMENT_APPLICATION_STATUS.SUBMITTED;
+
+  if (!showApprove && !showReject) {
     return null;
   }
 
+  const containerClassName =
+    showApprove && showReject
+      ? "flex w-full flex-col gap-2 @2xl/page-shell:w-auto @2xl/page-shell:flex-row"
+      : "flex w-full flex-col gap-2 @lg/page-shell:w-auto @lg/page-shell:flex-row";
+
+  const buttonClassName = showApprove && showReject ? "w-full @2xl/page-shell:w-auto" : "w-full @lg/page-shell:w-auto";
+
   return (
     <>
-      <div className="flex w-full flex-col gap-2 @2xl/page-shell:w-auto @2xl/page-shell:flex-row">
-        {canApprove && (application.canApproveProvisionally || application.canConfirm) ? (
-          <Button type="button" size="lg" className="w-full @2xl/page-shell:w-auto" onClick={() => setShowApproveDialog(true)}>
+      <div className={containerClassName}>
+        {showApprove ? (
+          <Button type="button" size="lg" className={buttonClassName} onClick={() => setShowApproveDialog(true)}>
             {application.canApproveProvisionally ? "Admitir provisoriamente" : "Confirmar inscripción definitiva"}
           </Button>
         ) : null}
-        {canReject && status === ENROLLMENT_APPLICATION_STATUS.SUBMITTED ? (
-          <Button type="button" size="lg" variant="destructive" className="w-full @2xl/page-shell:w-auto" onClick={() => setShowRejectDialog(true)}>
+        {showReject ? (
+          <Button type="button" size="lg" variant="destructive" className={buttonClassName} onClick={() => setShowRejectDialog(true)}>
             Rechazar inscripción
           </Button>
         ) : null}

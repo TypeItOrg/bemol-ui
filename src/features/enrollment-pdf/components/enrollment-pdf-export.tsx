@@ -5,6 +5,7 @@ import { useState, type ReactElement } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@common/components/ui/button";
+import { cn } from "@common/utils/cn.util";
 
 import type { EnrollmentApplicationStatus } from "@features/enrollment-applications/types/enrollment-application-status.types";
 import { ENROLLMENT_PDF_MESSAGES } from "@features/enrollment-pdf/constants/enrollment-pdf.constants";
@@ -12,7 +13,15 @@ import { readEnrollmentPdfResponse } from "@features/enrollment-pdf/utils/read-e
 
 const EXPORTABLE_STATUSES: readonly EnrollmentApplicationStatus[] = ["SUBMITTED", "PROVISIONALLY_APPROVED", "APPROVED", "REJECTED"];
 
-export function EnrollmentPdfExport({ href, status }: { href: string; status: EnrollmentApplicationStatus }): ReactElement | null {
+export function EnrollmentPdfExport({
+  className,
+  href,
+  status,
+}: {
+  className?: string;
+  href: string;
+  status: EnrollmentApplicationStatus;
+}): ReactElement | null {
   const [pending, setPending] = useState(false);
 
   if (!EXPORTABLE_STATUSES.includes(status)) {
@@ -50,11 +59,17 @@ export function EnrollmentPdfExport({ href, status }: { href: string; status: En
   }
 
   return (
-    <div className="flex min-w-0 flex-col items-stretch gap-2 sm:items-end">
-      <Button type="button" variant="outline" size="lg" disabled={pending} aria-busy={pending} onClick={() => void exportPdf()}>
-        {pending ? "Exportando…" : "Exportar"}
-        <span className="sr-only"> (abre en una nueva pestaña)</span>
-      </Button>
-    </div>
+    <Button
+      type="button"
+      variant="outline"
+      size="lg"
+      className={cn("w-full @xs/page-shell:w-auto", className)}
+      disabled={pending}
+      aria-busy={pending}
+      onClick={() => void exportPdf()}
+    >
+      {pending ? "Exportando…" : "Exportar"}
+      <span className="sr-only"> (abre en una nueva pestaña)</span>
+    </Button>
   );
 }
