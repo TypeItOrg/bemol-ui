@@ -11,7 +11,7 @@ export async function platformPasskeyRequest<T>(path: string, method: string, bo
   });
 
   if (!response.ok) {
-    const error = (await response.json()) as { code?: string; message?: string };
+    const error = (await response.json().catch(() => ({}))) as { code?: string; message?: string };
 
     throw new Error(error.code === RECENT_AUTH_REQUIRED ? RECENT_AUTH_REQUIRED : error.message || "No se pudo completar la operación.");
   }

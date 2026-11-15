@@ -18,6 +18,7 @@ import { DataTableIconLabel } from "@common/components/ui/data-table-icon-badge"
 import { TableCell, TableRow } from "@common/components/ui/table";
 
 import { PlatformAccountDisableDialog } from "@features/platform-accounts/components/platform-account-disable-dialog";
+import { PlatformAccountSetupCodeFlow } from "@features/platform-accounts/components/platform-account-setup-code-flow";
 import { PlatformAccountActions, dateFormatter } from "@features/platform-accounts/components/platform-account-table-actions";
 import type { PlatformAccountAdmin } from "@features/platform-accounts/types/platform-account-admin.types";
 import { usePlatformAccount } from "@features/platform-auth/hooks/use-platform-account.hook";
@@ -30,60 +31,75 @@ export function PlatformAccountTableRow({ account }: { account: PlatformAccountA
   const disableDisabled = !currentAccount || currentAccount.platformAccountId === account.platformAccountId;
 
   return (
-    <>
-      <ContextMenu key={account.platformAccountId}>
-        <ContextMenuTrigger asChild>
-          <TableRow>
-            <TableCell className="w-16 pl-4">
-              <PlatformAccountActions account={account} disableDisabled={disableDisabled} onDisable={() => setDisableOpen(true)} />
-            </TableCell>
-            <TableCell className="font-medium">
-              <DataTableIconLabel icon={UserRoundIcon}>
-                <ReturnToLink className="hover:underline" href={`/accounts/${account.platformAccountId}`}>
-                  {account.name} {account.lastName}
-                </ReturnToLink>
-              </DataTableIconLabel>
-            </TableCell>
-            <TableCell className="text-muted-foreground">
-              <DataTableIconLabel icon={MailIcon}>{account.email}</DataTableIconLabel>
-            </TableCell>
-            <TableCell>
-              <Badge size="lg" variant="secondary">
-                {account.roleName}
-              </Badge>
-            </TableCell>
-            <TableCell>
-              <Badge variant={account.enabled ? "success" : "destructive"}>{account.enabled ? "Habilitado" : "Deshabilitado"}</Badge>
-            </TableCell>
-            <TableCell className="text-muted-foreground tabular-nums">
-              <DataTableIconLabel icon={CalendarIcon}>{dateFormatter.format(new Date(account.createdAt))}</DataTableIconLabel>
-            </TableCell>
-          </TableRow>
-        </ContextMenuTrigger>
-        <ContextMenuContent className="w-40 p-1.5">
-          <ContextMenuGroup>
-            <ContextMenuItem asChild>
-              <ReturnToLink href={`/accounts/${account.platformAccountId}`} className="px-2.5 py-1.5">
-                Ver detalle
-              </ReturnToLink>
-            </ContextMenuItem>
-            <ContextMenuItem asChild>
-              <ReturnToLink href={`/accounts/${account.platformAccountId}/edit`} className="px-2.5 py-1.5">
-                Editar
-              </ReturnToLink>
-            </ContextMenuItem>
-          </ContextMenuGroup>
-          {account.enabled ? (
-            <>
-              <ContextMenuSeparator />
-              <ContextMenuItem variant="destructive" className="px-2.5 py-1.5" disabled={disableDisabled} onSelect={() => setDisableOpen(true)}>
-                Deshabilitar
-              </ContextMenuItem>
-            </>
-          ) : null}
-        </ContextMenuContent>
-      </ContextMenu>
-      {disableOpen ? <PlatformAccountDisableDialog account={account} onClose={() => setDisableOpen(false)} /> : null}
-    </>
+    <PlatformAccountSetupCodeFlow account={account} errorMode="toast">
+      {({ issue, available }) => (
+        <>
+          <ContextMenu>
+            <ContextMenuTrigger asChild>
+              <TableRow>
+                <TableCell className="w-16 pl-4">
+                  <PlatformAccountActions
+                    account={account}
+                    codeAvailable={available}
+                    onIssueCode={issue}
+                    disableDisabled={disableDisabled}
+                    onDisable={() => setDisableOpen(true)}
+                  />
+                </TableCell>
+                <TableCell className="font-medium">
+                  <DataTableIconLabel icon={UserRoundIcon}>
+                    <ReturnToLink className="hover:underline" href={`/accounts/${account.platformAccountId}`}>
+                      {account.name} {account.lastName}
+                    </ReturnToLink>
+                  </DataTableIconLabel>
+                </TableCell>
+                <TableCell className="text-muted-foreground">
+                  <DataTableIconLabel icon={MailIcon}>{account.email}</DataTableIconLabel>
+                </TableCell>
+                <TableCell>
+                  <Badge size="lg" variant="secondary">
+                    {account.roleName}
+                  </Badge>
+                </TableCell>
+                <TableCell>
+                  <Badge variant={account.enabled ? "success" : "destructive"}>{account.enabled ? "Habilitado" : "Deshabilitado"}</Badge>
+                </TableCell>
+                <TableCell className="text-muted-foreground tabular-nums">
+                  <DataTableIconLabel icon={CalendarIcon}>{dateFormatter.format(new Date(account.createdAt))}</DataTableIconLabel>
+                </TableCell>
+              </TableRow>
+            </ContextMenuTrigger>
+            <ContextMenuContent className="w-52 p-1.5">
+              <ContextMenuGroup>
+                <ContextMenuItem asChild>
+                  <ReturnToLink href={`/accounts/${account.platformAccountId}`} className="px-2.5 py-1.5">
+                    Ver detalle
+                  </ReturnToLink>
+                </ContextMenuItem>
+                <ContextMenuItem asChild>
+                  <ReturnToLink href={`/accounts/${account.platformAccountId}/edit`} className="px-2.5 py-1.5">
+                    Editar
+                  </ReturnToLink>
+                </ContextMenuItem>
+                {available ? (
+                  <ContextMenuItem className="px-2.5 py-1.5" disabled={!account.enabled} onSelect={issue}>
+                    Generar código de acceso
+                  </ContextMenuItem>
+                ) : null}
+              </ContextMenuGroup>
+              {account.enabled ? (
+                <>
+                  <ContextMenuSeparator />
+                  <ContextMenuItem variant="destructive" className="px-2.5 py-1.5" disabled={disableDisabled} onSelect={() => setDisableOpen(true)}>
+                    Deshabilitar
+                  </ContextMenuItem>
+                </>
+              ) : null}
+            </ContextMenuContent>
+          </ContextMenu>
+          {disableOpen ? <PlatformAccountDisableDialog account={account} onClose={() => setDisableOpen(false)} /> : null}
+        </>
+      )}
+    </PlatformAccountSetupCodeFlow>
   );
 }

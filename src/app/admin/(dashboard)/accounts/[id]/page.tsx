@@ -13,6 +13,7 @@ import { getSafeReturnTo } from "@common/utils/return-to.util";
 
 import { PlatformAccountDetail } from "@features/platform-accounts/components/platform-account-detail";
 import { PlatformAccountRecentActivity } from "@features/platform-accounts/components/platform-account-recent-activity";
+import { PlatformAccountSetupCodeButton } from "@features/platform-accounts/components/platform-account-setup-code-button";
 import { PlatformAccountStatusControl } from "@features/platform-accounts/components/platform-account-status-control";
 import { fetchPlatformAccountAdmin } from "@features/platform-accounts/services/fetch-platform-account.service";
 import { PlatformBreadcrumb } from "@features/platform-auth/components/platform-breadcrumb";
@@ -55,6 +56,7 @@ export default async function PlatformAccountDetailPage({ params, searchParams }
           <Link href={destination}>Volver</Link>
         </Button>
         <div className="flex flex-wrap items-center gap-3">
+          <PlatformAccountSetupCodeButton account={account} />
           <PlatformAccountStatusControl account={account} />
           <Button asChild size="lg">
             <ReturnToLink href={`/accounts/${id}/edit`}>Editar administrador</ReturnToLink>

@@ -143,7 +143,7 @@ describe("platform authentication over HTTP", () => {
         expect(cookieValues.has(REFRESH_COOKIE)).toBe(false);
         const { finishPlatformPasskey } = await import("@features/platform-auth/actions/platform-passkey.actions");
         await expect(
-          finishPlatformPasskey("22222222-2222-4222-8222-222222222222", { id: "fixture-credential" }, false, "/accounts?page=2"),
+          finishPlatformPasskey("22222222-2222-4222-8222-222222222222", { id: "fixture-credential" }, "verify", "/accounts?page=2"),
         ).rejects.toMatchObject({ url: "/accounts?page=2" });
       } else {
         await expect(loginPlatform({}, loginForm({ next: "/accounts?page=2" }))).rejects.toMatchObject({ url: "/accounts?page=2" });

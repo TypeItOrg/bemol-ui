@@ -16,4 +16,6 @@ export const PLATFORM_ACCOUNT_ERROR_MESSAGES = {
   PASSWORD_MIN_LENGTH: "La contraseña debe tener al menos 8 caracteres.",
   REQUIRED_PASSWORD_CONFIRMATION: "Confirmá la contraseña.",
   PASSWORD_MISMATCH: "Las contraseñas no coinciden.",
+  ISSUE_SETUP_CODE: "No se pudo generar el código de acceso.",
+  CANCEL_SETUP_CODE: "No se pudo cancelar el código de acceso.",
 } as const;

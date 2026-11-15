@@ -16,55 +16,78 @@ import { getPasskeyAssertion, isUserCancelled, toPublicKeyRequestOptions } from 
 import { createPasskeyCredential, toPublicKeyCreationOptions } from "@features/institutional-auth/utils/passkey-registration.util";
 import { beginPlatformPasskey, finishPlatformPasskey } from "@features/platform-auth/actions/platform-passkey.actions";
 import type { PlatformLoginChallenge } from "@features/platform-auth/types/platform-login-challenge.types";
+import type { PlatformPasskeyCeremonyMode } from "@features/platform-auth/types/platform-passkey-ceremony-mode.types";
+import { getPlatformPasskeyLoginCopy } from "@features/platform-auth/utils/platform-passkey-login-copy.util";
+
+type PasskeyLoginFormState = {
+  mode: PlatformPasskeyCeremonyMode;
+  message: string;
+};
 
 export function PlatformPasskeyLogin({ challenge, next }: { challenge: PlatformLoginChallenge; next?: string }): ReactElement {
-  const [setup, setSetup] = useState(challenge.setupRequired);
+  const [mode, setMode] = useState<PlatformPasskeyCeremonyMode>(challenge.setupRequired ? "setup" : "verify");
 
   const rateLimit = useAuthRateLimit();
 
   const controller = useRef<AbortController | null>(null);
 
-  const [error, action, pending] = useActionState<string, FormData>(async (_previous, data) => {
-    if (rateLimit.rateLimited) {
-      return _previous;
-    }
+  const isRegistration = mode !== "verify";
 
-    controller.current = new AbortController();
-
-    try {
-      const options = await beginPlatformPasskey(
-        challenge.loginAttemptId,
-        setup
-          ? {
-              code: String(data.get("code") ?? "").trim(),
-              label: String(data.get("label") ?? "").trim(),
-            }
-          : undefined,
-      );
-
-      const credential = setup
-        ? await createPasskeyCredential(toPublicKeyCreationOptions(options.options), controller.current.signal)
-        : await getPasskeyAssertion(toPublicKeyRequestOptions(options.options), controller.current.signal);
-
-      await finishPlatformPasskey(options.ceremonyId, credential, setup, next);
-
-      return "";
-    } catch (cause) {
-      if (rateLimit.handleError(cause)) {
-        return RATE_LIMIT_ERROR_MESSAGE;
+  const [formState, action, pending] = useActionState<PasskeyLoginFormState, FormData>(
+    async (_previous, data) => {
+      if (rateLimit.rateLimited) {
+        return { mode, message: "" };
       }
 
-      return isUserCancelled(cause)
-        ? "No se completó la verificación. Podés intentarlo nuevamente."
-        : "No se pudo completar el acceso. Verificá el código o volvé a iniciar sesión si venció el intento.";
-    }
-  }, "");
+      controller.current = new AbortController();
+
+      const fail = (text: string): PasskeyLoginFormState => ({
+        mode,
+        message: rateLimit.handleError(new Error(text)) ? RATE_LIMIT_ERROR_MESSAGE : text,
+      });
+
+      try {
+        const optionsResult = await beginPlatformPasskey(
+          challenge.loginAttemptId,
+          isRegistration ? { mode, code: String(data.get("code") ?? "").trim(), label: String(data.get("label") ?? "").trim() } : undefined,
+        );
+
+        if ("error" in optionsResult) {
+          return fail(optionsResult.error);
+        }
+
+        const credential = isRegistration
+          ? await createPasskeyCredential(toPublicKeyCreationOptions(optionsResult.options), controller.current.signal)
+          : await getPasskeyAssertion(toPublicKeyRequestOptions(optionsResult.options), controller.current.signal);
+
+        const finishResult = await finishPlatformPasskey(optionsResult.ceremonyId, credential, mode, next);
+
+        if (finishResult?.error) {
+          return fail(finishResult.error);
+        }
+
+        return { mode, message: "" };
+      } catch (cause) {
+        if (rateLimit.handleError(cause)) {
+          return { mode, message: RATE_LIMIT_ERROR_MESSAGE };
+        }
+
+        return {
+          mode,
+          message: isUserCancelled(cause)
+            ? "No se completó la verificación. Podés intentarlo nuevamente."
+            : "No se pudo completar el acceso. Verificá el código o volvé a iniciar sesión si venció el intento.",
+        };
+      }
+    },
+    { mode, message: "" },
+  );
 
   useEffect(() => () => controller.current?.abort(), []);
 
-  const submitLabel = setup ? "Registrar llave e ingresar" : "Usar llave de acceso";
+  const { title, description, submitLabel } = getPlatformPasskeyLoginCopy(mode, challenge.setupRequired);
 
-  const displayedError = rateLimit.getErrorMessage(error);
+  const displayedError = rateLimit.getErrorMessage(formState.mode === mode ? formState.message : "");
 
   return (
     <form action={action} className="flex flex-col justify-center p-6 md:p-8">
@@ -74,12 +97,8 @@ export function PlatformPasskeyLogin({ challenge, next }: { challenge: PlatformL
           imageContainerClassName="h-20 sm:h-24 w-full"
           imageClassName="max-h-20 max-w-56 sm:max-h-24 sm:max-w-64"
         />
-        <h1 className="text-2xl font-bold">{setup ? "Configurá tu llave de acceso" : "Confirmá que sos vos"}</h1>
-        <p className="text-muted-foreground text-sm text-balance">
-          {setup
-            ? "Ingresá el código temporal y registrá una llave de acceso en este dispositivo."
-            : "Usá tu llave de acceso para terminar de ingresar a la administración."}
-        </p>
+        <h1 className="text-2xl font-bold">{title}</h1>
+        <p className="text-muted-foreground text-sm text-balance">{description}</p>
       </header>
 
       <div className="mt-6 space-y-6">
@@ -91,19 +110,19 @@ export function PlatformPasskeyLogin({ challenge, next }: { challenge: PlatformL
           </Alert>
         ) : null}
 
-        {setup ? (
+        {isRegistration ? (
           <>
             <FieldGroup>
               <Field>
-                <FieldLabel htmlFor="platform-setup-code">Código temporal</FieldLabel>
+                <FieldLabel htmlFor="platform-setup-code">{mode === "enroll" ? "Código de vinculación" : "Código temporal"}</FieldLabel>
                 <Input
                   autoComplete="off"
+                  autoCapitalize="characters"
                   disabled={pending}
                   id="platform-setup-code"
                   name="code"
                   required
-                  minLength={64}
-                  maxLength={64}
+                  maxLength={100}
                   spellCheck={false}
                 />
               </Field>
@@ -112,7 +131,14 @@ export function PlatformPasskeyLogin({ challenge, next }: { challenge: PlatformL
             <FieldGroup>
               <Field>
                 <FieldLabel htmlFor="platform-key-label">Nombre de la llave</FieldLabel>
-                <Input disabled={pending} id="platform-key-label" name="label" required maxLength={100} placeholder="Mi computadora" />
+                <Input
+                  disabled={pending}
+                  id="platform-key-label"
+                  name="label"
+                  required
+                  maxLength={100}
+                  placeholder={mode === "enroll" ? "Mi teléfono" : "Mi computadora"}
+                />
               </Field>
             </FieldGroup>
           </>
@@ -126,33 +152,32 @@ export function PlatformPasskeyLogin({ challenge, next }: { challenge: PlatformL
           <Button className="w-full" disabled={pending} onClick={() => window.location.reload()} size="lg" type="button" variant="outline">
             Volver a iniciar sesión
           </Button>
-          {!setup ? (
-            <p className="text-muted-foreground mt-2 text-center text-sm">
-              ¿No tenés tu llave de acceso?{" "}
-              <button
-                className="text-primary font-medium underline underline-offset-4 disabled:pointer-events-none disabled:opacity-50"
-                disabled={pending}
-                onClick={() => setSetup(true)}
-                type="button"
-              >
-                Recuperar acceso
-              </button>
-            </p>
-          ) : null}
-          {setup && !challenge.setupRequired ? (
-            <p className="text-muted-foreground mt-2 text-center text-sm">
-              ¿Ya tenés tu llave de acceso?{" "}
-              <button
-                className="text-primary font-medium underline underline-offset-4 disabled:pointer-events-none disabled:opacity-50"
-                disabled={pending}
-                onClick={() => setSetup(false)}
-                type="button"
-              >
-                Usarla
-              </button>
-            </p>
-          ) : null}
         </footer>
+
+        {!challenge.setupRequired ? (
+          <p className="text-muted-foreground text-center text-sm">
+            {mode === "verify" ? (
+              <>
+                ¿Sin tu llave de acceso? Usá un{" "}
+                <Button className="h-auto p-0" disabled={pending} onClick={() => setMode("enroll")} type="button" variant="link">
+                  código de vinculación
+                </Button>{" "}
+                o{" "}
+                <Button className="h-auto p-0" disabled={pending} onClick={() => setMode("setup")} type="button" variant="link">
+                  recuperá tu acceso
+                </Button>
+                .
+              </>
+            ) : (
+              <>
+                ¿Ya tenés una llave?{" "}
+                <Button className="h-auto p-0" disabled={pending} onClick={() => setMode("verify")} type="button" variant="link">
+                  Usar llave de acceso
+                </Button>
+              </>
+            )}
+          </p>
+        ) : null}
       </div>
     </form>
   );

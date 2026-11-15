@@ -18,6 +18,7 @@ import type { RevokePasskeyState } from "@features/institutional-auth/types/revo
 import type { VerifyPasskeyRegistrationState } from "@features/institutional-auth/types/verify-passkey-registration-state.types";
 import { platformPasskeyRequest } from "@features/platform-auth/services/platform-passkeys.service";
 import type { PlatformLoginResult } from "@features/platform-auth/types/platform-login-result.types";
+import type { PlatformPasskeyCeremonyMode } from "@features/platform-auth/types/platform-passkey-ceremony-mode.types";
 import type { PlatformPasskeyOptions } from "@features/platform-auth/types/platform-passkey-options.types";
 import { clearPlatformAuthCookies, setPlatformAuthCookies } from "@features/platform-auth/utils/platform-auth-cookies.util";
 import { PLATFORM_LOGIN_PATH } from "@features/platform-auth/utils/platform-auth-proxy-policy.util";
@@ -25,61 +26,134 @@ import { redirectToNext } from "@features/platform-auth/utils/platform-auth-redi
 
 const uuid = z.uuid();
 
-const setupSchema = z.object({ code: z.string().regex(/^[a-f0-9]{64}$/), label: z.string().trim().min(1).max(100) });
+function isShortTemporaryCode(value: string): boolean {
+  return /^[A-Za-z0-9]{4}[\s-]?[A-Za-z0-9]{4}$/.test(value);
+}
+
+const setupSchema = z.object({
+  code: z
+    .string()
+    .trim()
+    .refine((value) => /^[a-f0-9]{64}$/.test(value) || isShortTemporaryCode(value), "Ingresá un código temporal válido."),
+  label: passkeyLabelSchema.shape.label,
+});
+
+const enrollSchema = z.object({
+  code: z.string().trim().refine(isShortTemporaryCode, "Ingresá el código de vinculación de 8 caracteres."),
+  label: passkeyLabelSchema.shape.label,
+});
 
 const verifySchema = z.object({ ceremonyId: uuid, credential: z.record(z.string(), z.unknown()) });
+
+const ceremonyModeSchema = z.enum(["verify", "setup", "enroll"]);
+
+const CEREMONY_PATHS: Record<PlatformPasskeyCeremonyMode, string> = { verify: "authentication", setup: "setup", enroll: "enrollment" };
+
+const REGISTRATION_SCHEMAS = { setup: setupSchema, enroll: enrollSchema };
 
 function message(error: unknown): string {
   return error instanceof Error ? error.message : "No se pudo completar la operación.";
 }
 
-async function loginRequest<T>(path: string, body: unknown): Promise<T> {
+type LoginResponse<T> = { ok: true; data: T } | { ok: false; error: string };
+
+async function loginRequest<T>(path: string, body: unknown): Promise<LoginResponse<T>> {
   const requestHeaders = await headers();
 
   requirePlatformHost(requestHeaders);
 
-  const response = await publicApiFetch(
-    `/api/v1/admin/auth/passkeys/${path}`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    },
-    requestHeaders,
-  );
+  let response: Response;
+
+  try {
+    response = await publicApiFetch(
+      `/api/v1/admin/auth/passkeys/${path}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      },
+      requestHeaders,
+    );
+  } catch {
+    return { ok: false, error: "No se pudo conectar con el servidor. Intentá nuevamente." };
+  }
 
   if (!response.ok) {
-    const error = (await response.json()) as { message?: string };
+    const error = (await response.json().catch(() => ({}))) as { message?: string };
 
-    throw new Error(error.message || "No se pudo verificar la llave de acceso. Volvé a iniciar sesión.");
+    return {
+      ok: false,
+      error: error.message || "No se pudo verificar la llave de acceso. Volvé a iniciar sesión.",
+    };
   }
 
-  return (await response.json()) as T;
+  return { ok: true, data: (await response.json()) as T };
 }
 
-export async function beginPlatformPasskey(loginAttemptId: string, setup?: { code: string; label: string }): Promise<PlatformPasskeyOptions> {
-  const id = uuid.parse(loginAttemptId);
+export async function beginPlatformPasskey(
+  loginAttemptId: string,
+  registration?: { mode: "setup" | "enroll"; code: string; label: string },
+): Promise<PlatformPasskeyOptions | { error: string }> {
+  const parsedAttempt = uuid.safeParse(loginAttemptId);
 
-  const parsed = setup === undefined ? undefined : setupSchema.parse(setup);
-
-  return loginRequest(parsed ? "setup/options" : "authentication/options", { loginAttemptId: id, ...parsed });
-}
-
-export async function finishPlatformPasskey(ceremonyId: string, credential: unknown, setup: boolean, next: unknown): Promise<void> {
-  const parsed = verifySchema.parse({ ceremonyId, credential });
-
-  if (typeof setup !== "boolean") {
-    throw new Error("Solicitud inválida.");
+  if (!parsedAttempt.success) {
+    return { error: "El intento de inicio de sesión es inválido o ha expirado." };
   }
 
-  const result = await loginRequest<PlatformLoginResult>(setup ? "setup/verify" : "authentication/verify", parsed);
+  let mode: PlatformPasskeyCeremonyMode = "verify";
 
-  await setPlatformAuthCookies(result.tokens);
+  let payload: Record<string, unknown> = { loginAttemptId: parsedAttempt.data };
+
+  if (registration !== undefined) {
+    const registrationMode = registration.mode === "enroll" ? "enroll" : "setup";
+
+    const parsed = REGISTRATION_SCHEMAS[registrationMode].safeParse({ code: registration.code, label: registration.label });
+
+    if (!parsed.success) {
+      return { error: parsed.error.issues[0]?.message || "Revisá los datos ingresados." };
+    }
+
+    mode = registrationMode;
+    payload = { loginAttemptId: parsedAttempt.data, ...parsed.data };
+  }
+
+  const result = await loginRequest<PlatformPasskeyOptions>(`${CEREMONY_PATHS[mode]}/options`, payload);
+
+  if (!result.ok) {
+    return { error: result.error };
+  }
+
+  return result.data;
+}
+
+export async function finishPlatformPasskey(
+  ceremonyId: string,
+  credential: unknown,
+  mode: PlatformPasskeyCeremonyMode,
+  next: unknown,
+): Promise<{ error?: string } | void> {
+  const parsed = verifySchema.safeParse({ ceremonyId, credential });
+
+  if (!parsed.success) {
+    return { error: "La verificación no es válida. Volvé a intentarlo." };
+  }
+
+  const path = `${CEREMONY_PATHS[ceremonyModeSchema.parse(mode)]}/verify`;
+
+  const result = await loginRequest<PlatformLoginResult>(path, parsed.data);
+
+  if (!result.ok) {
+    return { error: result.error };
+  }
+
+  await setPlatformAuthCookies(result.data.tokens);
   redirectToNext(typeof next === "string" ? next : null);
 }
 
 export async function beginPlatformPasskeyReauth(target: string): Promise<PlatformPasskeyOptions> {
-  const parsed = z.union([z.enum(["register", "email", "password"]), z.string().regex(/^revoke:[a-f0-9-]{36}$/)]).parse(target);
+  const parsed = z
+    .union([z.enum(["register", "enroll", "email", "password"]), z.string().regex(/^(revoke|setup-code):[a-fA-F0-9-]{36}$/)])
+    .parse(target);
 
   return platformPasskeyRequest("/reauth/options", "POST", { target: parsed });
 }

@@ -20,10 +20,14 @@ import type { PlatformAccountAdmin } from "@features/platform-accounts/types/pla
 export function PlatformAccountActions({
   account,
   disableDisabled,
+  codeAvailable,
+  onIssueCode,
   onDisable,
 }: {
   account: PlatformAccountAdmin;
   disableDisabled: boolean;
+  codeAvailable: boolean;
+  onIssueCode: () => void;
   onDisable: () => void;
 }): ReactElement {
   const accountName = `${account.name} ${account.lastName}`;
@@ -36,7 +40,7 @@ export function PlatformAccountActions({
             <EllipsisVerticalIcon />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" className="w-40 p-1.5">
+        <DropdownMenuContent align="start" className="w-52 p-1.5">
           <DropdownMenuGroup>
             <DropdownMenuItem asChild>
               <ReturnToLink href={`/accounts/${account.platformAccountId}`} className="px-2.5 py-1.5">
@@ -48,6 +52,11 @@ export function PlatformAccountActions({
                 Editar
               </ReturnToLink>
             </DropdownMenuItem>
+            {codeAvailable ? (
+              <DropdownMenuItem className="px-2.5 py-1.5" disabled={!account.enabled} onSelect={onIssueCode}>
+                Generar código de acceso
+              </DropdownMenuItem>
+            ) : null}
           </DropdownMenuGroup>
           {account.enabled ? (
             <>
