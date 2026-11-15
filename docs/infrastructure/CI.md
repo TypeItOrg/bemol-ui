@@ -1,12 +1,12 @@
 # Integración continua
 
-GitHub Actions verifica los pushes a `develop` y `main`, y los pull requests dirigidos a `develop`, `staging` y `main`. El job `verify` controla formato, lint, tipos, tests y el build de producción.
+GitHub Actions verifica los pushes a `develop` y los pull requests dirigidos a `develop` y `staging`. `main` no ejecuta CI: recibe el mismo SHA ya validado en staging. El job `verify` controla formato, lint, tipos, tests y el build de producción.
 
 Staging exige el check `verify` de GitHub Actions antes de aceptar el commit. Su workflow sólo publica y despliega, sin repetir CI. La protección también se aplica a administradores y permite el push directo del mismo SHA aprobado; ver [Promoción a staging](DEPLOYMENT.md#promoción-a-staging).
 
 ```mermaid
 graph LR
-    A[Push develop/main o PR] --> B[📋 Format Check]
+    A[Push develop o PR] --> B[📋 Format Check]
     B --> C[🔍 Lint]
     C --> D[📝 Typecheck]
     D --> E[🧪 Tests]

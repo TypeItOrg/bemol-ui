@@ -9,10 +9,10 @@ Este repositorio construye, valida y publica la imagen de `bemol-ui`. La topolog
 
 Hay dos workflows:
 
-- **CI**, en [`.github/workflows/ci.yaml`](../../.github/workflows/ci.yaml): formato, lint, tipos, tests y build. Se ejecuta para pull requests hacia `develop`, `staging` y `main`, y para pushes a `develop`/`main`. No publica imágenes ni recibe credenciales de despliegue.
+- **CI**, en [`.github/workflows/ci.yaml`](../../.github/workflows/ci.yaml): formato, lint, tipos, tests y build. Se ejecuta para pull requests hacia `develop` y `staging`, y para pushes a `develop`. No publica imágenes ni recibe credenciales de despliegue.
 - **Deploy staging**, en [`.github/workflows/deploy-staging.yaml`](../../.github/workflows/deploy-staging.yaml): sólo por push a `staging`. Publica `ghcr.io/typeitorg/bemol-ui:sha-<commit>` y `:staging`, y solicita el despliegue. No repite CI ni consulta ejecuciones anteriores.
 
-La protección de `staging` exige que el commit tenga el check `verify` de GitHub Actions aprobado antes de aceptar el push. El checkout y el tag de la imagen usan ese mismo SHA. `develop` y `main` sólo validan: ninguno publica imágenes ni despliega.
+La protección de `staging` exige que el commit tenga el check `verify` de GitHub Actions aprobado antes de aceptar el push. El checkout y el tag de la imagen usan ese mismo SHA. `develop` sólo valida; `main` no ejecuta CI porque recibe el SHA ya validado en staging.
 
 Los runners se fijan en `ubuntu-24.04`. Los grupos de concurrencia de CI y deploy son distintos y cancelan ejecuciones anteriores de la misma referencia.
 
@@ -47,6 +47,6 @@ No deben agregarse aquí configuraciones del proxy ni Compose de ambientes compa
 
 ## Producción
 
-Todavía no existe un ambiente productivo. No se conserva un workflow de despliegue a producción: se definirá cuando se prepare ese ambiente. Un push a `main` sólo ejecuta CI, sin publicar imágenes ni desplegar producción.
+La promoción avanza `main` hasta el SHA de staging y publica un tag `vX.Y.Z` sobre ese commit. **Promote production** ([`.github/workflows/promote-production.yaml`](../../.github/workflows/promote-production.yaml)) reetiqueta la imagen `sha-<commit>` de staging y despliega con `bemol-infra`, sin reconstruir ni repetir CI. Un push a `main` no ejecuta workflows.
 
 La configuración futura de infraestructura permanece en `bemol-infra`; retirarla no forma parte de esta limpieza de workflows.
