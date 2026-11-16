@@ -47,7 +47,7 @@ function EnrollmentDocumentsView({
     markRequestUncertain,
     reload,
     refresh,
-  } = useEnrollmentDocuments({ application, scope, disabled, onUploadBlockedChange });
+  } = useEnrollmentDocuments({ application, scope, disabled, autoSave, onUploadBlockedChange });
 
   if (!application.canReadAttachments) {
     return null;

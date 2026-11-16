@@ -14,7 +14,7 @@ import { useOperatingPersonId } from "@features/guardian-workspace/components/gu
 import { reloadForbiddenOperatingProfile } from "@features/guardian-workspace/utils/forbidden-operating-profile.util";
 import { getSelfServiceReadPath } from "@features/guardian-workspace/utils/self-service-read-path.util";
 
-export function useEnrollmentDocuments({ application, scope, disabled, onUploadBlockedChange }: EnrollmentDocumentsProps) {
+export function useEnrollmentDocuments({ application, scope, disabled, autoSave, onUploadBlockedChange }: EnrollmentDocumentsProps) {
   const personId = useOperatingPersonId();
 
   const router = useRouter();
@@ -87,7 +87,11 @@ export function useEnrollmentDocuments({ application, scope, disabled, onUploadB
 
     setSnapshot({ source: application.documents, documents: refreshed });
     setActivity(null);
-    router.refresh();
+
+    // The draft wizard owns its application state, so re-rendering the whole page only slows the upload down.
+    if (!autoSave) {
+      router.refresh();
+    }
   }
 
   async function reload(): Promise<void> {

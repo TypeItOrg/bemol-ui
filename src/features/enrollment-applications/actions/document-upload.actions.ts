@@ -1,7 +1,5 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
-
 import { z } from "zod";
 
 import type { PresignedUploadResult } from "@common/types/presigned-upload-result.types";
@@ -93,8 +91,6 @@ export async function confirmDocumentUpload(
   if (error) {
     return error;
   }
-
-  revalidatePath("/", "layout");
 
   return { success: true };
 }
