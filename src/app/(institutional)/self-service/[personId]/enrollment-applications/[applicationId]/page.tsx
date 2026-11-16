@@ -67,6 +67,8 @@ export default async function MyEnrollmentApplicationDetailPage({
 
   const detailLabel = isEditable ? "Continuar inscripción" : "Detalle de inscripción";
 
+  const pageTitle = application.trainingPathName || detailLabel;
+
   const PageIcon = isEditable ? FilePenLineIcon : ClipboardListIcon;
 
   const [shifts, courses] = await Promise.all([
@@ -78,7 +80,7 @@ export default async function MyEnrollmentApplicationDetailPage({
 
   return (
     <PlatformPageShell
-      title={detailLabel}
+      title={pageTitle}
       minViewportHeight
       breadcrumb={<InstitutionalBreadcrumb segmentLabels={{ [applicationId]: detailLabel }} />}
       actions={<PlatformPageIcon icon={PageIcon} />}

@@ -87,7 +87,7 @@ function EnrollmentWizardView(props: EnrollmentWizardProps): ReactElement {
         </Alert>
       ) : null}
 
-      <EnrollmentDraftStatus {...model} trainingPathName={application.trainingPathName} academicYear={application.academicYear} />
+      <EnrollmentDraftStatus {...model} />
       {model.saveConflict ? (
         <Alert variant="destructive">
           <AlertTriangleIcon />
