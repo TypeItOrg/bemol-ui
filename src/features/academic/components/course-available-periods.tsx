@@ -2,7 +2,7 @@
 
 import type { ReactElement } from "react";
 
-import { ClockIcon, ListIcon } from "lucide-react";
+import { CalendarXIcon, ClockIcon, ListIcon } from "lucide-react";
 
 import { Button } from "@common/components/ui/button";
 import {
@@ -15,6 +15,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@common/components/ui/dialog";
+import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@common/components/ui/empty";
 
 import type { CourseEnrollmentAssignmentOptions } from "@features/course-enrollments/types/course-enrollment-assignment-options.types";
 
@@ -61,7 +62,15 @@ export function CourseAvailablePeriods({
         </DialogHeader>
         <div className="min-h-0 space-y-4 overflow-y-auto">
           {schedules.length === 0 ? (
-            <p className="text-muted-foreground">No quedan períodos disponibles para este día.</p>
+            <Empty className="bg-muted/25 rounded-lg border border-solid px-4 py-8">
+              <EmptyHeader>
+                <EmptyMedia variant="icon">
+                  <CalendarXIcon className="size-5" aria-hidden="true" />
+                </EmptyMedia>
+                <EmptyTitle className="text-base">Sin períodos disponibles</EmptyTitle>
+                <EmptyDescription>No quedan períodos libres para este día.</EmptyDescription>
+              </EmptyHeader>
+            </Empty>
           ) : (
             schedules.map((schedule) => (
               <section key={schedule.id} aria-label={`Horario ${schedule.startTime.slice(0, 5)} a ${schedule.endTime.slice(0, 5)}`}>
