@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useLayoutEffect, useMemo, useRef, useState } from "react";
 
 import { useRouter } from "next/navigation";
 
@@ -11,6 +11,7 @@ import { useEnrollmentDraftAutosave } from "@features/enrollment-applications/ho
 import { useEnrollmentWizardCourses } from "@features/enrollment-applications/hooks/use-enrollment-wizard-courses";
 import { useEnrollmentWizardForm } from "@features/enrollment-applications/hooks/use-enrollment-wizard-form";
 import { useEnrollmentWizardNavigation } from "@features/enrollment-applications/hooks/use-enrollment-wizard-navigation";
+import { ENROLLMENT_APPLICATION_STATUS } from "@features/enrollment-applications/types/enrollment-application-status.types";
 import type { EnrollmentWizardProps } from "@features/enrollment-applications/types/enrollment-wizard-props.types";
 import { submitEnrollmentWizard } from "@features/enrollment-applications/utils/submit-enrollment-wizard.util";
 import { enrollmentFormDefinitionSchema } from "@features/enrollment-forms/schemas/enrollment-form-definition.schema";
@@ -44,6 +45,19 @@ export function useEnrollmentWizard(props: EnrollmentWizardProps) {
   const readOnly = requestedReadOnly || initialApplication.periodOpen === false || Boolean(configuredForm.error);
 
   const [application, setApplication] = useState(initialApplication);
+
+  const isDraft = application.status === ENROLLMENT_APPLICATION_STATUS.DRAFT;
+
+  const wasDraftRef = useRef(isDraft);
+
+  // The detail replaces the wizard in place, so start it at the top instead of the wizard's scroll offset.
+  useLayoutEffect(() => {
+    if (wasDraftRef.current && !isDraft) {
+      window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+    }
+
+    wasDraftRef.current = isDraft;
+  }, [isDraft]);
 
   const [documentsBlocked, setDocumentsBlocked] = useState(false);
 
