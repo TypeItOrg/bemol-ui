@@ -19,8 +19,8 @@ function serveFromStorage(file: Response): void {
   storageFetch = jest.spyOn(global, "fetch").mockResolvedValue(file);
 }
 
-function get(institutionId = id): Promise<Response> {
-  return GET(new Request("https://testing.typeit.com.ar/api/public/logo?v=opaque%2Bversion"), {
+function get(institutionId = id, query = "?v=opaque%2Bversion"): Promise<Response> {
+  return GET(new Request(`https://testing.typeit.com.ar/api/public/logo${query}`), {
     params: Promise.resolve({ institutionId }),
   });
 }
@@ -28,7 +28,7 @@ function get(institutionId = id): Promise<Response> {
 it.each([
   ["image/png", png],
   ["image/webp", webp],
-] as const)("streams %s no-store without exposing provider paths", async (type, bytes) => {
+] as const)("streams versioned %s as immutable without exposing provider paths", async (type, bytes) => {
   serveFromStorage(
     new Response(bytes, {
       headers: { "Content-Type": type, "X-Storage-Key": "private/secret" },
@@ -36,12 +36,18 @@ it.each([
   );
   const response = await get();
   expect(response.status).toBe(200);
-  expect(response.headers.get("Cache-Control")).toBe("no-store");
+  expect(response.headers.get("Cache-Control")).toBe("public, max-age=31536000, immutable");
   expect(response.headers.get("X-Content-Type-Options")).toBe("nosniff");
   expect(response.headers.get("X-Storage-Key")).toBeNull();
   expect(Buffer.from(await response.arrayBuffer())).toEqual(bytes);
   expect(publicApiFetch).toHaveBeenCalledWith(`/api/v1/institutions/${id}/logo?v=opaque%2Bversion`);
   expect(storageFetch).toHaveBeenCalledWith(storageUrl, expect.objectContaining({ cache: "no-store" }));
+});
+it("does not cache unversioned logos", async () => {
+  serveFromStorage(new Response(png, { headers: { "Content-Type": "image/png" } }));
+  const response = await get(id, "");
+  expect(response.status).toBe(200);
+  expect(response.headers.get("Cache-Control")).toBe("no-store");
 });
 it.each(["image/svg+xml", "text/html", "application/octet-stream"])("[L03.real-image-validation] does not serve unsupported %s", async (type) => {
   serveFromStorage(new Response(png, { headers: { "Content-Type": type } }));

@@ -146,7 +146,8 @@ export async function fetchInstitutionLogo(institutionId: string, version: strin
     return new Response(stream, {
       headers: {
         "Content-Type": type,
-        "Cache-Control": "no-store",
+        // A new upload changes `v`, so versioned URLs never change content.
+        "Cache-Control": version ? "public, max-age=31536000, immutable" : "no-store",
         "X-Content-Type-Options": "nosniff",
         "Content-Disposition": "inline",
       },
