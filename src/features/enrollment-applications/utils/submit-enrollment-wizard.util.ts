@@ -130,11 +130,11 @@ export async function submitEnrollmentWizard({
       return { issues: documentIssues };
     }
 
-    setApplication(
-      await submitEnrollmentApplicationAction(application.applicationId, application.personId, savedApplication.draftRevision ?? 0).then(
-        unwrapEnrollmentResult,
-      ),
+    await submitEnrollmentApplicationAction(application.applicationId, application.personId, savedApplication.draftRevision ?? 0).then(
+      unwrapEnrollmentResult,
     );
+
+    // The refreshed page brings the submitted detail together with its title and actions.
     router.refresh();
 
     return {};

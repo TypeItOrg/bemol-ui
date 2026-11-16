@@ -46,6 +46,17 @@ export function useEnrollmentWizard(props: EnrollmentWizardProps) {
 
   const [application, setApplication] = useState(initialApplication);
 
+  const [syncedInitialApplication, setSyncedInitialApplication] = useState(initialApplication);
+
+  // Adopt a status change from the server without discarding local draft edits.
+  if (initialApplication !== syncedInitialApplication) {
+    setSyncedInitialApplication(initialApplication);
+
+    if (initialApplication.status !== application.status) {
+      setApplication(initialApplication);
+    }
+  }
+
   const isDraft = application.status === ENROLLMENT_APPLICATION_STATUS.DRAFT;
 
   const wasDraftRef = useRef(isDraft);

@@ -135,10 +135,7 @@ function EnrollmentWizardView(props: EnrollmentWizardProps): ReactElement {
           applicationId={application.applicationId}
           beforeCancel={() => model.draftSaveQueue.current}
           onClose={() => model.setIsCancelDialogOpen(false)}
-          onCancelled={(cancelledApplication) => {
-            model.setApplication(cancelledApplication);
-            model.router.refresh();
-          }}
+          onCancelled={() => model.router.refresh()}
         />
       ) : null}
       {model.isSubmitDialogOpen ? (

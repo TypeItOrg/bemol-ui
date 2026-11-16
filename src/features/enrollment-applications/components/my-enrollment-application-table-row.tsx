@@ -152,7 +152,10 @@ export function MyEnrollmentApplicationTableRow({
         <EnrollmentCancelDialog
           applicationId={application.applicationId}
           onClose={() => setIsCancelOpen(false)}
-          onCancelled={() => router.refresh()}
+          onCancelled={() => {
+            setIsCancelOpen(false);
+            router.refresh();
+          }}
         />
       )}
     </>
