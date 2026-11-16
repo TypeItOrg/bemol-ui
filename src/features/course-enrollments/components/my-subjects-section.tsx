@@ -10,7 +10,6 @@ import type { useDataTableNavigation } from "@common/components/ui/data-table-na
 import { DataTablePagination } from "@common/components/ui/data-table-pagination";
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@common/components/ui/empty";
 import type { PaginatedResponse } from "@common/types/paginated-response.types";
-import { cn } from "@common/utils/cn.util";
 import { getDataTableEmptyContent } from "@common/utils/data-table-empty-content.util";
 
 import { MySubjectCard } from "@features/course-enrollments/components/my-subject-card";
@@ -74,9 +73,7 @@ export function MySubjectsSection({
 
     if (data.items.length > 0) {
       return (
-        <div
-          className={cn("grid gap-4", data.items.length > 1 && "@4xl/page-shell:grid-cols-2", data.items.length > 2 && "@7xl/page-shell:grid-cols-3")}
-        >
+        <div className="grid gap-4 @3xl/page-shell:grid-cols-2 @6xl/page-shell:grid-cols-3">
           {data.items.map((enrollment) => (
             <MySubjectCard
               key={enrollment.id}

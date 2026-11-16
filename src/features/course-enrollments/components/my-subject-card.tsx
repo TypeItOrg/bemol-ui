@@ -1,11 +1,12 @@
 import type { ReactElement } from "react";
 
-import { ClockIcon, Music2Icon } from "lucide-react";
+import { ClockIcon } from "lucide-react";
 
 import { FadeImage } from "@common/components/fade-image";
 import { Badge } from "@common/components/ui/badge";
 import { Button } from "@common/components/ui/button";
 
+import { DEFAULT_INSTRUMENT_ICON, INSTRUMENT_ICONS } from "@features/academic/constants/instrument-icon.constants";
 import { COURSE_DAY_LABELS } from "@features/course-enrollments/constants/course-enrollment.constants";
 import { MY_SUBJECTS_MESSAGES } from "@features/course-enrollments/constants/my-subjects.constants";
 import { COURSE_ENROLLMENT_STATUS } from "@features/course-enrollments/types/course-enrollment-status.types";
@@ -30,6 +31,8 @@ export function MySubjectCard({ enrollment, canWithdraw, canUpdateAcademicStatus
 
   const showAcademicAction = canUpdateAcademicStatus && !isWithdrawn;
 
+  const { icon: InstrumentIcon } = INSTRUMENT_ICONS[DEFAULT_INSTRUMENT_ICON];
+
   const days = Object.keys(COURSE_DAY_LABELS);
 
   const schedules = enrollment.schedules
@@ -38,7 +41,7 @@ export function MySubjectCard({ enrollment, canWithdraw, canUpdateAcademicStatus
 
   return (
     <article className="bg-background flex min-w-0 flex-col overflow-hidden rounded-xl border">
-      <div className="bg-muted relative h-40 shrink-0">
+      <div className="bg-muted relative h-32 shrink-0">
         <FadeImage
           src={getSubjectCover(enrollment)}
           alt=""
@@ -46,23 +49,21 @@ export function MySubjectCard({ enrollment, canWithdraw, canUpdateAcademicStatus
           sizes="(max-width: 767px) 100vw, (max-width: 1279px) 50vw, 33vw"
           className="object-cover"
         />
-        {enrollment.instrumentName ? (
-          <div className="absolute inset-x-4 bottom-4 flex">
-            <Badge variant="outline" className="bg-background h-auto max-w-full items-start gap-1.5 rounded-lg px-3 py-1.5 whitespace-normal">
-              <Music2Icon className="mt-1 shrink-0" aria-hidden="true" />
-              <span className="min-w-0 wrap-break-word">{enrollment.instrumentName}</span>
-            </Badge>
-          </div>
-        ) : null}
       </div>
-      <div className="flex min-w-0 flex-1 flex-col gap-5 p-5">
-        <div className="space-y-2">
+      <div className="flex min-w-0 flex-1 flex-col gap-4 px-5 pb-5">
+        <span className="bg-primary text-primary-foreground ring-background relative -mt-7 flex size-14 shrink-0 items-center justify-center rounded-full shadow-md ring-4">
+          <InstrumentIcon className="size-6" aria-hidden="true" />
+        </span>
+        <div className="min-w-0 space-y-1">
           {!isEnrolled ? (
-            <Badge variant="secondary" className="max-w-full whitespace-normal">
+            <Badge variant="secondary" className="mb-2 max-w-full whitespace-normal">
               {getCourseEnrollmentSituationLabel(enrollment.status, enrollment.academicStatus)}
             </Badge>
           ) : null}
-          <h2 className="text-xl leading-snug font-semibold tracking-tight wrap-break-word">{enrollment.academicSpaceName}</h2>
+          {enrollment.instrumentName ? (
+            <p className="text-primary text-xs font-semibold tracking-wide wrap-break-word uppercase">{enrollment.instrumentName}</p>
+          ) : null}
+          <h2 className="text-lg leading-snug font-semibold tracking-tight wrap-break-word">{enrollment.academicSpaceName}</h2>
         </div>
         <dl className="grid min-w-0 gap-2 text-sm">
           <div className="flex flex-wrap gap-x-2 gap-y-0.5">
@@ -76,20 +77,20 @@ export function MySubjectCard({ enrollment, canWithdraw, canUpdateAcademicStatus
             <dd className="min-w-0 wrap-break-word">{[enrollment.courseClassLabel, enrollment.academicLevelName].filter(Boolean).join(" · ")}</dd>
           </div>
         </dl>
-        <div className="mt-auto min-w-0 border-t pt-4">
-          <h3 className="text-muted-foreground mb-3 flex items-center gap-2 text-sm font-medium">
+        <div className="mt-auto min-w-0 space-y-2">
+          <h3 className="text-muted-foreground flex items-center gap-2 text-sm font-medium">
             <ClockIcon className="size-4 shrink-0" aria-hidden="true" />
             {isEnrolled ? "Horarios" : "Horarios de la cursada"}
           </h3>
           {schedules.length > 0 ? (
-            <ul className="space-y-3">
+            <ul className="divide-y rounded-lg border">
               {schedules.map((schedule) => (
-                <li key={schedule.id} className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 text-sm">
-                  <span>
+                <li key={schedule.id} className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 px-3 py-2.5">
+                  <span className="font-medium">
                     {COURSE_DAY_LABELS[schedule.dayOfWeek] ?? schedule.dayOfWeek}
-                    {schedule.releasedAt ? <span className="text-muted-foreground"> · Horario liberado</span> : null}
+                    {schedule.releasedAt ? <span className="text-muted-foreground font-normal"> · Horario liberado</span> : null}
                   </span>
-                  <span className="text-lg font-semibold whitespace-nowrap tabular-nums">
+                  <span className="text-muted-foreground whitespace-nowrap tabular-nums">
                     {schedule.startTime.slice(0, 5)}–{schedule.endTime.slice(0, 5)}
                   </span>
                 </li>
