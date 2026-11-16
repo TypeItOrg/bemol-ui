@@ -142,7 +142,9 @@ export function EnrollmentStatusCard({
           <EnrollmentHealthSummary health={health} />
           <EnrollmentResponsibleSummary responsible={responsible} />
 
-          <EnrollmentPreferenceSummary preference={preference} />
+          <div className="grid min-w-0 xl:col-span-2">
+            <EnrollmentPreferenceSummary preference={preference} />
+          </div>
 
           <div className="xl:col-span-2">
             <EnrollmentDocuments
