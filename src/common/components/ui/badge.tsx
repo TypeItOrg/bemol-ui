@@ -22,7 +22,7 @@ const badgeVariants = cva(
       },
       size: {
         default: "",
-        lg: "",
+        lg: "h-7 gap-1.5 px-3 has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2 [&>svg]:size-3.5!",
       },
     },
     defaultVariants: {

@@ -34,7 +34,7 @@ export function CourseClassTeacherField({
         <div className="bg-muted/20 flex min-h-12 flex-wrap items-center gap-2 rounded-xl border px-3 py-2.5">
           {courseClass.teachers.length === 0 ? <p className="text-muted-foreground text-sm">Los docentes seleccionados se mostrarán aquí.</p> : null}
           {courseClass.teachers.map((teacher) => (
-            <Badge className="h-7 gap-2 px-3" key={teacher.personId} size="lg" variant="secondary">
+            <Badge className="gap-2" key={teacher.personId} size="lg" variant="secondary">
               <span className="max-w-full truncate">{teacher.fullName}</span>
               <Button
                 aria-label={`Quitar a ${teacher.fullName}`}

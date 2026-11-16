@@ -128,7 +128,7 @@ export function GuardianDependentRow({
       <TableCell>
         <Popover>
           <PopoverTrigger asChild>
-            <Badge asChild size="lg" className="[&>svg]:size-3.5!" variant={STATUS_BADGE_VARIANT[dependent.status]}>
+            <Badge asChild size="lg" variant={STATUS_BADGE_VARIANT[dependent.status]}>
               <button
                 aria-label={`Ver detalle del estado: ${GUARDIAN_LINK_STATUS_LABELS[dependent.status]} de ${name}`}
                 className="cursor-pointer gap-1.5"

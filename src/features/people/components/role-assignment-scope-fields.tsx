@@ -108,7 +108,7 @@ export function RoleAssignmentScopeFields({
               const name = selectedNames[id] ?? names[id] ?? id;
 
               return (
-                <Badge key={id} className="h-auto min-h-7 max-w-full gap-2 px-3" size="lg" variant="secondary">
+                <Badge key={id} className="h-auto min-h-7 max-w-full gap-2" size="lg" variant="secondary">
                   <span className="min-w-0 wrap-anywhere whitespace-normal">{name}</span>
                   <Button
                     aria-label={`${M.REMOVE} ${name}`}
