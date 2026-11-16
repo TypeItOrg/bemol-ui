@@ -2,7 +2,7 @@
 
 import { useId, type ReactElement } from "react";
 
-import { ClipboardCheckIcon } from "lucide-react";
+import { CalendarClockIcon, ClipboardCheckIcon } from "lucide-react";
 
 import { Card, CardContent, CardHeader } from "@common/components/ui/card";
 
@@ -72,8 +72,8 @@ export function EnrollmentStatusCard({
     <div className="flex flex-col gap-4">
       <Card className={SECTION_CARD_CLASS_NAME} role="region" aria-labelledby={statusTitleId}>
         <CardHeader>
-          <div className="flex w-full min-w-0 flex-col gap-3 @xl/card-header:flex-row @xl/card-header:items-center @xl/card-header:justify-between @xl/card-header:gap-4">
-            <div className="flex min-w-0 items-center gap-3 @xl/card-header:gap-3.5">
+          <div className="flex w-full min-w-0 flex-wrap items-center justify-between gap-x-4 gap-y-2">
+            <div className="flex min-w-48 flex-1 items-center gap-3 @xl/card-header:gap-3.5">
               <div className="bg-primary/10 text-primary flex size-10 shrink-0 items-center justify-center rounded-xl @sm/card-header:size-11">
                 <ClipboardCheckIcon className="size-5" aria-hidden="true" />
               </div>
@@ -81,15 +81,16 @@ export function EnrollmentStatusCard({
                 <h2 id={statusTitleId} className="min-w-0 text-base leading-snug font-semibold text-balance break-words">
                   Estado de la solicitud
                 </h2>
-                <p className="text-muted-foreground min-w-0 text-sm text-pretty">
-                  Actualizada el{" "}
+                <p className="text-muted-foreground flex min-w-0 items-center gap-1.5 text-xs sm:text-sm">
+                  <CalendarClockIcon className="size-4 shrink-0" aria-hidden="true" />
+                  <span className="sr-only">Actualizada el</span>
                   <time dateTime={application.updatedAt} className="tabular-nums">
                     {formatEnrollmentApplicationDateTime(application.updatedAt)}
                   </time>
                 </p>
               </div>
             </div>
-            <div className="flex min-w-0 flex-col items-start gap-1 @xl/card-header:shrink-0 @xl/card-header:items-end">
+            <div className="shrink-0">
               <EnrollmentApplicationStatusBadge
                 status={application.status}
                 rejectionReason={application.rejectionReason}

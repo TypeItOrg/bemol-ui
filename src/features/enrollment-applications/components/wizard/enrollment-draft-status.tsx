@@ -56,14 +56,20 @@ export function EnrollmentDraftStatus({
 
   return (
     <div className="bg-muted/25 rounded-xl border p-4 sm:p-6">
-      <div className="flex items-start gap-3.5">
-        <div className="bg-primary/10 text-primary flex size-11 shrink-0 items-center justify-center rounded-xl">
-          <FileClockIcon className="size-5" aria-hidden="true" />
-        </div>
-        <div className="flex min-w-0 flex-1 flex-col justify-center gap-1">
-          <p className="font-heading text-sm font-medium break-words">Estado de la solicitud</p>
-          <div className="text-muted-foreground flex flex-wrap items-center gap-x-2 gap-y-1 text-xs sm:text-sm" aria-live="polite" aria-atomic="true">
-            {renderSaveStatus()}
+      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+        <div className="flex min-w-48 flex-1 items-center gap-3.5">
+          <div className="bg-primary/10 text-primary flex size-11 shrink-0 items-center justify-center rounded-xl">
+            <FileClockIcon className="size-5" aria-hidden="true" />
+          </div>
+          <div className="flex min-w-0 flex-col justify-center gap-0.5">
+            <p className="text-base leading-snug font-semibold text-balance break-words">Estado de la solicitud</p>
+            <div
+              className="text-muted-foreground flex flex-wrap items-center gap-x-2 gap-y-1 text-xs sm:text-sm"
+              aria-live="polite"
+              aria-atomic="true"
+            >
+              {renderSaveStatus()}
+            </div>
           </div>
         </div>
         <div className="shrink-0">
