@@ -55,9 +55,9 @@ export function EnrollmentDraftStatus({
   }
 
   return (
-    <div className="bg-muted/25 rounded-xl border p-4 sm:p-6">
-      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
-        <div className="flex min-w-48 flex-1 items-center gap-3.5">
+    <div className="bg-muted/25 @container/draft-status rounded-xl border p-4 sm:p-6">
+      <div className="flex flex-col gap-4 @md/draft-status:flex-row @md/draft-status:items-center @md/draft-status:justify-between">
+        <div className="flex min-w-0 items-center gap-3.5">
           <div className="bg-primary/10 text-primary flex size-11 shrink-0 items-center justify-center rounded-xl">
             <FileClockIcon className="size-5" aria-hidden="true" />
           </div>
@@ -72,8 +72,8 @@ export function EnrollmentDraftStatus({
             </div>
           </div>
         </div>
-        <div className="shrink-0">
-          <EnrollmentApplicationStatusBadge status={ENROLLMENT_APPLICATION_STATUS.DRAFT} size="lg" />
+        <div className="@md/draft-status:shrink-0">
+          <EnrollmentApplicationStatusBadge status={ENROLLMENT_APPLICATION_STATUS.DRAFT} size="lg" className="w-full @md/draft-status:w-fit" />
         </div>
       </div>
     </div>

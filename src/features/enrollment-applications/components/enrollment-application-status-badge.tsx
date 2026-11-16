@@ -22,6 +22,7 @@ type EnrollmentApplicationStatusBadgeProps = {
   pendingCourses?: boolean | null;
   detailHref?: string;
   size?: "default" | "lg";
+  className?: string;
 };
 
 const STATUS_CLASSNAMES: Record<EnrollmentApplicationStatus, string> = {
@@ -41,6 +42,7 @@ export function EnrollmentApplicationStatusBadge({
   pendingCourses,
   detailHref,
   size = "default",
+  className,
 }: EnrollmentApplicationStatusBadgeProps): ReactElement {
   const [open, setOpen] = useState(false);
 
@@ -72,7 +74,7 @@ export function EnrollmentApplicationStatusBadge({
     return (
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
-          <Badge asChild variant="outline" size={size} className={cn(statusClassName, "cursor-pointer hover:brightness-95")}>
+          <Badge asChild variant="outline" size={size} className={cn(statusClassName, "cursor-pointer hover:brightness-95", className)}>
             <button type="button" aria-label={`${statusLabel}: ver ${popoverTitle.toLowerCase()}`}>
               {statusLabel}
               {isRejected ? (
@@ -123,7 +125,7 @@ export function EnrollmentApplicationStatusBadge({
   }
 
   return (
-    <Badge variant="outline" size={size} className={statusClassName}>
+    <Badge variant="outline" size={size} className={cn(statusClassName, className)}>
       {statusLabel}
     </Badge>
   );

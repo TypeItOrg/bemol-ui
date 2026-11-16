@@ -72,8 +72,8 @@ export function EnrollmentStatusCard({
     <div className="flex flex-col gap-4">
       <Card className={SECTION_CARD_CLASS_NAME} role="region" aria-labelledby={statusTitleId}>
         <CardHeader>
-          <div className="flex w-full min-w-0 flex-wrap items-center justify-between gap-x-4 gap-y-2">
-            <div className="flex min-w-48 flex-1 items-center gap-3 @xl/card-header:gap-3.5">
+          <div className="flex w-full min-w-0 flex-col gap-4 @md/card-header:flex-row @md/card-header:items-center @md/card-header:justify-between">
+            <div className="flex min-w-0 items-center gap-3 @xl/card-header:gap-3.5">
               <div className="bg-primary/10 text-primary flex size-10 shrink-0 items-center justify-center rounded-xl @sm/card-header:size-11">
                 <ClipboardCheckIcon className="size-5" aria-hidden="true" />
               </div>
@@ -90,12 +90,13 @@ export function EnrollmentStatusCard({
                 </p>
               </div>
             </div>
-            <div className="shrink-0">
+            <div className="@md/card-header:shrink-0">
               <EnrollmentApplicationStatusBadge
                 status={application.status}
                 rejectionReason={application.rejectionReason}
                 pendingCourses={application.pendingCourses}
                 size="lg"
+                className="w-full @md/card-header:w-fit"
               />
             </div>
           </div>
