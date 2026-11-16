@@ -10,6 +10,7 @@ import { Badge } from "@common/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@common/components/ui/card";
 import { Separator } from "@common/components/ui/separator";
 
+import { getInstitutionLogoUrl } from "@features/institutions/utils/institution-logo-url.util";
 import { DashboardEmptyState } from "@features/platform-dashboard/components/dashboard-empty-state";
 import type { RecentInstitution } from "@features/platform-dashboard/types/recent-institution.types";
 import { formatDashboardDate } from "@features/platform-dashboard/utils/dashboard-date.util";
@@ -48,13 +49,15 @@ export function RecentInstitutionsCard({ institutions }: { institutions: RecentI
 }
 
 export function RecentInstitutionRow({ institution }: { institution: RecentInstitution }): ReactElement {
+  const logoUrl = getInstitutionLogoUrl(institution.id, institution.logoUrl);
+
   return (
     <Link
       href={`/institutions/${institution.id}`}
       className="group focus-visible:ring-ring flex min-w-0 items-center gap-3 rounded-lg py-3 outline-none first:pt-0 last:pb-0 focus-visible:ring-2 focus-visible:ring-offset-2"
     >
       <Avatar size="lg" className="rounded-lg after:rounded-lg">
-        <AvatarImage src={`/api/public/institutions/${institution.id}/logo`} alt="" className="bg-background rounded-lg object-contain p-1" />
+        {logoUrl ? <AvatarImage src={logoUrl} alt="" className="bg-background rounded-lg object-contain p-1" /> : null}
         <AvatarFallback className="bg-primary/10 text-primary rounded-lg">
           <BuildingIcon className="size-4" aria-hidden="true" />
         </AvatarFallback>

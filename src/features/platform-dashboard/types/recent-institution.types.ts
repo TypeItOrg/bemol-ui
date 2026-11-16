@@ -5,4 +5,5 @@ export type RecentInstitution = {
   province: string;
   active: boolean;
   createdAt: string;
+  logoUrl: string | null;
 };
