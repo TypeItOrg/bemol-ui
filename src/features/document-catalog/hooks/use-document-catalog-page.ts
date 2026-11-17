@@ -28,6 +28,7 @@ export function useDocumentCatalogPage({
 }) {
   const query = useQuery({
     queryKey: ["document-catalog", scope, institutionId, page, size, search, active],
+    meta: { refreshOnReturn: true },
     queryFn: ({ signal }) => {
       const filters = new URLSearchParams({ page: String(page), size: String(size), search });
 

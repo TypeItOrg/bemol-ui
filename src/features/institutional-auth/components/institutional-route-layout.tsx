@@ -3,6 +3,7 @@ import { Suspense, type ReactElement, type ReactNode } from "react";
 import { cookies, headers } from "next/headers";
 
 import { SidebarNavigationStateProvider } from "@common/components/navigation/sidebar-navigation-state-provider";
+import { RouteVisibilityRefresh } from "@common/components/route-visibility-refresh";
 import { SIDEBAR_NAVIGATION_GROUPS_COOKIE_NAMES } from "@common/constants/sidebar-navigation.constants";
 import { parseSidebarNavigationGroupStates } from "@common/utils/sidebar-navigation-cookie.util";
 
@@ -42,6 +43,7 @@ export async function InstitutionalRouteLayout({ children }: InstitutionalRouteL
         shortcutPlatform={shortcutPlatform}
         profiles={profiles}
       >
+        <RouteVisibilityRefresh />
         <Suspense fallback={<InstitutionalRouteSkeleton />}>{children}</Suspense>
       </InstitutionalShell>
     </SidebarNavigationStateProvider>

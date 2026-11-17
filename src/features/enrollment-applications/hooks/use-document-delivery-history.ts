@@ -29,6 +29,7 @@ export function useDocumentDeliveryHistory(applicationId: string, scope: Academi
 
   const query = useQuery({
     queryKey: [institutionId, personId, "document-delivery-history", scope, applicationId, requirementId, page],
+    meta: { refreshOnReturn: true },
     queryFn: async ({ signal }) => {
       const params = new URLSearchParams({ scope, requirementId, page: String(page) });
 

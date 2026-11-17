@@ -27,6 +27,7 @@ export function usePlatformAccount(options: UsePlatformAccountOptions = {}) {
 
   const query = useQuery<PlatformAccount | null>({
     queryKey: platformAccountKeys.byAccount(accountId),
+    meta: { refreshOnReturn: true },
     queryFn: fetchPlatformAccount,
     staleTime: 5 * 60 * 1000,
     retry: 1,

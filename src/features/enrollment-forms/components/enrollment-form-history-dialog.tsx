@@ -40,6 +40,7 @@ export function EnrollmentFormHistoryDialog({
 
   const versions = useQuery({
     queryKey: enrollmentFormQueryKey(context, path),
+    meta: { refreshOnReturn: true },
     queryFn: ({ signal }) =>
       readEnrollmentFormResource<PaginatedResponse<EnrollmentFormVersionSummary>>(context.scope, context.institutionId, path, signal),
     placeholderData: keepPreviousData,

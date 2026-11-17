@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { cookies, headers } from "next/headers";
 
 import { SidebarNavigationStateProvider } from "@common/components/navigation/sidebar-navigation-state-provider";
+import { RouteVisibilityRefresh } from "@common/components/route-visibility-refresh";
 import { SIDEBAR_NAVIGATION_GROUPS_COOKIE_NAMES } from "@common/constants/sidebar-navigation.constants";
 import { BEMOL_FAVICON_ICONS } from "@common/utils/brand-favicon.util";
 import { parseSidebarNavigationGroupStates } from "@common/utils/sidebar-navigation-cookie.util";
@@ -31,6 +32,7 @@ export default async function PlatformLayout({ children }: { children: ReactNode
     <PlatformAccountProvider initialAccount={account}>
       <SidebarNavigationStateProvider scope="platform" initialStates={sidebarGroupStates}>
         <PlatformShell defaultSidebarOpen={sidebarOpen} shortcutPlatform={shortcutPlatform}>
+          <RouteVisibilityRefresh />
           <Suspense fallback={<PlatformRouteSkeleton />}>{children}</Suspense>
         </PlatformShell>
       </SidebarNavigationStateProvider>

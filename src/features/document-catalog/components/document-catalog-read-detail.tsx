@@ -47,6 +47,7 @@ export function DocumentCatalogReadDetail({
 
   const query = useQuery({
     queryKey: ["document-catalog-associations", scope, institutionId, document.id, page, size, sort.field, sort.direction, true],
+    meta: { refreshOnReturn: true },
     queryFn: ({ signal }) =>
       fetchDocumentCatalog<PaginatedResponse<DocumentAssignment>>(
         scope,
