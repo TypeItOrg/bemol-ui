@@ -39,25 +39,33 @@ export function EnrollmentFormVersionSession({
   reload: () => Promise<EnrollmentFormVersion>;
   onCreated: (version: EnrollmentFormVersion) => void;
 }): ReactElement {
-  const [version, setVersion] = useState(initial);
+  const [{ version, editorGeneration }, setEditor] = useState({ version: initial, editorGeneration: 0 });
 
   const [dirty, setDirty] = useState(false);
 
-  const [epoch, setEpoch] = useState(0);
-
-  const versionLabel = getEnrollmentFormVersionLabel(version.versionNumber).toLowerCase();
-
-  const [confirm, setConfirm] = useState<"publish" | "archive" | null>(null);
-
-  const [assigning, setAssigning] = useState(false);
-
-  const [discard, setDiscard] = useState(false);
+  const [dialog, setDialog] = useState<"publish" | "archive" | "assign" | "discard" | null>(null);
 
   const [reloadError, setReloadError] = useState<unknown>();
 
   const [reloading, setReloading] = useState(false);
 
+  const hasNewerVersion = initial.revision > version.revision;
+
+  if (hasNewerVersion && !dirty && !dialog && !reloading) {
+    resetEditor(initial);
+  }
+
   const clone = useEnrollmentFormMutation<EnrollmentFormVersion>(context, onCreated);
+
+  const versionLabel = getEnrollmentFormVersionLabel(version.versionNumber).toLowerCase();
+
+  function resetEditor(nextVersion: EnrollmentFormVersion) {
+    setEditor((current) => ({ version: nextVersion, editorGeneration: current.editorGeneration + 1 }));
+  }
+
+  function acceptSave(nextVersion: EnrollmentFormVersion) {
+    setEditor((current) => ({ ...current, version: nextVersion }));
+  }
 
   function markDirty(value: boolean) {
     setDirty(value);
@@ -65,13 +73,12 @@ export function EnrollmentFormVersionSession({
   }
 
   async function reloadVersion() {
-    setDiscard(false);
+    setDialog(null);
     setReloading(true);
     setReloadError(undefined);
 
     try {
-      setVersion(await reload());
-      setEpoch((value) => value + 1);
+      resetEditor(await reload());
       markDirty(false);
     } catch (error) {
       setReloadError(error);
@@ -84,14 +91,14 @@ export function EnrollmentFormVersionSession({
     <div className="space-y-4">
       <EnrollmentFormFeedback error={clone.error || reloadError} />
       <EnrollmentFormEditor
-        key={`${version.id}:${epoch}`}
+        key={editorGeneration}
         context={context}
         version={version}
         onBack={onBack}
         actions={
           <>
             {context.canUpdate && version.status === "DRAFT" ? (
-              <Button type="button" disabled={dirty || reloading} onClick={() => setConfirm("publish")}>
+              <Button type="button" disabled={dirty || reloading} onClick={() => setDialog("publish")}>
                 Publicar
               </Button>
             ) : null}
@@ -124,21 +131,21 @@ export function EnrollmentFormVersionSession({
                     {version.status === "PUBLISHED" ? (
                       <>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem className="px-2.5 py-1.5" onSelect={() => setAssigning(true)}>
+                        <DropdownMenuItem className="px-2.5 py-1.5" onSelect={() => setDialog("assign")}>
                           Asignar formulario
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem variant="destructive" className="px-2.5 py-1.5" onSelect={() => setConfirm("archive")}>
+                        <DropdownMenuItem variant="destructive" className="px-2.5 py-1.5" onSelect={() => setDialog("archive")}>
                           Archivar
                         </DropdownMenuItem>
                       </>
                     ) : null}
                   </>
                 ) : null}
-                {initial.revision !== version.revision ? (
+                {hasNewerVersion ? (
                   <>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem className="px-2.5 py-1.5" disabled={reloading} onSelect={() => setDiscard(true)}>
+                    <DropdownMenuItem className="px-2.5 py-1.5" disabled={reloading} onSelect={() => setDialog("discard")}>
                       Hay cambios más recientes: recargar
                     </DropdownMenuItem>
                   </>
@@ -148,30 +155,30 @@ export function EnrollmentFormVersionSession({
           </>
         }
         onDirtyChange={markDirty}
-        onReload={() => setDiscard(true)}
-        onSaved={setVersion}
+        onReload={() => setDialog("discard")}
+        onSaved={acceptSave}
       />
-      {confirm ? (
+      {dialog === "publish" || dialog === "archive" ? (
         <EnrollmentFormConfirm
           context={context}
-          command={{ kind: confirm, formId: version.formId, versionId: version.id, expectedRevision: version.revision }}
-          icon={confirm === "publish" ? SendIcon : ArchiveIcon}
-          title={confirm === "publish" ? `Publicar la ${versionLabel}` : `Archivar la ${versionLabel}`}
+          command={{ kind: dialog, formId: version.formId, versionId: version.id, expectedRevision: version.revision }}
+          icon={dialog === "publish" ? SendIcon : ArchiveIcon}
+          title={dialog === "publish" ? `Publicar la ${versionLabel}` : `Archivar la ${versionLabel}`}
           description={
-            confirm === "publish"
+            dialog === "publish"
               ? "La definición quedará bloqueada. Las asignaciones actuales y las inscripciones ya iniciadas no cambian. Después podés asignarla a un trayecto y ciclo."
               : "Solo se puede archivar una versión sin asignaciones vigentes. Las inscripciones anteriores conservarán sus preguntas y respuestas."
           }
-          confirmLabel={confirm === "publish" ? "Publicar versión" : "Archivar versión"}
-          pendingLabel={confirm === "publish" ? "Publicando…" : "Archivando…"}
-          onClose={() => setConfirm(null)}
-          onSuccess={(value) => setVersion(value as EnrollmentFormVersion)}
+          confirmLabel={dialog === "publish" ? "Publicar versión" : "Archivar versión"}
+          pendingLabel={dialog === "publish" ? "Publicando…" : "Archivando…"}
+          onClose={() => setDialog(null)}
+          onSuccess={(value) => acceptSave(value as EnrollmentFormVersion)}
         />
       ) : null}
-      {assigning ? (
-        <EnrollmentFormAssignmentDialog context={context} version={version} modelName={modelName} onClose={() => setAssigning(false)} />
+      {dialog === "assign" ? (
+        <EnrollmentFormAssignmentDialog context={context} version={version} modelName={modelName} onClose={() => setDialog(null)} />
       ) : null}
-      {discard ? <EnrollmentFormDiscardDialog onCancel={() => setDiscard(false)} onConfirm={() => void reloadVersion()} /> : null}
+      {dialog === "discard" ? <EnrollmentFormDiscardDialog onCancel={() => setDialog(null)} onConfirm={() => void reloadVersion()} /> : null}
     </div>
   );
 }

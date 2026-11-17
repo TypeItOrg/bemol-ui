@@ -73,7 +73,12 @@ export function EnrollmentFormDetail({
     }
   }, [versionId, defaultVersionId, navigateParams]);
 
-  const detail = useEnrollmentFormResource<EnrollmentFormVersion>(context, `enrollment-forms/${modelId}/versions/${versionId}`, Boolean(versionId));
+  const detail = useEnrollmentFormResource<EnrollmentFormVersion>(
+    context,
+    `enrollment-forms/${modelId}/versions/${versionId}`,
+    Boolean(versionId),
+    !dirty,
+  );
 
   const loading = versionId ? detail.isPending || !versions.isFetched : versions.isPending || Boolean(defaultVersionId);
 

@@ -10,9 +10,10 @@ export function enrollmentFormQueryKey(context: EnrollmentFormContext, path?: st
   return ["enrollment-forms", context.scope, context.institutionId, ...(path ? [path] : [])];
 }
 
-export function useEnrollmentFormResource<T>(context: EnrollmentFormContext, path: string, enabled = true) {
+export function useEnrollmentFormResource<T>(context: EnrollmentFormContext, path: string, enabled = true, refreshOnReturn = true) {
   return useQuery({
     queryKey: enrollmentFormQueryKey(context, path),
+    meta: { refreshOnReturn },
     queryFn: ({ signal }) => readEnrollmentFormResource<T>(context.scope, context.institutionId, path, signal),
     enabled,
   });
