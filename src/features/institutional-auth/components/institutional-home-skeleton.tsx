@@ -13,7 +13,7 @@ export function InstitutionalHomeSkeleton({
 } = {}): ReactElement {
   return (
     <main
-      className="flex min-h-full flex-1 flex-col gap-4 min-[1600px]:[@media(min-height:860px)]:h-[calc(var(--app-viewport-height)-7.625rem)] min-[1600px]:[@media(min-height:860px)]:max-h-[calc(var(--app-viewport-height)-7.625rem)] min-[1600px]:[@media(min-height:860px)]:min-h-[540px] min-[1600px]:[@media(min-height:860px)]:flex-none min-[1600px]:[@media(min-height:860px)]:overflow-hidden"
+      className="flex min-h-full flex-1 flex-col gap-4 min-[1600px]:[@media(min-height:860px)]:h-[calc(var(--app-viewport-height)-7rem)] min-[1600px]:[@media(min-height:860px)]:max-h-[calc(var(--app-viewport-height)-7rem)] min-[1600px]:[@media(min-height:860px)]:min-h-[540px] min-[1600px]:[@media(min-height:860px)]:flex-none min-[1600px]:[@media(min-height:860px)]:overflow-hidden"
       aria-label="Cargando portal institucional"
       role="status"
     >
