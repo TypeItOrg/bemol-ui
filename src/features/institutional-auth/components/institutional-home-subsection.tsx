@@ -104,67 +104,70 @@ export function InstitutionalHomeSelector({ sections }: InstitutionalHomeSelecto
 
   const totalAccessCount = sections.reduce((total, section) => total + section.itemCount, 0);
 
+  const showSelector = sections.length > 1;
+
   return (
     <div className="@container/home-workspace flex min-h-0 flex-1 flex-col">
-      <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 @6xl/home-workspace:grid-cols-[max-content_minmax(0,1fr)]">
-        <aside className="bg-background flex min-h-0 flex-col gap-3 rounded-xl border p-2.5 shadow-xs sm:p-3.5 @6xl/home-workspace:h-full @6xl/home-workspace:min-w-72">
-          <div
-            role="tablist"
-            aria-label="Secciones de inicio"
-            aria-orientation="vertical"
-            className="grid grid-cols-1 gap-1.5 @xl/home-workspace:grid-cols-2 @4xl/home-workspace:flex @4xl/home-workspace:flex-row @4xl/home-workspace:flex-wrap @6xl/home-workspace:-mr-2.5 @6xl/home-workspace:flex @6xl/home-workspace:min-h-0 @6xl/home-workspace:flex-1 @6xl/home-workspace:flex-col @6xl/home-workspace:flex-nowrap @6xl/home-workspace:justify-start @6xl/home-workspace:gap-1 @6xl/home-workspace:overflow-y-auto @6xl/home-workspace:overscroll-contain @6xl/home-workspace:pr-2.5 @6xl/home-workspace:sm:-mr-3 @6xl/home-workspace:sm:pr-3"
-          >
-            {sections.map((section, index) => {
-              const isSelected = section.id === activeSection.id;
+      <div className={cn("grid min-h-0 flex-1 grid-cols-1 gap-4", showSelector && "@6xl/home-workspace:grid-cols-[max-content_minmax(0,1fr)]")}>
+        {showSelector ? (
+          <aside className="bg-background flex min-h-0 flex-col gap-3 rounded-xl border p-2.5 shadow-xs sm:p-3.5 @6xl/home-workspace:h-full @6xl/home-workspace:min-w-72">
+            <div
+              role="tablist"
+              aria-label="Secciones de inicio"
+              aria-orientation="vertical"
+              className="grid grid-cols-1 gap-1.5 @xl/home-workspace:grid-cols-2 @4xl/home-workspace:flex @4xl/home-workspace:flex-row @4xl/home-workspace:flex-wrap @6xl/home-workspace:-mr-2.5 @6xl/home-workspace:flex @6xl/home-workspace:min-h-0 @6xl/home-workspace:flex-1 @6xl/home-workspace:flex-col @6xl/home-workspace:flex-nowrap @6xl/home-workspace:justify-start @6xl/home-workspace:gap-1 @6xl/home-workspace:overflow-y-auto @6xl/home-workspace:overscroll-contain @6xl/home-workspace:pr-2.5 @6xl/home-workspace:sm:-mr-3 @6xl/home-workspace:sm:pr-3"
+            >
+              {sections.map((section, index) => {
+                const isSelected = section.id === activeSection.id;
 
-              return (
-                <button
-                  key={section.id}
-                  ref={(element) => {
-                    tabRefs.current[section.id] = element;
-                  }}
-                  type="button"
-                  role="tab"
-                  id={`${section.id}-tab`}
-                  aria-selected={isSelected}
-                  tabIndex={isSelected ? 0 : -1}
-                  onClick={() => setSelectedId(section.id)}
-                  onKeyDown={(event) => handleTabKeyDown(event, index)}
-                  className={cn(
-                    "focus-visible:ring-ring relative flex min-h-10 w-full shrink-0 cursor-pointer items-center justify-between gap-3 rounded-lg border border-transparent px-3.5 py-2.5 text-left text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none @4xl/home-workspace:w-auto @4xl/home-workspace:min-w-68 @4xl/home-workspace:flex-1 @6xl/home-workspace:w-full @6xl/home-workspace:min-w-0 @6xl/home-workspace:flex-none @6xl/home-workspace:gap-6",
-                    "aria-selected:bg-primary aria-selected:text-primary-foreground aria-selected:shadow-xs",
-                    !isSelected && "text-foreground hover:bg-muted/60",
-                  )}
-                >
-                  <span className="flex min-w-0 flex-1 items-center gap-2.5">
-                    {section.menuIcon}
-                    <span className="truncate">{section.title}</span>
-                  </span>
-                  <span
+                return (
+                  <button
+                    key={section.id}
+                    ref={(element) => {
+                      tabRefs.current[section.id] = element;
+                    }}
+                    type="button"
+                    role="tab"
+                    id={`${section.id}-tab`}
+                    aria-selected={isSelected}
+                    tabIndex={isSelected ? 0 : -1}
+                    onClick={() => setSelectedId(section.id)}
+                    onKeyDown={(event) => handleTabKeyDown(event, index)}
                     className={cn(
-                      "shrink-0 rounded-full px-2 py-0.5 text-xs font-medium",
-                      isSelected ? "bg-black/20 text-white dark:bg-white/20" : "bg-muted text-muted-foreground",
+                      "focus-visible:ring-ring relative flex min-h-10 w-full shrink-0 cursor-pointer items-center justify-between gap-3 rounded-lg border border-transparent px-3.5 py-2.5 text-left text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none @4xl/home-workspace:w-auto @4xl/home-workspace:min-w-68 @4xl/home-workspace:flex-1 @6xl/home-workspace:w-full @6xl/home-workspace:min-w-0 @6xl/home-workspace:flex-none @6xl/home-workspace:gap-6",
+                      "aria-selected:bg-primary aria-selected:text-primary-foreground aria-selected:shadow-xs",
+                      !isSelected && "text-foreground hover:bg-muted/60",
                     )}
                   >
-                    {section.itemCount}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-          <div className="bg-muted/70 dark:bg-muted/40 mt-auto hidden flex-col gap-0.5 rounded-lg px-3.5 py-3 @6xl/home-workspace:flex">
-            <p className="text-foreground text-xs font-semibold tracking-tight">
-              {sections.length} {sections.length === 1 ? "sección disponible" : "secciones disponibles"}
-            </p>
-            <p className="text-muted-foreground text-xs">
-              {totalAccessCount} {totalAccessCount === 1 ? "acceso habilitado" : "accesos habilitados"}
-            </p>
-          </div>
-        </aside>
+                    <span className="flex min-w-0 flex-1 items-center gap-2.5">
+                      {section.menuIcon}
+                      <span className="truncate">{section.title}</span>
+                    </span>
+                    <span
+                      className={cn(
+                        "shrink-0 rounded-full px-2 py-0.5 text-xs font-medium",
+                        isSelected ? "bg-black/20 text-white dark:bg-white/20" : "bg-muted text-muted-foreground",
+                      )}
+                    >
+                      {section.itemCount}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+            <div className="bg-muted/70 dark:bg-muted/40 mt-auto hidden flex-col gap-0.5 rounded-lg px-3.5 py-3 @6xl/home-workspace:flex">
+              <p className="text-foreground text-xs font-semibold tracking-tight">{sections.length} secciones disponibles</p>
+              <p className="text-muted-foreground text-xs">
+                {totalAccessCount} {totalAccessCount === 1 ? "acceso habilitado" : "accesos habilitados"}
+              </p>
+            </div>
+          </aside>
+        ) : null}
 
         <section
-          role="tabpanel"
-          aria-labelledby={`${activeSection.id}-tab`}
+          role={showSelector ? "tabpanel" : undefined}
+          aria-labelledby={showSelector ? `${activeSection.id}-tab` : undefined}
+          aria-label={showSelector ? undefined : activeSection.title}
           className="bg-background flex min-h-0 flex-col rounded-xl border p-4 shadow-xs sm:p-5 @6xl/home-workspace:h-full"
         >
           <div className="relative flex flex-col @6xl/home-workspace:-mr-2.5 @6xl/home-workspace:min-h-0 @6xl/home-workspace:flex-1 @6xl/home-workspace:overflow-hidden @6xl/home-workspace:sm:-mr-3">
