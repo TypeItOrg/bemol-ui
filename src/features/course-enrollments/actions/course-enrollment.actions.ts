@@ -10,6 +10,7 @@ import { getSafeReturnTo } from "@common/utils/return-to.util";
 import { ACADEMIC_ENROLLMENT_STATUS } from "@features/course-enrollments/types/academic-enrollment-status.types";
 import { type CourseEnrollmentActionResult } from "@features/course-enrollments/types/course-enrollment-action-result.types";
 import { buildAssignmentBody } from "@features/course-enrollments/utils/course-enrollment-assignment-body.util";
+import { revalidateCourseEnrollmentViews } from "@features/course-enrollments/utils/revalidate-course-enrollment-views.util";
 import { requireInstitutionalUser } from "@features/institutional-auth/services/get-institutional-user.service";
 import { institutionalApiFetch } from "@features/institutional-auth/services/institutional-api-fetch.service";
 
@@ -53,7 +54,7 @@ export async function createManualCourseEnrollmentAction(formData: FormData): Pr
     return { error: failure.error };
   }
 
-  revalidatePath("/course-enrollments");
+  revalidateCourseEnrollmentViews();
   redirect(returnTo);
 }
 
@@ -93,7 +94,7 @@ export async function enrollApplicationCourseAction(
   }
 
   revalidatePath(`/enrollment-applications/${applicationId}`);
-  revalidatePath("/course-enrollments");
+  revalidateCourseEnrollmentViews();
 
   return {};
 }
@@ -167,8 +168,7 @@ export async function withdrawCourseEnrollmentAction(
     return { error: failure.error };
   }
 
-  revalidatePath("/course-enrollments");
-  revalidatePath("/my-course-enrollments");
+  revalidateCourseEnrollmentViews();
 
   return {};
 }
@@ -210,7 +210,7 @@ export async function updateCourseAcademicStatusAction(
   }
 
   revalidatePath("/course-enrollments");
-  revalidatePath("/my-course-enrollments");
+  revalidatePath("/(institutional)/self-service/[personId]/courses", "page");
 
   return {};
 }

@@ -1,7 +1,5 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
-
 import { z } from "zod";
 
 import { getResponseErrorActionState } from "@common/utils/action-state.util";
@@ -11,6 +9,7 @@ import { authorizeAcademicAction } from "@features/academic/utils/academic-actio
 import type { AcademicScope } from "@features/academic/utils/academic-scope.util";
 import { ENROLLMENT_MESSAGES } from "@features/enrollment-applications/constants/enrollment-messages.constants";
 import type { DocumentRequestActionState } from "@features/enrollment-applications/types/document-request-action-state.types";
+import { revalidateEnrollmentApplicationViews } from "@features/enrollment-applications/utils/revalidate-enrollment-application-views.util";
 import { INSTITUTIONAL_PERMISSION } from "@features/institutional-auth/types/institutional-permission.types";
 
 export async function requestDocuments(
@@ -92,8 +91,7 @@ export async function requestDocuments(
     return { ...error, uncertain: !response || response.status >= 500 };
   }
 
-  revalidatePath(scope === "admin" ? "/admin/enrollment-applications" : "/enrollment-applications");
-  revalidatePath("/my-enrollment-applications");
+  revalidateEnrollmentApplicationViews(applicationId, { institutionId });
 
   return { success: true };
 }

@@ -79,7 +79,8 @@ async function mutate(
 
   revalidatePath("/enrollment-periods");
   revalidatePath("/admin/enrollment-periods");
-  revalidatePath("/my-enrollment-applications", "layout");
+  revalidatePath("/(institutional)/self-service/[personId]/enrollment", "page");
+  revalidatePath("/(institutional)/self-service/[personId]/enrollment-applications", "layout");
   revalidatePath("/enrollment-applications", "layout");
   revalidatePath("/admin/enrollment-applications", "layout");
 

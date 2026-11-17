@@ -1,19 +1,14 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
-
 import { INVALID_ACTION_ARGUMENTS, isValidUuid } from "@common/utils/action-argument.util";
 import { getResponseErrorActionState, getValidationActionState } from "@common/utils/action-state.util";
 
-import {
-  GUARDIAN_DEPENDENTS_PAGE_PATH,
-  GUARDIAN_DEPENDENT_MESSAGES,
-  getGuardianDependentsApiPath,
-} from "@features/guardian-dependents/constants/guardian-dependent.constants";
+import { GUARDIAN_DEPENDENT_MESSAGES, getGuardianDependentsApiPath } from "@features/guardian-dependents/constants/guardian-dependent.constants";
 import { createGuardianDependentSchema } from "@features/guardian-dependents/schemas/create-guardian-dependent.schema";
 import type { GuardianDependentActionState } from "@features/guardian-dependents/types/guardian-dependent-action-state.types";
 import { GUARDIAN_DEPENDENT_FIELD_NAMES } from "@features/guardian-dependents/types/guardian-dependent-field-name.types";
 import { authorizeGuardianAction } from "@features/guardian-dependents/utils/authorize-guardian-action.util";
+import { revalidateGuardianLinkViews } from "@features/guardian-links/utils/revalidate-guardian-link-views.util";
 import { requireInstitutionalUser } from "@features/institutional-auth/services/get-institutional-user.service";
 import { institutionalApiFetch } from "@features/institutional-auth/services/institutional-api-fetch.service";
 import { canRequestDependents } from "@features/institutional-auth/utils/institutional-applicant-role.util";
@@ -65,7 +60,7 @@ export async function createGuardianDependentAction(
     return errorState;
   }
 
-  revalidatePath(GUARDIAN_DEPENDENTS_PAGE_PATH);
+  revalidateGuardianLinkViews();
 
   try {
     const response = await request;

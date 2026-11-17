@@ -2,8 +2,6 @@
 
 import { useActionState, type ReactElement, type RefObject } from "react";
 
-import { useRouter } from "next/navigation";
-
 import { CircleAlertIcon, FileTextIcon } from "lucide-react";
 
 import { ActionForm } from "@common/components/action-form";
@@ -51,8 +49,6 @@ export function DocumentCatalogSaveConfirmation({
   returnTo?: string;
   onResult: (result: DocumentCatalogActionState) => void;
 }): ReactElement {
-  const router = useRouter();
-
   const [state, action, pending] = useActionState(async (previous: DocumentCatalogActionState) => {
     onPendingChange?.(true);
 
@@ -67,7 +63,6 @@ export function DocumentCatalogSaveConfirmation({
 
       if (result.success && result.document) {
         onSaved(result.document);
-        router.refresh();
       }
 
       return result;

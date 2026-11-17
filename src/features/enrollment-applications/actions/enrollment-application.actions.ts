@@ -11,6 +11,10 @@ import { mutateEnrollmentApplication } from "@features/enrollment-applications/s
 import type { ChangeEnrollmentCareerResult } from "@features/enrollment-applications/types/change-enrollment-career-result.types";
 import type { StartEnrollmentApplicationInput } from "@features/enrollment-applications/types/start-enrollment-application-input.types";
 import type { UpdateEnrollmentDraftInput } from "@features/enrollment-applications/types/update-enrollment-draft-input.types";
+import {
+  revalidateEnrollmentApplicationLists,
+  revalidateEnrollmentApplicationViews,
+} from "@features/enrollment-applications/utils/revalidate-enrollment-application-views.util";
 import { getSelfServiceEnrollmentApiPath } from "@features/guardian-workspace/services/operating-profile.service";
 
 export async function startOrGetEnrollmentApplicationAction(
@@ -23,7 +27,18 @@ export async function startOrGetEnrollmentApplicationAction(
     return { error: INVALID_ACTION_ARGUMENTS };
   }
 
-  return mutateEnrollmentApplication(await getSelfServiceEnrollmentApiPath(personId), "POST", ENROLLMENT_MESSAGES.START_FAILED, parsed.data);
+  const result = await mutateEnrollmentApplication(
+    await getSelfServiceEnrollmentApiPath(personId),
+    "POST",
+    ENROLLMENT_MESSAGES.START_FAILED,
+    parsed.data,
+  );
+
+  if (result.application) {
+    revalidateEnrollmentApplicationLists(result.application.personId);
+  }
+
+  return result;
 }
 
 export async function updateEnrollmentDraftAction(
@@ -59,12 +74,18 @@ export async function submitEnrollmentApplicationAction(
     return { error: INVALID_ACTION_ARGUMENTS };
   }
 
-  return mutateEnrollmentApplication(
+  const result = await mutateEnrollmentApplication(
     `${await getSelfServiceEnrollmentApiPath(personId)}/${applicationId}/submit`,
     "POST",
     ENROLLMENT_MESSAGES.SUBMISSION_FAILED,
     { expectedRevision },
   );
+
+  if (result.application) {
+    revalidateEnrollmentApplicationViews(applicationId, result.application);
+  }
+
+  return result;
 }
 
 export async function cancelEnrollmentApplicationAction(applicationId: string, personId?: string): Promise<ChangeEnrollmentCareerResult> {
@@ -72,9 +93,15 @@ export async function cancelEnrollmentApplicationAction(applicationId: string, p
     return { error: INVALID_ACTION_ARGUMENTS };
   }
 
-  return mutateEnrollmentApplication(
+  const result = await mutateEnrollmentApplication(
     `${await getSelfServiceEnrollmentApiPath(personId)}/${applicationId}/cancel`,
     "POST",
     ENROLLMENT_MESSAGES.CANCEL_APPLICATION_FAILED,
   );
+
+  if (result.application) {
+    revalidateEnrollmentApplicationViews(applicationId, result.application);
+  }
+
+  return result;
 }

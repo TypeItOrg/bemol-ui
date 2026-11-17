@@ -2,8 +2,6 @@
 
 import { useState, type ReactElement } from "react";
 
-import { useRouter } from "next/navigation";
-
 import { Loader2Icon } from "lucide-react";
 
 import { useDataTableNavigation } from "@common/components/ui/data-table-navigation";
@@ -43,8 +41,6 @@ export function EnrollmentApplicationTablePresentation({
   canReject,
   scope,
 }: EnrollmentApplicationTablePresentationProps): ReactElement {
-  const router = useRouter();
-
   const { isPending: isNavigating } = useDataTableNavigation();
 
   const [applicationToApprove, setApplicationToApprove] = useState<EnrollmentApplication>();
@@ -70,7 +66,6 @@ export function EnrollmentApplicationTablePresentation({
   function handleResolved(): void {
     setApplicationToApprove(undefined);
     setApplicationToReject(undefined);
-    router.refresh();
   }
 
   if (data.items.length === 0) {

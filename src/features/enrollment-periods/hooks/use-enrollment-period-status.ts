@@ -2,8 +2,6 @@
 
 import { startTransition, useActionState } from "react";
 
-import { useRouter } from "next/navigation";
-
 import { toast } from "sonner";
 
 import { AcademicScope } from "@features/academic/utils/academic-scope.util";
@@ -13,8 +11,6 @@ import type { EnrollmentPeriodActionState } from "@features/enrollment-periods/t
 import { type EnrollmentPeriodStatus } from "@features/enrollment-periods/types/enrollment-period-status.types";
 
 export function useEnrollmentPeriodStatus(institutionId: string, scope: AcademicScope) {
-  const router = useRouter();
-
   const [, changeStatus, isChangingStatus] = useActionState(
     async (_previous: EnrollmentPeriodActionState, input: { periodId: string; status: EnrollmentPeriodStatus }) => {
       const result = await updateEnrollmentPeriodStatusAction(institutionId, input.periodId, { status: input.status }, scope);
@@ -23,7 +19,6 @@ export function useEnrollmentPeriodStatus(institutionId: string, scope: Academic
         toast.error(result.error);
       } else {
         toast.success(ENROLLMENT_MESSAGES.PERIOD_STATUS_UPDATED);
-        router.refresh();
       }
 
       return result;

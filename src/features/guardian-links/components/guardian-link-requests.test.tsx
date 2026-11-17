@@ -10,11 +10,10 @@ import type { GuardianLinksQuery } from "@features/guardian-links/types/guardian
 
 const mockNavigate = jest.fn();
 const mockPush = jest.fn();
-const mockRefresh = jest.fn();
 
 jest.mock("next/navigation", () => ({
   usePathname: () => "/guardian-links",
-  useRouter: () => ({ push: mockPush, refresh: mockRefresh }),
+  useRouter: () => ({ push: mockPush }),
   useSearchParams: () => new URLSearchParams("page=2&size=20"),
 }));
 jest.mock("@common/components/ui/data-table-navigation", () => ({
@@ -66,7 +65,6 @@ describe("GuardianLinkRequests", () => {
   beforeEach(() => {
     mockNavigate.mockReset();
     mockPush.mockReset();
-    mockRefresh.mockReset();
     jest.mocked(resolveGuardianLinkAction).mockReset().mockResolvedValue({ success: true });
   });
 
@@ -164,7 +162,7 @@ describe("GuardianLinkRequests", () => {
     expect(resolveGuardianLinkAction).not.toHaveBeenCalled();
   });
 
-  it("refreshes after rejection and hides decisions for the refreshed resolved request", async () => {
+  it("hides decisions for the resolved request after rejection", async () => {
     const user = userEvent.setup();
     const { rerender } = render(<RequestsFixture institutionId={INSTITUTION_ID} requests={[buildRequest()]} />);
 
@@ -173,8 +171,6 @@ describe("GuardianLinkRequests", () => {
 
     const dialog = await screen.findByRole("alertdialog");
     await user.click(within(dialog).getByRole("button", { name: "Rechazar" }));
-
-    await waitFor(() => expect(mockRefresh).toHaveBeenCalled());
 
     await user.click(screen.getByRole("combobox", { name: "Estado" }));
     await user.click(await screen.findByRole("option", { name: "Rechazada" }));

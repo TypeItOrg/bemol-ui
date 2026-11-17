@@ -1,7 +1,5 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
-
 import { INVALID_ACTION_ARGUMENTS, isValidUuid } from "@common/utils/action-argument.util";
 import { getResponseErrorActionState, getValidationActionState } from "@common/utils/action-state.util";
 
@@ -11,12 +9,11 @@ import { ENROLLMENT_MESSAGES } from "@features/enrollment-applications/constants
 import { rejectionReasonSchema } from "@features/enrollment-applications/schemas/rejection-reason.schema";
 import type { EnrollmentApplicationRejectActionState } from "@features/enrollment-applications/types/enrollment-application-reject-action-state.types";
 import type { EnrollmentApplicationRejectField } from "@features/enrollment-applications/types/enrollment-application-reject-field.types";
+import { revalidateEnrollmentApplicationViews } from "@features/enrollment-applications/utils/revalidate-enrollment-application-views.util";
 import { institutionalApiFetch } from "@features/institutional-auth/services/institutional-api-fetch.service";
 import { INSTITUTIONAL_PERMISSION } from "@features/institutional-auth/types/institutional-permission.types";
 
 const REJECT_FIELDS: readonly EnrollmentApplicationRejectField[] = ["rejectionReason"];
-
-const UPDATE_PATH = "/enrollment-applications";
 
 export async function rejectEnrollmentApplicationAction(
   institutionId: string,
@@ -56,7 +53,7 @@ export async function rejectEnrollmentApplicationAction(
     return errorState;
   }
 
-  revalidatePath(UPDATE_PATH);
+  revalidateEnrollmentApplicationViews(applicationId, { institutionId });
 
   return { success: true };
 }

@@ -146,10 +146,7 @@ export function GuardianLinkRequests({
       {requestToApprove ? (
         <ApproveGuardianLinkDialog
           institutionId={institutionId}
-          onApproved={() => {
-            setRequestToApprove(null);
-            router.refresh();
-          }}
+          onApproved={() => setRequestToApprove(null)}
           onClose={() => setRequestToApprove(null)}
           onResolve={onResolve}
           request={requestToApprove}
@@ -160,10 +157,7 @@ export function GuardianLinkRequests({
         <RejectGuardianLinkDialog
           institutionId={institutionId}
           onClose={() => setRequestToReject(null)}
-          onRejected={() => {
-            setRequestToReject(null);
-            router.refresh();
-          }}
+          onRejected={() => setRequestToReject(null)}
           onResolve={onResolve}
           request={requestToReject}
         />

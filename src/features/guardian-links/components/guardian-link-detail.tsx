@@ -3,7 +3,6 @@
 import { useState, type ReactElement } from "react";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 
 import { ClipboardCheckIcon, ClipboardListIcon, FileTextIcon, UsersIcon } from "lucide-react";
 
@@ -46,8 +45,6 @@ export function GuardianLinkDetail({
   returnTo: string;
   platform?: boolean;
 }): ReactElement {
-  const router = useRouter();
-
   const [decision, setDecision] = useState<"approve" | "reject" | null>(null);
 
   const onResolve = platform ? resolvePlatformGuardianLinkAction : resolveGuardianLinkAction;
@@ -58,7 +55,6 @@ export function GuardianLinkDetail({
 
   function onSuccess(): void {
     setDecision(null);
-    router.refresh();
   }
 
   return (

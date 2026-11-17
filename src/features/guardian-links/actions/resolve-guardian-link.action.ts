@@ -1,16 +1,11 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
-
 import { INVALID_ACTION_ARGUMENTS, isValidUuid } from "@common/utils/action-argument.util";
 import { getResponseErrorActionState, type FieldActionState } from "@common/utils/action-state.util";
 
-import {
-  GUARDIAN_LINK_MESSAGES,
-  GUARDIAN_LINKS_PAGE_PATH,
-  getGuardianLinksApiPath,
-} from "@features/guardian-links/constants/guardian-link.constants";
+import { GUARDIAN_LINK_MESSAGES, getGuardianLinksApiPath } from "@features/guardian-links/constants/guardian-link.constants";
 import type { GuardianLinkDecision } from "@features/guardian-links/types/guardian-link-decision.types";
+import { revalidateGuardianLinkViews } from "@features/guardian-links/utils/revalidate-guardian-link-views.util";
 import { requireInstitutionalUser } from "@features/institutional-auth/services/get-institutional-user.service";
 import { institutionalApiFetch } from "@features/institutional-auth/services/institutional-api-fetch.service";
 import { canReviewGuardianLinks } from "@features/institutional-auth/utils/institutional-applicant-role.util";
@@ -53,7 +48,7 @@ export async function resolveGuardianLinkAction(
     return errorState;
   }
 
-  revalidatePath(GUARDIAN_LINKS_PAGE_PATH);
+  revalidateGuardianLinkViews(linkId);
 
   return { success: true };
 }

@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { INVALID_ACTION_ARGUMENTS, isValidUuid } from "@common/utils/action-argument.util";
 import { getResponseErrorActionState } from "@common/utils/action-state.util";
 
+import { revalidateCourseEnrollmentViews } from "@features/course-enrollments/utils/revalidate-course-enrollment-views.util";
 import { requirePlatformAccount } from "@features/platform-auth/services/get-platform-account.service";
 import { platformApiFetch } from "@features/platform-auth/services/platform-api-fetch.service";
 
@@ -101,6 +102,7 @@ export async function enrollPlatformApplicationCourseAction(
   }
 
   revalidatePath(`/admin/enrollment-applications/${institutionId}/${applicationId}`);
+  revalidateCourseEnrollmentViews();
 
   return {};
 }

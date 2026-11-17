@@ -2,8 +2,6 @@
 
 import { useState, type ReactElement } from "react";
 
-import { useRouter } from "next/navigation";
-
 import { CalendarIcon, CalendarRangeIcon, EllipsisVerticalIcon, RouteIcon, UserRoundIcon } from "lucide-react";
 
 import { ReturnToLink } from "@common/components/navigation/return-to-link";
@@ -45,8 +43,6 @@ export function MyEnrollmentApplicationTableRow({
   canManageApplications = false,
 }: MyEnrollmentApplicationTableRowProps): ReactElement {
   const personId = useOperatingPersonId();
-
-  const router = useRouter();
 
   const [isCancelOpen, setIsCancelOpen] = useState(false);
 
@@ -152,10 +148,7 @@ export function MyEnrollmentApplicationTableRow({
         <EnrollmentCancelDialog
           applicationId={application.applicationId}
           onClose={() => setIsCancelOpen(false)}
-          onCancelled={() => {
-            setIsCancelOpen(false);
-            router.refresh();
-          }}
+          onCancelled={() => setIsCancelOpen(false)}
         />
       )}
     </>

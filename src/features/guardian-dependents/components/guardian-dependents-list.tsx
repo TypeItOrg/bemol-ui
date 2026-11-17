@@ -2,8 +2,6 @@
 
 import { startTransition, useState, type ReactElement } from "react";
 
-import { useRouter } from "next/navigation";
-
 import { useQueryClient } from "@tanstack/react-query";
 import { Loader2Icon, PlusIcon } from "lucide-react";
 
@@ -38,8 +36,6 @@ type GuardianDependentsListProps = {
 };
 
 export function GuardianDependentsList({ data, institutionId, query, canRequest = false }: GuardianDependentsListProps): ReactElement {
-  const router = useRouter();
-
   const queryClient = useQueryClient();
 
   const { isPending: isNavigating, navigate } = useDataTableNavigation();
@@ -188,7 +184,6 @@ export function GuardianDependentsList({ data, institutionId, query, canRequest 
             onClose={() => setDependentToUnlink(null)}
             onSuccess={() => {
               setDependentToUnlink(null);
-              router.refresh();
             }}
           />
         ) : null}

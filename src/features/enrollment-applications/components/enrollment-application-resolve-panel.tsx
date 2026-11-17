@@ -2,8 +2,6 @@
 
 import { useState, type ReactElement } from "react";
 
-import { useRouter } from "next/navigation";
-
 import { Button } from "@common/components/ui/button";
 
 import { EnrollmentApplicationApproveDialog } from "@features/enrollment-applications/components/enrollment-application-approve-dialog";
@@ -27,8 +25,6 @@ export function EnrollmentApplicationResolvePanel({
   canApprove,
   canReject,
 }: EnrollmentApplicationResolvePanelProps): ReactElement | null {
-  const router = useRouter();
-
   const [showApproveDialog, setShowApproveDialog] = useState(false);
 
   const [showRejectDialog, setShowRejectDialog] = useState(false);
@@ -36,7 +32,6 @@ export function EnrollmentApplicationResolvePanel({
   function handleResolved(): void {
     setShowApproveDialog(false);
     setShowRejectDialog(false);
-    router.refresh();
   }
 
   const showApprove =

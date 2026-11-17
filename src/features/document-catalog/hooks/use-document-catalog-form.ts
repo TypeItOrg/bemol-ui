@@ -61,7 +61,6 @@ export function useDocumentCatalogForm({
         setChanges({});
         setRemovedAssignments({});
         onSaved?.(result.document);
-        router.refresh();
       }
 
       return result;

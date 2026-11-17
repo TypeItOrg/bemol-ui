@@ -3,7 +3,6 @@
 import { useState, type ReactElement } from "react";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 
 import { useQueryClient } from "@tanstack/react-query";
 import { BookOpenIcon, EllipsisIcon } from "lucide-react";
@@ -52,8 +51,6 @@ export function EnrollmentApplicationCoursesManagement({
   readOnly = false,
   showAvailability = false,
 }: EnrollmentApplicationCoursesManagementProps): ReactElement | null {
-  const router = useRouter();
-
   const queryClient = useQueryClient();
 
   const [courseToEnroll, setCourseToEnroll] = useState<EnrollmentApplicationCourse>();
@@ -62,7 +59,6 @@ export function EnrollmentApplicationCoursesManagement({
 
   function handleResolved(): void {
     void queryClient.invalidateQueries({ queryKey: ["course-enrollment-options", scope, institutionId] });
-    router.refresh();
   }
 
   if (courses.length === 0) {

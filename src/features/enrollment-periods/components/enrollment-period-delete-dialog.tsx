@@ -2,8 +2,6 @@
 
 import { useActionState } from "react";
 
-import { useRouter } from "next/navigation";
-
 import { CircleAlertIcon, Trash2Icon } from "lucide-react";
 
 import { Alert, AlertDescription } from "@common/components/ui/alert";
@@ -33,14 +31,11 @@ export function EnrollmentPeriodDeleteDialog({
   scope: AcademicScope;
   onClose: () => void;
 }) {
-  const router = useRouter();
-
   const [state, action, pending] = useActionState(async (): Promise<EnrollmentPeriodActionState> => {
     const result = await deleteEnrollmentPeriodAction(institutionId, periodId, scope);
 
     if (result.success) {
       onClose();
-      router.refresh();
     }
 
     return result;

@@ -1,7 +1,5 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
-
 import { INVALID_ACTION_ARGUMENTS, isValidUuid } from "@common/utils/action-argument.util";
 import { getResponseErrorActionState } from "@common/utils/action-state.util";
 
@@ -9,10 +7,9 @@ import { authorizeAcademicAction } from "@features/academic/utils/academic-actio
 import { AcademicScope } from "@features/academic/utils/academic-scope.util";
 import { ENROLLMENT_MESSAGES } from "@features/enrollment-applications/constants/enrollment-messages.constants";
 import type { EnrollmentApplicationActionState } from "@features/enrollment-applications/types/enrollment-application-action-state.types";
+import { revalidateEnrollmentApplicationViews } from "@features/enrollment-applications/utils/revalidate-enrollment-application-views.util";
 import { INSTITUTIONAL_PERMISSION } from "@features/institutional-auth/types/institutional-permission.types";
 import { platformApiFetch } from "@features/platform-auth/services/platform-api-fetch.service";
-
-const UPDATE_PATH = "/admin/enrollment-applications";
 
 export async function approvePlatformEnrollmentApplicationAction(
   institutionId: string,
@@ -41,8 +38,7 @@ export async function approvePlatformEnrollmentApplicationAction(
     return errorState;
   }
 
-  revalidatePath(UPDATE_PATH);
-  revalidatePath(`${UPDATE_PATH}/${institutionId}/${applicationId}`);
+  revalidateEnrollmentApplicationViews(applicationId, { institutionId });
 
   return { success: true };
 }

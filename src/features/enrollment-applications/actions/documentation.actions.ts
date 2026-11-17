@@ -8,6 +8,7 @@ import { getResponseErrorActionState } from "@common/utils/action-state.util";
 import { DOCUMENT_MESSAGES } from "@features/enrollment-applications/constants/documentation.constants";
 import { fetchDocumentAttachments, getDocumentAttachmentsPath } from "@features/enrollment-applications/services/document-attachments-api.service";
 import type { DocumentActionState } from "@features/enrollment-applications/types/document-action-state.types";
+import { revalidateEnrollmentApplicationViews } from "@features/enrollment-applications/utils/revalidate-enrollment-application-views.util";
 
 const context = z.object({
   scope: z.enum(["admin", "institutional"]),
@@ -71,6 +72,7 @@ export async function mutateDocument(
     return error;
   }
 
-  // Callers refresh what they show; the draft wizard keeps its own state instead of re-rendering the page.
+  revalidateEnrollmentApplicationViews(input.applicationId, { personId });
+
   return { success: true };
 }

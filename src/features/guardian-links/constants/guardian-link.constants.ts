@@ -1,6 +1,8 @@
 /** Page where the institution reviews the guardianship requests. Server Actions revalidate it. */
 export const GUARDIAN_LINKS_PAGE_PATH = "/guardian-links";
 
+export const PLATFORM_GUARDIAN_LINKS_PAGE_PATH = "/admin/guardian-links";
+
 export function getPlatformGuardianLinksApiPath(): string {
   return "/api/v1/admin/guardian-links";
 }
