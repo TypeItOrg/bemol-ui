@@ -19,6 +19,7 @@ import { safelyRunAction } from "@common/utils/safe-action.util";
 import { cancelEnrollmentApplicationAction } from "@features/enrollment-applications/actions/enrollment-application.actions";
 import { ENROLLMENT_MESSAGES } from "@features/enrollment-applications/constants/enrollment-messages.constants";
 import type { ChangeEnrollmentCareerResult } from "@features/enrollment-applications/types/change-enrollment-career-result.types";
+import type { EnrollmentApplicationResponse } from "@features/enrollment-applications/types/enrollment-application-response.types";
 import { useOperatingPersonId } from "@features/guardian-workspace/components/guardian-workspace-provider";
 
 export function EnrollmentCancelDialog({
@@ -30,7 +31,7 @@ export function EnrollmentCancelDialog({
   applicationId: string;
   beforeCancel?: () => Promise<void>;
   onClose: () => void;
-  onCancelled: () => void;
+  onCancelled: (application: EnrollmentApplicationResponse) => void;
 }) {
   const personId = useOperatingPersonId();
 
@@ -45,7 +46,7 @@ export function EnrollmentCancelDialog({
     );
 
     if (result.application) {
-      onCancelled();
+      onCancelled(result.application);
     }
 
     return result;

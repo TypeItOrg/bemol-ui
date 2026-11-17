@@ -15,6 +15,9 @@ import { EnrollmentMutationError, unwrapEnrollmentResult } from "@features/enrol
 
 export function useEnrollmentDraftAutosave({
   application,
+  serverDraftRevision,
+  onAdoptServerDraft,
+  documentsBlocked,
   readOnly,
   isSubmitDialogOpen,
   isCancelDialogOpen,
@@ -23,6 +26,9 @@ export function useEnrollmentDraftAutosave({
   setApplication,
 }: {
   application: EnrollmentApplicationResponse;
+  serverDraftRevision?: number;
+  onAdoptServerDraft?: (revision: number) => void;
+  documentsBlocked?: boolean;
   readOnly: boolean;
   isSubmitDialogOpen: boolean;
   isCancelDialogOpen: boolean;
@@ -48,6 +54,8 @@ export function useEnrollmentDraftAutosave({
   const initialized = useRef(false);
 
   const dataSignature = JSON.stringify(structuredData);
+
+  const initialSignature = useRef(dataSignature);
 
   const debouncedSignature = useDebouncedValue(dataSignature, 800);
 
@@ -110,7 +118,31 @@ export function useEnrollmentDraftAutosave({
 
   const currentPath = structuredData.careerSelection?.trainingPathId === (selectedTrainingPathId || undefined);
 
-  const target = canSave && currentPath && debouncedSignature === dataSignature ? application.applicationId : null;
+  const hasNewServerDraft = serverDraftRevision !== undefined && serverDraftRevision > (application.draftRevision ?? 0);
+
+  useEffect(() => {
+    if (
+      serverDraftRevision === undefined ||
+      serverDraftRevision <= revision.current ||
+      saving ||
+      documentsBlocked ||
+      isSubmitDialogOpen ||
+      isCancelDialogOpen ||
+      conflict.current
+    ) {
+      return;
+    }
+
+    if (dataSignature !== (lastSavedData.current ?? initialSignature.current)) {
+      pauseForConflict();
+
+      return;
+    }
+
+    onAdoptServerDraft?.(serverDraftRevision);
+  }, [dataSignature, documentsBlocked, isCancelDialogOpen, isSubmitDialogOpen, onAdoptServerDraft, pauseForConflict, saving, serverDraftRevision]);
+
+  const target = canSave && !hasNewServerDraft && currentPath && debouncedSignature === dataSignature ? application.applicationId : null;
 
   useEffect(() => {
     if (!target) {

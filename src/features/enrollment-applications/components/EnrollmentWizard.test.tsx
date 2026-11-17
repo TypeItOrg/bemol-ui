@@ -20,13 +20,11 @@ import type { EnrollmentCourseOption } from "@features/enrollment-applications/t
 
 import { renderWithQueryClient as render } from "@/../test/utils/render-with-query-client";
 
-const mockRefresh = jest.fn();
-
 jest.mock("next/navigation", () => ({
   useRouter: () => ({
     push: jest.fn(),
     replace: jest.fn(),
-    refresh: mockRefresh,
+    refresh: jest.fn(),
   }),
   usePathname: () => "/self-service/person-1/enrollment-applications/app-1",
   useSearchParams: () => new URLSearchParams(),
@@ -194,18 +192,13 @@ describe("EnrollmentWizard", () => {
     updateAction.mockResolvedValue({ application: COMPLETE_DRAFT });
     submitAction.mockResolvedValue({ application: { ...COMPLETE_DRAFT, status: "SUBMITTED" } });
 
-    const { rerender } = renderWizard({ initialApplication: COMPLETE_DRAFT });
+    renderWizard({ initialApplication: COMPLETE_DRAFT });
 
     await screen.findByDisplayValue("Lucas");
     await userEvent.click(screen.getByRole("tab", { name: /preferencias/i }));
     await confirmSubmission();
 
     await waitFor(() => expect(submitAction).toHaveBeenCalledWith("app-1", "person-1", 0));
-    await waitFor(() => expect(mockRefresh).toHaveBeenCalled());
-    expect(screen.queryByText("Enviada")).not.toBeInTheDocument();
-
-    rerender(<EnrollmentWizard initialApplication={{ ...COMPLETE_DRAFT, status: "SUBMITTED" }} initialCourseOptions={[COURSE_OPTION]} />);
-
     expect(await screen.findByText("Enviada")).toBeVisible();
     expect(screen.getByText("Lucas Mendoza")).toBeVisible();
     expect(screen.queryByRole("tab", { name: /datos personales/i })).not.toBeInTheDocument();
@@ -214,7 +207,7 @@ describe("EnrollmentWizard", () => {
   it("cancels the draft after the applicant confirms the dialog", async () => {
     cancelAction.mockResolvedValue({ application: { ...BASE, status: "CANCELLED" } });
 
-    const { rerender } = renderWizard();
+    renderWizard();
 
     await screen.findByLabelText(/^nombre/i);
     fireEvent.click(screen.getByRole("button", { name: "Cancelar" }));
@@ -222,11 +215,6 @@ describe("EnrollmentWizard", () => {
     fireEvent.click(within(dialog).getByRole("button", { name: "Cancelar inscripción" }));
 
     await waitFor(() => expect(cancelAction).toHaveBeenCalledWith("app-1", "person-1"));
-    await waitFor(() => expect(mockRefresh).toHaveBeenCalled());
-    expect(screen.getByRole("alertdialog")).toBeVisible();
-
-    rerender(<EnrollmentWizard initialApplication={{ ...BASE, status: "CANCELLED" }} initialCourseOptions={[COURSE_OPTION]} />);
-
     expect(await screen.findByText("Cancelada")).toBeVisible();
     expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
     expect(screen.queryByRole("tab", { name: /datos personales/i })).not.toBeInTheDocument();
@@ -366,7 +354,7 @@ describe("EnrollmentWizard", () => {
       .mockReturnValueOnce(pending)
       .mockResolvedValueOnce({ application: { ...COMPLETE_DRAFT, status: "CANCELLED" } });
     const user = userEvent.setup();
-    const { rerender } = renderWizard({ initialApplication: COMPLETE_DRAFT });
+    renderWizard({ initialApplication: COMPLETE_DRAFT });
 
     await user.click(screen.getByRole("button", { name: "Cancelar" }));
     expect(cancelAction).not.toHaveBeenCalled();
@@ -390,9 +378,6 @@ describe("EnrollmentWizard", () => {
 
     await user.click(screen.getByRole("button", { name: "Cancelar" }));
     await user.click(within(screen.getByRole("alertdialog")).getByRole("button", { name: "Cancelar inscripción" }));
-
-    await waitFor(() => expect(mockRefresh).toHaveBeenCalled());
-    rerender(<EnrollmentWizard initialApplication={{ ...COMPLETE_DRAFT, status: "CANCELLED" }} initialCourseOptions={[COURSE_OPTION]} />);
 
     expect(await screen.findByText("Cancelada")).toBeVisible();
     expect(cancelAction).toHaveBeenCalledTimes(2);

@@ -1,7 +1,5 @@
 import type { Dispatch, RefObject, SetStateAction } from "react";
 
-import { useRouter } from "next/navigation";
-
 import type { z } from "zod";
 
 import { getErrorMessage } from "@common/utils/error-message.util";
@@ -37,7 +35,6 @@ export async function submitEnrollmentWizard({
   onConflict,
   definition,
   setApplication,
-  router,
 }: {
   blockedDocumentsRef: RefObject<Set<string>>;
   application: EnrollmentApplicationResponse;
@@ -58,7 +55,6 @@ export async function submitEnrollmentWizard({
   onConflict?: () => void;
   definition?: EnrollmentFormDefinition | null;
   setApplication: Dispatch<SetStateAction<EnrollmentApplicationResponse>>;
-  router: ReturnType<typeof useRouter>;
 }): Promise<{ error?: string; issues?: z.ZodIssue[] }> {
   if (blockedDocumentsRef.current.size > 0) {
     return { error: ENROLLMENT_MESSAGES.DOCUMENTS_SAVE_PENDING };
@@ -130,12 +126,13 @@ export async function submitEnrollmentWizard({
       return { issues: documentIssues };
     }
 
-    await submitEnrollmentApplicationAction(application.applicationId, application.personId, savedApplication.draftRevision ?? 0).then(
-      unwrapEnrollmentResult,
-    );
+    const submittedApplication = await submitEnrollmentApplicationAction(
+      application.applicationId,
+      application.personId,
+      savedApplication.draftRevision ?? 0,
+    ).then(unwrapEnrollmentResult);
 
-    // The refreshed page brings the submitted detail together with its title and actions.
-    router.refresh();
+    setApplication(submittedApplication);
 
     return {};
   } catch (error) {

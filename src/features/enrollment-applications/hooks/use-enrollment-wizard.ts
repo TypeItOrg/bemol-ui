@@ -2,8 +2,6 @@
 
 import { useLayoutEffect, useMemo, useRef, useState } from "react";
 
-import { useRouter } from "next/navigation";
-
 import type { z } from "zod";
 
 import { ENROLLMENT_MESSAGES } from "@features/enrollment-applications/constants/enrollment-messages.constants";
@@ -16,15 +14,13 @@ import type { EnrollmentWizardProps } from "@features/enrollment-applications/ty
 import { submitEnrollmentWizard } from "@features/enrollment-applications/utils/submit-enrollment-wizard.util";
 import { enrollmentFormDefinitionSchema } from "@features/enrollment-forms/schemas/enrollment-form-definition.schema";
 
-export function useEnrollmentWizard(props: EnrollmentWizardProps) {
+export function useEnrollmentWizard(props: EnrollmentWizardProps & { onAdoptServerDraft: (revision: number) => void }) {
   const {
     initialApplication,
     initialShifts = [],
     readOnly: requestedReadOnly = false,
     returnTo = `/self-service/${initialApplication.personId}/enrollment-applications`,
   } = props;
-
-  const router = useRouter();
 
   const configuredForm = useMemo(() => {
     if (!initialApplication.formVersionId) {
@@ -48,11 +44,11 @@ export function useEnrollmentWizard(props: EnrollmentWizardProps) {
 
   const [syncedInitialApplication, setSyncedInitialApplication] = useState(initialApplication);
 
-  // Adopt a status change from the server without discarding local draft edits.
+  // Keep local draft edits; non-draft details can use the latest server snapshot.
   if (initialApplication !== syncedInitialApplication) {
     setSyncedInitialApplication(initialApplication);
 
-    if (initialApplication.status !== application.status) {
+    if (initialApplication.status !== ENROLLMENT_APPLICATION_STATUS.DRAFT || initialApplication.status !== application.status) {
       setApplication(initialApplication);
     }
   }
@@ -99,6 +95,9 @@ export function useEnrollmentWizard(props: EnrollmentWizardProps) {
 
   const autosave = useEnrollmentDraftAutosave({
     application,
+    serverDraftRevision: initialApplication.status === ENROLLMENT_APPLICATION_STATUS.DRAFT ? initialApplication.draftRevision : undefined,
+    onAdoptServerDraft: props.onAdoptServerDraft,
+    documentsBlocked,
     readOnly,
     isSubmitDialogOpen,
     isCancelDialogOpen,
@@ -167,7 +166,6 @@ export function useEnrollmentWizard(props: EnrollmentWizardProps) {
       onConflict: autosave.pauseForConflict,
       definition,
       setApplication,
-      router,
     });
 
     if (result.error || result.issues?.length) {
@@ -206,7 +204,6 @@ export function useEnrollmentWizard(props: EnrollmentWizardProps) {
     isSubmitDialogOpen,
     validationIssues,
     submissionError,
-    router,
     setApplication,
     setIsCancelDialogOpen,
     setIsSubmitDialogOpen,

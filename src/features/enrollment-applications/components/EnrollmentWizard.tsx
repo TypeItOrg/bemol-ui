@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactElement } from "react";
+import { useState, type ReactElement } from "react";
 
 import Link from "next/link";
 
@@ -21,10 +21,18 @@ import { ENROLLMENT_APPLICATION_STATUS } from "@features/enrollment-applications
 import type { EnrollmentWizardProps } from "@features/enrollment-applications/types/enrollment-wizard-props.types";
 
 export function EnrollmentWizard(props: EnrollmentWizardProps): ReactElement {
-  return <EnrollmentWizardView key={props.initialApplication.applicationId} {...props} />;
+  const [adoptedRevision, adoptServerDraft] = useState<number>();
+
+  return (
+    <EnrollmentWizardView
+      key={`${props.initialApplication.applicationId}:${adoptedRevision ?? ""}`}
+      {...props}
+      onAdoptServerDraft={adoptServerDraft}
+    />
+  );
 }
 
-function EnrollmentWizardView(props: EnrollmentWizardProps): ReactElement {
+function EnrollmentWizardView(props: EnrollmentWizardProps & { onAdoptServerDraft: (revision: number) => void }): ReactElement {
   const model = useEnrollmentWizard(props);
 
   const { application, validationIssues, submissionError } = model;
@@ -135,7 +143,7 @@ function EnrollmentWizardView(props: EnrollmentWizardProps): ReactElement {
           applicationId={application.applicationId}
           beforeCancel={() => model.draftSaveQueue.current}
           onClose={() => model.setIsCancelDialogOpen(false)}
-          onCancelled={() => model.router.refresh()}
+          onCancelled={model.setApplication}
         />
       ) : null}
       {model.isSubmitDialogOpen ? (

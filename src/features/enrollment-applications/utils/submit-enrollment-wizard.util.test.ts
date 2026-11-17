@@ -26,7 +26,6 @@ function input(): Parameters<typeof submitEnrollmentWizard>[0] {
     definition: CONFIGURED_APPLICATION.formDefinition,
     setApplication: jest.fn(),
     onConflict: jest.fn(),
-    router: { bfcacheId: "test", refresh: jest.fn(), back: jest.fn(), forward: jest.fn(), push: jest.fn(), replace: jest.fn(), prefetch: jest.fn() },
   };
 }
 
@@ -50,7 +49,7 @@ describe("submitEnrollmentWizard", () => {
     await expect(pending).resolves.toEqual({});
     expect(params.persistDraft).toHaveBeenCalledWith(CONFIGURED_APPLICATION.data);
     expect(submit).toHaveBeenCalledWith(CONFIGURED_APPLICATION.applicationId, CONFIGURED_APPLICATION.personId, 9);
-    expect(params.router.refresh).toHaveBeenCalled();
+    expect(params.setApplication).toHaveBeenLastCalledWith({ ...CONFIGURED_APPLICATION, status: "SUBMITTED", draftRevision: 9 });
   });
 
   it("routes an unanswered required custom boolean to its pinned section and control", async () => {
