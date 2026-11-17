@@ -47,7 +47,6 @@ export function MobileBottomNavigation({ items, primaryItem }: MobileBottomNavig
             <li key={item.url} className="flex min-w-0 flex-1 justify-center">
               <Link
                 href={item.url}
-                prefetch
                 aria-current={isActive ? "page" : undefined}
                 aria-label={item.ariaLabel}
                 className={cn(

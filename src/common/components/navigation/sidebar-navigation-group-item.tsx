@@ -125,7 +125,6 @@ export function SidebarNavigationGroupItem({ group, navigation }: SidebarNavigat
                 >
                   <Link
                     href={item.url}
-                    prefetch
                     aria-label={item.ariaLabel}
                     aria-current={isActive ? "page" : undefined}
                     onNavigate={() => {
@@ -179,7 +178,6 @@ export function SidebarNavigationGroupItem({ group, navigation }: SidebarNavigat
                   >
                     <Link
                       href={item.url}
-                      prefetch
                       aria-label={item.ariaLabel}
                       aria-current={isActive ? "page" : undefined}
                       onNavigate={() => navigation.handleNavigation(item.url)}

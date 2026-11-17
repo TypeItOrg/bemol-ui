@@ -48,7 +48,6 @@ export function SidebarNavigation({ sections, navigation }: SidebarNavigationPro
                     >
                       <Link
                         href={item.url}
-                        prefetch
                         aria-label={item.ariaLabel}
                         aria-current={isActive ? "page" : undefined}
                         onNavigate={() => navigation.handleNavigation(item.url)}
