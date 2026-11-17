@@ -48,12 +48,12 @@ export function InstitutionalHomeSkeleton({
         <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 @6xl/home-workspace:grid-cols-[max-content_minmax(0,1fr)]">
           {/* Selector lateral skeleton */}
           <aside className="bg-background flex min-h-0 flex-col gap-3 rounded-xl border p-2.5 shadow-xs sm:p-3.5 @6xl/home-workspace:h-full @6xl/home-workspace:min-w-72">
-            <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2 lg:flex lg:flex-row lg:flex-wrap @6xl/home-workspace:flex @6xl/home-workspace:flex-1 @6xl/home-workspace:flex-col @6xl/home-workspace:flex-nowrap">
-              <Skeleton className="h-10 w-full rounded-lg lg:min-w-68 lg:flex-1 @6xl/home-workspace:min-w-0 @6xl/home-workspace:flex-none" />
-              <Skeleton className="h-10 w-full rounded-lg lg:min-w-68 lg:flex-1 @6xl/home-workspace:min-w-0 @6xl/home-workspace:flex-none" />
-              <Skeleton className="h-10 w-full rounded-lg lg:min-w-68 lg:flex-1 @6xl/home-workspace:min-w-0 @6xl/home-workspace:flex-none" />
-              <Skeleton className="h-10 w-full rounded-lg lg:min-w-68 lg:flex-1 @6xl/home-workspace:min-w-0 @6xl/home-workspace:flex-none" />
-              <Skeleton className="h-10 w-full rounded-lg lg:min-w-68 lg:flex-1 @6xl/home-workspace:min-w-0 @6xl/home-workspace:flex-none" />
+            <div className="grid grid-cols-1 gap-1.5 @xl/home-workspace:grid-cols-2 @4xl/home-workspace:flex @4xl/home-workspace:flex-row @4xl/home-workspace:flex-wrap @6xl/home-workspace:flex @6xl/home-workspace:flex-1 @6xl/home-workspace:flex-col @6xl/home-workspace:flex-nowrap">
+              <Skeleton className="h-10 w-full rounded-lg @4xl/home-workspace:min-w-68 @4xl/home-workspace:flex-1 @6xl/home-workspace:min-w-0 @6xl/home-workspace:flex-none" />
+              <Skeleton className="h-10 w-full rounded-lg @4xl/home-workspace:min-w-68 @4xl/home-workspace:flex-1 @6xl/home-workspace:min-w-0 @6xl/home-workspace:flex-none" />
+              <Skeleton className="h-10 w-full rounded-lg @4xl/home-workspace:min-w-68 @4xl/home-workspace:flex-1 @6xl/home-workspace:min-w-0 @6xl/home-workspace:flex-none" />
+              <Skeleton className="h-10 w-full rounded-lg @4xl/home-workspace:min-w-68 @4xl/home-workspace:flex-1 @6xl/home-workspace:min-w-0 @6xl/home-workspace:flex-none" />
+              <Skeleton className="h-10 w-full rounded-lg @4xl/home-workspace:min-w-68 @4xl/home-workspace:flex-1 @6xl/home-workspace:min-w-0 @6xl/home-workspace:flex-none" />
             </div>
             <div className="bg-muted/70 dark:bg-muted/40 mt-auto hidden flex-col gap-1.5 rounded-lg px-3.5 py-3 @6xl/home-workspace:flex">
               <Skeleton className="h-3.5 w-32" />
@@ -62,14 +62,7 @@ export function InstitutionalHomeSkeleton({
           </aside>
 
           {/* Panel de accesos skeleton */}
-          <section className="bg-background flex min-h-0 flex-col gap-3.5 rounded-xl border p-4 shadow-xs sm:p-5 @6xl/home-workspace:h-full">
-            <div className="flex shrink-0 items-stretch gap-3.5">
-              <Skeleton className="w-12 shrink-0 rounded-xl" />
-              <div className="flex min-w-0 flex-1 flex-col justify-center gap-1.5">
-                <Skeleton className="h-5 w-48" />
-                <Skeleton className="h-4 w-72 max-w-full" />
-              </div>
-            </div>
+          <section className="bg-background flex min-h-0 flex-col rounded-xl border p-4 shadow-xs sm:p-5 @6xl/home-workspace:h-full">
             <div className="@container/home-content grid min-h-0 flex-1 auto-rows-[minmax(8.5rem,1fr)] grid-cols-6 gap-3 sm:gap-4">
               <NavigationCardSkeleton className="bg-background col-span-6 h-full min-h-34 items-stretch p-4 sm:p-5 @xl/home-content:col-span-3 [&>div:first-child]:h-full [&>div:first-child]:w-full [&>div:first-child]:flex-col [&>div:first-child]:items-start [&>div:first-child]:justify-between [&>div:first-child>div:first-child]:size-11 [&>div:first-child>div:first-child]:rounded-xl [&>div:first-child>div:last-child]:mt-auto [&>div:first-child>div:last-child]:w-full [&>div:first-child>div:last-child]:flex-none [&>div:last-child]:hidden" />
               <NavigationCardSkeleton className="bg-background col-span-6 h-full min-h-34 items-stretch p-4 sm:p-5 @xl/home-content:col-span-3 [&>div:first-child]:h-full [&>div:first-child]:w-full [&>div:first-child]:flex-col [&>div:first-child]:items-start [&>div:first-child]:justify-between [&>div:first-child>div:first-child]:size-11 [&>div:first-child>div:first-child]:rounded-xl [&>div:first-child>div:last-child]:mt-auto [&>div:first-child>div:last-child]:w-full [&>div:first-child>div:last-child]:flex-none [&>div:last-child]:hidden" />

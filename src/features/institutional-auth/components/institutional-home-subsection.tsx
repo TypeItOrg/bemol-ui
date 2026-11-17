@@ -112,7 +112,7 @@ export function InstitutionalHomeSelector({ sections }: InstitutionalHomeSelecto
             role="tablist"
             aria-label="Secciones de inicio"
             aria-orientation="vertical"
-            className="grid grid-cols-1 gap-1.5 sm:grid-cols-2 lg:flex lg:flex-row lg:flex-wrap @6xl/home-workspace:-mr-2.5 @6xl/home-workspace:flex @6xl/home-workspace:min-h-0 @6xl/home-workspace:flex-1 @6xl/home-workspace:flex-col @6xl/home-workspace:flex-nowrap @6xl/home-workspace:justify-start @6xl/home-workspace:gap-1 @6xl/home-workspace:overflow-y-auto @6xl/home-workspace:overscroll-contain @6xl/home-workspace:pr-2.5 @6xl/home-workspace:sm:-mr-3 @6xl/home-workspace:sm:pr-3"
+            className="grid grid-cols-1 gap-1.5 @xl/home-workspace:grid-cols-2 @4xl/home-workspace:flex @4xl/home-workspace:flex-row @4xl/home-workspace:flex-wrap @6xl/home-workspace:-mr-2.5 @6xl/home-workspace:flex @6xl/home-workspace:min-h-0 @6xl/home-workspace:flex-1 @6xl/home-workspace:flex-col @6xl/home-workspace:flex-nowrap @6xl/home-workspace:justify-start @6xl/home-workspace:gap-1 @6xl/home-workspace:overflow-y-auto @6xl/home-workspace:overscroll-contain @6xl/home-workspace:pr-2.5 @6xl/home-workspace:sm:-mr-3 @6xl/home-workspace:sm:pr-3"
           >
             {sections.map((section, index) => {
               const isSelected = section.id === activeSection.id;
@@ -131,14 +131,14 @@ export function InstitutionalHomeSelector({ sections }: InstitutionalHomeSelecto
                   onClick={() => setSelectedId(section.id)}
                   onKeyDown={(event) => handleTabKeyDown(event, index)}
                   className={cn(
-                    "focus-visible:ring-ring relative flex min-h-10 w-full shrink-0 cursor-pointer items-center justify-between gap-3 rounded-lg border border-transparent px-3.5 py-2.5 text-left text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none lg:w-auto lg:min-w-68 lg:flex-1 @6xl/home-workspace:w-full @6xl/home-workspace:min-w-0 @6xl/home-workspace:flex-none @6xl/home-workspace:gap-6",
+                    "focus-visible:ring-ring relative flex min-h-10 w-full shrink-0 cursor-pointer items-center justify-between gap-3 rounded-lg border border-transparent px-3.5 py-2.5 text-left text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none @4xl/home-workspace:w-auto @4xl/home-workspace:min-w-68 @4xl/home-workspace:flex-1 @6xl/home-workspace:w-full @6xl/home-workspace:min-w-0 @6xl/home-workspace:flex-none @6xl/home-workspace:gap-6",
                     "aria-selected:bg-primary aria-selected:text-primary-foreground aria-selected:shadow-xs",
                     !isSelected && "text-foreground hover:bg-muted/60",
                   )}
                 >
-                  <span className="flex min-w-0 items-center gap-2.5">
+                  <span className="flex min-w-0 flex-1 items-center gap-2.5">
                     {section.menuIcon}
-                    <span className="whitespace-nowrap">{section.title}</span>
+                    <span className="truncate">{section.title}</span>
                   </span>
                   <span
                     className={cn(
@@ -165,20 +165,8 @@ export function InstitutionalHomeSelector({ sections }: InstitutionalHomeSelecto
         <section
           role="tabpanel"
           aria-labelledby={`${activeSection.id}-tab`}
-          className="bg-background flex min-h-0 flex-col gap-3.5 rounded-xl border p-4 shadow-xs sm:p-5 @6xl/home-workspace:h-full"
+          className="bg-background flex min-h-0 flex-col rounded-xl border p-4 shadow-xs sm:p-5 @6xl/home-workspace:h-full"
         >
-          <div className="flex shrink-0 items-stretch gap-3.5">
-            <div className="from-primary to-primary/80 text-primary-foreground flex w-12 shrink-0 items-center justify-center rounded-xl bg-linear-to-br shadow-xs">
-              {activeSection.headerIcon}
-            </div>
-            <div className="min-w-0 flex-1">
-              <h2 id={activeSection.id} className="truncate text-xl leading-none font-bold tracking-tight">
-                {activeSection.title}
-              </h2>
-              <p className="text-muted-foreground mt-1.5 truncate text-sm leading-normal">{activeSection.description}</p>
-            </div>
-          </div>
-
           <div className="relative flex flex-col @6xl/home-workspace:-mr-2.5 @6xl/home-workspace:min-h-0 @6xl/home-workspace:flex-1 @6xl/home-workspace:overflow-hidden @6xl/home-workspace:sm:-mr-3">
             <div
               aria-hidden="true"
@@ -214,8 +202,6 @@ export function InstitutionalHomeSelector({ sections }: InstitutionalHomeSelecto
 
 export type InstitutionalHomeSectionItem = {
   content: ReactNode;
-  description: string;
-  headerIcon: ReactNode;
   id: string;
   itemCount: number;
   menuIcon: ReactNode;
