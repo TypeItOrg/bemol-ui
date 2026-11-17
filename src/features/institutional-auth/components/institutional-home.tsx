@@ -1,17 +1,30 @@
 import { Suspense, type ReactElement } from "react";
 
-import { BookOpenIcon, Building2Icon, ClipboardListIcon, GraduationCapIcon, HistoryIcon, Settings2Icon, UserRoundIcon } from "lucide-react";
+import {
+  BookOpenIcon,
+  Building2Icon,
+  ClipboardListIcon,
+  GraduationCapIcon,
+  HistoryIcon,
+  Settings2Icon,
+  UserRoundIcon,
+  type LucideIcon,
+} from "lucide-react";
 
-import { AcademicResourceLinks, getReadableAcademicResources } from "@features/academic/components/academic-resource-links";
+import { ACADEMIC_RESOURCE_DESCRIPTIONS, getReadableAcademicResources } from "@features/academic/components/academic-resource-links";
+import { ACADEMIC_COLLECTION_CONFIG } from "@features/academic/config/academic-collection.config";
+import { ACADEMIC_RESOURCE_ICONS } from "@features/academic/config/academic-resource-icons.config";
+import type { AcademicCollectionResource } from "@features/academic/types/academic-collection-resource.types";
 import { AcademicResource } from "@features/academic/types/academic-resource.types";
 import { getAcademicAccess } from "@features/academic/utils/academic-access.util";
 import { GUARDIAN_DEPENDENTS_PAGE_PATH } from "@features/guardian-dependents/constants/guardian-dependent.constants";
 import { GUARDIAN_LINKS_PAGE_PATH } from "@features/guardian-links/constants/guardian-link.constants";
 import { fetchOperatingProfile } from "@features/guardian-workspace/services/operating-profile.service";
 import { getInstitutionalActivityHomeLinks } from "@features/institutional-activity/utils/institutional-activity-access.util";
+import { InstitutionalHomeCard } from "@features/institutional-auth/components/institutional-home-card";
 import { InstitutionalHomeHero } from "@features/institutional-auth/components/institutional-home-hero";
 import { InstitutionalHomeSkeleton } from "@features/institutional-auth/components/institutional-home-skeleton";
-import { HomeAccessRow, HomeSubsection } from "@features/institutional-auth/components/institutional-home-subsection";
+import { InstitutionalHomeSelector, type InstitutionalHomeSectionItem } from "@features/institutional-auth/components/institutional-home-subsection";
 import { fetchInstitutionalPerson } from "@features/institutional-auth/services/fetch-institutional-person.service";
 import { getInstitutionalBrand } from "@features/institutional-auth/services/get-institutional-brand.service";
 import { requireInstitutionalUser } from "@features/institutional-auth/services/get-institutional-user.service";
@@ -22,6 +35,7 @@ import {
   getInstitutionalEnrollmentHomeLinks,
   getInstitutionalFormationHomeLinks,
   getInstitutionalHomeLinks,
+  type InstitutionalHomeLink,
 } from "@features/institutional-auth/utils/institutional-home-access.util";
 import type { PublicInstitution } from "@features/institutions/types/public-institution.types";
 
@@ -52,28 +66,13 @@ async function InstitutionalHomeContent({
 
   const enrollmentLinks = getInstitutionalEnrollmentHomeLinks(user);
 
-  const activityLinks = getInstitutionalActivityHomeLinks(user);
-
-  const managementLinks = [
-    ...links.filter((link) => link.href !== "/account/profile"),
-    ...enrollmentLinks.filter((link) => link.href === GUARDIAN_LINKS_PAGE_PATH),
-  ];
-
-  const institutionalEnrollmentLinks = enrollmentLinks.filter(
-    (link) => link.href === "/course-enrollments" || link.href === "/enrollment-applications",
-  );
-
   const academicOfferLink = getInstitutionalAcademicOfferLink(user);
 
   const academicResources = getReadableAcademicResources(getAcademicAccess(user));
 
-  const operationalResources = academicResources.filter(
-    (resource) => resource === AcademicResource.ACADEMIC_YEAR || resource === AcademicResource.COURSE,
-  );
+  const operationalResources = academicResources.filter((item) => item === AcademicResource.ACADEMIC_YEAR || item === AcademicResource.COURSE);
 
-  const configurationResources = academicResources.filter(
-    (resource) => resource !== AcademicResource.ACADEMIC_YEAR && resource !== AcademicResource.COURSE,
-  );
+  const configurationResources = academicResources.filter((item) => item !== AcademicResource.ACADEMIC_YEAR && item !== AcademicResource.COURSE);
 
   const baseFormationLinks = [...enrollmentLinks.filter((link) => link.href.startsWith("/my-teaching")), ...getInstitutionalFormationHomeLinks(user)];
 
@@ -94,135 +93,110 @@ async function InstitutionalHomeContent({
     ...enrollmentLinks.filter((link) => link.href === GUARDIAN_DEPENDENTS_PAGE_PATH),
   ];
 
-  const formationLinks = [...(standaloneOffer && !embedOfferInPersonal ? [standaloneOffer] : []), ...baseFormationLinks];
-
-  const primaryRole = user.roles[0] ?? "Usuario institucional";
+  const sections = [
+    createHomeSection(
+      "institutional-management-title",
+      "Gestión institucional",
+      "Administrá la información, las personas y los accesos de la institución.",
+      Building2Icon,
+      [...links.filter((link) => link.href !== "/account/profile"), ...enrollmentLinks.filter((link) => link.href === GUARDIAN_LINKS_PAGE_PATH)],
+    ),
+    createHomeSection(
+      "academic-management-title",
+      "Área académica",
+      "Consultá la oferta y organizá los ciclos lectivos y cursos.",
+      GraduationCapIcon,
+      operationalResources.length > 0 ? [...(academicOfferLink ? [academicOfferLink] : []), ...operationalResources.map(toAcademicHomeLink)] : [],
+      "Secciones académicas",
+    ),
+    createHomeSection(
+      "academic-configuration-title",
+      "Configuración académica",
+      "Definí la estructura curricular y los recursos de la institución.",
+      Settings2Icon,
+      configurationResources.map(toAcademicHomeLink),
+      "Secciones académicas",
+    ),
+    createHomeSection(
+      "enrollment-management-title",
+      "Inscripciones y cursadas",
+      "Revisá las solicitudes de inscripción y gestioná las cursadas de la institución.",
+      ClipboardListIcon,
+      enrollmentLinks.filter((link) => link.href === "/course-enrollments" || link.href === "/enrollment-applications"),
+    ),
+    createHomeSection(
+      "institutional-activity-title",
+      "Actividad",
+      "Consultá la actividad registrada en la institución.",
+      HistoryIcon,
+      getInstitutionalActivityHomeLinks(user),
+      "Actividad institucional",
+    ),
+    createHomeSection("formation-title", "Formación", "Seguí tu recorrido académico en la institución.", BookOpenIcon, [
+      ...(standaloneOffer && !embedOfferInPersonal ? [standaloneOffer] : []),
+      ...baseFormationLinks,
+    ]),
+    createHomeSection(
+      "personal-space-title",
+      "Mi espacio",
+      "Gestioná tus inscripciones, las personas a tu cargo y tu perfil.",
+      UserRoundIcon,
+      personalLinks,
+      "Herramientas personales",
+    ),
+  ].filter((section): section is InstitutionalHomeSectionItem => section !== null);
 
   return (
-    <main className="flex min-h-full flex-1 flex-col gap-4">
+    <main className="flex min-h-full flex-1 flex-col gap-4 min-[1600px]:[@media(min-height:860px)]:h-[calc(var(--app-viewport-height)-7.625rem)] min-[1600px]:[@media(min-height:860px)]:max-h-[calc(var(--app-viewport-height)-7.625rem)] min-[1600px]:[@media(min-height:860px)]:min-h-[540px] min-[1600px]:[@media(min-height:860px)]:flex-none min-[1600px]:[@media(min-height:860px)]:overflow-hidden">
       <InstitutionalHomeHero
         greeting={getGreeting(new Date())}
         name={user.name}
         institutionName={person?.institutionName}
-        primaryRole={primaryRole}
+        primaryRole={user.roles[0] ?? "Usuario institucional"}
         institution={institution}
       />
 
-      <div className="flex flex-col gap-4 px-3 pb-3 md:px-4 md:pb-4">
-        {personalLinks.length > 0 ? (
-          <HomeSubsection
-            id="personal-space-title"
-            title="Mi espacio"
-            description="Gestioná tus inscripciones, las personas a tu cargo y tu perfil."
-            icon={UserRoundIcon}
-            imageSrc="/images/institutional-management.webp"
-            imageSide="right"
-          >
-            <nav aria-label="Herramientas personales" className="[&>a]:bg-background grid gap-4">
-              {personalLinks.map((link) => (
-                <HomeAccessRow key={link.href} link={link} />
-              ))}
-            </nav>
-          </HomeSubsection>
-        ) : null}
-
-        {managementLinks.length > 0 ? (
-          <HomeSubsection
-            id="institutional-management-title"
-            title="Gestión institucional"
-            description="Administrá la información, las personas y los accesos de la institución."
-            icon={Building2Icon}
-            imageSrc="/images/institutional-management.webp"
-          >
-            <nav aria-label="Gestión institucional" className="[&>a]:bg-background grid gap-4">
-              {managementLinks.map((link) => (
-                <HomeAccessRow key={link.href} link={link} />
-              ))}
-            </nav>
-          </HomeSubsection>
-        ) : null}
-
-        {operationalResources.length > 0 ? (
-          <HomeSubsection
-            id="academic-management-title"
-            title="Área académica"
-            description="Consultá la oferta y organizá los ciclos lectivos y cursos."
-            icon={GraduationCapIcon}
-            imageSrc="/images/academic-management.webp"
-            imageSide="right"
-          >
-            <AcademicResourceLinks
-              basePath=""
-              resources={operationalResources}
-              leadingContent={academicOfferLink ? <HomeAccessRow link={academicOfferLink} /> : undefined}
-              prominent
-              className="[&>a]:bg-background"
-            />
-          </HomeSubsection>
-        ) : null}
-
-        {configurationResources.length > 0 ? (
-          <HomeSubsection
-            id="academic-configuration-title"
-            title="Configuración académica"
-            description="Definí la estructura curricular y los recursos de la institución."
-            icon={Settings2Icon}
-            imageSrc="/images/academic-management.webp"
-            imageSide="right"
-          >
-            <AcademicResourceLinks basePath="" resources={configurationResources} prominent className="[&>a]:bg-background" />
-          </HomeSubsection>
-        ) : null}
-
-        {institutionalEnrollmentLinks.length > 0 ? (
-          <HomeSubsection
-            id="enrollment-management-title"
-            title="Inscripciones y cursadas"
-            description="Revisá las solicitudes de inscripción y gestioná las cursadas de la institución."
-            icon={ClipboardListIcon}
-            imageSrc="/images/institutional-management.webp"
-          >
-            <nav aria-label="Inscripciones y cursadas" className="[&>a]:bg-background grid gap-4">
-              {institutionalEnrollmentLinks.map((link) => (
-                <HomeAccessRow key={link.href} link={link} />
-              ))}
-            </nav>
-          </HomeSubsection>
-        ) : null}
-
-        {activityLinks.length > 0 ? (
-          <HomeSubsection
-            id="institutional-activity-title"
-            title="Actividad"
-            description="Consultá la actividad registrada en la institución."
-            icon={HistoryIcon}
-            imageSrc="/images/institutional-management.webp"
-          >
-            <nav aria-label="Actividad institucional" className="[&>a]:bg-background grid gap-4">
-              {activityLinks.map((link) => (
-                <HomeAccessRow key={link.href} link={link} />
-              ))}
-            </nav>
-          </HomeSubsection>
-        ) : null}
-
-        {formationLinks.length > 0 ? (
-          <HomeSubsection
-            id="formation-title"
-            title="Formación"
-            description="Seguí tu recorrido académico en la institución."
-            icon={BookOpenIcon}
-            imageSrc="/images/academic-management.webp"
-            imageSide="right"
-          >
-            <nav aria-label="Formación" className="[&>a]:bg-background grid gap-4">
-              {formationLinks.map((link) => (
-                <HomeAccessRow key={link.href} link={link} />
-              ))}
-            </nav>
-          </HomeSubsection>
-        ) : null}
+      <div className="flex min-h-0 flex-1 flex-col gap-4 px-3 pb-3 md:px-4 md:pb-4">
+        <InstitutionalHomeSelector sections={sections} />
       </div>
     </main>
   );
+}
+
+function toAcademicHomeLink(resource: AcademicCollectionResource): InstitutionalHomeLink {
+  return {
+    href: `/${resource}`,
+    title: ACADEMIC_COLLECTION_CONFIG[resource].title,
+    description: ACADEMIC_RESOURCE_DESCRIPTIONS[resource],
+    icon: ACADEMIC_RESOURCE_ICONS[resource],
+  };
+}
+
+function createHomeSection(
+  id: string,
+  title: string,
+  description: string,
+  Icon: LucideIcon,
+  links: readonly InstitutionalHomeLink[],
+  navLabel?: string,
+): InstitutionalHomeSectionItem | null {
+  if (links.length === 0) {
+    return null;
+  }
+
+  return {
+    id,
+    title,
+    description,
+    itemCount: links.length,
+    menuIcon: <Icon aria-hidden="true" className="size-4 shrink-0" />,
+    headerIcon: <Icon aria-hidden="true" />,
+    content: (
+      <nav aria-label={navLabel ?? title} className="grid min-h-full flex-1 auto-rows-[minmax(8.5rem,1fr)] grid-cols-6 gap-3 sm:gap-4">
+        {links.map((link, index) => (
+          <InstitutionalHomeCard key={link.href} link={link} index={index} totalCount={links.length} />
+        ))}
+      </nav>
+    ),
+  };
 }

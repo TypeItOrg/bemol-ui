@@ -17,7 +17,7 @@ type AcademicResourceLinksProps = {
   resources: readonly AcademicCollectionResource[];
 };
 
-const ACADEMIC_RESOURCE_DESCRIPTIONS: Record<AcademicCollectionResource, string> = {
+export const ACADEMIC_RESOURCE_DESCRIPTIONS: Record<AcademicCollectionResource, string> = {
   [AcademicResource.ACADEMIC_YEAR]: "Organizá los períodos y fechas del calendario académico.",
   [AcademicResource.TRAINING_PATH]: "Definí las propuestas formativas de la institución.",
   [AcademicResource.STUDY_PLAN]: "Administrá la estructura curricular de cada trayecto.",
