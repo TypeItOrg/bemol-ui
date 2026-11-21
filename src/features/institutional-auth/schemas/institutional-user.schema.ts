@@ -23,6 +23,7 @@ const institutionalUserResponseSchema = z.object({
       canViewOwnFormation: z.boolean(),
       canViewTeaching: z.boolean(),
       canUpdateTeachingAcademicStatus: z.boolean(),
+      canManageTeachingGrades: z.boolean().default(false),
     }),
     permissions: z.array(z.string()).default([]),
     permissionScopes: z

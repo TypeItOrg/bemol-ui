@@ -209,8 +209,7 @@ export async function updateCourseAcademicStatusAction(
     return { error: failure.error };
   }
 
-  revalidatePath("/course-enrollments");
-  revalidatePath("/(institutional)/self-service/[personId]/courses", "page");
+  revalidateCourseEnrollmentViews();
 
   return {};
 }

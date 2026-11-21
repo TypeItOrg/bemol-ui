@@ -10,6 +10,7 @@ import { getSafeReturnTo } from "@common/utils/return-to.util";
 
 import { CourseEnrollmentDetail } from "@features/course-enrollments/components/course-enrollment-detail";
 import { CourseEnrollmentDetailActions } from "@features/course-enrollments/components/course-enrollment-detail-actions";
+import { CourseEnrollmentDetailGradeSection } from "@features/course-enrollments/components/course-enrollment-detail-grade-section";
 import {
   fetchTeacherClass,
   fetchTeacherEnrollment,
@@ -53,6 +54,8 @@ export default async function TeacherEnrollmentPage({
     fetchTeacherEnrollmentHistory(user.institutionId, classId, id),
   ]);
 
+  const canManageGrades = Boolean(user.capabilities.canManageTeachingGrades);
+
   return (
     <PlatformPageShell
       title="Detalle de cursada"
@@ -73,6 +76,15 @@ export default async function TeacherEnrollmentPage({
         teacherClassId={classId}
       />
       <CourseEnrollmentDetail enrollment={enrollment} history={history} />
+      <CourseEnrollmentDetailGradeSection
+        enrollment={enrollment}
+        mode="teacher"
+        classId={classId}
+        canRead={user.capabilities.canViewTeaching}
+        canCreate={canManageGrades}
+        canUpdate={canManageGrades}
+        canDelete={canManageGrades}
+      />
     </PlatformPageShell>
   );
 }
