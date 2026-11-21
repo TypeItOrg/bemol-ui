@@ -75,10 +75,10 @@ function PublishConfirmForm({
     onOpenChange(next);
   }
 
-  const pendingText =
+  const pendingCountText =
     summary && summary.pendingChanges > 0
-      ? `${summary.pendingChanges} ${summary.pendingChanges === 1 ? "cambio pendiente" : "cambios pendientes"} para ${summary.affectedStudents} ${summary.affectedStudents === 1 ? "estudiante" : "estudiantes"}.`
-      : "Sin cambios pendientes.";
+      ? `${summary.pendingChanges} ${summary.pendingChanges === 1 ? "cambio pendiente" : "cambios pendientes"} para ${summary.affectedStudents} ${summary.affectedStudents === 1 ? "estudiante" : "estudiantes"}`
+      : null;
 
   return (
     <AlertDialog open onOpenChange={handleOpenChange}>
@@ -89,9 +89,14 @@ function PublishConfirmForm({
               <SendIcon className="size-6" aria-hidden="true" />
             </div>
             <AlertDialogTitle>{COURSE_ENROLLMENT_GRADE_MESSAGES.PUBLISH_CONFIRM_TITLE}</AlertDialogTitle>
-            <AlertDialogDescription>
-              Esta publicación afecta a toda la clase: se publicarán todos los cambios pendientes de notas de esta clase.
-              <span className="text-foreground mt-2 block font-semibold">{pendingText}</span>
+            <AlertDialogDescription className="leading-relaxed">
+              {pendingCountText ? (
+                <>
+                  Esta publicación afecta a toda la clase: se publicarán <span className="text-foreground font-semibold">{pendingCountText}</span>.
+                </>
+              ) : (
+                "Esta publicación afecta a toda la clase, pero actualmente no hay cambios pendientes para publicar."
+              )}
             </AlertDialogDescription>
           </AlertDialogHeader>
           {state.error ? (

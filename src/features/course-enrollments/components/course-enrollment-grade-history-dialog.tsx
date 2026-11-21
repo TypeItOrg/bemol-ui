@@ -61,8 +61,15 @@ function GradeHistoryContent({ mode, enrollmentId, classId, gradeId, gradeLabel,
             <HistoryIcon className="size-6" aria-hidden="true" />
           </div>
           <DialogTitle className="leading-snug font-semibold">Historial de cambios</DialogTitle>
-          <DialogDescription className="max-w-md text-pretty">
-            {gradeLabel ? `Historial de “${gradeLabel}”.` : "Historial de la nota."} Registro de operaciones y su estado resultante.
+          <DialogDescription className="max-w-md leading-relaxed text-balance">
+            {gradeLabel ? (
+              <>
+                Consultá el registro cronológico de operaciones y valores resultantes de{" "}
+                <span className="text-foreground font-semibold">{gradeLabel}</span>.
+              </>
+            ) : (
+              "Consultá el registro cronológico de operaciones y valores resultantes registrados para esta calificación."
+            )}
           </DialogDescription>
         </DialogHeader>
         <div className="-mx-4 min-h-0 flex-1 space-y-4 overflow-y-auto px-4">

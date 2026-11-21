@@ -20,13 +20,23 @@ export function CourseEnrollmentDeletedGradeItem({ grade, onViewHistory }: Delet
   const isDiscardedDraft = grade.deletionType === COURSE_ENROLLMENT_GRADE_HISTORY_ACTION.DISCARDED_DRAFT_ON_EXIT;
 
   return (
-    <li className="flex items-center justify-between gap-3 px-3 py-2.5 opacity-70">
-      <div className="flex min-w-0 flex-1 flex-col items-start gap-1.5 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
+    <li className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-2.5 px-3.5 py-3 opacity-70 sm:flex sm:items-center sm:justify-between sm:gap-4">
+      <div className="contents sm:flex sm:min-w-0 sm:flex-1 sm:items-center sm:justify-between sm:gap-3">
         <p className="min-w-0 font-semibold wrap-break-word">{grade.lastEvaluation}</p>
-        {isDiscardedDraft ? <Badge variant="secondary">Borrador descartado</Badge> : <Badge variant="destructive">Eliminada</Badge>}
+        <div className="col-span-2 row-start-2">
+          {isDiscardedDraft ? (
+            <Badge variant="secondary" size="lg">
+              Borrador descartado
+            </Badge>
+          ) : (
+            <Badge variant="destructive" size="lg">
+              Eliminada
+            </Badge>
+          )}
+        </div>
       </div>
-      <div className="flex shrink-0 items-center gap-1.5">
-        <span className="bg-muted inline-flex min-w-13 items-center justify-center rounded-md px-3 py-1.5 text-center text-lg font-semibold tabular-nums">
+      <div className="col-start-2 row-start-1 flex shrink-0 items-center gap-2">
+        <span className="bg-muted inline-flex h-8 min-w-12 items-center justify-center rounded-md px-2.5 text-center text-base font-semibold tabular-nums">
           {grade.lastValue != null ? formatGradeValue(grade.lastValue) : "—"}
         </span>
         <Button
