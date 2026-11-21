@@ -4,6 +4,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { GraduationCapIcon } from "lucide-react";
+
 import { Button } from "@common/components/ui/button";
 import { DataTableNavigationProvider } from "@common/components/ui/data-table-navigation";
 import type { QueryParamValue } from "@common/types/query-param.types";
@@ -21,6 +23,8 @@ import { InstitutionalAccessDenied } from "@features/institutional-auth/componen
 import { InstitutionalBreadcrumb } from "@features/institutional-auth/components/institutional-breadcrumb";
 import { requireInstitutionalUser } from "@features/institutional-auth/services/get-institutional-user.service";
 import { getInstitutionalMetadata } from "@features/institutional-auth/utils/institutional-metadata.util";
+import { PlatformCollectionActions } from "@features/platform-auth/components/platform-collection-actions";
+import { PlatformPageIcon } from "@features/platform-auth/components/platform-page-icon";
 import { PlatformPageShell } from "@features/platform-auth/components/platform-page-shell";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -63,13 +67,14 @@ export default async function TeacherClassPage({
     <PlatformPageShell
       title={teacherClass.academicSpaceName}
       breadcrumb={<InstitutionalBreadcrumb hiddenSegments={[classId]} segmentLabels={{ classes: teacherClass.academicSpaceName }} />}
-      actions={canManageGrades ? <PublishGradesButton classId={classId} mode="teacher" /> : undefined}
+      actions={<PlatformPageIcon icon={GraduationCapIcon} />}
     >
-      <div className="flex items-center">
+      <PlatformCollectionActions className={canManageGrades ? "sm:justify-between" : "sm:justify-start"}>
         <Button asChild variant="outline" size="lg">
           <Link href={returnTo}>Volver</Link>
         </Button>
-      </div>
+        {canManageGrades ? <PublishGradesButton classId={classId} mode="teacher" /> : null}
+      </PlatformCollectionActions>
       <DataTableNavigationProvider>
         <CourseEnrollmentTable
           data={data}

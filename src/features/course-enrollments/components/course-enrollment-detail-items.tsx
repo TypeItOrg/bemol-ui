@@ -10,15 +10,17 @@ export function SectionHeader({
   icon: Icon,
   title,
   description,
+  action,
 }: {
   id: string;
   icon: LucideIcon;
   title: string;
   description: string;
+  action?: ReactNode;
 }): ReactElement {
   return (
     <header className="-mx-5 border-b px-5 pb-5 md:-mx-6 md:px-6">
-      <SharedSectionHeader icon={Icon} title={title} description={description} titleId={id} />
+      <SharedSectionHeader icon={Icon} title={title} description={description} titleId={id} action={action} />
     </header>
   );
 }

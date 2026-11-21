@@ -3,13 +3,14 @@
 import { useActionState } from "react";
 import type { ReactElement } from "react";
 
-import { CircleAlertIcon } from "lucide-react";
+import { CircleAlertIcon, Trash2Icon } from "lucide-react";
 import { toast } from "sonner";
 
 import { ActionForm } from "@common/components/action-form";
 import { Alert, AlertDescription } from "@common/components/ui/alert";
 import {
   AlertDialog,
+  AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
@@ -65,9 +66,12 @@ function DeleteConfirmForm({ grade, onOpenChange, onConfirm, onDeleted }: Delete
 
   return (
     <AlertDialog open onOpenChange={handleOpenChange}>
-      <AlertDialogContent className="max-w-[calc(100%_-_2.5rem)]">
-        <ActionForm action={formAction} className="space-y-4">
+      <AlertDialogContent>
+        <ActionForm action={formAction}>
           <AlertDialogHeader>
+            <div className="bg-destructive/10 text-destructive mb-1 flex size-12 items-center justify-center rounded-2xl">
+              <Trash2Icon className="size-6" aria-hidden="true" />
+            </div>
             <AlertDialogTitle>{COURSE_ENROLLMENT_GRADE_MESSAGES.DELETE_GRADE}</AlertDialogTitle>
             <AlertDialogDescription>
               {grade.publicationStatus === "DRAFT"
@@ -76,16 +80,16 @@ function DeleteConfirmForm({ grade, onOpenChange, onConfirm, onDeleted }: Delete
             </AlertDialogDescription>
           </AlertDialogHeader>
           {state.error ? (
-            <Alert variant="destructive">
+            <Alert className="mt-4" variant="destructive">
               <CircleAlertIcon />
               <AlertDescription>{state.error}</AlertDescription>
             </Alert>
           ) : null}
-          <AlertDialogFooter>
-            <Button type="button" variant="outline" disabled={isPending} onClick={() => onOpenChange(false)}>
+          <AlertDialogFooter className="mt-5">
+            <AlertDialogCancel type="button" size="lg" disabled={isPending}>
               Cancelar
-            </Button>
-            <Button type="submit" variant="destructive" disabled={isPending}>
+            </AlertDialogCancel>
+            <Button type="submit" size="lg" variant="destructive" disabled={isPending}>
               {isPending ? "Eliminando…" : "Confirmar"}
             </Button>
           </AlertDialogFooter>

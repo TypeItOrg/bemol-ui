@@ -3,7 +3,7 @@
 import { useActionState } from "react";
 import type { ReactElement } from "react";
 
-import { CircleAlertIcon } from "lucide-react";
+import { CircleAlertIcon, ClipboardCheckIcon, PencilIcon } from "lucide-react";
 import { toast } from "sonner";
 
 import { ActionForm } from "@common/components/action-form";
@@ -93,54 +93,73 @@ function GradeFormContent({ mode, enrollmentId, classId, grade, onOpenChange, on
 
   return (
     <Dialog open onOpenChange={handleOpenChange}>
-      <DialogContent className="max-w-[calc(100%_-_2.5rem)] sm:max-w-md">
-        <ActionForm action={formAction} noValidate className="space-y-4">
-          <DialogHeader>
-            <DialogTitle>{grade ? COURSE_ENROLLMENT_GRADE_MESSAGES.EDIT_GRADE : COURSE_ENROLLMENT_GRADE_MESSAGES.ADD_GRADE}</DialogTitle>
-            <DialogDescription>
-              {isEditingPublished ? COURSE_ENROLLMENT_GRADE_MESSAGES.PUBLISHED_EDIT_DESCRIPTION : COURSE_ENROLLMENT_GRADE_MESSAGES.DRAFT_DESCRIPTION}
-            </DialogDescription>
-          </DialogHeader>
-          {state.error ? (
-            <Alert variant="destructive">
-              <CircleAlertIcon />
-              <AlertDescription>{state.error}</AlertDescription>
-            </Alert>
-          ) : null}
-          <Field data-invalid={Boolean(state.fieldErrors?.evaluation) || undefined}>
-            <FieldLabel htmlFor="evaluation" required>
-              Evaluación
-            </FieldLabel>
-            <Input
-              id="evaluation"
-              name="evaluation"
-              required
-              maxLength={150}
-              disabled={isPending}
-              aria-invalid={Boolean(state.fieldErrors?.evaluation) || undefined}
-              defaultValue={grade?.evaluation ?? ""}
-              placeholder="Parcial 1"
-            />
-            <FieldError>{state.fieldErrors?.evaluation}</FieldError>
-          </Field>
-          <Field data-invalid={Boolean(state.fieldErrors?.value) || undefined}>
-            <FieldLabel htmlFor="value" required>
-              Nota
-            </FieldLabel>
-            <Input
-              id="value"
-              name="value"
-              type="text"
-              inputMode="decimal"
-              required
-              disabled={isPending}
-              aria-invalid={Boolean(state.fieldErrors?.value) || undefined}
-              defaultValue={grade ? formatGradeValue(grade.value) : ""}
-              placeholder="7,50"
-            />
-            <FieldError>{state.fieldErrors?.value}</FieldError>
-          </Field>
-          <DialogFooter>
+      <DialogContent
+        className="flex max-h-[calc(100dvh-2rem)] flex-col gap-5 overflow-hidden sm:max-w-md"
+        onInteractOutside={(event) => {
+          if (isPending) {
+            event.preventDefault();
+          }
+        }}
+        onEscapeKeyDown={(event) => {
+          if (isPending) {
+            event.preventDefault();
+          }
+        }}
+      >
+        <DialogHeader className="shrink-0 items-center pt-2 text-center">
+          <div className="bg-primary/10 text-primary mb-1 flex size-12 items-center justify-center rounded-2xl">
+            {grade ? <PencilIcon className="size-6" aria-hidden="true" /> : <ClipboardCheckIcon className="size-6" aria-hidden="true" />}
+          </div>
+          <DialogTitle className="leading-snug font-semibold">
+            {grade ? COURSE_ENROLLMENT_GRADE_MESSAGES.EDIT_GRADE : COURSE_ENROLLMENT_GRADE_MESSAGES.ADD_GRADE}
+          </DialogTitle>
+          <DialogDescription className="max-w-sm text-pretty">
+            {isEditingPublished ? COURSE_ENROLLMENT_GRADE_MESSAGES.PUBLISHED_EDIT_DESCRIPTION : COURSE_ENROLLMENT_GRADE_MESSAGES.DRAFT_DESCRIPTION}
+          </DialogDescription>
+        </DialogHeader>
+        <ActionForm action={formAction} noValidate className="flex min-h-0 flex-1 flex-col">
+          <div className="-mx-4 min-h-0 space-y-4 overflow-y-auto px-4 pb-5">
+            {state.error ? (
+              <Alert variant="destructive">
+                <CircleAlertIcon />
+                <AlertDescription>{state.error}</AlertDescription>
+              </Alert>
+            ) : null}
+            <Field data-invalid={Boolean(state.fieldErrors?.evaluation) || undefined}>
+              <FieldLabel htmlFor="evaluation" required>
+                Evaluación
+              </FieldLabel>
+              <Input
+                id="evaluation"
+                name="evaluation"
+                required
+                maxLength={150}
+                disabled={isPending}
+                aria-invalid={Boolean(state.fieldErrors?.evaluation) || undefined}
+                defaultValue={grade?.evaluation ?? ""}
+                placeholder="Parcial 1"
+              />
+              <FieldError>{state.fieldErrors?.evaluation}</FieldError>
+            </Field>
+            <Field data-invalid={Boolean(state.fieldErrors?.value) || undefined}>
+              <FieldLabel htmlFor="value" required>
+                Nota
+              </FieldLabel>
+              <Input
+                id="value"
+                name="value"
+                type="text"
+                inputMode="decimal"
+                required
+                disabled={isPending}
+                aria-invalid={Boolean(state.fieldErrors?.value) || undefined}
+                defaultValue={grade ? formatGradeValue(grade.value) : ""}
+                placeholder="7,50"
+              />
+              <FieldError>{state.fieldErrors?.value}</FieldError>
+            </Field>
+          </div>
+          <DialogFooter className="shrink-0">
             <Button type="button" variant="outline" size="lg" disabled={isPending} onClick={() => onOpenChange(false)}>
               Cancelar
             </Button>

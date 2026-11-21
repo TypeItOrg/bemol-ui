@@ -55,70 +55,75 @@ function GradeHistoryContent({ mode, enrollmentId, classId, gradeId, gradeLabel,
 
   return (
     <Dialog open onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[calc(100dvh-2.5rem)] max-w-[calc(100%_-_2.5rem)] overflow-y-auto sm:max-w-3xl">
-        <DialogHeader>
-          <DialogTitle>Historial de cambios</DialogTitle>
-          <DialogDescription>
+      <DialogContent className="flex max-h-[calc(100dvh-2rem)] flex-col gap-5 overflow-hidden sm:max-w-3xl">
+        <DialogHeader className="shrink-0 items-center pt-2 text-center">
+          <div className="bg-primary/10 text-primary mb-1 flex size-12 items-center justify-center rounded-2xl">
+            <HistoryIcon className="size-6" aria-hidden="true" />
+          </div>
+          <DialogTitle className="leading-snug font-semibold">Historial de cambios</DialogTitle>
+          <DialogDescription className="max-w-md text-pretty">
             {gradeLabel ? `Historial de “${gradeLabel}”.` : "Historial de la nota."} Registro de operaciones y su estado resultante.
           </DialogDescription>
         </DialogHeader>
-        {loading ? <GradeHistorySkeleton /> : null}
-        {!loading && error ? (
-          <Alert variant="destructive">
-            <CircleAlertIcon />
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        ) : null}
-        {isPristineEmpty ? (
-          <Empty className="min-h-48 p-6">
-            <EmptyHeader className="max-w-sm">
-              <EmptyMedia variant="icon">
-                <HistoryIcon className="size-5" aria-hidden="true" />
-              </EmptyMedia>
-              <EmptyTitle className="text-base">Sin historial</EmptyTitle>
-              <EmptyDescription>No hay cambios registrados para esta nota.</EmptyDescription>
-            </EmptyHeader>
-          </Empty>
-        ) : null}
-        {isOutOfRange ? (
-          <Alert>
-            <CircleAlertIcon />
-            <AlertDescription>Esta página no contiene eventos. El historial puede haber cambiado.</AlertDescription>
-          </Alert>
-        ) : null}
-        {!loading && !error && !isPristineEmpty && history.items.length > 0 ? (
-          <div className="bg-background overflow-x-auto rounded-lg border [&_div[data-slot=table-container]]:cursor-auto">
-            <Table className="min-w-150 sm:min-w-180">
-              <TableHeader className="bg-muted">
-                <TableRow className="h-11">
-                  <TableHead>Fecha y hora</TableHead>
-                  <TableHead>Operación</TableHead>
-                  <TableHead>Valores resultantes</TableHead>
-                  <TableHead>Autor</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {history.items.map((event) => (
-                  <CourseEnrollmentGradeHistoryRow key={event.historyId} event={event} />
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        ) : null}
-        {showPagination ? (
-          <DataTablePagination
-            isInline
-            page={page}
-            size={size}
-            totalPages={totalPages}
-            summaryLabel={`${totalItems} ${totalItems === 1 ? "evento" : "eventos"}`}
-            pageSizeOptions={COURSE_ENROLLMENT_PAGE_SIZE_OPTIONS}
-            isPending={loading}
-            onPageChange={changePage}
-            onPageSizeChange={(nextSize) => changeSize(Number(nextSize))}
-          />
-        ) : null}
-        <DialogFooter>
+        <div className="-mx-4 min-h-0 flex-1 space-y-4 overflow-y-auto px-4">
+          {loading ? <GradeHistorySkeleton /> : null}
+          {!loading && error ? (
+            <Alert variant="destructive">
+              <CircleAlertIcon />
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          ) : null}
+          {isPristineEmpty ? (
+            <Empty className="min-h-48 p-6">
+              <EmptyHeader className="max-w-sm">
+                <EmptyMedia variant="icon">
+                  <HistoryIcon className="size-5" aria-hidden="true" />
+                </EmptyMedia>
+                <EmptyTitle className="text-base">Sin historial</EmptyTitle>
+                <EmptyDescription>No hay cambios registrados para esta nota.</EmptyDescription>
+              </EmptyHeader>
+            </Empty>
+          ) : null}
+          {isOutOfRange ? (
+            <Alert>
+              <CircleAlertIcon />
+              <AlertDescription>Esta página no contiene eventos. El historial puede haber cambiado.</AlertDescription>
+            </Alert>
+          ) : null}
+          {!loading && !error && !isPristineEmpty && history.items.length > 0 ? (
+            <div className="bg-background overflow-x-auto rounded-lg border [&_div[data-slot=table-container]]:cursor-auto">
+              <Table className="min-w-150 sm:min-w-180">
+                <TableHeader className="bg-muted">
+                  <TableRow className="h-11">
+                    <TableHead>Fecha y hora</TableHead>
+                    <TableHead>Operación</TableHead>
+                    <TableHead>Valores resultantes</TableHead>
+                    <TableHead>Autor</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {history.items.map((event) => (
+                    <CourseEnrollmentGradeHistoryRow key={event.historyId} event={event} />
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          ) : null}
+          {showPagination ? (
+            <DataTablePagination
+              isInline
+              page={page}
+              size={size}
+              totalPages={totalPages}
+              summaryLabel={`${totalItems} ${totalItems === 1 ? "evento" : "eventos"}`}
+              pageSizeOptions={COURSE_ENROLLMENT_PAGE_SIZE_OPTIONS}
+              isPending={loading}
+              onPageChange={changePage}
+              onPageSizeChange={(nextSize) => changeSize(Number(nextSize))}
+            />
+          ) : null}
+        </div>
+        <DialogFooter className="shrink-0">
           <Button type="button" variant="outline" size="lg" onClick={() => onOpenChange(false)}>
             Cerrar
           </Button>

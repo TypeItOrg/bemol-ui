@@ -178,21 +178,24 @@ export function BulkPublishGradesForm({
     batchProgress && batchProgress.total > 1 ? `Publicando… (lote ${batchProgress.current} de ${batchProgress.total})` : "Publicando…";
 
   return (
-    <form onSubmit={(event) => void handleSubmit(event)} noValidate className="space-y-4">
-      <div className="space-y-4">
-        <Field>
+    <form onSubmit={(event) => void handleSubmit(event)} noValidate className="flex min-h-0 flex-1 flex-col">
+      <div className="-mx-4 min-h-0 flex-1 space-y-4 overflow-y-auto px-4 pb-5">
+        <Field className="min-w-0">
           <FieldLabel htmlFor="bulk-course">Curso</FieldLabel>
           <Select value={effectiveCourseId} onValueChange={handleCourseChange} disabled={isPublishing}>
-            <SelectTrigger id="bulk-course" className="w-full">
+            <SelectTrigger
+              id="bulk-course"
+              className="h-9! w-full min-w-0 [&_[data-slot=select-value]]:min-w-0 [&_[data-slot=select-value]]:truncate"
+            >
               <SelectValue />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="w-(--radix-select-trigger-width)">
               <SelectGroup>
                 <SelectItem value={ALL_COURSES} className="px-2.5 py-1.5">
                   Todos los cursos
                 </SelectItem>
                 {courses.map((course) => (
-                  <SelectItem key={course.id} value={course.id} className="px-2.5 py-1.5">
+                  <SelectItem key={course.id} value={course.id} className="px-2.5 py-1.5 break-words whitespace-normal">
                     {course.name}
                   </SelectItem>
                 ))}
@@ -200,19 +203,19 @@ export function BulkPublishGradesForm({
             </SelectContent>
           </Select>
         </Field>
-        <Field>
+        <Field className="min-w-0">
           <FieldLabel htmlFor="bulk-class">Clase</FieldLabel>
           <Select value={effectiveClassId} onValueChange={setClassId} disabled={isPublishing || effectiveCourseId === ALL_COURSES}>
-            <SelectTrigger id="bulk-class" className="w-full">
+            <SelectTrigger id="bulk-class" className="h-9! w-full min-w-0 [&_[data-slot=select-value]]:min-w-0 [&_[data-slot=select-value]]:truncate">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="w-(--radix-select-trigger-width)">
               <SelectGroup>
                 <SelectItem value={ALL_CLASSES} className="px-2.5 py-1.5">
                   Todas las clases
                 </SelectItem>
                 {classOptions.map((option) => (
-                  <SelectItem key={option.classId} value={option.classId} className="px-2.5 py-1.5">
+                  <SelectItem key={option.classId} value={option.classId} className="px-2.5 py-1.5 break-words whitespace-normal">
                     {option.classLabel} · {option.pendingChanges} {option.pendingChanges === 1 ? "pendiente" : "pendientes"}
                   </SelectItem>
                 ))}
@@ -233,7 +236,7 @@ export function BulkPublishGradesForm({
           onRefreshPendingClasses={onRefreshPendingClasses}
         />
       </div>
-      <DialogFooter>
+      <DialogFooter className="shrink-0">
         <Button type="button" variant="outline" size="lg" disabled={isPublishing} onClick={() => onOpenChange(false)}>
           Cancelar
         </Button>

@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { ReactElement } from "react";
 
-import { CircleAlertIcon, ScrollTextIcon } from "lucide-react";
+import { CircleAlertIcon, ScrollTextIcon, SendIcon } from "lucide-react";
 
 import { Alert, AlertDescription } from "@common/components/ui/alert";
 import { Button } from "@common/components/ui/button";
@@ -131,76 +131,31 @@ function BulkPublishDialogContent({ onOpenChange, onPublished }: Omit<BulkPublis
     onOpenChange(next);
   }
 
+  const showForm = !isLoading && !loadError && (classes.length > 0 || hasReport);
+
   return (
     <Dialog open onOpenChange={handleOpenChange}>
-      <DialogContent className="max-w-[calc(100%_-_2.5rem)] sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>Publicar notas</DialogTitle>
-          <DialogDescription>Seleccioná el curso y la clase con cambios pendientes.</DialogDescription>
+      <DialogContent
+        className="flex max-h-[calc(100dvh-2rem)] flex-col gap-5 overflow-hidden sm:max-w-md"
+        onInteractOutside={(event) => {
+          if (isPublishing) {
+            event.preventDefault();
+          }
+        }}
+        onEscapeKeyDown={(event) => {
+          if (isPublishing) {
+            event.preventDefault();
+          }
+        }}
+      >
+        <DialogHeader className="shrink-0 items-center pt-2 text-center">
+          <div className="bg-primary/10 text-primary mb-1 flex size-12 items-center justify-center rounded-2xl">
+            <SendIcon className="size-6" aria-hidden="true" />
+          </div>
+          <DialogTitle className="leading-snug font-semibold">Publicar notas</DialogTitle>
+          <DialogDescription className="max-w-sm text-pretty">Seleccioná el curso y la clase con cambios pendientes.</DialogDescription>
         </DialogHeader>
-        {isLoading ? (
-          <>
-            <div className="space-y-4" aria-busy="true" aria-label="Cargando clases con cambios">
-              <span className="sr-only" role="status">
-                Cargando clases con cambios…
-              </span>
-              <div className="space-y-2">
-                <Skeleton className="h-4 w-16" />
-                <Skeleton className="h-10 w-full" />
-              </div>
-              <div className="space-y-2">
-                <Skeleton className="h-4 w-16" />
-                <Skeleton className="h-10 w-full" />
-              </div>
-            </div>
-            <DialogFooter>
-              <Button type="button" variant="outline" size="lg" onClick={() => onOpenChange(false)}>
-                Cancelar
-              </Button>
-              <Button type="button" size="lg" disabled>
-                Publicar notas
-              </Button>
-            </DialogFooter>
-          </>
-        ) : null}
-        {!isLoading && loadError ? (
-          <>
-            <Alert variant="destructive">
-              <CircleAlertIcon />
-              <AlertDescription>{loadError}</AlertDescription>
-            </Alert>
-            <DialogFooter>
-              <Button type="button" variant="outline" size="lg" onClick={() => onOpenChange(false)}>
-                Cancelar
-              </Button>
-              <Button type="button" size="lg" onClick={() => void handleRetry()}>
-                Reintentar
-              </Button>
-            </DialogFooter>
-          </>
-        ) : null}
-        {!isLoading && !loadError && classes.length === 0 && !hasReport ? (
-          <>
-            <Empty className="min-h-56 p-6">
-              <EmptyHeader className="max-w-sm">
-                <EmptyMedia variant="icon">
-                  <ScrollTextIcon className="size-5" aria-hidden="true" />
-                </EmptyMedia>
-                <EmptyTitle className="text-base">Sin cambios pendientes</EmptyTitle>
-                <EmptyDescription>No hay clases con cambios pendientes de notas para publicar.</EmptyDescription>
-              </EmptyHeader>
-            </Empty>
-            <DialogFooter>
-              <Button type="button" variant="outline" size="lg" onClick={() => onOpenChange(false)}>
-                Cancelar
-              </Button>
-              <Button type="button" size="lg" disabled>
-                Publicar notas
-              </Button>
-            </DialogFooter>
-          </>
-        ) : null}
-        {!isLoading && !loadError && (classes.length > 0 || hasReport) ? (
+        {showForm ? (
           <BulkPublishGradesForm
             classes={classes}
             isRefreshing={isRefreshing}
@@ -211,7 +166,58 @@ function BulkPublishDialogContent({ onOpenChange, onPublished }: Omit<BulkPublis
             onPendingChange={setIsPublishing}
             onReportAvailable={() => setHasReport(true)}
           />
-        ) : null}
+        ) : (
+          <>
+            <div className="-mx-4 min-h-0 flex-1 overflow-y-auto px-4">
+              {isLoading ? (
+                <div className="space-y-4" aria-busy="true" aria-label="Cargando clases con cambios">
+                  <span className="sr-only" role="status">
+                    Cargando clases con cambios…
+                  </span>
+                  <div className="space-y-2">
+                    <Skeleton className="h-4 w-16" />
+                    <Skeleton className="h-9 w-full" />
+                  </div>
+                  <div className="space-y-2">
+                    <Skeleton className="h-4 w-16" />
+                    <Skeleton className="h-9 w-full" />
+                  </div>
+                </div>
+              ) : null}
+              {!isLoading && loadError ? (
+                <Alert variant="destructive">
+                  <CircleAlertIcon />
+                  <AlertDescription>{loadError}</AlertDescription>
+                </Alert>
+              ) : null}
+              {!isLoading && !loadError ? (
+                <Empty className="min-h-56 p-6">
+                  <EmptyHeader className="max-w-sm">
+                    <EmptyMedia variant="icon">
+                      <ScrollTextIcon className="size-5" aria-hidden="true" />
+                    </EmptyMedia>
+                    <EmptyTitle className="text-base">Sin cambios pendientes</EmptyTitle>
+                    <EmptyDescription>No hay clases con cambios pendientes de notas para publicar.</EmptyDescription>
+                  </EmptyHeader>
+                </Empty>
+              ) : null}
+            </div>
+            <DialogFooter className="shrink-0">
+              <Button type="button" variant="outline" size="lg" onClick={() => onOpenChange(false)}>
+                Cancelar
+              </Button>
+              {loadError ? (
+                <Button type="button" size="lg" onClick={() => void handleRetry()}>
+                  Reintentar
+                </Button>
+              ) : (
+                <Button type="button" size="lg" disabled>
+                  Publicar notas
+                </Button>
+              )}
+            </DialogFooter>
+          </>
+        )}
       </DialogContent>
     </Dialog>
   );
