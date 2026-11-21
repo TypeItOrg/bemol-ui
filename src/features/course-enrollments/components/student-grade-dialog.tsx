@@ -5,7 +5,7 @@ import type { ReactElement } from "react";
 import { useParams } from "next/navigation";
 
 import { useQuery } from "@tanstack/react-query";
-import { CircleAlertIcon, ScrollTextIcon } from "lucide-react";
+import { CircleAlertIcon, ClipboardCheckIcon, ScrollTextIcon } from "lucide-react";
 
 import { Alert, AlertDescription } from "@common/components/ui/alert";
 import { Button } from "@common/components/ui/button";
@@ -50,67 +50,72 @@ function StudentGradeDialogContent({ enrollment, onOpenChange }: Omit<StudentGra
 
   return (
     <Dialog open onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[calc(100dvh-2.5rem)] max-w-[calc(100%_-_2.5rem)] overflow-y-auto sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>{COURSE_ENROLLMENT_GRADE_MESSAGES.STUDENT_DIALOG_TITLE}</DialogTitle>
-          <DialogDescription>
+      <DialogContent className="flex max-h-[calc(100dvh-2rem)] flex-col gap-5 overflow-hidden sm:max-w-md">
+        <DialogHeader className="shrink-0 items-center pt-2 text-center">
+          <div className="bg-primary/10 text-primary mb-1 flex size-12 items-center justify-center rounded-2xl">
+            <ClipboardCheckIcon className="size-6" aria-hidden="true" />
+          </div>
+          <DialogTitle className="leading-snug font-semibold">{COURSE_ENROLLMENT_GRADE_MESSAGES.STUDENT_DIALOG_TITLE}</DialogTitle>
+          <DialogDescription className="max-w-sm text-pretty">
             {enrollment.academicSpaceName} · {enrollment.courseClassLabel}
           </DialogDescription>
         </DialogHeader>
-        {isLoading ? (
-          <div className="space-y-2" aria-busy="true" aria-label="Cargando notas">
-            <span className="sr-only" role="status">
-              Cargando notas…
-            </span>
-            {Array.from({ length: 3 }).map((_, index) => (
-              <div key={index} className="flex items-baseline justify-between gap-4 rounded-lg border px-3 py-2">
-                <Skeleton className="h-5 w-32" />
-                <Skeleton className="h-5 w-12" />
-              </div>
-            ))}
-          </div>
-        ) : null}
-        {hasError ? (
-          <>
+        <div className="-mx-4 min-h-0 flex-1 overflow-y-auto px-4">
+          {isLoading ? (
+            <div className="space-y-2" aria-busy="true" aria-label="Cargando notas">
+              <span className="sr-only" role="status">
+                Cargando notas…
+              </span>
+              {Array.from({ length: 3 }).map((_, index) => (
+                <div key={index} className="flex items-baseline justify-between gap-4 rounded-lg border px-3 py-2">
+                  <Skeleton className="h-5 w-32" />
+                  <Skeleton className="h-5 w-12" />
+                </div>
+              ))}
+            </div>
+          ) : null}
+          {hasError ? (
             <Alert variant="destructive">
               <CircleAlertIcon />
               <AlertDescription>{COURSE_ENROLLMENT_GRADE_MESSAGES.LOAD_FAILED}</AlertDescription>
             </Alert>
-            <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-                Cerrar
-              </Button>
-              <Button type="button" onClick={() => void gradesQuery.refetch()}>
-                Reintentar
-              </Button>
-            </DialogFooter>
-          </>
-        ) : null}
-        {!isLoading && !hasError && grades.length === 0 ? (
-          <Empty className="min-h-56 p-6">
-            <EmptyHeader className="max-w-sm">
-              <EmptyMedia variant="icon">
-                <ScrollTextIcon className="size-5" aria-hidden="true" />
-              </EmptyMedia>
-              <EmptyTitle className="text-base">{COURSE_ENROLLMENT_GRADE_MESSAGES.NO_PUBLISHED_GRADES_TITLE}</EmptyTitle>
-              <EmptyDescription>
-                {isClosed ? COURSE_ENROLLMENT_GRADE_MESSAGES.NO_PUBLISHED_GRADES_CLOSED : COURSE_ENROLLMENT_GRADE_MESSAGES.NO_PUBLISHED_GRADES}
-              </EmptyDescription>
-            </EmptyHeader>
-          </Empty>
-        ) : null}
-        {!isLoading && !hasError && grades.length > 0 ? (
-          <ul className="space-y-2">
-            {grades.map((grade) => (
-              <li key={grade.id} className="flex items-center justify-between gap-4 rounded-lg border px-3 py-2">
-                <span className="min-w-0 font-medium wrap-break-word">{grade.evaluation}</span>
-                <span className="bg-muted inline-flex min-w-13 shrink-0 items-center justify-center rounded-md px-3 py-1.5 text-center font-semibold tabular-nums">
-                  {formatGradeValue(grade.value)}
-                </span>
-              </li>
-            ))}
-          </ul>
-        ) : null}
+          ) : null}
+          {!isLoading && !hasError && grades.length === 0 ? (
+            <Empty className="min-h-56 p-6">
+              <EmptyHeader className="max-w-sm">
+                <EmptyMedia variant="icon">
+                  <ScrollTextIcon className="size-5" aria-hidden="true" />
+                </EmptyMedia>
+                <EmptyTitle className="text-base">{COURSE_ENROLLMENT_GRADE_MESSAGES.NO_PUBLISHED_GRADES_TITLE}</EmptyTitle>
+                <EmptyDescription>
+                  {isClosed ? COURSE_ENROLLMENT_GRADE_MESSAGES.NO_PUBLISHED_GRADES_CLOSED : COURSE_ENROLLMENT_GRADE_MESSAGES.NO_PUBLISHED_GRADES}
+                </EmptyDescription>
+              </EmptyHeader>
+            </Empty>
+          ) : null}
+          {!isLoading && !hasError && grades.length > 0 ? (
+            <ul className="space-y-2">
+              {grades.map((grade) => (
+                <li key={grade.id} className="flex items-center justify-between gap-4 rounded-lg border px-3 py-2">
+                  <span className="min-w-0 font-medium wrap-break-word">{grade.evaluation}</span>
+                  <span className="bg-muted inline-flex min-w-13 shrink-0 items-center justify-center rounded-md px-3 py-1.5 text-center font-semibold tabular-nums">
+                    {formatGradeValue(grade.value)}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          ) : null}
+        </div>
+        <DialogFooter className="shrink-0">
+          <Button type="button" variant="outline" size="lg" onClick={() => onOpenChange(false)}>
+            Cerrar
+          </Button>
+          {hasError ? (
+            <Button type="button" size="lg" onClick={() => void gradesQuery.refetch()}>
+              Reintentar
+            </Button>
+          ) : null}
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

@@ -24,6 +24,7 @@ import { requireInstitutionalUser } from "@features/institutional-auth/services/
 import { INSTITUTIONAL_PERMISSION } from "@features/institutional-auth/types/institutional-permission.types";
 import { getInstitutionalMetadata } from "@features/institutional-auth/utils/institutional-metadata.util";
 import { hasInstitutionalPermission } from "@features/institutional-auth/utils/institutional-permission.util";
+import { PlatformCollectionActions } from "@features/platform-auth/components/platform-collection-actions";
 import { PlatformPageIcon } from "@features/platform-auth/components/platform-page-icon";
 import { PlatformPageShell } from "@features/platform-auth/components/platform-page-shell";
 
@@ -84,14 +85,14 @@ export default async function CourseEnrollmentsPage({
   return (
     <PlatformPageShell title="Cursadas" breadcrumb={<InstitutionalBreadcrumb />} actions={<PlatformPageIcon icon={GraduationCapIcon} />}>
       {canCreate || canPublishGrades ? (
-        <div className="flex flex-wrap items-center gap-2">
+        <PlatformCollectionActions className="sm:justify-start">
           {canCreate ? (
             <Button asChild size="lg">
               <Link href={appendReturnTo("/course-enrollments/new", returnTo)}>Alta manual</Link>
             </Button>
           ) : null}
           {canPublishGrades ? <BulkPublishGradesButton /> : null}
-        </div>
+        </PlatformCollectionActions>
       ) : null}
       <DataTableNavigationProvider>
         <CourseEnrollmentFilters size={size} status={status} academicStatus={academicStatus} />

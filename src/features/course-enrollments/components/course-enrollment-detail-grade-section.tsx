@@ -98,27 +98,26 @@ export function CourseEnrollmentDetailGradeSection({
 
   return (
     <section aria-labelledby="enrollment-grades-title" className="bg-muted/25 rounded-xl border p-5 md:p-6">
-      <div className="flex flex-wrap items-start justify-between gap-4 border-b pb-5">
-        <div className="min-w-0 flex-1 [&>div]:border-b-0 [&>div]:pb-0">
-          <SectionHeader
-            id="enrollment-grades-title"
-            icon={ClipboardCheckIcon}
-            title="Notas"
-            description="Calificaciones registradas y estado de publicación para esta cursada."
-          />
-        </div>
-        {showAddButton ? (
-          <Button
-            size="lg"
-            onClick={() => {
-              setFormGrade(undefined);
-              setIsFormOpen(true);
-            }}
-          >
-            {COURSE_ENROLLMENT_GRADE_MESSAGES.ADD_GRADE}
-          </Button>
-        ) : null}
-      </div>
+      <SectionHeader
+        id="enrollment-grades-title"
+        icon={ClipboardCheckIcon}
+        title="Notas"
+        description="Calificaciones registradas y estado de publicación para esta cursada."
+        action={
+          showAddButton ? (
+            <Button
+              size="lg"
+              className="w-full @xl/section-header:w-auto"
+              onClick={() => {
+                setFormGrade(undefined);
+                setIsFormOpen(true);
+              }}
+            >
+              {COURSE_ENROLLMENT_GRADE_MESSAGES.ADD_GRADE}
+            </Button>
+          ) : undefined
+        }
+      />
       <div className="pt-5">
         <CourseEnrollmentGradesBody
           key={`${enrollment.id}-${mode}`}

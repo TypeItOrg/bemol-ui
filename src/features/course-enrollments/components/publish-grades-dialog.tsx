@@ -3,13 +3,14 @@
 import { useActionState } from "react";
 import type { ReactElement } from "react";
 
-import { CircleAlertIcon } from "lucide-react";
+import { CircleAlertIcon, SendIcon } from "lucide-react";
 import { toast } from "sonner";
 
 import { ActionForm } from "@common/components/action-form";
 import { Alert, AlertDescription } from "@common/components/ui/alert";
 import {
   AlertDialog,
+  AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
@@ -82,25 +83,28 @@ function PublishConfirmForm({
 
   return (
     <AlertDialog open onOpenChange={handleOpenChange}>
-      <AlertDialogContent className="max-w-[calc(100%_-_2.5rem)]">
-        <ActionForm action={formAction} className="space-y-4">
+      <AlertDialogContent>
+        <ActionForm action={formAction}>
           <AlertDialogHeader>
+            <div className="bg-primary/10 text-primary mb-1 flex size-12 items-center justify-center rounded-2xl">
+              <SendIcon className="size-6" aria-hidden="true" />
+            </div>
             <AlertDialogTitle>{COURSE_ENROLLMENT_GRADE_MESSAGES.PUBLISH_CONFIRM_TITLE}</AlertDialogTitle>
             <AlertDialogDescription>
               Esta publicación afecta a toda la clase: se publicarán todos los cambios pendientes de notas de esta clase.
-              <span className="mt-2 block font-semibold">{pendingText}</span>
+              <span className="text-foreground mt-2 block font-semibold">{pendingText}</span>
             </AlertDialogDescription>
           </AlertDialogHeader>
           {state.error ? (
-            <Alert variant="destructive">
+            <Alert className="mt-4" variant="destructive">
               <CircleAlertIcon />
               <AlertDescription>{state.error}</AlertDescription>
             </Alert>
           ) : null}
-          <AlertDialogFooter>
-            <Button type="button" variant="outline" size="lg" disabled={isPending} onClick={() => onOpenChange(false)}>
+          <AlertDialogFooter className="mt-5">
+            <AlertDialogCancel type="button" size="lg" disabled={isPending}>
               Cancelar
-            </Button>
+            </AlertDialogCancel>
             <Button type="submit" size="lg" disabled={isPending || !summary || summary.pendingChanges === 0}>
               {isPending ? "Publicando…" : (label ?? COURSE_ENROLLMENT_GRADE_MESSAGES.PUBLISH_GRADES)}
             </Button>

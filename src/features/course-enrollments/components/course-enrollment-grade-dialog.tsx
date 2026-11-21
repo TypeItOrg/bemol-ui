@@ -4,10 +4,11 @@ import { useState } from "react";
 import type { ReactElement } from "react";
 
 import { useQueryClient } from "@tanstack/react-query";
+import { ClipboardCheckIcon } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@common/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@common/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@common/components/ui/dialog";
 import { safelyRunAction } from "@common/utils/safe-action.util";
 
 import {
@@ -104,47 +105,51 @@ function GradeDialogContent({
     <>
       <Dialog open onOpenChange={onOpenChange}>
         <DialogContent
-          className="max-h-[calc(100dvh-2.5rem)] max-w-[calc(100%_-_2.5rem)] overflow-y-auto sm:max-w-2xl"
+          className="flex max-h-[calc(100dvh-2rem)] flex-col gap-5 overflow-hidden sm:max-w-2xl"
           onOpenAutoFocus={(event) => event.preventDefault()}
         >
-          <DialogHeader>
-            <DialogTitle>{COURSE_ENROLLMENT_GRADE_MESSAGES.DIALOG_TITLE}</DialogTitle>
-            <DialogDescription>
+          <DialogHeader className="shrink-0 items-center pt-2 text-center">
+            <div className="bg-primary/10 text-primary mb-1 flex size-12 items-center justify-center rounded-2xl">
+              <ClipboardCheckIcon className="size-6" aria-hidden="true" />
+            </div>
+            <DialogTitle className="leading-snug font-semibold">{COURSE_ENROLLMENT_GRADE_MESSAGES.DIALOG_TITLE}</DialogTitle>
+            <DialogDescription className="max-w-md text-pretty">
               {enrollment.studentName} · {enrollment.academicSpaceName} · {enrollment.courseClassLabel}
             </DialogDescription>
           </DialogHeader>
-          <CourseEnrollmentGradesBody
-            key={`${enrollment.id}-${mode}`}
-            mode={mode}
-            enrollmentId={enrollment.id}
-            classId={classId}
-            variant="dialog"
-            canUpdate={canUpdate}
-            canDelete={canDelete}
-            canEdit={canEdit}
-            onEdit={(grade) => {
-              setFormGrade(grade);
-              setIsFormOpen(true);
-            }}
-            onDelete={setDeleteGrade}
-            onHistory={(gradeId, label) => setHistoryGrade({ id: gradeId, label })}
-            onCancelDeletion={(grade) => void handleCancelDeletion(grade)}
-            onErrorChange={setListError}
-            onLoadingChange={setListLoading}
-          />
-          {listError ? (
-            <div className="bg-popover sticky bottom-0 flex justify-end gap-2 pt-2">
-              <Button variant="outline" size="lg" onClick={() => onOpenChange(false)}>
-                Cerrar
-              </Button>
-              <Button size="lg" onClick={handleRetry}>
+          <div className="-mx-4 min-h-0 flex-1 overflow-y-auto px-4">
+            <CourseEnrollmentGradesBody
+              key={`${enrollment.id}-${mode}`}
+              mode={mode}
+              enrollmentId={enrollment.id}
+              classId={classId}
+              variant="dialog"
+              canUpdate={canUpdate}
+              canDelete={canDelete}
+              canEdit={canEdit}
+              onEdit={(grade) => {
+                setFormGrade(grade);
+                setIsFormOpen(true);
+              }}
+              onDelete={setDeleteGrade}
+              onHistory={(gradeId, label) => setHistoryGrade({ id: gradeId, label })}
+              onCancelDeletion={(grade) => void handleCancelDeletion(grade)}
+              onErrorChange={setListError}
+              onLoadingChange={setListLoading}
+            />
+          </div>
+          <DialogFooter className="shrink-0">
+            <Button type="button" variant="outline" size="lg" onClick={() => onOpenChange(false)}>
+              Cerrar
+            </Button>
+            {listError ? (
+              <Button type="button" size="lg" onClick={handleRetry}>
                 Reintentar
               </Button>
-            </div>
-          ) : null}
-          {!listError && canCreate && canEdit ? (
-            <div className="bg-popover sticky bottom-0 flex justify-end pt-2">
+            ) : null}
+            {!listError && canCreate && canEdit ? (
               <Button
+                type="button"
                 size="lg"
                 disabled={listLoading}
                 onClick={() => {
@@ -154,8 +159,8 @@ function GradeDialogContent({
               >
                 {COURSE_ENROLLMENT_GRADE_MESSAGES.ADD_GRADE}
               </Button>
-            </div>
-          ) : null}
+            ) : null}
+          </DialogFooter>
         </DialogContent>
       </Dialog>
 
