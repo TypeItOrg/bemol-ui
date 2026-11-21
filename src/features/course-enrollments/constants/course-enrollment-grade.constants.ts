@@ -19,11 +19,9 @@ export const COURSE_ENROLLMENT_GRADE_MESSAGES = {
   NO_PUBLISHED_GRADES_TITLE: "Sin notas publicadas",
   NO_PUBLISHED_GRADES: "Todavía no hay notas publicadas para esta materia.",
   NO_PUBLISHED_GRADES_CLOSED: "No se publicaron notas para esta cursada.",
-  DRAFT_DESCRIPTION: "Las notas se guardan como borrador hasta publicar la clase.",
+  DRAFT_DESCRIPTION: "La calificación se guarda como borrador y será visible para el estudiante cuando se publiquen las notas de la clase.",
   PUBLISHED_EDIT_DESCRIPTION:
     "Los cambios quedan pendientes hasta publicar la clase; mientras tanto el estudiante sigue viendo la versión publicada.",
-  DELETE_DRAFT_CONFIRM: "¿Eliminar este borrador? Esta acción no se puede deshacer y no afecta a los estudiantes.",
-  DELETE_PUBLISHED_CONFIRM: "La nota seguirá visible para el estudiante hasta que se publiquen las notas de la clase.",
   PUBLISH_CONFIRM_TITLE: "Publicar notas",
   LOAD_FAILED: "No se pudieron cargar las notas.",
   MUTATION_FAILED: "No se pudo guardar la nota. Revisá los datos e intentá nuevamente.",

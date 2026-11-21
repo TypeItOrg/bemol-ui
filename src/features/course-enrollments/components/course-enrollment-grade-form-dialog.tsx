@@ -104,7 +104,7 @@ function GradeFormContent({ mode, enrollmentId, classId, grade, onOpenChange, on
           <DialogTitle className="leading-snug font-semibold">
             {grade ? COURSE_ENROLLMENT_GRADE_MESSAGES.EDIT_GRADE : COURSE_ENROLLMENT_GRADE_MESSAGES.ADD_GRADE}
           </DialogTitle>
-          <DialogDescription className="max-w-sm text-pretty">
+          <DialogDescription className="max-w-sm leading-relaxed text-balance">
             {isEditingPublished ? COURSE_ENROLLMENT_GRADE_MESSAGES.PUBLISHED_EDIT_DESCRIPTION : COURSE_ENROLLMENT_GRADE_MESSAGES.DRAFT_DESCRIPTION}
           </DialogDescription>
         </DialogHeader>

@@ -69,8 +69,18 @@ function DeleteConfirmForm({ grade, onOpenChange, onConfirm, onDeleted }: Delete
               <Trash2Icon className="size-6" aria-hidden="true" />
             </div>
             <AlertDialogTitle>{COURSE_ENROLLMENT_GRADE_MESSAGES.DELETE_GRADE}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {isDraft ? COURSE_ENROLLMENT_GRADE_MESSAGES.DELETE_DRAFT_CONFIRM : COURSE_ENROLLMENT_GRADE_MESSAGES.DELETE_PUBLISHED_CONFIRM}
+            <AlertDialogDescription className="leading-relaxed">
+              {isDraft ? (
+                <>
+                  ¿Querés eliminar el borrador de <span className="text-foreground font-semibold">{grade.evaluation}</span>? Esta acción no se puede
+                  deshacer y no afecta a los estudiantes.
+                </>
+              ) : (
+                <>
+                  Vas a marcar <span className="text-foreground font-semibold">{grade.evaluation}</span> para eliminar; seguirá visible para el
+                  estudiante hasta que se publiquen las notas de la clase.
+                </>
+              )}
             </AlertDialogDescription>
           </AlertDialogHeader>
           {state.error ? (

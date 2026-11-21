@@ -115,8 +115,9 @@ function GradeDialogContent({
               <ClipboardCheckIcon className="size-6" aria-hidden="true" />
             </div>
             <DialogTitle className="leading-snug font-semibold">{COURSE_ENROLLMENT_GRADE_MESSAGES.DIALOG_TITLE}</DialogTitle>
-            <DialogDescription className="max-w-md text-pretty">
-              {enrollment.studentName} · {enrollment.academicSpaceName} · {enrollment.courseClassLabel}
+            <DialogDescription className="max-w-md leading-relaxed text-balance">
+              Calificaciones registradas para <span className="text-foreground font-semibold">{enrollment.studentName}</span> en{" "}
+              <span className="text-foreground font-semibold">{enrollment.academicSpaceName}</span> ({enrollment.courseClassLabel}).
             </DialogDescription>
           </DialogHeader>
           <div className="-mx-4 min-h-0 flex-1 overflow-y-auto px-4">

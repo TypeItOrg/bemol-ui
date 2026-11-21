@@ -153,7 +153,9 @@ function BulkPublishDialogContent({ onOpenChange, onPublished }: Omit<BulkPublis
             <SendIcon className="size-6" aria-hidden="true" />
           </div>
           <DialogTitle className="leading-snug font-semibold">Publicar notas</DialogTitle>
-          <DialogDescription className="max-w-sm text-pretty">Seleccioná el curso y la clase con cambios pendientes.</DialogDescription>
+          <DialogDescription className="max-w-sm leading-relaxed text-balance">
+            Elegí el curso y la clase que querés publicar para que los estudiantes puedan ver sus calificaciones actualizadas.
+          </DialogDescription>
         </DialogHeader>
         {showForm ? (
           <BulkPublishGradesForm

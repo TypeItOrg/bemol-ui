@@ -56,8 +56,9 @@ function StudentGradeDialogContent({ enrollment, onOpenChange }: Omit<StudentGra
             <ClipboardCheckIcon className="size-6" aria-hidden="true" />
           </div>
           <DialogTitle className="leading-snug font-semibold">{COURSE_ENROLLMENT_GRADE_MESSAGES.STUDENT_DIALOG_TITLE}</DialogTitle>
-          <DialogDescription className="max-w-sm text-pretty">
-            {enrollment.academicSpaceName} · {enrollment.courseClassLabel}
+          <DialogDescription className="max-w-sm leading-relaxed text-balance">
+            Calificaciones publicadas para <span className="text-foreground font-semibold">{enrollment.academicSpaceName}</span> (
+            {enrollment.courseClassLabel}).
           </DialogDescription>
         </DialogHeader>
         <div className="-mx-4 min-h-0 flex-1 overflow-y-auto px-4">
@@ -96,9 +97,9 @@ function StudentGradeDialogContent({ enrollment, onOpenChange }: Omit<StudentGra
           {!isLoading && !hasError && grades.length > 0 ? (
             <ul className="space-y-2">
               {grades.map((grade) => (
-                <li key={grade.id} className="flex items-center justify-between gap-4 rounded-lg border px-3 py-2">
-                  <span className="min-w-0 font-medium wrap-break-word">{grade.evaluation}</span>
-                  <span className="bg-muted inline-flex min-w-13 shrink-0 items-center justify-center rounded-md px-3 py-1.5 text-center font-semibold tabular-nums">
+                <li key={grade.id} className="flex items-center justify-between gap-4 rounded-lg border px-3.5 py-3">
+                  <span className="min-w-0 font-semibold wrap-break-word">{grade.evaluation}</span>
+                  <span className="bg-muted inline-flex h-8 min-w-12 shrink-0 items-center justify-center rounded-md px-2.5 text-center text-base font-semibold tabular-nums">
                     {formatGradeValue(grade.value)}
                   </span>
                 </li>
