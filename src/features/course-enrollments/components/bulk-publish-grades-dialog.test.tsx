@@ -47,6 +47,8 @@ describe("BulkPublishGradesDialog", () => {
 
     expect(courseCombobox).toHaveTextContent("Todos los cursos");
     expect(screen.getByRole("combobox", { name: "Clase" })).toHaveTextContent("Todas las clases");
+    expect(screen.getByText("Elegí un curso para filtrar por clase.")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Publicar notas (6)" })).toBeEnabled();
 
     await user.click(courseCombobox);
     await user.click(await screen.findByRole("option", { name: "Lenguaje" }));
@@ -54,11 +56,13 @@ describe("BulkPublishGradesDialog", () => {
     const classCombobox = screen.getByRole("combobox", { name: "Clase" });
 
     expect(classCombobox).toBeEnabled();
+    expect(screen.queryByText("Elegí un curso para filtrar por clase.")).not.toBeInTheDocument();
 
     await user.click(classCombobox);
     await user.click(await screen.findByRole("option", { name: "Clase 2 · 3 pendientes" }));
 
     expect(screen.getByText("3 cambios pendientes en la selección.")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Publicar notas (3)" })).toBeEnabled();
   });
 
   it("shows empty state without pending classes", async () => {
@@ -160,7 +164,7 @@ describe("BulkPublishGradesDialog", () => {
 
     await screen.findByRole("combobox", { name: "Curso" });
 
-    await user.click(screen.getByRole("button", { name: "Publicar notas" }));
+    await user.click(screen.getByRole("button", { name: /^Publicar notas/ }));
 
     expect(await screen.findByText("Se publicaron 0 de 3 clases.")).toBeInTheDocument();
 

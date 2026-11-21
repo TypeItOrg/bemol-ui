@@ -7,8 +7,9 @@ import { useQueryClient } from "@tanstack/react-query";
 
 import { Button } from "@common/components/ui/button";
 import { DialogFooter } from "@common/components/ui/dialog";
-import { Field, FieldLabel } from "@common/components/ui/field";
+import { Field, FieldDescription, FieldLabel } from "@common/components/ui/field";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@common/components/ui/select";
+import { cn } from "@common/utils/cn.util";
 import { safelyRunAction } from "@common/utils/safe-action.util";
 
 import { publishBulkInstitutionalGradesAction } from "@features/course-enrollments/actions/publish-bulk-grades.actions";
@@ -16,6 +17,7 @@ import { BulkPublishOutcome } from "@features/course-enrollments/components/bulk
 import { COURSE_ENROLLMENT_GRADE_BULK_PUBLISH_LIMIT } from "@features/course-enrollments/constants/course-enrollment-grade.constants";
 import type { BulkPublishClassResult, BulkPublishResult } from "@features/course-enrollments/types/bulk-publish-grades.types";
 import type { PendingClassGrades } from "@features/course-enrollments/types/pending-class-grades.types";
+import { buildBulkPublishCourseOptions, chunkClassIds, formatPendingSummary } from "@features/course-enrollments/utils/bulk-publish-grades.util";
 import { invalidateGradeQueries } from "@features/course-enrollments/utils/course-enrollment-grade-query-keys.util";
 
 const ALL_COURSES = "all-courses";
@@ -40,18 +42,6 @@ type BulkPublishGradesFormProps = {
   onReportAvailable: () => void;
 };
 
-function chunkClassIds(classIds: string[], size: number): string[][] {
-  return Array.from({ length: Math.ceil(classIds.length / size) }, (_, index) => classIds.slice(index * size, (index + 1) * size));
-}
-
-function formatPendingSummary(count: number): string {
-  if (count <= 0) {
-    return "Sin cambios en la selección.";
-  }
-
-  return count === 1 ? "1 cambio pendiente en la selección." : `${count} cambios pendientes en la selección.`;
-}
-
 export function BulkPublishGradesForm({
   classes,
   isRefreshing,
@@ -74,17 +64,7 @@ export function BulkPublishGradesForm({
 
   const [batchProgress, setBatchProgress] = useState<{ current: number; total: number } | null>(null);
 
-  const courses = useMemo(() => {
-    const byId = new Map<string, string>();
-
-    for (const pending of classes) {
-      if (!byId.has(pending.courseId)) {
-        byId.set(pending.courseId, pending.courseName);
-      }
-    }
-
-    return [...byId.entries()].map(([id, name]) => ({ id, name })).sort((left, right) => left.name.localeCompare(right.name, "es"));
-  }, [classes]);
+  const courses = useMemo(() => buildBulkPublishCourseOptions(classes), [classes]);
 
   const effectiveCourseId = courseId !== ALL_COURSES && courses.some((course) => course.id === courseId) ? courseId : ALL_COURSES;
 
@@ -175,6 +155,8 @@ export function BulkPublishGradesForm({
   const batchLabel =
     batchProgress && batchProgress.total > 1 ? `Publicando… (lote ${batchProgress.current} de ${batchProgress.total})` : "Publicando…";
 
+  const submitLabel = totalPending > 0 ? `Publicar notas (${totalPending})` : "Publicar notas";
+
   return (
     <form onSubmit={(event) => void handleSubmit(event)} noValidate className="flex min-h-0 flex-1 flex-col">
       <div className="-mx-4 min-h-0 flex-1 space-y-4 overflow-y-auto px-4 pb-5">
@@ -220,11 +202,19 @@ export function BulkPublishGradesForm({
               </SelectGroup>
             </SelectContent>
           </Select>
+          {effectiveCourseId === ALL_COURSES ? <FieldDescription>Elegí un curso para filtrar por clase.</FieldDescription> : null}
         </Field>
         {selectedClassIds.map((id) => (
           <input key={id} type="hidden" name="classId" value={id} />
         ))}
-        <p className="text-muted-foreground text-sm">{formatPendingSummary(totalPending)}</p>
+        <p
+          className={cn(
+            "bg-muted/40 rounded-lg border px-3 py-2 text-sm",
+            totalPending > 0 ? "text-foreground font-medium" : "text-muted-foreground",
+          )}
+        >
+          {formatPendingSummary(totalPending)}
+        </p>
         <BulkPublishOutcome
           state={state}
           classLabels={state.classLabels ?? {}}
@@ -239,7 +229,7 @@ export function BulkPublishGradesForm({
           Cancelar
         </Button>
         <Button type="submit" size="lg" disabled={isPublishing || isRefreshing || selectedClassIds.length === 0}>
-          {isPublishing ? batchLabel : "Publicar notas"}
+          {isPublishing ? batchLabel : submitLabel}
         </Button>
       </DialogFooter>
     </form>

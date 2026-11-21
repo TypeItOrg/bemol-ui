@@ -61,7 +61,7 @@ it("publishes the whole selection in a single batch and closes on full success",
 
   const props = renderForm();
 
-  await user.click(screen.getByRole("button", { name: "Publicar notas" }));
+  await user.click(screen.getByRole("button", { name: /^Publicar notas/ }));
 
   await waitFor(() => expect(props.onOpenChange).toHaveBeenCalledWith(false));
 
@@ -107,7 +107,7 @@ it("splits selections larger than the batch limit and reports batch progress", a
 
   const props = renderForm({ classes: manyClasses });
 
-  await user.click(screen.getByRole("button", { name: "Publicar notas" }));
+  await user.click(screen.getByRole("button", { name: /^Publicar notas/ }));
 
   await waitFor(() => expect(screen.getByRole("button", { name: "Publicando… (lote 1 de 2)" })).toBeDisabled());
   expect(publishAction).toHaveBeenCalledTimes(1);
@@ -158,7 +158,7 @@ it("keeps a per-class report, updates the system and refreshes pending classes o
 
   const props = renderForm();
 
-  await user.click(screen.getByRole("button", { name: "Publicar notas" }));
+  await user.click(screen.getByRole("button", { name: /^Publicar notas/ }));
 
   expect(await screen.findByText("Se publicaron 1 de 3 clases.")).toBeInTheDocument();
   expect(screen.getByText(/Cada clase se publica de forma independiente/)).toBeInTheDocument();
@@ -192,7 +192,7 @@ it("counts only classes with a confirmed response", async () => {
 
   const props = renderForm();
 
-  await user.click(screen.getByRole("button", { name: "Publicar notas" }));
+  await user.click(screen.getByRole("button", { name: /^Publicar notas/ }));
 
   expect(await screen.findByText("Se publicaron 1 de 3 clases.")).toBeInTheDocument();
   expect(props.onRefreshPendingClasses).toHaveBeenCalledTimes(1);
@@ -228,7 +228,7 @@ it("does not retry uncertain classes automatically and allows a deliberate secon
 
   const props = renderForm();
 
-  await user.click(screen.getByRole("button", { name: "Publicar notas" }));
+  await user.click(screen.getByRole("button", { name: /^Publicar notas/ }));
 
   expect(await screen.findByText("No se pudo confirmar la publicación. Verificá el estado antes de reintentar.")).toBeInTheDocument();
   expect(publishAction).toHaveBeenCalledTimes(1);
@@ -236,7 +236,7 @@ it("does not retry uncertain classes automatically and allows a deliberate secon
   expect(props.onRefreshPendingClasses).toHaveBeenCalledTimes(1);
   expect(screen.getAllByText(/Sin confirmar — /)).toHaveLength(3);
 
-  await user.click(screen.getByRole("button", { name: "Publicar notas" }));
+  await user.click(screen.getByRole("button", { name: /^Publicar notas/ }));
 
   await waitFor(() => expect(props.onOpenChange).toHaveBeenCalledWith(false));
   expect(publishAction).toHaveBeenCalledTimes(2);
@@ -250,7 +250,7 @@ it("marks the whole batch as uncertain when the action call itself fails", async
 
   const props = renderForm();
 
-  await user.click(screen.getByRole("button", { name: "Publicar notas" }));
+  await user.click(screen.getByRole("button", { name: /^Publicar notas/ }));
 
   expect(await screen.findByText("No se pudo confirmar la publicación. Verificá el estado antes de reintentar.")).toBeInTheDocument();
   expect(screen.getAllByText(/Sin confirmar — /)).toHaveLength(3);
@@ -320,7 +320,7 @@ it("marks a failed batch as uncertain and keeps publishing the remaining batches
 
   const props = renderForm({ classes: manyClasses });
 
-  await user.click(screen.getByRole("button", { name: "Publicar notas" }));
+  await user.click(screen.getByRole("button", { name: /^Publicar notas/ }));
 
   expect(await screen.findByText("Se publicaron 5 de 25 clases.")).toBeInTheDocument();
   expect(publishAction).toHaveBeenCalledTimes(2);
@@ -349,7 +349,7 @@ it("renders an all-failed report without claiming success", async () => {
 
   const props = renderForm();
 
-  await user.click(screen.getByRole("button", { name: "Publicar notas" }));
+  await user.click(screen.getByRole("button", { name: /^Publicar notas/ }));
 
   expect(await screen.findByText("Se publicaron 0 de 3 clases.")).toBeInTheDocument();
   expect(screen.getByText("No se pudieron publicar las notas.")).toBeInTheDocument();
@@ -406,7 +406,7 @@ it("sends only the still-pending classes on a deliberate retry after a refresh",
     </QueryClientProvider>,
   );
 
-  await user.click(screen.getByRole("button", { name: "Publicar notas" }));
+  await user.click(screen.getByRole("button", { name: /^Publicar notas/ }));
 
   expect(await screen.findByText("Se publicaron 1 de 3 clases.")).toBeInTheDocument();
   expect(baseProps.onRefreshPendingClasses).toHaveBeenCalledTimes(1);
@@ -417,7 +417,7 @@ it("sends only the still-pending classes on a deliberate retry after a refresh",
     </QueryClientProvider>,
   );
 
-  await user.click(screen.getByRole("button", { name: "Publicar notas" }));
+  await user.click(screen.getByRole("button", { name: /^Publicar notas/ }));
 
   await waitFor(() => expect(baseProps.onOpenChange).toHaveBeenCalledWith(false));
   expect(publishAction).toHaveBeenCalledTimes(2);

@@ -2,7 +2,7 @@
 
 import type { ReactElement } from "react";
 
-import { ClockIcon } from "lucide-react";
+import { ClockIcon, PencilLineIcon, Trash2Icon } from "lucide-react";
 
 import { Badge } from "@common/components/ui/badge";
 
@@ -20,15 +20,28 @@ export function CourseEnrollmentGradeStatusBadge({ status }: { status: CourseEnr
   if (status === COURSE_ENROLLMENT_GRADE_STATUS.DRAFT) {
     return (
       <Badge variant="secondary">
-        <ClockIcon className="size-3.5" aria-hidden="true" />
+        <ClockIcon aria-hidden="true" />
         {COURSE_ENROLLMENT_GRADE_STATUS_LABELS[status]}
       </Badge>
     );
   }
 
   if (status === COURSE_ENROLLMENT_GRADE_STATUS.PENDING_DELETION) {
-    return <Badge variant="destructive">{COURSE_ENROLLMENT_GRADE_STATUS_LABELS[status]}</Badge>;
+    return (
+      <Badge variant="destructive">
+        <Trash2Icon aria-hidden="true" />
+        {COURSE_ENROLLMENT_GRADE_STATUS_LABELS[status]}
+      </Badge>
+    );
   }
 
-  return <Badge variant="outline">{COURSE_ENROLLMENT_GRADE_STATUS_LABELS[status]}</Badge>;
+  return (
+    <Badge
+      variant="outline"
+      className="border-amber-500/30 bg-amber-500/15 text-amber-700 dark:border-amber-500/30 dark:bg-amber-500/20 dark:text-amber-300"
+    >
+      <PencilLineIcon aria-hidden="true" />
+      {COURSE_ENROLLMENT_GRADE_STATUS_LABELS[status]}
+    </Badge>
+  );
 }

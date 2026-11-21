@@ -48,9 +48,11 @@ export function CourseEnrollmentGradeListItem({
 
   return (
     <li className="flex items-center justify-between gap-3 px-3 py-2.5">
-      <p className="min-w-0 font-semibold wrap-break-word">{grade.evaluation}</p>
-      <div className="flex shrink-0 items-center gap-1.5">
+      <div className="flex min-w-0 flex-1 flex-col items-start gap-1.5 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
+        <p className="min-w-0 font-semibold wrap-break-word">{grade.evaluation}</p>
         {showPill ? <CourseEnrollmentGradeStatusBadge status={grade.publicationStatus} /> : null}
+      </div>
+      <div className="flex shrink-0 items-center gap-1.5">
         <span className="bg-muted inline-flex min-w-13 items-center justify-center rounded-md px-3 py-1.5 text-center text-lg font-semibold tabular-nums">
           {formatGradeValue(grade.value)}
         </span>
