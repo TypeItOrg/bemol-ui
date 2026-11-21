@@ -101,9 +101,11 @@ function GradeDialogContent({
 
   const canEdit = enrollment.status === COURSE_ENROLLMENT_STATUS.ENROLLED;
 
+  const hasSubDialog = isFormOpen || deleteGrade !== null || historyGrade !== null;
+
   return (
     <>
-      <Dialog open onOpenChange={onOpenChange}>
+      <Dialog open={!hasSubDialog} onOpenChange={onOpenChange}>
         <DialogContent
           className="flex max-h-[calc(100dvh-2rem)] flex-col gap-5 overflow-hidden sm:max-w-2xl"
           onOpenAutoFocus={(event) => event.preventDefault()}
