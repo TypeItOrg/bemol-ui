@@ -4,4 +4,5 @@ export type InstitutionalCapabilities = {
   canViewOwnFormation: boolean;
   canViewTeaching: boolean;
   canUpdateTeachingAcademicStatus: boolean;
+  canManageTeachingGrades?: boolean;
 };

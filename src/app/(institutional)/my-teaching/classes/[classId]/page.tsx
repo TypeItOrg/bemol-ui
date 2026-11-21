@@ -11,6 +11,7 @@ import { isValidUuid } from "@common/utils/action-argument.util";
 import { getSafeReturnTo } from "@common/utils/return-to.util";
 
 import { CourseEnrollmentTable } from "@features/course-enrollments/components/course-enrollment-table";
+import { PublishGradesButton } from "@features/course-enrollments/components/publish-grades-button";
 import { fetchTeacherClass, fetchTeacherClassEnrollments } from "@features/course-enrollments/services/teacher-course.service";
 import {
   parseCourseEnrollmentPaginationParams,
@@ -56,10 +57,13 @@ export default async function TeacherClassPage({
     fetchTeacherClassEnrollments(user.institutionId, classId, page, size),
   ]);
 
+  const canManageGrades = Boolean(user.capabilities.canManageTeachingGrades);
+
   return (
     <PlatformPageShell
       title={teacherClass.academicSpaceName}
       breadcrumb={<InstitutionalBreadcrumb hiddenSegments={[classId]} segmentLabels={{ classes: teacherClass.academicSpaceName }} />}
+      actions={canManageGrades ? <PublishGradesButton classId={classId} mode="teacher" /> : undefined}
     >
       <div className="flex items-center">
         <Button asChild variant="outline" size="lg">
@@ -75,6 +79,11 @@ export default async function TeacherClassPage({
           detailBasePath={`/my-teaching/classes/${classId}/enrollments`}
           canUpdateAcademicStatus={user.capabilities.canUpdateTeachingAcademicStatus}
           teacherClassId={classId}
+          gradeMode="teacher"
+          canReadGrades={user.capabilities.canViewTeaching}
+          canCreateGrade={canManageGrades}
+          canUpdateGrade={canManageGrades}
+          canDeleteGrade={canManageGrades}
         />
       </DataTableNavigationProvider>
     </PlatformPageShell>

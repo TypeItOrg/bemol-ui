@@ -2,6 +2,8 @@
 
 import { useActionState, type ReactElement } from "react";
 
+import { useQueryClient } from "@tanstack/react-query";
+
 import { AlertDialog, AlertDialogContent } from "@common/components/ui/alert-dialog";
 import { safelyRunAction } from "@common/utils/safe-action.util";
 
@@ -10,6 +12,7 @@ import { CourseEnrollmentMutationFields } from "@features/course-enrollments/com
 import { ACADEMIC_ENROLLMENT_STATUS_LABELS, COURSE_ENROLLMENT_MESSAGES } from "@features/course-enrollments/constants/course-enrollment.constants";
 import { ACADEMIC_ENROLLMENT_STATUS } from "@features/course-enrollments/types/academic-enrollment-status.types";
 import type { CourseEnrollment } from "@features/course-enrollments/types/course-enrollment.types";
+import { invalidateGradeQueries } from "@features/course-enrollments/utils/course-enrollment-grade-query-keys.util";
 
 type CourseEnrollmentMutationDialogProps = {
   enrollment: CourseEnrollment;
@@ -38,6 +41,8 @@ export function CourseEnrollmentMutationDialog({
   onUpdated,
   teacherClassId,
 }: CourseEnrollmentMutationDialogProps): ReactElement {
+  const queryClient = useQueryClient();
+
   const [state, formAction, isPending] = useActionState(async (_previous: { error?: string }, formData: FormData) => {
     const reason = formData.get("reason");
 
@@ -60,6 +65,7 @@ export function CourseEnrollmentMutationDialog({
     if (!result.error) {
       onOpenChange(false);
       onUpdated();
+      void invalidateGradeQueries(queryClient);
     }
 
     return result;

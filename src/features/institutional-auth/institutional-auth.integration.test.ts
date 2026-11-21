@@ -19,6 +19,7 @@ const user = {
     canViewOwnFormation: true,
     canViewTeaching: false,
     canUpdateTeachingAcademicStatus: false,
+    canManageTeachingGrades: false,
   },
   systemRoleCodes: ["STUDENT"] as const,
   roles: ["Estudiante"],

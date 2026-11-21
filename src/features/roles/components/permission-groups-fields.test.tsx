@@ -116,15 +116,15 @@ describe("PermissionGroupsFields", () => {
     expect(readCheckbox).not.toBeDisabled();
   });
 
-  it("hides GRADES permission group", () => {
+  it("displays the GRADES permission group", () => {
     const gradesGroup: InstitutionPermissionGroup = {
       code: "GRADES",
       displayName: "Calificaciones",
-      description: "Gestión de calificaciones",
+      description: "Carga y gestión de calificaciones académicas.",
       permissions: [
         {
-          code: "institution:grades:enter",
-          description: "Cargar calificaciones",
+          code: "institution:course-enrollment-grade:read",
+          description: "Consultar notas de estudiantes",
           grantable: true,
           requiredPermissions: [],
         },
@@ -133,6 +133,6 @@ describe("PermissionGroupsFields", () => {
 
     render(<PermissionGroupsFields groups={[...mockPermissionGroups, gradesGroup]} />);
 
-    expect(screen.queryByText("Calificaciones")).not.toBeInTheDocument();
+    expect(screen.getByText("Calificaciones")).toBeInTheDocument();
   });
 });

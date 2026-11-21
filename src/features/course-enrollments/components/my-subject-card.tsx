@@ -1,4 +1,4 @@
-import type { ReactElement } from "react";
+import { useState, type ReactElement } from "react";
 
 import { ClockIcon } from "lucide-react";
 
@@ -7,6 +7,8 @@ import { Badge } from "@common/components/ui/badge";
 import { Button } from "@common/components/ui/button";
 
 import { DEFAULT_INSTRUMENT_ICON, INSTRUMENT_ICONS } from "@features/academic/constants/instrument-icon.constants";
+import { StudentGradeDialog } from "@features/course-enrollments/components/student-grade-dialog";
+import { COURSE_ENROLLMENT_GRADE_MESSAGES } from "@features/course-enrollments/constants/course-enrollment-grade.constants";
 import { COURSE_DAY_LABELS } from "@features/course-enrollments/constants/course-enrollment.constants";
 import { MY_SUBJECTS_MESSAGES } from "@features/course-enrollments/constants/my-subjects.constants";
 import { COURSE_ENROLLMENT_STATUS } from "@features/course-enrollments/types/course-enrollment-status.types";
@@ -22,6 +24,8 @@ type MySubjectCardProps = {
 };
 
 export function MySubjectCard({ enrollment, canWithdraw, canUpdateAcademicStatus, onMutation }: MySubjectCardProps): ReactElement {
+  const [isGradesOpen, setIsGradesOpen] = useState(false);
+
   const isEnrolled = enrollment.status === COURSE_ENROLLMENT_STATUS.ENROLLED;
 
   const isWithdrawn =
@@ -106,20 +110,22 @@ export function MySubjectCard({ enrollment, canWithdraw, canUpdateAcademicStatus
       {enrollment.trainingPathName ? (
         <p className="bg-muted/25 text-muted-foreground border-t px-5 py-4 text-sm leading-relaxed wrap-break-word">{enrollment.trainingPathName}</p>
       ) : null}
-      {showWithdraw || showAcademicAction ? (
-        <div className="flex flex-wrap gap-2 border-t px-5 py-4">
-          {showWithdraw ? (
-            <Button variant="outline" size="lg" onClick={() => onMutation(enrollment, "withdraw")}>
-              Registrar baja
-            </Button>
-          ) : null}
-          {showAcademicAction ? (
-            <Button variant="outline" size="lg" onClick={() => onMutation(enrollment, "academic")}>
-              Registrar resultado
-            </Button>
-          ) : null}
-        </div>
-      ) : null}
+      <div className="flex flex-wrap gap-2 border-t px-5 py-4">
+        <Button variant="outline" size="lg" onClick={() => setIsGradesOpen(true)}>
+          {COURSE_ENROLLMENT_GRADE_MESSAGES.VIEW_GRADES}
+        </Button>
+        {showWithdraw ? (
+          <Button variant="outline" size="lg" onClick={() => onMutation(enrollment, "withdraw")}>
+            Registrar baja
+          </Button>
+        ) : null}
+        {showAcademicAction ? (
+          <Button variant="outline" size="lg" onClick={() => onMutation(enrollment, "academic")}>
+            Registrar resultado
+          </Button>
+        ) : null}
+      </div>
+      <StudentGradeDialog enrollment={enrollment} open={isGradesOpen} onOpenChange={setIsGradesOpen} />
     </article>
   );
 }
