@@ -12,6 +12,7 @@ import { PublishGradesDialog } from "@features/course-enrollments/components/pub
 import {
   fetchClassPendingSummaryClient,
   fetchTeacherPendingSummaryClient,
+  GRADE_MANAGEMENT_MODE,
   type GradeManagementMode,
 } from "@features/course-enrollments/services/course-enrollment-grade-client.service";
 import { gradeQueryKeys, invalidateGradeQueries } from "@features/course-enrollments/utils/course-enrollment-grade-query-keys.util";
@@ -30,7 +31,7 @@ export function PublishGradesButton({ classId, mode, label }: PublishGradesButto
   const summaryQuery = useQuery({
     queryKey: gradeQueryKeys.pendingSummary(mode, classId),
     queryFn: ({ signal }) =>
-      mode === "teacher" ? fetchTeacherPendingSummaryClient(classId, signal) : fetchClassPendingSummaryClient(classId, signal),
+      mode === GRADE_MANAGEMENT_MODE.TEACHER ? fetchTeacherPendingSummaryClient(classId, signal) : fetchClassPendingSummaryClient(classId, signal),
     retry: false,
     meta: { refreshOnReturn: true },
   });

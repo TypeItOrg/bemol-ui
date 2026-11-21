@@ -4,7 +4,6 @@ import { useActionState } from "react";
 import type { ReactElement } from "react";
 
 import { CircleAlertIcon, Trash2Icon } from "lucide-react";
-import { toast } from "sonner";
 
 import { ActionForm } from "@common/components/action-form";
 import { Alert, AlertDescription } from "@common/components/ui/alert";
@@ -21,6 +20,7 @@ import { Button } from "@common/components/ui/button";
 import { safelyRunAction } from "@common/utils/safe-action.util";
 
 import { COURSE_ENROLLMENT_GRADE_MESSAGES } from "@features/course-enrollments/constants/course-enrollment-grade.constants";
+import { COURSE_ENROLLMENT_GRADE_STATUS } from "@features/course-enrollments/types/course-enrollment-grade-status.types";
 import type { CourseEnrollmentGrade } from "@features/course-enrollments/types/course-enrollment-grade.types";
 
 type GradeDeleteDialogProps = {
@@ -45,16 +45,12 @@ function DeleteConfirmForm({ grade, onOpenChange, onConfirm, onDeleted }: Delete
       return { error: result.error };
     }
 
-    if (grade.publicationStatus === "DRAFT") {
-      toast.success("Borrador eliminado.");
-    } else {
-      toast.success("Nota marcada como pendiente de eliminación.");
-    }
-
     onDeleted(grade);
 
     return {};
   }, {});
+
+  const isDraft = grade.publicationStatus === COURSE_ENROLLMENT_GRADE_STATUS.DRAFT;
 
   function handleOpenChange(next: boolean): void {
     if (isPending && !next) {
@@ -74,9 +70,7 @@ function DeleteConfirmForm({ grade, onOpenChange, onConfirm, onDeleted }: Delete
             </div>
             <AlertDialogTitle>{COURSE_ENROLLMENT_GRADE_MESSAGES.DELETE_GRADE}</AlertDialogTitle>
             <AlertDialogDescription>
-              {grade.publicationStatus === "DRAFT"
-                ? COURSE_ENROLLMENT_GRADE_MESSAGES.DELETE_DRAFT_CONFIRM
-                : COURSE_ENROLLMENT_GRADE_MESSAGES.DELETE_PUBLISHED_CONFIRM}
+              {isDraft ? COURSE_ENROLLMENT_GRADE_MESSAGES.DELETE_DRAFT_CONFIRM : COURSE_ENROLLMENT_GRADE_MESSAGES.DELETE_PUBLISHED_CONFIRM}
             </AlertDialogDescription>
           </AlertDialogHeader>
           {state.error ? (

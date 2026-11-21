@@ -4,7 +4,6 @@ import { useActionState } from "react";
 import type { ReactElement } from "react";
 
 import { CircleAlertIcon, SendIcon } from "lucide-react";
-import { toast } from "sonner";
 
 import { ActionForm } from "@common/components/action-form";
 import { Alert, AlertDescription } from "@common/components/ui/alert";
@@ -22,11 +21,12 @@ import { safelyRunAction } from "@common/utils/safe-action.util";
 
 import { publishInstitutionalGradesAction, publishTeacherGradesAction } from "@features/course-enrollments/actions/course-enrollment-grade.actions";
 import { COURSE_ENROLLMENT_GRADE_MESSAGES } from "@features/course-enrollments/constants/course-enrollment-grade.constants";
+import { GRADE_MANAGEMENT_MODE, type GradeManagementMode } from "@features/course-enrollments/services/course-enrollment-grade-client.service";
 import type { PendingGradesSummary } from "@features/course-enrollments/types/pending-grades-summary.types";
 
 type PublishGradesDialogProps = {
   classId: string;
-  mode: "institutional" | "teacher";
+  mode: GradeManagementMode;
   summary: PendingGradesSummary | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -45,7 +45,7 @@ function PublishConfirmForm({
   label,
 }: {
   classId: string;
-  mode: "institutional" | "teacher";
+  mode: GradeManagementMode;
   summary: PendingGradesSummary | null;
   onOpenChange: (open: boolean) => void;
   onPublished: () => void;
@@ -53,7 +53,7 @@ function PublishConfirmForm({
 }): ReactElement {
   const [state, formAction, isPending] = useActionState(async (): Promise<PublishState> => {
     const result = await safelyRunAction(
-      mode === "teacher" ? publishTeacherGradesAction(classId) : publishInstitutionalGradesAction(classId),
+      mode === GRADE_MANAGEMENT_MODE.TEACHER ? publishTeacherGradesAction(classId) : publishInstitutionalGradesAction(classId),
       "No se pudieron publicar las notas.",
     );
 
@@ -61,7 +61,6 @@ function PublishConfirmForm({
       return { error: result.error };
     }
 
-    toast.success(COURSE_ENROLLMENT_GRADE_MESSAGES.PUBLISH_SUCCESS);
     onOpenChange(false);
     onPublished();
 

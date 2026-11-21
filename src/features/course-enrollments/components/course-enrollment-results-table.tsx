@@ -17,6 +17,7 @@ import { formatStudyPlanLabel } from "@features/academic/utils/study-plan-label.
 import { CourseEnrollmentSchedules } from "@features/course-enrollments/components/course-enrollment-schedules";
 import { CourseEnrollmentTableHeader } from "@features/course-enrollments/components/course-enrollment-table-header";
 import { COURSE_ENROLLMENT_GRADE_MESSAGES } from "@features/course-enrollments/constants/course-enrollment-grade.constants";
+import { GRADE_MANAGEMENT_MODE } from "@features/course-enrollments/services/course-enrollment-grade-client.service";
 import type { CourseEnrollmentResultsTableProps } from "@features/course-enrollments/types/course-enrollment-results-table-props.types";
 import { getCourseEnrollmentSituationLabel } from "@features/course-enrollments/utils/course-enrollment-situation.util";
 import { INSTITUTIONAL_PERMISSION as P } from "@features/institutional-auth/types/institutional-permission.types";
@@ -54,7 +55,8 @@ export function CourseEnrollmentResultsTable({
 
           const canViewGrades =
             canReadGrades &&
-            (gradeMode === "teacher" || scopeIncludesTrainingPath(permissionScopes, P.COURSE_ENROLLMENT_GRADE_READ, enrollment.trainingPathId));
+            (gradeMode === GRADE_MANAGEMENT_MODE.TEACHER ||
+              scopeIncludesTrainingPath(permissionScopes, P.COURSE_ENROLLMENT_GRADE_READ, enrollment.trainingPathId));
 
           const hasActions = Boolean(detailBasePath) || canWithdrawEnrollment || canUpdateResult || canViewGrades;
 

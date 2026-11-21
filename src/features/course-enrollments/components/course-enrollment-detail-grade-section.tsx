@@ -22,8 +22,9 @@ import { CourseEnrollmentGradeFormDialog } from "@features/course-enrollments/co
 import { CourseEnrollmentGradeHistoryDialog } from "@features/course-enrollments/components/course-enrollment-grade-history-dialog";
 import { CourseEnrollmentGradesBody } from "@features/course-enrollments/components/course-enrollment-grades-body";
 import { COURSE_ENROLLMENT_GRADE_MESSAGES } from "@features/course-enrollments/constants/course-enrollment-grade.constants";
-import type { GradeManagementMode } from "@features/course-enrollments/services/course-enrollment-grade-client.service";
+import { GRADE_MANAGEMENT_MODE, type GradeManagementMode } from "@features/course-enrollments/services/course-enrollment-grade-client.service";
 import type { CourseEnrollmentGrade } from "@features/course-enrollments/types/course-enrollment-grade.types";
+import { COURSE_ENROLLMENT_STATUS } from "@features/course-enrollments/types/course-enrollment-status.types";
 import type { CourseEnrollment } from "@features/course-enrollments/types/course-enrollment.types";
 import { invalidateGradeQueries } from "@features/course-enrollments/utils/course-enrollment-grade-query-keys.util";
 
@@ -39,7 +40,7 @@ type DetailGradeSectionProps = {
 
 export function CourseEnrollmentDetailGradeSection({
   enrollment,
-  mode = "institutional",
+  mode = GRADE_MANAGEMENT_MODE.INSTITUTIONAL,
   classId,
   canRead,
   canCreate,
@@ -58,9 +59,11 @@ export function CourseEnrollmentDetailGradeSection({
 
   const effectiveClassId = classId ?? enrollment.courseClassId;
 
+  const isTeacherMode = mode === GRADE_MANAGEMENT_MODE.TEACHER;
+
   async function handleCancelDeletion(grade: CourseEnrollmentGrade): Promise<void> {
     const result = await safelyRunAction(
-      mode === "teacher"
+      isTeacherMode
         ? cancelTeacherGradeDeletionAction(effectiveClassId, enrollment.id, grade.id, grade.version)
         : cancelInstitutionalGradeDeletionAction(enrollment.id, grade.id, grade.version),
       "No se pudo deshacer la eliminación.",
@@ -72,7 +75,6 @@ export function CourseEnrollmentDetailGradeSection({
       return;
     }
 
-    toast.success("Eliminación deshecha.");
     void invalidateGradeQueries(queryClient);
   }
 
@@ -81,7 +83,7 @@ export function CourseEnrollmentDetailGradeSection({
   }
 
   function handleDeleteConfirm(grade: CourseEnrollmentGrade): Promise<{ error?: string }> {
-    if (mode === "teacher") {
+    if (isTeacherMode) {
       return deleteTeacherGradeAction(effectiveClassId, enrollment.id, grade.id, grade.version);
     }
 
@@ -92,7 +94,7 @@ export function CourseEnrollmentDetailGradeSection({
     return <></>;
   }
 
-  const canEdit = enrollment.status === "ENROLLED";
+  const canEdit = enrollment.status === COURSE_ENROLLMENT_STATUS.ENROLLED;
 
   const showAddButton = canCreate && canEdit;
 
@@ -123,7 +125,7 @@ export function CourseEnrollmentDetailGradeSection({
           key={`${enrollment.id}-${mode}`}
           mode={mode}
           enrollmentId={enrollment.id}
-          classId={mode === "teacher" ? effectiveClassId : undefined}
+          classId={isTeacherMode ? effectiveClassId : undefined}
           variant="inline"
           canUpdate={canUpdate}
           canDelete={canDelete}
@@ -140,7 +142,7 @@ export function CourseEnrollmentDetailGradeSection({
       <CourseEnrollmentGradeFormDialog
         mode={mode}
         enrollmentId={enrollment.id}
-        classId={mode === "teacher" ? effectiveClassId : undefined}
+        classId={isTeacherMode ? effectiveClassId : undefined}
         grade={formGrade}
         open={isFormOpen}
         onOpenChange={setIsFormOpen}
@@ -163,7 +165,7 @@ export function CourseEnrollmentDetailGradeSection({
         key={historyGrade ? `history-${historyGrade.id}` : "history-closed"}
         mode={mode}
         enrollmentId={enrollment.id}
-        classId={mode === "teacher" ? effectiveClassId : undefined}
+        classId={isTeacherMode ? effectiveClassId : undefined}
         gradeId={historyGrade?.id ?? null}
         gradeLabel={historyGrade?.label}
         open={historyGrade !== null}

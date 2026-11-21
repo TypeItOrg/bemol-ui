@@ -22,8 +22,9 @@ import { CourseEnrollmentGradeFormDialog } from "@features/course-enrollments/co
 import { CourseEnrollmentGradeHistoryDialog } from "@features/course-enrollments/components/course-enrollment-grade-history-dialog";
 import { CourseEnrollmentGradesBody } from "@features/course-enrollments/components/course-enrollment-grades-body";
 import { COURSE_ENROLLMENT_GRADE_MESSAGES } from "@features/course-enrollments/constants/course-enrollment-grade.constants";
-import type { GradeManagementMode } from "@features/course-enrollments/services/course-enrollment-grade-client.service";
+import { GRADE_MANAGEMENT_MODE, type GradeManagementMode } from "@features/course-enrollments/services/course-enrollment-grade-client.service";
 import type { CourseEnrollmentGrade } from "@features/course-enrollments/types/course-enrollment-grade.types";
+import { COURSE_ENROLLMENT_STATUS } from "@features/course-enrollments/types/course-enrollment-status.types";
 import type { CourseEnrollment } from "@features/course-enrollments/types/course-enrollment.types";
 import { invalidateGradeQueries } from "@features/course-enrollments/utils/course-enrollment-grade-query-keys.util";
 
@@ -69,7 +70,7 @@ function GradeDialogContent({
 
   async function handleCancelDeletion(grade: CourseEnrollmentGrade): Promise<void> {
     const result = await safelyRunAction(
-      mode === "teacher"
+      mode === GRADE_MANAGEMENT_MODE.TEACHER
         ? cancelTeacherGradeDeletionAction(classId, enrollment.id, grade.id, grade.version)
         : cancelInstitutionalGradeDeletionAction(enrollment.id, grade.id, grade.version),
       "No se pudo deshacer la eliminación.",
@@ -81,7 +82,6 @@ function GradeDialogContent({
       return;
     }
 
-    toast.success("Eliminación deshecha.");
     void invalidateGradeQueries(queryClient);
     onChanged?.();
   }
@@ -92,14 +92,14 @@ function GradeDialogContent({
   }
 
   function handleDeleteConfirm(grade: CourseEnrollmentGrade): Promise<{ error?: string }> {
-    if (mode === "teacher") {
+    if (mode === GRADE_MANAGEMENT_MODE.TEACHER) {
       return deleteTeacherGradeAction(classId, enrollment.id, grade.id, grade.version);
     }
 
     return deleteInstitutionalGradeAction(enrollment.id, grade.id, grade.version);
   }
 
-  const canEdit = enrollment.status === "ENROLLED";
+  const canEdit = enrollment.status === COURSE_ENROLLMENT_STATUS.ENROLLED;
 
   return (
     <>
@@ -190,7 +190,7 @@ function GradeDialogContent({
         key={historyGrade ? `history-${historyGrade.id}` : "history-closed"}
         mode={mode}
         enrollmentId={enrollment.id}
-        classId={mode === "teacher" ? classId : undefined}
+        classId={mode === GRADE_MANAGEMENT_MODE.TEACHER ? classId : undefined}
         gradeId={historyGrade?.id ?? null}
         gradeLabel={historyGrade?.label}
         open={historyGrade !== null}

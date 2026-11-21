@@ -4,7 +4,6 @@ import { useMemo, useState } from "react";
 import type { FormEvent, ReactElement } from "react";
 
 import { useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
 
 import { Button } from "@common/components/ui/button";
 import { DialogFooter } from "@common/components/ui/dialog";
@@ -159,7 +158,6 @@ export function BulkPublishGradesForm({
       }
 
       if (confirmed === requestedIds.length && error === undefined) {
-        toast.success("Notas publicadas correctamente.");
         onOpenChange(false);
       } else {
         onReportAvailable();
