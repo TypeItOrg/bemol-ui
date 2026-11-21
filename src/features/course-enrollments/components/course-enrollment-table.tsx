@@ -17,6 +17,7 @@ import { CourseEnrollmentGradeDialog } from "@features/course-enrollments/compon
 import { CourseEnrollmentMutationDialog } from "@features/course-enrollments/components/course-enrollment-mutation-dialog";
 import { CourseEnrollmentPagination } from "@features/course-enrollments/components/course-enrollment-pagination";
 import { CourseEnrollmentResultsTable } from "@features/course-enrollments/components/course-enrollment-results-table";
+import { GRADE_MANAGEMENT_MODE, type GradeManagementMode } from "@features/course-enrollments/services/course-enrollment-grade-client.service";
 import type { AcademicEnrollmentStatus } from "@features/course-enrollments/types/academic-enrollment-status.types";
 import type { CourseEnrollmentStatus } from "@features/course-enrollments/types/course-enrollment-status.types";
 import type { CourseEnrollment } from "@features/course-enrollments/types/course-enrollment.types";
@@ -35,7 +36,7 @@ type CourseEnrollmentTableProps = {
   canUpdateAcademicStatus?: boolean;
   detailBasePath?: string;
   teacherClassId?: string;
-  gradeMode?: "institutional" | "teacher";
+  gradeMode?: GradeManagementMode;
   canReadGrades?: boolean;
   canCreateGrade?: boolean;
   canUpdateGrade?: boolean;
@@ -153,17 +154,17 @@ export function CourseEnrollmentTable({
           enrollment={gradeEnrollment}
           mode={gradeMode}
           canCreate={
-            gradeMode === "teacher"
+            gradeMode === GRADE_MANAGEMENT_MODE.TEACHER
               ? canCreateGrade
               : canCreateGrade && scopeIncludesTrainingPath(permissionScopes, P.COURSE_ENROLLMENT_GRADE_CREATE, gradeEnrollment.trainingPathId)
           }
           canUpdate={
-            gradeMode === "teacher"
+            gradeMode === GRADE_MANAGEMENT_MODE.TEACHER
               ? canUpdateGrade
               : canUpdateGrade && scopeIncludesTrainingPath(permissionScopes, P.COURSE_ENROLLMENT_GRADE_UPDATE, gradeEnrollment.trainingPathId)
           }
           canDelete={
-            gradeMode === "teacher"
+            gradeMode === GRADE_MANAGEMENT_MODE.TEACHER
               ? canDeleteGrade
               : canDeleteGrade && scopeIncludesTrainingPath(permissionScopes, P.COURSE_ENROLLMENT_GRADE_DELETE, gradeEnrollment.trainingPathId)
           }

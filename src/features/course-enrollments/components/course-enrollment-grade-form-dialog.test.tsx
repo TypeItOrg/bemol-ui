@@ -1,15 +1,12 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { toast } from "sonner";
 
 import { updateInstitutionalGradeAction } from "@features/course-enrollments/actions/course-enrollment-grade.actions";
 import { CourseEnrollmentGradeFormDialog } from "@features/course-enrollments/components/course-enrollment-grade-form-dialog";
 import { COURSE_ENROLLMENT_GRADE_MESSAGES } from "@features/course-enrollments/constants/course-enrollment-grade.constants";
+import { GRADE_MANAGEMENT_MODE } from "@features/course-enrollments/services/course-enrollment-grade-client.service";
+import { COURSE_ENROLLMENT_GRADE_STATUS } from "@features/course-enrollments/types/course-enrollment-grade-status.types";
 import type { CourseEnrollmentGrade } from "@features/course-enrollments/types/course-enrollment-grade.types";
-
-jest.mock("sonner", () => ({
-  toast: Object.assign(jest.fn(), { success: jest.fn(), error: jest.fn() }),
-}));
 
 jest.mock("@features/course-enrollments/actions/course-enrollment-grade.actions", () => ({
   createInstitutionalGradeAction: jest.fn(),
@@ -24,7 +21,7 @@ const publishedGrade = {
   id: "00000000-0000-4000-8000-000000000003",
   evaluation: "Parcial 1",
   value: 7,
-  publicationStatus: "PUBLISHED",
+  publicationStatus: COURSE_ENROLLMENT_GRADE_STATUS.PUBLISHED,
   version: 3,
 } as CourseEnrollmentGrade;
 
@@ -34,7 +31,7 @@ function renderDialog(): { onOpenChange: jest.Mock; onSaved: jest.Mock } {
 
   render(
     <CourseEnrollmentGradeFormDialog
-      mode="institutional"
+      mode={GRADE_MANAGEMENT_MODE.INSTITUTIONAL}
       enrollmentId={ENROLLMENT_ID}
       grade={publishedGrade}
       open
@@ -47,7 +44,7 @@ function renderDialog(): { onOpenChange: jest.Mock; onSaved: jest.Mock } {
 }
 
 describe("CourseEnrollmentGradeFormDialog", () => {
-  it("uses a neutral message and closes when the update had no changes", async () => {
+  it("closes and refreshes when the update had no changes", async () => {
     const user = userEvent.setup();
     jest.mocked(updateInstitutionalGradeAction).mockResolvedValue({ unchanged: true });
 
@@ -58,26 +55,23 @@ describe("CourseEnrollmentGradeFormDialog", () => {
     await waitFor(() => expect(onSaved).toHaveBeenCalledTimes(1));
 
     expect(updateInstitutionalGradeAction).toHaveBeenCalledWith(ENROLLMENT_ID, publishedGrade.id, publishedGrade.version, expect.any(FormData));
-    expect(toast).toHaveBeenCalledWith("No hubo cambios; la nota quedó igual.");
-    expect(toast.success).not.toHaveBeenCalled();
     expect(onOpenChange).toHaveBeenCalledWith(false);
   });
 
-  it("still congratulates a real update", async () => {
+  it("closes and refreshes after saving pending changes", async () => {
     const user = userEvent.setup();
     jest.mocked(updateInstitutionalGradeAction).mockResolvedValue({ pending: true });
 
-    const { onSaved } = renderDialog();
+    const { onOpenChange, onSaved } = renderDialog();
 
     await user.click(screen.getByRole("button", { name: COURSE_ENROLLMENT_GRADE_MESSAGES.SAVE_GRADE }));
 
     await waitFor(() => expect(onSaved).toHaveBeenCalledTimes(1));
 
-    expect(toast.success).toHaveBeenCalledWith(COURSE_ENROLLMENT_GRADE_MESSAGES.CHANGES_SAVED);
-    expect(toast).not.toHaveBeenCalled();
+    expect(onOpenChange).toHaveBeenCalledWith(false);
   });
 
-  it("asks the user to verify when the backend outcome is unconfirmed", async () => {
+  it("closes and refreshes when the backend outcome is unconfirmed", async () => {
     const user = userEvent.setup();
     jest.mocked(updateInstitutionalGradeAction).mockResolvedValue({ unconfirmed: true });
 
@@ -87,8 +81,6 @@ describe("CourseEnrollmentGradeFormDialog", () => {
 
     await waitFor(() => expect(onSaved).toHaveBeenCalledTimes(1));
 
-    expect(toast).toHaveBeenCalledWith(COURSE_ENROLLMENT_GRADE_MESSAGES.UNCONFIRMED);
-    expect(toast.success).not.toHaveBeenCalled();
     expect(onOpenChange).toHaveBeenCalledWith(false);
   });
 
@@ -103,7 +95,5 @@ describe("CourseEnrollmentGradeFormDialog", () => {
     expect(await screen.findByRole("alert")).toHaveTextContent("Sin permiso");
     expect(onSaved).not.toHaveBeenCalled();
     expect(onOpenChange).not.toHaveBeenCalled();
-    expect(toast).not.toHaveBeenCalled();
-    expect(toast.success).not.toHaveBeenCalled();
   });
 });

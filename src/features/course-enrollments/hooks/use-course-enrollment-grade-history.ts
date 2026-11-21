@@ -10,7 +10,7 @@ import {
   COURSE_ENROLLMENT_GRADE_HISTORY_PAGE_SIZE,
   COURSE_ENROLLMENT_GRADE_MESSAGES,
 } from "@features/course-enrollments/constants/course-enrollment-grade.constants";
-import type { GradeManagementMode } from "@features/course-enrollments/services/course-enrollment-grade-client.service";
+import { GRADE_MANAGEMENT_MODE, type GradeManagementMode } from "@features/course-enrollments/services/course-enrollment-grade-client.service";
 import {
   fetchManagementGradeHistoryClient,
   fetchTeacherGradeHistoryClient,
@@ -41,7 +41,7 @@ export function useCourseEnrollmentGradeHistory({ mode, enrollmentId, classId, g
   const query = useQuery({
     queryKey: gradeQueryKeys.history(mode, enrollmentId, gradeId, classId, page, size),
     queryFn: async ({ signal }) => {
-      if (mode === "teacher" && classId) {
+      if (mode === GRADE_MANAGEMENT_MODE.TEACHER && classId) {
         return fetchTeacherGradeHistoryClient(classId, enrollmentId, gradeId, page, size, signal);
       }
 

@@ -9,6 +9,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 
 import { CourseEnrollmentGradeStatusBadge } from "@features/course-enrollments/components/course-enrollment-grade-status-badge";
 import { COURSE_ENROLLMENT_GRADE_MESSAGES } from "@features/course-enrollments/constants/course-enrollment-grade.constants";
+import { COURSE_ENROLLMENT_GRADE_STATUS } from "@features/course-enrollments/types/course-enrollment-grade-status.types";
 import type { CourseEnrollmentGrade } from "@features/course-enrollments/types/course-enrollment-grade.types";
 import { formatGradeValue } from "@features/course-enrollments/utils/course-enrollment-grade-format.util";
 
@@ -33,10 +34,9 @@ export function CourseEnrollmentGradeListItem({
   onCancelDeletion,
   onViewHistory,
 }: GradeListItemProps): ReactElement {
-  const showPill =
-    grade.publicationStatus === "DRAFT" || grade.publicationStatus === "PENDING_CHANGES" || grade.publicationStatus === "PENDING_DELETION";
+  const showPill = grade.publicationStatus !== COURSE_ENROLLMENT_GRADE_STATUS.PUBLISHED;
 
-  const isPendingDeletion = grade.publicationStatus === "PENDING_DELETION";
+  const isPendingDeletion = grade.publicationStatus === COURSE_ENROLLMENT_GRADE_STATUS.PENDING_DELETION;
 
   const showEditAction = canUpdate && canEdit && !isPendingDeletion;
 

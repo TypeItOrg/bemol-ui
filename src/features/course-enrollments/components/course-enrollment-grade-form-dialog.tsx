@@ -4,7 +4,6 @@ import { useActionState } from "react";
 import type { ReactElement } from "react";
 
 import { CircleAlertIcon, ClipboardCheckIcon, PencilIcon } from "lucide-react";
-import { toast } from "sonner";
 
 import { ActionForm } from "@common/components/action-form";
 import { Alert, AlertDescription } from "@common/components/ui/alert";
@@ -22,11 +21,13 @@ import {
   type GradeActionResult,
 } from "@features/course-enrollments/actions/course-enrollment-grade.actions";
 import { COURSE_ENROLLMENT_GRADE_MESSAGES } from "@features/course-enrollments/constants/course-enrollment-grade.constants";
+import { GRADE_MANAGEMENT_MODE, type GradeManagementMode } from "@features/course-enrollments/services/course-enrollment-grade-client.service";
+import { COURSE_ENROLLMENT_GRADE_STATUS } from "@features/course-enrollments/types/course-enrollment-grade-status.types";
 import type { CourseEnrollmentGrade } from "@features/course-enrollments/types/course-enrollment-grade.types";
 import { formatGradeValue } from "@features/course-enrollments/utils/course-enrollment-grade-format.util";
 
 type GradeFormDialogProps = {
-  mode: "institutional" | "teacher";
+  mode: GradeManagementMode;
   enrollmentId: string;
   classId?: string;
   grade?: CourseEnrollmentGrade;
@@ -39,7 +40,7 @@ function GradeFormContent({ mode, enrollmentId, classId, grade, onOpenChange, on
   const [state, formAction, isPending] = useActionState(async (_previous: GradeActionResult, formData: FormData) => {
     async function run(): Promise<GradeActionResult> {
       if (grade) {
-        if (mode === "teacher") {
+        if (mode === GRADE_MANAGEMENT_MODE.TEACHER) {
           if (!classId) {
             return { error: "Falta la clase." };
           }
@@ -50,7 +51,7 @@ function GradeFormContent({ mode, enrollmentId, classId, grade, onOpenChange, on
         return updateInstitutionalGradeAction(enrollmentId, grade.id, grade.version, formData);
       }
 
-      if (mode === "teacher") {
+      if (mode === GRADE_MANAGEMENT_MODE.TEACHER) {
         if (!classId) {
           return { error: "Falta la clase." };
         }
@@ -64,16 +65,6 @@ function GradeFormContent({ mode, enrollmentId, classId, grade, onOpenChange, on
     const result = await safelyRunAction(run(), COURSE_ENROLLMENT_GRADE_MESSAGES.MUTATION_FAILED);
 
     if (!result.error && !result.fieldErrors) {
-      if (result.draft) {
-        toast.success(COURSE_ENROLLMENT_GRADE_MESSAGES.DRAFT_SAVED);
-      } else if (result.pending) {
-        toast.success(COURSE_ENROLLMENT_GRADE_MESSAGES.CHANGES_SAVED);
-      } else if (result.unchanged) {
-        toast(COURSE_ENROLLMENT_GRADE_MESSAGES.UNCHANGED);
-      } else if (result.unconfirmed) {
-        toast(COURSE_ENROLLMENT_GRADE_MESSAGES.UNCONFIRMED);
-      }
-
       onOpenChange(false);
       onSaved();
     }
@@ -81,7 +72,7 @@ function GradeFormContent({ mode, enrollmentId, classId, grade, onOpenChange, on
     return result;
   }, {});
 
-  const isEditingPublished = grade !== undefined && grade.publicationStatus !== "DRAFT";
+  const isEditingPublished = grade !== undefined && grade.publicationStatus !== COURSE_ENROLLMENT_GRADE_STATUS.DRAFT;
 
   function handleOpenChange(nextOpen: boolean): void {
     if (isPending && !nextOpen) {

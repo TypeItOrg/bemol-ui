@@ -16,6 +16,7 @@ import { COURSE_ENROLLMENT_GRADE_MESSAGES } from "@features/course-enrollments/c
 import {
   fetchManagementGradesClient,
   fetchTeacherGradesClient,
+  GRADE_MANAGEMENT_MODE,
   type GradeManagementMode,
 } from "@features/course-enrollments/services/course-enrollment-grade-client.service";
 import {
@@ -56,12 +57,14 @@ export function CourseEnrollmentGradesBody({
   onErrorChange,
   onLoadingChange,
 }: GradesBodyProps): ReactElement {
-  const missingTeacherClass = mode === "teacher" && !classId;
+  const isTeacherMode = mode === GRADE_MANAGEMENT_MODE.TEACHER;
+
+  const missingTeacherClass = isTeacherMode && !classId;
 
   const gradesQuery = useQuery({
     queryKey: gradeQueryKeys.enrollment(mode, enrollmentId, classId),
     queryFn: ({ signal }) => {
-      if (mode === "teacher") {
+      if (isTeacherMode) {
         if (!classId) {
           throw new Error("Falta la clase.");
         }
@@ -79,7 +82,7 @@ export function CourseEnrollmentGradesBody({
   const archivedQuery = useQuery({
     queryKey: gradeQueryKeys.archived(mode, enrollmentId, classId),
     queryFn: ({ signal }) => {
-      if (mode === "teacher") {
+      if (isTeacherMode) {
         if (!classId) {
           throw new Error("Falta la clase.");
         }

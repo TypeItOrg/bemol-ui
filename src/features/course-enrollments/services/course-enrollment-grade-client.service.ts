@@ -6,7 +6,12 @@ import type { CourseEnrollmentStudentGrade } from "@features/course-enrollments/
 import type { PendingGradesSummary } from "@features/course-enrollments/types/pending-grades-summary.types";
 import { reloadForbiddenOperatingProfile } from "@features/guardian-workspace/utils/forbidden-operating-profile.util";
 
-export type GradeManagementMode = "institutional" | "teacher";
+export const GRADE_MANAGEMENT_MODE = {
+  INSTITUTIONAL: "institutional",
+  TEACHER: "teacher",
+} as const;
+
+export type GradeManagementMode = (typeof GRADE_MANAGEMENT_MODE)[keyof typeof GRADE_MANAGEMENT_MODE];
 
 export async function fetchManagementGradesClient(enrollmentId: string, signal?: AbortSignal): Promise<CourseEnrollmentGrade[]> {
   const response = await fetch(`/api/institutional/course-enrollments/${enrollmentId}/grades`, { cache: "no-store", signal });
