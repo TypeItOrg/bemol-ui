@@ -31,7 +31,7 @@
     "cmdk": "^1.1.1",
     "date-fns": "^4.4.0",
     "lucide-react": "^1.29.0",
-    "next": "16.4.1",
+    "next": "16.4.5",
     "next-themes": "^0.4.6",
     "nextjs-toploader": "^3.9.17",
     "pdfjs-dist": "^6.3.289",
@@ -61,7 +61,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "16.4.1",
+    "eslint-config-next": "16.4.5",
     "husky": "^9.1.7",
     "jest": "^30.4.2",
     "jest-environment-jsdom": "^30.4.1",
@@ -79,15 +79,19 @@
     "brace-expansion@^2.0.0": "2.1.7",
     "brace-expansion@^5.0.0": "5.0.12",
     "js-yaml@4": "4.3.2",
-    "hono": "4.13.11",
+    "hono": "4.13.16",
     "undici": "8.12.2",
     "ip-address": "10.7.4",
     "fast-uri": "3.1.9",
-    "@hono/node-server": ">=2.0.5",
+    "@hono/node-server": ">=2.1.6 <3",
     "sharp": "^0.35.5",
     "@istanbuljs/load-nyc-config": {
       "js-yaml": "4.3.2"
-    }
+    },
+    "systeminformation@5": "5.33.16",
+    "qs@^6.0.0": "6.16.1",
+    "glob@^10.0.0": "14.0.2",
+    "minimatch@>=7 <11": "11.0.1"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx,mjs,cjs}": [
